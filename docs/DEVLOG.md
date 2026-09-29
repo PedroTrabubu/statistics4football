@@ -34,7 +34,7 @@ modelo Poisson/Dixon-Coles (ajustable con xG) -> EV = prob_modelo x cuota - 1
   - Pendiente dentro de esta fase: ingesta de proximos partidos/cuotas via
     football-data.org + API-Football (necesita tus API keys).
 - **Fase 3 (hecho):** modulo de stats `app/stats/` — forma reciente, H2H,
-  xG rolling y Elo, todo calculado *point-in-time* (solo con datos anteriores
+  xG rolling y Elo, todo calculado _point-in-time_ (solo con datos anteriores
   a la fecha del partido, nunca el resultado del propio partido ni partidos
   futuros — verificado con tests). `compute_match_features()` ensambla todo
   para un partido dado. Elo da `None` mientras `elo_ratings` este vacio
@@ -84,19 +84,19 @@ modelo Poisson/Dixon-Coles (ajustable con xG) -> EV = prob_modelo x cuota - 1
   **Tres bugs reales mas, encontrados probando la API contra datos reales**
   (mas alla del de West Brom de la Fase 4) — quedan documentados porque
   explican decisiones de diseño en `engine.py`/`poisson_model.py`:
-  1. *Cuotas agregadas corruptas*: football-data.co.uk trae de vez en cuando
+  1. _Cuotas agregadas corruptas_: football-data.co.uk trae de vez en cuando
      un valor absurdo en las columnas "Market Average/Max" (visto: un
      hancicap asiatico con Market Max=22.0 cuando Bet365/Pinnacle marcaban
      ~1.9 para la misma seleccion) — generaba EV de 9-10 sin que fuera un
      error de nuestro motor. Se corrigio comparando el agregado contra las
      casas individuales trackeadas y usando el mejor precio individual si el
      agregado se dispara mas de 1.8x por encima (`engine._sane_price`).
-  2. *Prior de equipo ascendido*: un equipo sin ningun partido en la ventana
+  2. _Prior de equipo ascendido_: un equipo sin ningun partido en la ventana
      de entrenamiento se asumia "equipo medio" (attack=defense=0), pero un
      ascendido tipico rinde por debajo de la media real de la liga — se
      cambio el fallback a la media del cuartil mas flojo de la liga en vez
      de la media general (`promoted_attack_prior`/`promoted_defense_prior`).
-  3. *Equipo con muy pocos partidos (no cero)*: Sunderland, recien ascendido
+  3. _Equipo con muy pocos partidos (no cero)_: Sunderland, recien ascendido
      y con solo ~8 partidos jugados en la temporada de test, salia con una
      defensa "mejor que la del Chelsea" por puro ruido de muestra pequeña
      (Chelsea-Sunderland llegaba a un 57% de probabilidad de empate, una
@@ -124,7 +124,6 @@ modelo Poisson/Dixon-Coles (ajustable con xG) -> EV = prob_modelo x cuota - 1
   de cuotas de casas de apuestas (pivote de enfoque: el objetivo pasa a ser
   estadisticas reales de partidos,
   no EV de mercado).
-
   - `scripts/ingest_fixtures.py` -> `app/ingestion/fixtures_backfill.py`
     (`sync_current_season_matches`): sincroniza la temporada en curso via
     `football-data.org` (tier gratuito, ~10 req/min) — partidos ya jugados
@@ -170,7 +169,6 @@ modelo Poisson/Dixon-Coles (ajustable con xG) -> EV = prob_modelo x cuota - 1
   — la pieza que
   faltaba respecto a `/matches/{id}/stats` (que es point-in-time por
   partido, no un agregado por equipo/temporada).
-
   - `app/stats/season_stats.py` + `GET /leagues/{id}/season-stats?season=`:
     por cada equipo de una liga/temporada (la mas reciente jugada si no se
     especifica), splits Total/Local/Visitante con PJ/G/E/P/Pts, goles a
@@ -199,9 +197,8 @@ modelo Poisson/Dixon-Coles (ajustable con xG) -> EV = prob_modelo x cuota - 1
   porque `fixtures_backfill.py` solo traia partidos SCHEDULED/TIMED de
   football-data.org (los que aun no se juegan), nunca los ya jugados de la
   temporada activa. El historico "de fondo" (soccerdata/MatchHistory) cubre
-  temporadas *cerradas*; nadie estaba trayendo los resultados de la
+  temporadas _cerradas_; nadie estaba trayendo los resultados de la
   temporada que esta en curso ahora mismo.
-
   - `football_data_client.get_season_matches()` (antes `get_upcoming_matches`,
     filtrado a SCHEDULED/TIMED): ahora pide la competicion sin filtro de
     `status`, que devuelve toda la `currentSeason` (jugados + por jugar) en
@@ -214,7 +211,7 @@ modelo Poisson/Dixon-Coles (ajustable con xG) -> EV = prob_modelo x cuota - 1
     League + 46 de La Liga entraron a la BD (antes: 0).
   - Efecto en cadena, verificado: `/leagues/{id}/season-stats` ahora
     muestra "26/27" con datos reales por defecto (antes solo se veia
-    "25/26", la ultima temporada *cerrada*). El motor Dixon-Coles tambien
+    "25/26", la ultima temporada _cerrada_). El motor Dixon-Coles tambien
     empieza a usar estos partidos de la temporada actual al ajustar el
     modelo (las predicciones de partidos futuros cambian ligeramente al
     incorporar la forma real de esta temporada).
@@ -228,7 +225,6 @@ modelo Poisson/Dixon-Coles (ajustable con xG) -> EV = prob_modelo x cuota - 1
 
 - **Fase 7 (hecho):** corners/tarjetas, auditoria visual del frontend, y dos
   bugs reales de transparencia reportados por el usuario.
-
   - **Corners y tarjetas ya estaban en el CSV de MatchHistory** (columnas
     HC/AC/HY/AY/HR/AR/HF/AF/HS/AS/HST/AST) y nunca se leian. Ahora
     `historical_backfill.py` las guarda en `team_match_stats`
@@ -283,24 +279,23 @@ modelo Poisson/Dixon-Coles (ajustable con xG) -> EV = prob_modelo x cuota - 1
 - **Fase 8 (hecho):** cuotas reales pre-partido para partidos futuros — cierra
   el gap que dejaba la Fase 7 ("Recomendaciones -> Proximas" vacia por falta
   de una fuente de cuotas para partidos aun no jugados).
-
   - Evaluadas varias fuentes antes de elegir (ver comparativa completa en el
     hilo de la especificacion): The Odds API (plan gratuito: 500
     creditos/mes, cubre EPL+LaLiga con h2h+totals, ToS permite
     explicitamente uso en "dashboards analiticos" y guardar el dato
     indefinidamente), API-Football directo, Betfair Exchange (alta de
-    £499 para clave "Live" de produccion) y **scrapear un portal de estadisticas de terceros**
-    (descartado: no publica cuotas, solo estadisticas que ya calculamos
-    nosotros mismos con mas rigor; ademas riesgo real de *database right*
-    al scrapear a un competidor, sin aportar nada a este
-    proyecto). Se eligio The Odds API.
+    £499 para clave "Live" de produccion) y **scrapear un portal de
+    estadisticas de terceros** (descartado: no publica cuotas, solo
+    estadisticas que ya calculamos nosotros mismos con mas rigor; ademas
+    riesgo real de _database right_ al scrapear a un competidor). Se eligio
+    The Odds API.
   - `app/ingestion/odds_api_client.py` + `app/ingestion/prematch_odds_backfill.py`
-    + `scripts/refresh_odds.py`: cuotas h2h+totals por liga, calculando
-    "Market Average"/"Market Max" a partir de las casas devueltas (igual que
-    football-data.co.uk trae precalculado en su CSV) y guardando
-    Bet365/Pinnacle/William Hill con esos mismos nombres para que
-    `bookmaker_agreement` en `engine.py` siga funcionando sin cambios. btts
-    queda fuera (requiere plan de pago de the-odds-api.com).
+    - `scripts/refresh_odds.py`: cuotas h2h+totals por liga, calculando
+      "Market Average"/"Market Max" a partir de las casas devueltas (igual que
+      football-data.co.uk trae precalculado en su CSV) y guardando
+      Bet365/Pinnacle/William Hill con esos mismos nombres para que
+      `bookmaker_agreement` en `engine.py` siga funcionando sin cambios. btts
+      queda fuera (requiere plan de pago de the-odds-api.com).
   - Bug real encontrado al primer intento: 9 equipos sin resolver
     (`Brighton and Hove Albion`, `Coventry City`, `Hull City`,
     `Ipswich Town`, `Leeds United`, `Tottenham Hotspur`, `Athletic Bilbao`,
@@ -351,6 +346,7 @@ tier gratuito). Cuotas pre-partido: API-Football/RapidAPI (tier gratuito, ~100
 req/dia: se consulta solo para los partidos ya filtrados por interes, nunca en bulk).
 
 Necesitas cuentas gratuitas propias para:
+
 - https://www.football-data.org/client/register
 - https://rapidapi.com/api-sports/api/api-football
 
