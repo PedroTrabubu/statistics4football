@@ -41,6 +41,22 @@ def _parse_utc(iso_datetime: str) -> datetime:
     return datetime.fromisoformat(iso_datetime.replace("Z", "+00:00")).replace(tzinfo=None)
 
 
+def referee_short_name(full_name: str) -> str:
+    """"Anthony Taylor" -> "A Taylor": el formato del CSV de MatchHistory,
+    para que un mismo arbitro no quede partido en dos segun la fuente."""
+    parts = full_name.split()
+    if len(parts) < 2:
+        return full_name
+    return f"{parts[0][0]} {' '.join(parts[1:])}"
+
+
+def _main_referee(row: dict) -> str | None:
+    for referee in row.get("referees") or []:
+        if referee.get("type") == "REFEREE" and referee.get("name"):
+            return referee_short_name(referee["name"])
+    return None
+
+
 def _get_or_create_season(db: Session, league_id: int, name: str, start: datetime, end: datetime) -> Season:
     season = db.query(Season).filter_by(league_id=league_id, name=name).one_or_none()
     if season is None:
@@ -151,6 +167,19 @@ def sync_current_season_matches(db: Session, settings: Settings, leagues: list[s
                     match.home_goals = home_goals
                     match.away_goals = away_goals
                     match.status = MatchStatus.HISTORICAL if is_finished else MatchStatus.SCHEDULED
+
+                    # Descanso y arbitro solo se rellenan, nunca se borran: el
+                    # CSV de MatchHistory (historical_backfill) es la fuente
+                    # principal y puede haberlos traido ya. Excepcion: en un
+                    # partido aun no jugado el arbitro designado puede cambiar,
+                    # asi que ahi manda siempre el ultimo dato de la API.
+                    half_time = row.get("score", {}).get("halfTime", {}) if is_finished else {}
+                    if half_time.get("home") is not None and half_time.get("away") is not None:
+                        match.home_ht_goals = half_time["home"]
+                        match.away_ht_goals = half_time["away"]
+                    referee = _main_referee(row)
+                    if referee and (not match.referee or not is_finished):
+                        match.referee = referee
 
                     rows_ingested += 1
 

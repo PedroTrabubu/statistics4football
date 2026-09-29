@@ -50,3 +50,11 @@ def test_realized_pnl_recovers_price_from_ev():
 def test_realized_pnl_none_when_unresolved_or_no_ev():
     assert realized_pnl_units(prob_model=0.5, ev=0.1, won=None) is None
     assert realized_pnl_units(prob_model=0.5, ev=None, won=True) is None
+
+
+def test_referee_short_name_matches_match_history_format() -> None:
+    from app.ingestion.fixtures_backfill import referee_short_name
+
+    assert referee_short_name("Anthony Taylor") == "A Taylor"
+    assert referee_short_name("Manuel Orellana Cid") == "M Orellana Cid"
+    assert referee_short_name("Taylor") == "Taylor"

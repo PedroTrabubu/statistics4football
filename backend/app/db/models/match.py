@@ -25,6 +25,12 @@ class Match(Base):
 
     home_goals: Mapped[int | None] = mapped_column(Integer, nullable=True)
     away_goals: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    home_ht_goals: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    away_ht_goals: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # Formato del CSV de MatchHistory ("A Taylor"); los nombres completos de
+    # football-data.org se normalizan a ese formato (ver fixtures_backfill.referee_short_name).
+    referee: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     status: Mapped[MatchStatus] = mapped_column(
         Enum(MatchStatus, native_enum=False), default=MatchStatus.SCHEDULED, index=True
