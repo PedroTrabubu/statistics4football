@@ -2,10 +2,13 @@ import type {
   League,
   Match,
   MatchFeatures,
+  MatchRefereeStats,
+  MatchResult,
   MatchStatus,
   Prediction,
   Recommendation,
   RecommendationHistoryResponse,
+  RefereeScope,
   RiskLevel,
   Team,
   TeamSeasonStats,
@@ -51,6 +54,12 @@ export function getLeagueSeasons(leagueId: number): Promise<string[]> {
   return request(`/leagues/${leagueId}/seasons`);
 }
 
+/** Todos los partidos ya jugados de una temporada (sin paginar), mas
+ * recientes primero. Sin `season`, la mas reciente con partidos jugados. */
+export function getLeagueResults(leagueId: number, season?: string): Promise<MatchResult[]> {
+  return request(`/leagues/${leagueId}/results`, { season });
+}
+
 export function getLeagueSeasonStats(leagueId: number, season?: string): Promise<TeamSeasonStats[]> {
   return request(`/leagues/${leagueId}/season-stats`, { season });
 }
@@ -93,6 +102,10 @@ export function getMatch(matchId: number): Promise<Match> {
 
 export function getMatchStats(matchId: number, numMatches = 5): Promise<MatchFeatures> {
   return request(`/matches/${matchId}/stats`, { num_matches: numMatches });
+}
+
+export function getMatchRefereeStats(matchId: number, refereeScope: RefereeScope): Promise<MatchRefereeStats> {
+  return request(`/matches/${matchId}/referee-stats`, { referee_scope: refereeScope });
 }
 
 export function getMatchPredictions(matchId: number): Promise<Prediction[]> {

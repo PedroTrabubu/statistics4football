@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { MARKET_GROUPS, SIDEBAR_MARKETS, findMarket } from "../lib/markets";
 import { IconBook, IconMatches, IconMenu, IconStats, IconTarget } from "./icons";
 
 const NAV_ITEMS = [
@@ -12,6 +13,7 @@ const NAV_ITEMS = [
 export function Layout() {
   const [navOpen, setNavOpen] = useState(false);
   const location = useLocation();
+  const currentMarket = findMarket(location.pathname.match(/^\/mercados\/([^/]+)/)?.[1]);
 
   useEffect(() => {
     setNavOpen(false);
@@ -45,6 +47,33 @@ export function Layout() {
               </NavLink>
             ))}
           </nav>
+
+          {MARKET_GROUPS.map((group) => (
+            <nav key={group} className="sidebar-nav sidebar-section" aria-label={`Mercados: ${group}`}>
+              <p className="sidebar-heading">{group}</p>
+              {SIDEBAR_MARKETS.filter((market) => market.group === group).map((market) => {
+                // Una familia (Córners, Tarjetas...) queda activa en cualquiera de sus variantes.
+                const active =
+                  currentMarket !== undefined &&
+                  (currentMarket.slug === market.slug ||
+                    (market.family !== undefined && currentMarket.family?.key === market.family.key));
+                return (
+                  <NavLink
+                    key={market.slug}
+                    to={`/mercados/${market.slug}`}
+                    className={active ? "sidebar-link sidebar-sublink active" : "sidebar-link sidebar-sublink"}
+                  >
+                    <span>{market.label}</span>
+                  </NavLink>
+                );
+              })}
+              {group === "Estadísticas" && (
+                <NavLink to="/arbitros" className="sidebar-link sidebar-sublink">
+                  <span>Árbitros</span>
+                </NavLink>
+              )}
+            </nav>
+          ))}
 
           <div className="sidebar-footer">
             <p>Análisis estadístico de fútbol. No es una casa de apuestas.</p>
