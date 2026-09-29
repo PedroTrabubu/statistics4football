@@ -19,7 +19,18 @@ export function StatsPanel({
   homeTeam: string;
   awayTeam: string;
 }) {
-  const { home_form, away_form, h2h, home_xg_form, away_xg_form, home_elo, away_elo } = features;
+  const {
+    home_form,
+    away_form,
+    h2h,
+    home_xg_form,
+    away_xg_form,
+    home_discipline,
+    away_discipline,
+    home_elo,
+    away_elo,
+  } = features;
+  const disciplineMatches = home_discipline.matches_with_data || away_discipline.matches_with_data;
 
   return (
     <div className="stats-panel">
@@ -55,12 +66,37 @@ export function StatsPanel({
             away={away_xg_form.avg_xg_against?.toFixed(2) ?? "—"}
           />
           <FormRow
+            label="Corners a favor (media)"
+            home={home_discipline.avg_corners_for?.toFixed(1) ?? "—"}
+            away={away_discipline.avg_corners_for?.toFixed(1) ?? "—"}
+          />
+          <FormRow
+            label="Corners en contra (media)"
+            home={home_discipline.avg_corners_against?.toFixed(1) ?? "—"}
+            away={away_discipline.avg_corners_against?.toFixed(1) ?? "—"}
+          />
+          <FormRow
+            label="Tarjetas amarillas (media)"
+            home={home_discipline.avg_yellow_cards?.toFixed(1) ?? "—"}
+            away={away_discipline.avg_yellow_cards?.toFixed(1) ?? "—"}
+          />
+          <FormRow
+            label="Tarjetas rojas (media)"
+            home={home_discipline.avg_red_cards?.toFixed(2) ?? "—"}
+            away={away_discipline.avg_red_cards?.toFixed(2) ?? "—"}
+          />
+          <FormRow
             label="Rating Elo"
             home={home_elo !== null ? home_elo.toFixed(0) : "—"}
             away={away_elo !== null ? away_elo.toFixed(0) : "—"}
           />
         </tbody>
       </table>
+      {disciplineMatches === 0 && (
+        <p className="small muted">
+          Sin datos de corners/tarjetas todavía para estos equipos en el rango analizado.
+        </p>
+      )}
 
       <h3>Enfrentamientos directos (últimos {h2h.matches_played})</h3>
       {h2h.matches_played === 0 ? (

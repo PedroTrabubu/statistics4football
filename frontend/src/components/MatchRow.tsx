@@ -6,8 +6,10 @@ export function MatchRow({ match }: { match: Match }) {
   const played = match.status === "historical";
   return (
     <Link to={`/matches/${match.id}`} className="match-row">
-      <span className="match-row-date">{formatDateTime(match.date)}</span>
-      <span className="match-row-league">{match.league_code}</span>
+      <span className="match-row-when">
+        <span className="match-row-date">{formatDateTime(match.date)}</span>
+        <span className="match-row-league">{match.league_code}</span>
+      </span>
       <span className="match-row-teams">
         <span className="match-row-team">{match.home_team}</span>
         {played ? (
