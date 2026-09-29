@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { getLeagues, getMatches } from "../api/client";
 import type { MatchStatus } from "../api/types";
 import { MatchRow } from "../components/MatchRow";
@@ -9,7 +10,7 @@ const PAGE_SIZE = 20;
 
 export function MatchesPage() {
   const [leagueId, setLeagueId] = useState<number | undefined>(undefined);
-  const [status, setStatus] = useState<MatchStatus | undefined>(undefined);
+  const [status, setStatus] = useState<MatchStatus | undefined>("scheduled");
   const [page, setPage] = useState(0);
 
   const { data: leagues } = useApi(() => getLeagues(), []);
@@ -31,6 +32,11 @@ export function MatchesPage() {
   return (
     <div>
       <h1>Partidos</h1>
+      <p className="intro-note small muted">
+        Los porcentajes que ves aquí son <strong>frecuencia histórica</strong>, no una promesa de lo que va a pasar:
+        cuentan cuántas veces ocurrió algo antes, siempre junto al número de partidos usado. No es lo mismo que una
+        probabilidad garantizada. <Link to="/glosario">Más sobre cómo leerlos →</Link>
+      </p>
 
       <div className="filters">
         <select

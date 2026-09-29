@@ -1,11 +1,44 @@
-export function formatPercent(value: number, digits = 1): string {
+export function formatPercent(value: number | null, digits = 1): string {
+  if (value === null) return "—";
   return `${(value * 100).toFixed(digits)}%`;
 }
 
-export function formatEv(value: number): string {
+export function formatEv(value: number | null): string {
+  if (value === null) return "—";
   const pct = value * 100;
   const sign = pct > 0 ? "+" : "";
   return `${sign}${pct.toFixed(1)}%`;
+}
+
+/** Para valores que ya vienen en escala 0-100 (stats de temporada), a
+ * diferencia de formatPercent que espera una fraccion 0-1 (probabilidades). */
+export function formatPct(value: number | null, digits = 0): string {
+  if (value === null) return "—";
+  return `${value.toFixed(digits)}%`;
+}
+
+export function formatNumber(value: number | null, digits = 2): string {
+  if (value === null) return "—";
+  return value.toFixed(digits);
+}
+
+/** value ya viene en unidades de porcentaje (p.ej. -4.4 = -4.4%), a
+ * diferencia de formatEv que espera una fraccion 0-1. */
+export function formatRoiPct(value: number | null): string {
+  if (value === null) return "—";
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${value.toFixed(1)}%`;
+}
+
+export function formatPnl(value: number | null): string {
+  if (value === null) return "—";
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${value.toFixed(2)}u`;
+}
+
+export function formatOdds(value: number | null): string {
+  if (value === null || !Number.isFinite(value)) return "—";
+  return value.toFixed(2);
 }
 
 export function formatDate(iso: string): string {

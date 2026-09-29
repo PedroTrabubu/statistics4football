@@ -34,6 +34,16 @@ class XgFormOut(BaseModel):
     avg_xg_against: float | None
 
 
+class DisciplineFormOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    matches_with_data: int
+    avg_corners_for: float | None
+    avg_corners_against: float | None
+    avg_yellow_cards: float | None
+    avg_red_cards: float | None
+
+
 class MatchFeaturesOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -42,5 +52,7 @@ class MatchFeaturesOut(BaseModel):
     h2h: HeadToHeadOut
     home_xg_form: XgFormOut
     away_xg_form: XgFormOut
+    home_discipline: DisciplineFormOut
+    away_discipline: DisciplineFormOut
     home_elo: float | None
     away_elo: float | None

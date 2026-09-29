@@ -25,15 +25,18 @@ def compute_confidence(
     return round(0.5 * data_confidence + 0.5 * bookmaker_agreement, 3)
 
 
+def risk_level_from_confidence(confidence: float) -> RiskLevel:
+    if confidence >= 0.66:
+        return RiskLevel.LOW
+    if confidence >= 0.33:
+        return RiskLevel.MEDIUM
+    return RiskLevel.HIGH
+
+
 def compute_risk_level(confidence: float, odds: float) -> RiskLevel:
     """Nivel de riesgo: baja confianza o cuota muy alta (mayor varianza) sube
     el riesgo, aunque el EV puntual sea bueno."""
-    if confidence >= 0.66:
-        risk = RiskLevel.LOW
-    elif confidence >= 0.33:
-        risk = RiskLevel.MEDIUM
-    else:
-        risk = RiskLevel.HIGH
+    risk = risk_level_from_confidence(confidence)
 
     if odds >= 10.0:
         return RiskLevel.HIGH
@@ -45,12 +48,12 @@ def compute_risk_level(confidence: float, odds: float) -> RiskLevel:
 
 @dataclass
 class Recommendation:
-    prob_market_implied: float
     prob_model: float
-    ev: float
     confidence: float
     risk_level: RiskLevel
     is_recommended: bool
+    prob_market_implied: float | None = None
+    ev: float | None = None
 
 
 def build_recommendation(
@@ -74,4 +77,18 @@ def build_recommendation(
         confidence=confidence,
         risk_level=risk_level,
         is_recommended=is_recommended,
+    )
+
+
+def build_stats_only_recommendation(prob_model: float, matches_used: int) -> Recommendation:
+    """Probabilidad del modelo sin comparar contra mercado (no hay cuotas):
+    partidos futuros que aun no tienen cuotas ingeridas. La confianza depende
+    solo de cuantos partidos respaldan al modelo para estos equipos; nunca se
+    marca como "recomendada" porque eso requiere EV (no hay sin cuota)."""
+    confidence = compute_confidence(matches_used, bookmaker_agreement=None)
+    return Recommendation(
+        prob_model=prob_model,
+        confidence=confidence,
+        risk_level=risk_level_from_confidence(confidence),
+        is_recommended=False,
     )

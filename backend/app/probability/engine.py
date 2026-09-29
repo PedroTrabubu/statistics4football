@@ -16,12 +16,13 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
 from app.db.models import Match, MatchOdds, MatchStatus, ModelPrediction
-from app.probability.ev import build_recommendation
+from app.probability.ev import build_recommendation, build_stats_only_recommendation
 from app.probability.market import bookmaker_agreement, implied_probabilities_shin
 from app.probability.poisson_model import DixonColesModel, MatchResult, fit_dixon_coles
 from app.probability.score_markets import (
     probabilities_1x2,
     probabilities_asian_handicap,
+    probabilities_btts,
     probabilities_over_under,
 )
 
@@ -31,6 +32,7 @@ INDIVIDUAL_BOOKMAKERS = ["Bet365", "Bet&Win", "Pinnacle", "William Hill", "VC Be
 
 ONEXTWO_SELECTIONS = ["home", "draw", "away"]
 OU25_SELECTIONS = ["over", "under"]
+BTTS_SELECTIONS = ["yes", "no"]
 AH_SELECTIONS = ["home", "away"]
 
 MODEL_VERSION = "dixon_coles_v1"
@@ -153,7 +155,28 @@ def _build_predictions_for_market(
 
     ordered_selections = [s for s in selections if s in reference]
     if len(ordered_selections) < 2:
-        return []
+        # Sin cuotas de mercado para este partido/mercado (p.ej. fixture
+        # futuro sin cuotas ingeridas todavia): probabilidad real del modelo,
+        # sin comparacion contra mercado ni EV.
+        predictions = []
+        for selection in selections:
+            rec = build_stats_only_recommendation(model_probs[selection], matches_used)
+            predictions.append(
+                ModelPrediction(
+                    match_id=match.id,
+                    model_version=MODEL_VERSION,
+                    market=market,
+                    selection=selection,
+                    prob_market_implied=rec.prob_market_implied,
+                    prob_model=rec.prob_model,
+                    ev=rec.ev,
+                    confidence=rec.confidence,
+                    risk_level=rec.risk_level,
+                    is_recommended=rec.is_recommended,
+                    matches_used=matches_used,
+                )
+            )
+        return predictions
 
     individual_odds_by_selection = {
         s: _individual_odds(db, match.id, market, s) for s in ordered_selections
@@ -193,6 +216,7 @@ def _build_predictions_for_market(
                 confidence=rec.confidence,
                 risk_level=rec.risk_level,
                 is_recommended=rec.is_recommended,
+                matches_used=matches_used,
             )
         )
     return predictions
@@ -219,16 +243,28 @@ def generate_predictions_for_match(
         )
     )
 
-    if _odds_map(db, match.id, "over_under_2.5", REFERENCE_BOOKMAKER):
-        predictions += _build_predictions_for_market(
-            db,
-            match,
-            "over_under_2.5",
-            OU25_SELECTIONS,
-            probabilities_over_under(matrix, 2.5),
-            ev_threshold,
-            matches_used,
-        )
+    # over/under 2.5 y BTTS son mercados binarios estandar (no dependen de una
+    # linea que solo exista en la cuota, como el handicap): se calculan
+    # siempre, con o sin cuotas ingeridas para el partido.
+    predictions += _build_predictions_for_market(
+        db,
+        match,
+        "over_under_2.5",
+        OU25_SELECTIONS,
+        probabilities_over_under(matrix, 2.5),
+        ev_threshold,
+        matches_used,
+    )
+
+    predictions += _build_predictions_for_market(
+        db,
+        match,
+        "btts",
+        BTTS_SELECTIONS,
+        probabilities_btts(matrix),
+        ev_threshold,
+        matches_used,
+    )
 
     ah_ref = _odds_map(db, match.id, "asian_handicap", REFERENCE_BOOKMAKER)
     if ah_ref:

@@ -29,26 +29,7 @@ from app.core.config import get_settings
 from app.db.models import League, Match, MatchOdds, MatchStatus
 from app.db.session import SessionLocal
 from app.probability.engine import fit_league_model, generate_predictions_for_match
-
-
-def _selection_won(match: Match, market: str, selection: str) -> bool | None:
-    if match.home_goals is None or match.away_goals is None:
-        return None
-    total_goals = match.home_goals + match.away_goals
-
-    if market == "1x2":
-        if selection == "home":
-            return match.home_goals > match.away_goals
-        if selection == "away":
-            return match.home_goals < match.away_goals
-        if selection == "draw":
-            return match.home_goals == match.away_goals
-    if market == "over_under_2.5":
-        if selection == "over":
-            return total_goals > 2.5
-        if selection == "under":
-            return total_goals < 2.5
-    return None  # asian_handicap: requiere resolver push, se omite del PnL rapido
+from app.probability.outcomes import resolve_selection
 
 
 def main() -> None:
@@ -58,10 +39,15 @@ def main() -> None:
         leagues = db.query(League).filter(League.code.in_(settings.leagues)).all()
 
         for league in leagues:
+            # Solo temporadas con partidos jugados: la temporada en curso creada
+            # por ingest_fixtures.py solo con partidos SCHEDULED (antes de la
+            # jornada 1) no sirve de test y dejaria sin backtest la anterior.
             seasons = sorted(
                 {
                     m.season.name
-                    for m in db.query(Match).filter_by(league_id=league.id).all()
+                    for m in db.query(Match)
+                    .filter_by(league_id=league.id, status=MatchStatus.HISTORICAL)
+                    .all()
                 }
             )
             if len(seasons) < 2:
@@ -112,7 +98,7 @@ def main() -> None:
                         if not pred.is_recommended:
                             continue
                         n_recommended[pred.market] += 1
-                        won = _selection_won(match, pred.market, pred.selection)
+                        won = resolve_selection(match, pred.market, pred.selection)
                         if won is None:
                             continue
                         odds_row = (
