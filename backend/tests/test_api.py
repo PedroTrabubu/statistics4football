@@ -161,6 +161,32 @@ def test_league_seasons_lists_most_recent_first() -> None:
     assert seasons == sorted(seasons, reverse=True)
 
 
+def test_league_results_only_played_matches_of_one_season() -> None:
+    db = SessionLocal()
+    try:
+        league = db.query(League).filter_by(code="ENG-Premier League").one()
+    finally:
+        db.close()
+
+    seasons = client.get(f"/leagues/{league.id}/seasons").json()
+    response = client.get(f"/leagues/{league.id}/results")
+    assert response.status_code == 200
+    matches = response.json()
+    assert len(matches) > 0
+    assert {m["season"] for m in matches} == {seasons[0]}
+    assert all(m["status"] == "historical" for m in matches)
+    assert all(m["home_goals"] is not None and m["away_goals"] is not None for m in matches)
+    dates = [m["date"] for m in matches]
+    assert dates == sorted(dates, reverse=True)
+    # Premier League: el CSV de MatchHistory trae descanso, arbitro y stats.
+    assert all(m["home_ht_goals"] is not None and m["referee"] for m in matches)
+    assert all(m["home_ht_goals"] <= m["home_goals"] and m["away_ht_goals"] <= m["away_goals"] for m in matches)
+    assert all(m["home_stats"] is not None and m["home_stats"]["corners"] is not None for m in matches)
+
+    older = client.get(f"/leagues/{league.id}/results", params={"season": seasons[-1]}).json()
+    assert {m["season"] for m in older} == {seasons[-1]}
+
+
 def test_team_season_stats_shape() -> None:
     db = SessionLocal()
     try:
@@ -179,3 +205,32 @@ def test_team_season_stats_shape() -> None:
 def test_team_season_stats_404_for_unknown_team() -> None:
     response = client.get("/teams/999999/season-stats")
     assert response.status_code == 404
+
+
+def test_match_referee_stats_is_point_in_time() -> None:
+    db = SessionLocal()
+    try:
+        match = (
+            db.query(Match)
+            .filter(Match.status == MatchStatus.HISTORICAL, Match.referee.isnot(None))
+            .order_by(Match.date.desc())
+            .first()
+        )
+        assert match is not None
+        match_id, referee, match_date = match.id, match.referee, match.date.isoformat()
+    finally:
+        db.close()
+
+    for scope in ("season", "all"):
+        response = client.get(f"/matches/{match_id}/referee-stats", params={"referee_scope": scope})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["referee"] == referee
+        assert all(m["referee"] == referee for m in body["referee_matches"])
+        for key in ("referee_matches", "home_matches", "away_matches"):
+            assert all(m["date"] < match_date for m in body[key])
+            assert all(m["id"] != match_id for m in body[key])
+
+    season_only = client.get(f"/matches/{match_id}/referee-stats").json()
+    all_seasons = client.get(f"/matches/{match_id}/referee-stats", params={"referee_scope": "all"}).json()
+    assert len(all_seasons["referee_matches"]) >= len(season_only["referee_matches"])
