@@ -2,13 +2,14 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Query as SAQuery
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.config import Settings, get_settings
 from app.db.models import Match, MatchStatus, Season
 from app.db.session import get_db
 from app.probability.engine import generate_predictions_for_match, get_cached_league_model
-from app.schemas.match import MatchOut, match_to_out
+from app.schemas.match import MatchOut, MatchRefereeStatsOut, match_to_out, match_to_result_out
 from app.schemas.prediction import PredictionOut
 from app.schemas.stats import MatchFeaturesOut
 from app.stats.features import compute_match_features
@@ -89,3 +90,64 @@ def get_match_predictions(
     predictions = generate_predictions_for_match(db, match, model, settings.ev_threshold)
     db.commit()
     return predictions
+
+
+def _played_before(db: Session, match: Match) -> SAQuery:
+    """Partidos de la misma liga ya jugados antes de `match` (point-in-time:
+    nunca el propio partido ni nada posterior), con lo necesario para
+    `match_to_result_out` cargado de una vez."""
+    return (
+        db.query(Match)
+        .filter(
+            Match.league_id == match.league_id,
+            Match.status == MatchStatus.HISTORICAL,
+            Match.date < match.date,
+        )
+        .options(
+            joinedload(Match.league),
+            joinedload(Match.season),
+            joinedload(Match.home_team),
+            joinedload(Match.away_team),
+            selectinload(Match.team_stats),
+        )
+        .order_by(Match.date.desc())
+    )
+
+
+@router.get("/{match_id}/referee-stats", response_model=MatchRefereeStatsOut)
+def get_match_referee_stats(
+    match_id: int,
+    referee_scope: str = Query("season", pattern="^(season|all)$"),
+    db: Session = Depends(get_db),
+) -> MatchRefereeStatsOut:
+    """Partidos previos del arbitro designado y de cada equipo, para comparar
+    tarjetas/puntos de tarjeta. Los equipos, siempre en la temporada del
+    partido; el arbitro, en esa temporada (`season`) o en todas las de la
+    liga (`all`). El frontend calcula medias y porcentajes."""
+    match = _get_match_or_404(db, match_id)
+
+    def team_matches(team_id: int) -> list:
+        rows = (
+            _played_before(db, match)
+            .filter(
+                Match.season_id == match.season_id,
+                or_(Match.home_team_id == team_id, Match.away_team_id == team_id),
+            )
+            .all()
+        )
+        return [match_to_result_out(m) for m in rows]
+
+    referee_matches = []
+    if match.referee:
+        query = _played_before(db, match).filter(Match.referee == match.referee)
+        if referee_scope == "season":
+            query = query.filter(Match.season_id == match.season_id)
+        referee_matches = [match_to_result_out(m) for m in query.all()]
+
+    return MatchRefereeStatsOut(
+        referee=match.referee,
+        referee_scope=referee_scope,
+        referee_matches=referee_matches,
+        home_matches=team_matches(match.home_team_id),
+        away_matches=team_matches(match.away_team_id),
+    )
