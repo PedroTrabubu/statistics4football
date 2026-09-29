@@ -1,5 +1,4 @@
-"""Estadisticas agregadas por equipo a lo largo de una temporada :
-% over/under, % ambos anotan, % porteria a cero, forma
+"""Estadisticas agregadas por equipo a lo largo de una temporada: % over/under, % ambos anotan, % porteria a cero, forma
 local/visitante/total.
 
 A diferencia del resto de `app/stats/` (point-in-time, pensado para
