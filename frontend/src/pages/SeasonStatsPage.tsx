@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getLeagues, getLeagueSeasonStats, getLeagueSeasons } from "../api/client";
 import type { SplitStats, TeamSeasonStats } from "../api/types";
+import { LeagueSwitch } from "../components/LeagueSwitch";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
 import { formatPct } from "../lib/format";
+import { DEFAULT_LEAGUE_CODE, useSelectedLeagueCode } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 
 type SplitKey = "overall" | "home" | "away";
@@ -22,19 +24,21 @@ export function SeasonStatsPage() {
   const [searchParams] = useSearchParams();
   const leagueFromUrl = searchParams.get("league");
 
-  const [leagueId, setLeagueId] = useState<number | undefined>(
-    leagueFromUrl ? Number(leagueFromUrl) : undefined,
-  );
   const [season, setSeason] = useState<string | undefined>(undefined);
   const [split, setSplit] = useState<SplitKey>("overall");
 
   const { data: leagues } = useApi(() => getLeagues(), []);
 
+  // Sin "todas las ligas" en esta pagina: si venia de "Ambas", LaLiga.
+  const [selectedCode, setLeagueCode] = useSelectedLeagueCode();
+  const leagueCode = selectedCode ?? DEFAULT_LEAGUE_CODE;
+  const leagueId = leagues?.find((l) => l.code === leagueCode)?.id;
+
+  // Enlace desde la ficha de partido (?league=<id>): preselecciona esa liga.
   useEffect(() => {
-    if (leagueId === undefined && leagues && leagues.length > 0) {
-      setLeagueId(leagues[0].id);
-    }
-  }, [leagues, leagueId]);
+    const fromUrl = leagues?.find((l) => String(l.id) === leagueFromUrl);
+    if (fromUrl) setLeagueCode(fromUrl.code);
+  }, [leagues, leagueFromUrl, setLeagueCode]);
 
   const { data: seasons } = useApi(
     () => (leagueId !== undefined ? getLeagueSeasons(leagueId) : Promise.resolve([])),
@@ -67,17 +71,9 @@ export function SeasonStatsPage() {
         visitante.
       </p>
 
+      <LeagueSwitch leagues={leagues} value={leagueCode} onChange={(code) => code && setLeagueCode(code)} />
+
       <div className="filters">
-        <select
-          value={leagueId ?? ""}
-          onChange={(e) => setLeagueId(e.target.value ? Number(e.target.value) : undefined)}
-        >
-          {leagues?.map((league) => (
-            <option key={league.id} value={league.id}>
-              {league.name}
-            </option>
-          ))}
-        </select>
 
         <select value={effectiveSeason ?? ""} onChange={(e) => setSeason(e.target.value)}>
           {seasons?.map((s) => (

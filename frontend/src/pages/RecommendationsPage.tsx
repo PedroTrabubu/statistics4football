@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { getLeagues, getRecommendationHistory, getRecommendations } from "../api/client";
 import type { RiskLevel } from "../api/types";
+import { LeagueSwitch } from "../components/LeagueSwitch";
 import { EvValue } from "../components/EvValue";
 import { OutcomeBadge } from "../components/OutcomeBadge";
 import { RiskBadge } from "../components/RiskBadge";
 import { SampleBadge } from "../components/SampleBadge";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
 import { formatDateTime, formatPercent, formatPnl, formatRoiPct, marketLabel, selectionLabel } from "../lib/format";
+import { leagueName, useSelectedLeagueCode } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 
 type Tab = "upcoming" | "history";
@@ -19,8 +21,9 @@ function roiClass(value: number | null): string {
 
 export function RecommendationsPage() {
   const [tab, setTab] = useState<Tab>("upcoming");
-  const [leagueId, setLeagueId] = useState<number | undefined>(undefined);
+  const [leagueCode, setLeagueCode] = useSelectedLeagueCode();
   const { data: leagues } = useApi(() => getLeagues(), []);
+  const leagueId = leagues?.find((l) => l.code === leagueCode)?.id;
 
   return (
     <div>
@@ -29,6 +32,8 @@ export function RecommendationsPage() {
         Esto es una herramienta de análisis, no una promesa de ganancia — fíjate siempre en la muestra y el
         riesgo, no solo en el EV.
       </p>
+
+      <LeagueSwitch leagues={leagues} value={leagueCode} onChange={setLeagueCode} allowAll />
 
       <div className="tab-group tab-group-spaced">
         <button
@@ -45,22 +50,21 @@ export function RecommendationsPage() {
         </button>
       </div>
 
-      {tab === "upcoming" ? (
-        <UpcomingRecommendations leagueId={leagueId} setLeagueId={setLeagueId} leagues={leagues} />
-      ) : (
-        <RecommendationHistory leagueId={leagueId} setLeagueId={setLeagueId} leagues={leagues} />
-      )}
+      {leagues &&
+        (tab === "upcoming" ? (
+          <UpcomingRecommendations leagueId={leagueId} />
+        ) : (
+          <RecommendationHistory leagueId={leagueId} />
+        ))}
     </div>
   );
 }
 
 interface LeagueFilterProps {
   leagueId: number | undefined;
-  setLeagueId: (id: number | undefined) => void;
-  leagues: { id: number; name: string }[] | null;
 }
 
-function UpcomingRecommendations({ leagueId, setLeagueId, leagues }: LeagueFilterProps) {
+function UpcomingRecommendations({ leagueId }: LeagueFilterProps) {
   const [riskLevel, setRiskLevel] = useState<RiskLevel | undefined>(undefined);
   const [minEv, setMinEv] = useState<number>(0.05);
 
@@ -76,17 +80,6 @@ function UpcomingRecommendations({ leagueId, setLeagueId, leagues }: LeagueFilte
   return (
     <>
       <div className="filters">
-        <select
-          value={leagueId ?? ""}
-          onChange={(e) => setLeagueId(e.target.value ? Number(e.target.value) : undefined)}
-        >
-          <option value="">Todas las ligas</option>
-          {leagues?.map((league) => (
-            <option key={league.id} value={league.id}>
-              {league.name}
-            </option>
-          ))}
-        </select>
 
         <select
           value={riskLevel ?? ""}
@@ -139,7 +132,7 @@ function UpcomingRecommendations({ leagueId, setLeagueId, leagues }: LeagueFilte
                       {rec.home_team} vs {rec.away_team}
                     </Link>
                     <div className="muted small">
-                      {rec.league_code} · {formatDateTime(rec.date)}
+                      {leagueName(rec.league_code)} · {formatDateTime(rec.date)}
                     </div>
                   </td>
                   <td className="rec-match">{marketLabel(rec.market)}</td>
@@ -167,7 +160,7 @@ function UpcomingRecommendations({ leagueId, setLeagueId, leagues }: LeagueFilte
   );
 }
 
-function RecommendationHistory({ leagueId, setLeagueId, leagues }: LeagueFilterProps) {
+function RecommendationHistory({ leagueId }: LeagueFilterProps) {
   const {
     data,
     loading,
@@ -177,17 +170,6 @@ function RecommendationHistory({ leagueId, setLeagueId, leagues }: LeagueFilterP
   return (
     <>
       <div className="filters">
-        <select
-          value={leagueId ?? ""}
-          onChange={(e) => setLeagueId(e.target.value ? Number(e.target.value) : undefined)}
-        >
-          <option value="">Todas las ligas</option>
-          {leagues?.map((league) => (
-            <option key={league.id} value={league.id}>
-              {league.name}
-            </option>
-          ))}
-        </select>
       </div>
 
       {loading && <LoadingView label="Cargando histórico..." />}
@@ -282,7 +264,7 @@ function RecommendationHistory({ leagueId, setLeagueId, leagues }: LeagueFilterP
                         {rec.home_team} vs {rec.away_team}
                       </Link>
                       <div className="muted small">
-                        {rec.league_code} · {formatDateTime(rec.date)}
+                        {leagueName(rec.league_code)} · {formatDateTime(rec.date)}
                       </div>
                     </td>
                     <td className="rec-match">{marketLabel(rec.market)}</td>

@@ -2,31 +2,36 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { getLeagues, getMatches } from "../api/client";
 import type { MatchStatus } from "../api/types";
+import { LeagueSwitch } from "../components/LeagueSwitch";
 import { MatchRow } from "../components/MatchRow";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
+import { useSelectedLeagueCode } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 
 const PAGE_SIZE = 20;
 
 export function MatchesPage() {
-  const [leagueId, setLeagueId] = useState<number | undefined>(undefined);
+  const [leagueCode, setLeagueCode] = useSelectedLeagueCode();
   const [status, setStatus] = useState<MatchStatus | undefined>("scheduled");
   const [page, setPage] = useState(0);
 
   const { data: leagues } = useApi(() => getLeagues(), []);
+  const leagueId = leagues?.find((l) => l.code === leagueCode)?.id;
   const {
     data: matches,
     loading,
     error,
   } = useApi(
     () =>
-      getMatches({
+      leagues === null
+        ? Promise.resolve([])
+        : getMatches({
         league_id: leagueId,
         status,
         limit: PAGE_SIZE,
         offset: page * PAGE_SIZE,
       }),
-    [leagueId, status, page],
+    [leagues, leagueId, status, page],
   );
 
   return (
@@ -38,21 +43,17 @@ export function MatchesPage() {
         probabilidad garantizada. <Link to="/glosario">Más sobre cómo leerlos →</Link>
       </p>
 
+      <LeagueSwitch
+        leagues={leagues}
+        value={leagueCode}
+        onChange={(code) => {
+          setPage(0);
+          setLeagueCode(code);
+        }}
+        allowAll
+      />
+
       <div className="filters">
-        <select
-          value={leagueId ?? ""}
-          onChange={(e) => {
-            setPage(0);
-            setLeagueId(e.target.value ? Number(e.target.value) : undefined);
-          }}
-        >
-          <option value="">Todas las ligas</option>
-          {leagues?.map((league) => (
-            <option key={league.id} value={league.id}>
-              {league.name}
-            </option>
-          ))}
-        </select>
 
         <select
           value={status ?? ""}

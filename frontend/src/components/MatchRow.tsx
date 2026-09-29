@@ -1,3 +1,4 @@
+import { leagueName } from "../lib/leagues";
 import { Link } from "react-router-dom";
 import type { Match } from "../api/types";
 import { formatDateTime } from "../lib/format";
@@ -8,7 +9,7 @@ export function MatchRow({ match }: { match: Match }) {
     <Link to={`/matches/${match.id}`} className="match-row">
       <span className="match-row-when">
         <span className="match-row-date">{formatDateTime(match.date)}</span>
-        <span className="match-row-league">{match.league_code}</span>
+        <span className="match-row-league">{leagueName(match.league_code)}</span>
       </span>
       <span className="match-row-teams">
         <span className="match-row-team">{match.home_team}</span>
