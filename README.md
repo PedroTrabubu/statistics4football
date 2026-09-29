@@ -9,6 +9,8 @@ Every statistic is computed from real results. Match-level stats are **point-in-
 ## Features
 
 - **Season tables:** for every team, split into total, home and away. Includes W/D/L, points, goals for and against, over 1.5/2.5/3.5, both teams to score, clean sheets, failed to score, corners and cards.
+- **Markets by team:** for each team, the hit rate and the full list of matches, green when the market landed and red when it didn't, split into home and away. Covers both teams to score (also with result), match and team goals, goals by half, half time/full time, result and clean sheets. Goals, corners, cards, booking points, shots, shots on target and fouls can each be checked for the whole match, the team, the opponent or each team, with over and under lines (plus corner handicap).
+- **Referees:** the same view grouped by referee, for cards, booking points, corners and goals. Premier League for every season; LaLiga only for the current one.
 - **Match page:** form, head-to-head, rolling xG, Elo, corners and discipline for both teams, with a season summary for each.
 - **Match probabilities:** 1X2, over/under 2.5 and both teams to score, from a Dixon-Coles model fitted on roughly the last three seasons. Each probability shows how many matches support it, so a newly promoted team with no history is flagged as a small sample instead of being shown with false confidence.
 - **Market comparison (optional):** when pre-match odds are available, the model probability is compared against the bookmakers' implied probability (with the margin removed). A history tab shows every past pick with its real outcome, losses included.
@@ -32,13 +34,13 @@ This is an analysis tool, not a betting system. The out-of-sample backtest cover
 
 | Data | Source |
 |---|---|
-| Historical results, corners, cards and closing odds | [Football-Data.co.uk](https://www.football-data.co.uk/) via [soccerdata](https://github.com/probberechts/soccerdata) |
+| Historical and current season results, half-time score, referee (Premier League), corners, cards, shots, fouls and closing odds | [Football-Data.co.uk](https://www.football-data.co.uk/) via [soccerdata](https://github.com/probberechts/soccerdata) |
 | xG per match | [Understat](https://understat.com/) via soccerdata |
 | Elo ratings | [ClubElo](http://clubelo.com/) via soccerdata |
 | Current season results and fixtures | [football-data.org](https://www.football-data.org/) (free tier) |
 | Pre-match odds (optional) | [The Odds API](https://the-odds-api.com/) (free tier) |
 
-The current season comes from football-data.org, which only provides results. Corners and cards are therefore only available for completed seasons.
+Football-Data.co.uk also publishes the current season (updated a couple of times a week); football-data.org fills in the most recent results in between.
 
 ## Getting started
 
@@ -117,11 +119,13 @@ python -m pytest
 | `GET /leagues` | Available leagues |
 | `GET /leagues/{id}/seasons` | Seasons with played matches |
 | `GET /leagues/{id}/season-stats?season=` | Season table for every team |
+| `GET /leagues/{id}/results?season=` | Every played match of a season, with half-time score, referee and team stats |
 | `GET /teams?league_id=` | Teams |
 | `GET /teams/{id}/season-stats?season=` | Season stats for one team |
 | `GET /matches` | Matches, filterable by league, season, status, team and dates |
 | `GET /matches/{id}` | One match |
 | `GET /matches/{id}/stats` | Point-in-time form, head-to-head, xG and Elo |
+| `GET /matches/{id}/referee-stats?referee_scope=` | Previous matches of the appointed referee and of both teams (cards and booking points comparison) |
 | `GET /matches/{id}/predictions` | Model probabilities for a match |
 | `GET /recommendations` | Upcoming value picks (requires odds) |
 | `GET /recommendations/history` | Past picks with their real outcome |
