@@ -9,6 +9,8 @@ Todas las estadísticas se calculan con resultados reales. Las de cada partido s
 ## Funcionalidades
 
 - **Tablas por temporada:** para cada equipo, en total, como local y como visitante. Incluyen victorias, empates, derrotas, puntos, goles a favor y en contra, over 1.5/2.5/3.5, ambos marcan, portería a cero, no marcó, córners y tarjetas.
+- **Mercados por equipo:** para cada equipo, el porcentaje de acierto y la lista completa de sus partidos, en verde si se cumplió el mercado y en rojo si no, separados en local y visitante. Incluye ambos marcan (también con resultado), goles del partido y del equipo, goles por parte, descanso/final, resultado y portería a cero. Goles, córners, tarjetas, puntos de tarjeta, tiros, tiros a puerta y faltas se pueden consultar del partido, del equipo, del rival o de cada equipo, con líneas de más de y menos de (y hándicap de córners).
+- **Árbitros:** la misma vista agrupada por árbitro, para tarjetas, puntos de tarjeta, córners y goles. Premier League en todas las temporadas; LaLiga solo en la temporada en curso.
 - **Ficha de partido:** forma, enfrentamientos directos, xG reciente, Elo, córners y disciplina de los dos equipos, con un resumen de la temporada de cada uno.
 - **Probabilidades de partido:** 1X2, over/under 2.5 y ambos marcan, con un modelo Dixon-Coles ajustado sobre las últimas tres temporadas aproximadamente. Cada probabilidad indica cuántos partidos la respaldan, así que un equipo recién ascendido sin historial aparece marcado como muestra pequeña en lugar de mostrarse con una confianza falsa.
 - **Comparación con el mercado (opcional):** cuando hay cuotas pre-partido, la probabilidad del modelo se compara con la probabilidad implícita de las casas de apuestas (quitando su margen). Una pestaña de histórico muestra todas las selecciones pasadas con su resultado real, incluidos los fallos.
@@ -32,13 +34,13 @@ Es una herramienta de análisis, no un sistema de apuestas. El backtest fuera de
 
 | Datos | Fuente |
 |---|---|
-| Resultados históricos, córners, tarjetas y cuotas de cierre | [Football-Data.co.uk](https://www.football-data.co.uk/) mediante [soccerdata](https://github.com/probberechts/soccerdata) |
+| Resultados históricos y de la temporada en curso, marcador al descanso, árbitro (Premier League), córners, tarjetas, tiros, faltas y cuotas de cierre | [Football-Data.co.uk](https://www.football-data.co.uk/) mediante [soccerdata](https://github.com/probberechts/soccerdata) |
 | xG por partido | [Understat](https://understat.com/) mediante soccerdata |
 | Rating Elo | [ClubElo](http://clubelo.com/) mediante soccerdata |
 | Resultados y calendario de la temporada en curso | [football-data.org](https://www.football-data.org/) (plan gratuito) |
 | Cuotas pre-partido (opcional) | [The Odds API](https://the-odds-api.com/) (plan gratuito) |
 
-La temporada en curso viene de football-data.org, que solo da resultados. Por eso los córners y las tarjetas solo están disponibles para temporadas ya terminadas.
+Football-Data.co.uk también publica la temporada en curso (se actualiza un par de veces por semana); football-data.org completa los resultados más recientes entre medias.
 
 ## Puesta en marcha
 
@@ -117,11 +119,13 @@ python -m pytest
 | `GET /leagues` | Ligas disponibles |
 | `GET /leagues/{id}/seasons` | Temporadas con partidos jugados |
 | `GET /leagues/{id}/season-stats?season=` | Tabla de la temporada de todos los equipos |
+| `GET /leagues/{id}/results?season=` | Todos los partidos jugados de una temporada, con el marcador al descanso, el árbitro y las estadísticas de cada equipo |
 | `GET /teams?league_id=` | Equipos |
 | `GET /teams/{id}/season-stats?season=` | Estadísticas de la temporada de un equipo |
 | `GET /matches` | Partidos, filtrables por liga, temporada, estado, equipo y fechas |
 | `GET /matches/{id}` | Un partido |
 | `GET /matches/{id}/stats` | Forma, enfrentamientos directos, xG y Elo point-in-time |
+| `GET /matches/{id}/referee-stats?referee_scope=` | Partidos anteriores del árbitro designado y de los dos equipos (comparativa de tarjetas y puntos de tarjeta) |
 | `GET /matches/{id}/predictions` | Probabilidades del modelo para un partido |
 | `GET /recommendations` | Próximas selecciones de valor (necesita cuotas) |
 | `GET /recommendations/history` | Selecciones pasadas con su resultado real |
