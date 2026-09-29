@@ -139,6 +139,14 @@ def backfill_match_history(
             match.home_goals = int(home_goals) if has_score else None
             match.away_goals = int(away_goals) if has_score else None
             match.status = MatchStatus.HISTORICAL if has_score else MatchStatus.SCHEDULED
+            home_ht_goals = _int_or_none(row.get("HTHG"))
+            away_ht_goals = _int_or_none(row.get("HTAG"))
+            if home_ht_goals is not None and away_ht_goals is not None:
+                match.home_ht_goals = home_ht_goals
+                match.away_ht_goals = away_ht_goals
+            referee = row.get("referee")
+            if isinstance(referee, str) and referee.strip():
+                match.referee = referee.strip()
             db.flush()
 
             db.query(MatchOdds).filter_by(match_id=match.id).delete()
