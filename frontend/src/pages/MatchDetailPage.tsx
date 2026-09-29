@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { getMatch, getMatchPredictions, getMatchStats, getTeamSeasonStatsOrNull } from "../api/client";
 import { PredictionsTable } from "../components/PredictionsTable";
+import { RefereePanel } from "../components/RefereePanel";
 import { SeasonStatsSummary } from "../components/SeasonStatsSummary";
 import { ErrorView, LoadingView } from "../components/StatusView";
 import { StatsPanel } from "../components/StatsPanel";
@@ -69,6 +70,11 @@ export function MatchDetailPage() {
             leagueId={match.league_id}
           />
         )}
+      </section>
+
+      <section className="detail-section">
+        <h2>Árbitro{match.referee ? `: ${match.referee}` : ""}</h2>
+        <RefereePanel match={match} />
       </section>
 
       <section className="detail-section">

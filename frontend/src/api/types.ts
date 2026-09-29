@@ -27,6 +27,35 @@ export interface Match {
   away_team: string;
   home_goals: number | null;
   away_goals: number | null;
+  home_ht_goals: number | null;
+  away_ht_goals: number | null;
+  referee: string | null;
+}
+
+export interface TeamMatchStats {
+  corners: number | null;
+  yellow_cards: number | null;
+  red_cards: number | null;
+  fouls: number | null;
+  shots: number | null;
+  shots_on_target: number | null;
+}
+
+export type RefereeScope = "season" | "all";
+
+/** GET /matches/{id}/referee-stats: partidos previos del arbitro y de cada equipo. */
+export interface MatchRefereeStats {
+  referee: string | null;
+  referee_scope: RefereeScope;
+  referee_matches: MatchResult[];
+  home_matches: MatchResult[];
+  away_matches: MatchResult[];
+}
+
+/** Partido jugado con las stats de cada equipo (GET /leagues/{id}/results). */
+export interface MatchResult extends Match {
+  home_stats: TeamMatchStats | null;
+  away_stats: TeamMatchStats | null;
 }
 
 export interface TeamForm {

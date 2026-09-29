@@ -50,6 +50,16 @@ export function formatDate(iso: string): string {
   });
 }
 
+/** 21/09/26: para listas densas de partidos. */
+export function formatShortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "2-digit" });
+}
+
+/** "2526" -> "25/26" (formato de temporada de soccerdata). */
+export function formatSeason(season: string): string {
+  return `${season.slice(0, 2)}/${season.slice(2)}`;
+}
+
 export function formatDateTime(iso: string): string {
   const date = new Date(iso);
   return date.toLocaleString("es-ES", {
