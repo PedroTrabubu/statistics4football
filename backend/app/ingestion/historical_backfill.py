@@ -19,6 +19,7 @@ from app.db.models import (
     MatchStatus,
     Season,
     Team,
+    TeamMatchStats,
 )
 from app.ingestion.odds_columns import extract_all_odds
 from app.ingestion.soccerdata_client import get_match_history_reader
@@ -53,13 +54,33 @@ def _get_or_create_team(db: Session, name: str, league_id: int) -> Team:
     return team
 
 
+def _int_or_none(value) -> int | None:
+    return int(value) if pd.notna(value) else None
+
+
+def _upsert_team_match_stats(db: Session, match_id: int, team_id: int, **fields) -> None:
+    """Crea o actualiza solo los campos pasados; no toca xg/xga (los rellena
+    xg_backfill.py por separado, ver app/ingestion/xg_backfill.py)."""
+    stats = db.query(TeamMatchStats).filter_by(match_id=match_id, team_id=team_id).one_or_none()
+    if stats is None:
+        stats = TeamMatchStats(match_id=match_id, team_id=team_id)
+        db.add(stats)
+    for key, value in fields.items():
+        setattr(stats, key, value)
+
+
 def backfill_match_history(
     db: Session, leagues: list[str], seasons: list[str] | str | None = None
 ) -> IngestionRun:
     """Descarga (o usa cache) MatchHistory para `leagues`/`seasons` y puebla la BD.
 
     Idempotente: re-ejecutar actualiza resultados/cuotas de los mismos partidos
-    en vez de duplicarlos (se busca el partido por liga+temporada+equipos+fecha).
+    en vez de duplicarlos. El partido se identifica por liga+temporada+equipos
+    (cada cruce local/visitante es unico en una temporada), la misma clave que
+    usa `fixtures_backfill.py`: no se usa la fecha porque la del CSV (hora UK o
+    solo dia) no coincide con la hora UTC que guarda football-data.org, y eso
+    duplicaba partidos de la temporada en curso. La fecha solo se fija al
+    crear el partido, para no pisar la hora UTC mas precisa de football-data.org.
     """
     run = IngestionRun(source="soccerdata.match_history", status=IngestionStatus.RUNNING)
     db.add(run)
@@ -91,7 +112,6 @@ def backfill_match_history(
                     season_id=season.id,
                     home_team_id=home_team.id,
                     away_team_id=away_team.id,
-                    date=match_datetime,
                 )
                 .one_or_none()
             )
@@ -133,6 +153,35 @@ def backfill_match_history(
                         line=odds["line"],
                         snapshot_time=match_datetime,
                     )
+                )
+
+            if has_score:
+                # Corners/tarjetas/faltas/tiros: mismo CSV de MatchHistory
+                # (columnas HC/AC, HY/AY, HR/AR, HF/AF, HS/AS, HST/AST), solo
+                # disponibles para partidos ya jugados.
+                _upsert_team_match_stats(
+                    db,
+                    match.id,
+                    home_team.id,
+                    shots=_int_or_none(row.get("HS")),
+                    shots_on_target=_int_or_none(row.get("HST")),
+                    corners_for=_int_or_none(row.get("HC")),
+                    corners_against=_int_or_none(row.get("AC")),
+                    fouls=_int_or_none(row.get("HF")),
+                    yellow_cards=_int_or_none(row.get("HY")),
+                    red_cards=_int_or_none(row.get("HR")),
+                )
+                _upsert_team_match_stats(
+                    db,
+                    match.id,
+                    away_team.id,
+                    shots=_int_or_none(row.get("AS")),
+                    shots_on_target=_int_or_none(row.get("AST")),
+                    corners_for=_int_or_none(row.get("AC")),
+                    corners_against=_int_or_none(row.get("HC")),
+                    fouls=_int_or_none(row.get("AF")),
+                    yellow_cards=_int_or_none(row.get("AY")),
+                    red_cards=_int_or_none(row.get("AR")),
                 )
 
             rows_ingested += 1

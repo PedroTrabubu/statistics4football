@@ -12,6 +12,9 @@ venv/
 
 # Data / caches
 data/*.db
+data/*.db-shm
+data/*.db-wal
+data/*.db-journal
 data/*.sqlite3
 data/soccerdata_cache/
 backend/logs/

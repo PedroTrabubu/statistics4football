@@ -49,7 +49,10 @@ def list_matches(
     if date_to is not None:
         query = query.filter(Match.date <= date_to)
 
-    matches = query.order_by(Match.date.desc()).offset(offset).limit(limit).all()
+    # Proximos partidos: los mas cercanos primero (lo util al mirar "que se
+    # juega pronto"). Historico/sin filtro: los mas recientes primero.
+    order = Match.date.asc() if status == MatchStatus.SCHEDULED else Match.date.desc()
+    matches = query.order_by(order).offset(offset).limit(limit).all()
     return [match_to_out(m) for m in matches]
 
 

@@ -10,16 +10,26 @@ from app.stats.elo import get_elo_at
 from app.stats.features import MatchFeatures, compute_match_features
 from app.stats.form import TeamForm, compute_team_form
 from app.stats.h2h import HeadToHead, compute_h2h
+from app.stats.season_stats import (
+    SplitStats,
+    TeamSeasonStats,
+    compute_league_season_stats,
+    get_team_season_stats,
+)
 from app.stats.xg import XgForm, compute_xg_form
 
 __all__ = [
     "HeadToHead",
     "MatchFeatures",
+    "SplitStats",
     "TeamForm",
+    "TeamSeasonStats",
     "XgForm",
     "compute_h2h",
+    "compute_league_season_stats",
     "compute_match_features",
     "compute_team_form",
     "compute_xg_form",
     "get_elo_at",
+    "get_team_season_stats",
 ]

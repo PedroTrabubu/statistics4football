@@ -24,6 +24,7 @@ class Settings(BaseSettings):
 
     football_data_org_api_key: str = ""
     api_football_rapidapi_key: str = ""
+    the_odds_api_key: str = ""
 
     ev_threshold: float = 0.05
 
