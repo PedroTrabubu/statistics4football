@@ -741,6 +741,30 @@ h4 {
 .season-stats-table td.low-sample {
   color: var(--faint);
 }
+.season-stats-table th.sortable button {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.season-stats-table th.sortable button:hover,
+.season-stats-table th.sorted button {
+  color: var(--primary);
+}
+.season-stats-table th.sortable button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+.season-stats-table .sort-arrow {
+  display: inline-block;
+  width: 0.7em;
+  font-size: 0.6rem;
+}
+.season-stats-table td.sorted {
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+}
 
 /* Risk badges */
 .badge {

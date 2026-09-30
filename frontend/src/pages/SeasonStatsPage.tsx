@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getLeagues, getLeagueSeasonStats, getLeagueSeasons } from "../api/client";
 import type { SplitStats, TeamSeasonStats } from "../api/types";
@@ -20,12 +20,86 @@ function splitOf(team: TeamSeasonStats, split: SplitKey): SplitStats {
   return team[split];
 }
 
+type SortDir = "asc" | "desc";
+
+interface Column {
+  key: string;
+  label: string;
+  title: string;
+  value: (s: SplitStats) => number | null;
+  render: (s: SplitStats) => ReactNode;
+  /** Se pinta en gris cuando la muestra es pequena. */
+  lowSampleAware?: boolean;
+}
+
+const pctColumn = (key: string, label: string, title: string, value: (s: SplitStats) => number | null): Column => ({
+  key,
+  label,
+  title,
+  value,
+  render: (s) => formatPct(value(s)),
+  lowSampleAware: true,
+});
+
+const avgColumn = (key: string, label: string, title: string, value: (s: SplitStats) => number | null): Column => ({
+  key,
+  label,
+  title,
+  value,
+  render: (s) => value(s)?.toFixed(1) ?? "—",
+});
+
+const COLUMNS: Column[] = [
+  {
+    key: "pj",
+    label: "PJ",
+    title: "Partidos jugados",
+    value: (s) => s.matches_played,
+    render: (s) => s.matches_played,
+    lowSampleAware: true,
+  },
+  { key: "g", label: "G", title: "Ganados", value: (s) => s.wins, render: (s) => s.wins },
+  { key: "e", label: "E", title: "Empatados", value: (s) => s.draws, render: (s) => s.draws },
+  { key: "p", label: "P", title: "Perdidos", value: (s) => s.losses, render: (s) => s.losses },
+  { key: "gf", label: "GF", title: "Goles a favor", value: (s) => s.goals_for, render: (s) => s.goals_for },
+  { key: "gc", label: "GC", title: "Goles en contra", value: (s) => s.goals_against, render: (s) => s.goals_against },
+  {
+    key: "dg",
+    label: "DG",
+    title: "Diferencia de goles",
+    value: (s) => s.goals_for - s.goals_against,
+    render: (s) => {
+      const dg = s.goals_for - s.goals_against;
+      return dg > 0 ? `+${dg}` : dg;
+    },
+  },
+  { key: "pts", label: "Pts", title: "Puntos", value: (s) => s.points, render: (s) => <strong>{s.points}</strong> },
+  pctColumn("o15", "+1.5", "% de partidos con más de 1.5 goles", (s) => s.over_1_5_pct),
+  pctColumn("o25", "+2.5", "% de partidos con más de 2.5 goles", (s) => s.over_2_5_pct),
+  pctColumn("o35", "+3.5", "% de partidos con más de 3.5 goles", (s) => s.over_3_5_pct),
+  pctColumn("btts", "Ambos anotan", "% de partidos en los que marcan los dos equipos", (s) => s.btts_pct),
+  pctColumn("cs", "Portería a 0", "% de partidos sin encajar", (s) => s.clean_sheet_pct),
+  pctColumn("fts", "No marca", "% de partidos sin marcar", (s) => s.failed_to_score_pct),
+  avgColumn("cf", "Corners a favor", "Media de corners a favor por partido", (s) => s.corners_for_avg),
+  avgColumn("cc", "Corners en contra", "Media de corners en contra por partido", (s) => s.corners_against_avg),
+];
+
+/** Orden de clasificacion: puntos, diferencia de goles y goles a favor. */
+function compareStandings(a: SplitStats, b: SplitStats): number {
+  return (
+    b.points - a.points ||
+    b.goals_for - b.goals_against - (a.goals_for - a.goals_against) ||
+    b.goals_for - a.goals_for
+  );
+}
+
 export function SeasonStatsPage() {
   const [searchParams] = useSearchParams();
   const leagueFromUrl = searchParams.get("league");
 
   const [season, setSeason] = useState<string | undefined>(undefined);
   const [split, setSplit] = useState<SplitKey>("overall");
+  const [sort, setSort] = useState<{ key: string; dir: SortDir }>({ key: "pts", dir: "desc" });
 
   const { data: leagues } = useApi(() => getLeagues(), []);
 
@@ -60,15 +134,34 @@ export function SeasonStatsPage() {
     [leagueId, effectiveSeason],
   );
 
-  const sorted = teams ? [...teams].sort((a, b) => splitOf(b, split).points - splitOf(a, split).points) : null;
+  // Posicion real en la clasificacion, independiente de la columna por la que se ordene.
+  const standings = teams ? [...teams].sort((a, b) => compareStandings(splitOf(a, split), splitOf(b, split))) : null;
+  const position = new Map(standings?.map((t, i) => [t.team_id, i + 1]));
+
+  const sortColumn = COLUMNS.find((c) => c.key === sort.key);
+  const sorted =
+    standings && sortColumn
+      ? [...standings].sort((a, b) => {
+          const va = sortColumn.value(splitOf(a, split));
+          const vb = sortColumn.value(splitOf(b, split));
+          // Sin dato siempre al final, sea cual sea la direccion.
+          if (va === null || vb === null) return va === vb ? 0 : va === null ? 1 : -1;
+          return sort.dir === "desc" ? vb - va : va - vb;
+        })
+      : standings;
+
+  // Primer clic: mayor a menor; segundo clic en la misma columna: menor a mayor.
+  function toggleSort(key: string) {
+    setSort((prev) => (prev.key === key ? { key, dir: prev.dir === "desc" ? "asc" : "desc" } : { key, dir: "desc" }));
+  }
   const noCornersYet = sorted !== null && sorted.length > 0 && sorted.every((t) => splitOf(t, split).matches_with_corners === 0);
 
   return (
     <div>
-      <h1>Estadísticas por temporada</h1>
+      <h1>Clasificación y estadísticas</h1>
       <p className="muted">
         Datos reales de partidos jugados: % over/under, ambos anotan, porterías a cero, forma local y
-        visitante.
+        visitante. Pulsa en una cabecera para ordenar por esa columna (otra vez para invertir el orden).
       </p>
 
       <LeagueSwitch leagues={leagues} value={leagueCode} onChange={(code) => code && setLeagueCode(code)} />
@@ -116,21 +209,24 @@ export function SeasonStatsPage() {
           <table className="predictions-table season-stats-table">
             <thead>
               <tr>
+                <th className="num">#</th>
                 <th>Equipo</th>
-                <th className="num">PJ</th>
-                <th className="num">G</th>
-                <th className="num">E</th>
-                <th className="num">P</th>
-                <th className="num">GF</th>
-                <th className="num">GC</th>
-                <th className="num">Pts</th>
-                <th className="num">+1.5</th>
-                <th className="num">+2.5</th>
-                <th className="num">+3.5</th>
-                <th className="num">Ambos anotan</th>
-                <th className="num">Portería a 0</th>
-                <th className="num">Corners a favor</th>
-                <th className="num">Corners en contra</th>
+                {COLUMNS.map((col) => {
+                  const active = sort.key === col.key;
+                  return (
+                    <th
+                      key={col.key}
+                      className={active ? "num sortable sorted" : "num sortable"}
+                      title={col.title}
+                      aria-sort={active ? (sort.dir === "desc" ? "descending" : "ascending") : "none"}
+                    >
+                      <button type="button" onClick={() => toggleSort(col.key)}>
+                        {col.label}
+                        <span className="sort-arrow">{active ? (sort.dir === "desc" ? "▼" : "▲") : ""}</span>
+                      </button>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
@@ -139,23 +235,18 @@ export function SeasonStatsPage() {
                 const lowSample = s.matches_played > 0 && s.matches_played < 5;
                 return (
                   <tr key={team.team_id}>
+                    <td className="num muted">{position.get(team.team_id)}</td>
                     <td>{team.team_name}</td>
-                    <td className={lowSample ? "num low-sample" : "num"}>{s.matches_played}</td>
-                    <td className="num">{s.wins}</td>
-                    <td className="num">{s.draws}</td>
-                    <td className="num">{s.losses}</td>
-                    <td className="num">{s.goals_for}</td>
-                    <td className="num">{s.goals_against}</td>
-                    <td className="num">
-                      <strong>{s.points}</strong>
-                    </td>
-                    <td className={lowSample ? "num low-sample" : "num"}>{formatPct(s.over_1_5_pct)}</td>
-                    <td className={lowSample ? "num low-sample" : "num"}>{formatPct(s.over_2_5_pct)}</td>
-                    <td className={lowSample ? "num low-sample" : "num"}>{formatPct(s.over_3_5_pct)}</td>
-                    <td className={lowSample ? "num low-sample" : "num"}>{formatPct(s.btts_pct)}</td>
-                    <td className={lowSample ? "num low-sample" : "num"}>{formatPct(s.clean_sheet_pct)}</td>
-                    <td className="num">{s.corners_for_avg?.toFixed(1) ?? "—"}</td>
-                    <td className="num">{s.corners_against_avg?.toFixed(1) ?? "—"}</td>
+                    {COLUMNS.map((col) => {
+                      const classes = ["num"];
+                      if (col.lowSampleAware && lowSample) classes.push("low-sample");
+                      if (sort.key === col.key) classes.push("sorted");
+                      return (
+                        <td key={col.key} className={classes.join(" ")}>
+                          {col.render(s)}
+                        </td>
+                      );
+                    })}
                   </tr>
                 );
               })}
@@ -166,7 +257,8 @@ export function SeasonStatsPage() {
 
       {!loading && !error && sorted && sorted.length > 0 && (
         <p className="muted small">
-          PJ = partidos jugados · G/E/P = ganados/empatados/perdidos · GF/GC = goles a favor/en contra. Con menos de
+          PJ = partidos jugados · G/E/P = ganados/empatados/perdidos · GF/GC/DG = goles a favor/en contra/diferencia · # = posición en la
+          clasificación. Con menos de
           5 partidos (en gris) los porcentajes son poco fiables — tómalos como orientativos, no como un patrón
           asentado.
         </p>
