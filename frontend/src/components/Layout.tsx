@@ -5,7 +5,7 @@ import { IconBook, IconMatches, IconMenu, IconStats, IconTarget } from "./icons"
 
 const NAV_ITEMS = [
   { to: "/", label: "Partidos", end: true, icon: IconMatches },
-  { to: "/stats", label: "Estadísticas", end: false, icon: IconStats },
+  { to: "/stats", label: "Clasificación", end: false, icon: IconStats },
   { to: "/recommendations", label: "Recomendaciones", end: false, icon: IconTarget },
   { to: "/glosario", label: "Glosario", end: false, icon: IconBook },
 ];
