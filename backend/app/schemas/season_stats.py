@@ -23,6 +23,12 @@ class SplitStatsOut(BaseModel):
     matches_with_corners: int
     corners_for_avg: float | None
     corners_against_avg: float | None
+    matches_with_ht: int
+    ht_over_0_5_pct: float | None
+    ht_win_pct: float | None
+    matches_with_cards: int
+    yellow_for_avg: float | None
+    yellow_against_avg: float | None
 
 
 class TeamSeasonStatsOut(BaseModel):
@@ -34,3 +40,5 @@ class TeamSeasonStatsOut(BaseModel):
     overall: SplitStatsOut
     home: SplitStatsOut
     away: SplitStatsOut
+    last5: SplitStatsOut
+    form: list[str]

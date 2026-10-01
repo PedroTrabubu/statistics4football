@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.db.base import Base
-from app.db.models import League, Match, MatchStatus, Season, Team
+from app.db.models import League, Match, MatchStatus, Season, Team, TeamMatchStats
 from app.stats.season_stats import compute_league_season_stats, compute_team_season_stats
 
 
@@ -171,3 +171,59 @@ def test_league_season_stats_defaults_to_latest_season(db: Session, league_and_t
     results = compute_league_season_stats(db, league.id)
 
     assert all(r.season == "2526" for r in results)
+
+
+def test_last5_and_form_use_most_recent_matches(db: Session, league_and_teams):
+    league, season, team_a, team_b, _team_c = league_and_teams
+
+    # 6 partidos: el primero (derrota 0-3) queda fuera de los ultimos 5.
+    results = [(0, 3), (1, 0), (1, 1), (2, 0), (0, 1), (3, 2)]
+    for month, (gf, ga) in enumerate(results, start=1):
+        _add_match(db, league.id, season.id, team_a, team_b, datetime(2024, month, 1), gf, ga)
+
+    stats = compute_team_season_stats(db, team_a, season)
+
+    assert stats.form == ["W", "D", "W", "L", "W"]
+    assert stats.last5.matches_played == 5
+    assert stats.last5.points == 10
+    assert stats.last5.goals_against == 4
+    assert stats.overall.matches_played == 6
+
+
+def test_half_time_stats_only_count_matches_with_ht_data(db: Session, league_and_teams):
+    league, season, team_a, team_b, _team_c = league_and_teams
+
+    m1 = _add_match(db, league.id, season.id, team_a, team_b, datetime(2024, 1, 1), 2, 1)
+    m1.home_ht_goals, m1.away_ht_goals = 1, 0  # gana al descanso, +0.5 1a parte
+    m2 = _add_match(db, league.id, season.id, team_b, team_a, datetime(2024, 2, 1), 1, 1)
+    m2.home_ht_goals, m2.away_ht_goals = 0, 0  # 0-0 al descanso
+    _add_match(db, league.id, season.id, team_a, team_b, datetime(2024, 3, 1), 3, 0)  # sin dato de descanso
+    db.flush()
+
+    stats = compute_team_season_stats(db, team_a, season)
+
+    assert stats.overall.matches_with_ht == 2
+    assert stats.overall.ht_over_0_5_pct == 50.0
+    assert stats.overall.ht_win_pct == 50.0
+
+
+def test_yellow_cards_use_opponent_row_for_against(db: Session, league_and_teams):
+    league, season, team_a, team_b, _team_c = league_and_teams
+
+    m1 = _add_match(db, league.id, season.id, team_a, team_b, datetime(2024, 1, 1), 1, 0)
+    m2 = _add_match(db, league.id, season.id, team_b, team_a, datetime(2024, 2, 1), 0, 0)
+    db.add_all(
+        [
+            TeamMatchStats(match_id=m1.id, team_id=team_a.id, yellow_cards=2),
+            TeamMatchStats(match_id=m1.id, team_id=team_b.id, yellow_cards=4),
+            TeamMatchStats(match_id=m2.id, team_id=team_a.id, yellow_cards=3),
+            # m2 sin fila del rival: no cuenta para tarjetas
+        ]
+    )
+    db.flush()
+
+    stats = compute_team_season_stats(db, team_a, season)
+
+    assert stats.overall.matches_with_cards == 1
+    assert stats.overall.yellow_for_avg == 2.0
+    assert stats.overall.yellow_against_avg == 4.0
