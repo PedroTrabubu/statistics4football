@@ -25,6 +25,25 @@ def test_over_under_2_5():
     assert resolve_selection(_match(1, 1), "over_under_2.5", "under") is True
 
 
+def test_double_chance():
+    assert resolve_selection(_match(1, 1), "double_chance", "1X") is True
+    assert resolve_selection(_match(1, 1), "double_chance", "12") is False
+    assert resolve_selection(_match(0, 2), "double_chance", "X2") is True
+    assert resolve_selection(_match(0, 2), "double_chance", "1X") is False
+
+
+def test_other_goal_lines():
+    assert resolve_selection(_match(1, 1), "over_under_1.5", "over") is True
+    assert resolve_selection(_match(1, 0), "over_under_1.5", "under") is True
+    assert resolve_selection(_match(2, 2), "over_under_3.5", "over") is True
+    assert resolve_selection(_match(2, 1), "over_under_3.5", "under") is True
+
+
+def test_team_scores():
+    assert resolve_selection(_match(1, 0), "team_scores", "home") is True
+    assert resolve_selection(_match(1, 0), "team_scores", "away") is False
+
+
 def test_btts():
     assert resolve_selection(_match(1, 1), "btts", "yes") is True
     assert resolve_selection(_match(1, 1), "btts", "no") is False

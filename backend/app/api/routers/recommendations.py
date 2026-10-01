@@ -1,8 +1,12 @@
+from typing import Literal
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.db.models import Match, MatchStatus, ModelPrediction, RiskLevel
 from app.db.session import get_db
+from app.probability.engine import MODEL_VERSION as VALUE_MODEL_VERSION
+from app.probability.pattern_model import MODEL_VERSION as PATTERN_MODEL_VERSION
 from app.probability.outcomes import realized_pnl_units, resolve_selection
 from app.schemas.prediction import (
     RecommendationHistoryBreakdown,
@@ -15,6 +19,11 @@ from app.schemas.prediction import (
 
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
 
+# "valor": Dixon-Coles + EV contra la cuota. "alta_probabilidad": modelo de
+# patrones (docs/MODELO_PATRONES.md), una seleccion como maximo por partido.
+Strategy = Literal["valor", "alta_probabilidad"]
+MODEL_VERSIONS: dict[str, str] = {"valor": VALUE_MODEL_VERSION, "alta_probabilidad": PATTERN_MODEL_VERSION}
+
 
 @router.get("", response_model=list[RecommendationOut])
 def list_recommendations(
@@ -22,6 +31,7 @@ def list_recommendations(
     market: str | None = None,
     risk_level: RiskLevel | None = None,
     min_ev: float | None = None,
+    strategy: Strategy = "valor",
     limit: int = Query(50, le=200),
     db: Session = Depends(get_db),
 ) -> list[RecommendationOut]:
@@ -35,7 +45,11 @@ def list_recommendations(
     query = (
         db.query(ModelPrediction)
         .join(Match, Match.id == ModelPrediction.match_id)
-        .filter(ModelPrediction.is_recommended.is_(True), Match.status == MatchStatus.SCHEDULED)
+        .filter(
+            ModelPrediction.is_recommended.is_(True),
+            ModelPrediction.model_version == MODEL_VERSIONS[strategy],
+            Match.status == MatchStatus.SCHEDULED,
+        )
     )
     if league_id is not None:
         query = query.filter(Match.league_id == league_id)
@@ -46,7 +60,8 @@ def list_recommendations(
     if min_ev is not None:
         query = query.filter(ModelPrediction.ev >= min_ev)
 
-    predictions = query.order_by(ModelPrediction.ev.desc()).limit(limit).all()
+    order = ModelPrediction.ev.desc() if strategy == "valor" else Match.date.asc()
+    predictions = query.order_by(order).limit(limit).all()
     return [recommendation_to_out(p) for p in predictions]
 
 
@@ -55,7 +70,13 @@ def _breakdown(key: str, rows: list[tuple[ModelPrediction, bool | None, float | 
     lost = sum(1 for _, w, _ in rows if w is False)
     pending = sum(1 for _, w, _ in rows if w is None)
     settled = won + lost
-    pnl = sum(pnl for _, _, pnl in rows if pnl is not None)
+    # ROI solo sobre selecciones con cuota real (las de "alta probabilidad"
+    # en mercados sin cuota en los datos no tienen PnL y no cuentan).
+    with_pnl = [pnl for _, _, pnl in rows if pnl is not None]
+    pnl = sum(with_pnl)
+    # Lo que el mercado esperaba acertar en esas mismas selecciones: el
+    # acierto solo es merito del modelo si lo supera.
+    market_probs = [p.prob_market_implied for p, w, _ in rows if w is not None and p.prob_market_implied is not None]
     return RecommendationHistoryBreakdown(
         key=key,
         total=len(rows),
@@ -63,8 +84,10 @@ def _breakdown(key: str, rows: list[tuple[ModelPrediction, bool | None, float | 
         lost=lost,
         pending=pending,
         hit_rate=round(100 * won / settled, 1) if settled else None,
+        market_expected_hit_rate=round(100 * sum(market_probs) / len(market_probs), 1) if market_probs else None,
+        with_odds=len(with_pnl),
         pnl_units=round(pnl, 2),
-        roi=round(100 * pnl / settled, 1) if settled else None,
+        roi=round(100 * pnl / len(with_pnl), 1) if with_pnl else None,
     )
 
 
@@ -72,6 +95,7 @@ def _breakdown(key: str, rows: list[tuple[ModelPrediction, bool | None, float | 
 def list_recommendation_history(
     league_id: int | None = None,
     market: str | None = None,
+    strategy: Strategy = "valor",
     limit: int = Query(50, le=200),
     db: Session = Depends(get_db),
 ) -> RecommendationHistoryListOut:
@@ -87,7 +111,11 @@ def list_recommendation_history(
     query = (
         db.query(ModelPrediction)
         .join(Match, Match.id == ModelPrediction.match_id)
-        .filter(ModelPrediction.is_recommended.is_(True), Match.status == MatchStatus.HISTORICAL)
+        .filter(
+            ModelPrediction.is_recommended.is_(True),
+            ModelPrediction.model_version == MODEL_VERSIONS[strategy],
+            Match.status == MatchStatus.HISTORICAL,
+        )
     )
     if league_id is not None:
         query = query.filter(Match.league_id == league_id)
@@ -102,15 +130,7 @@ def list_recommendation_history(
     ]
 
     summary_breakdown = _breakdown("total", resolved)
-    summary = RecommendationHistorySummary(
-        total=summary_breakdown.total,
-        won=summary_breakdown.won,
-        lost=summary_breakdown.lost,
-        pending=summary_breakdown.pending,
-        hit_rate=summary_breakdown.hit_rate,
-        pnl_units=summary_breakdown.pnl_units,
-        roi=summary_breakdown.roi,
-    )
+    summary = RecommendationHistorySummary(**summary_breakdown.model_dump(exclude={"key"}))
 
     by_market_keys = sorted({p.market for p, _, _ in resolved})
     by_market = [_breakdown(m, [row for row in resolved if row[0].market == m]) for m in by_market_keys]
