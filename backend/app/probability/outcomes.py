@@ -22,11 +22,24 @@ def resolve_selection(match: Match, market: str, selection: str) -> bool | None:
             return home < away
         if selection == "draw":
             return home == away
-    if market == "over_under_2.5":
+    if market == "double_chance":
+        if selection == "1X":
+            return home >= away
+        if selection == "X2":
+            return home <= away
+        if selection == "12":
+            return home != away
+    if market in ("over_under_1.5", "over_under_2.5", "over_under_3.5"):
+        line = float(market.rsplit("_", 1)[1])
         if selection == "over":
-            return total_goals > 2.5
+            return total_goals > line
         if selection == "under":
-            return total_goals < 2.5
+            return total_goals < line
+    if market == "team_scores":
+        if selection == "home":
+            return home > 0
+        if selection == "away":
+            return away > 0
     if market == "btts":
         both_scored = home > 0 and away > 0
         if selection == "yes":

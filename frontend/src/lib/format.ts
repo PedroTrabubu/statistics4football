@@ -76,6 +76,10 @@ const MARKET_LABELS: Record<string, string> = {
   "over_under_2.5": "Over/Under 2.5",
   asian_handicap: "Hándicap asiático",
   btts: "Ambos anotan",
+  double_chance: "Doble oportunidad",
+  "over_under_1.5": "Over/Under 1.5",
+  "over_under_3.5": "Over/Under 3.5",
+  team_scores: "Marca equipo",
 };
 
 export function marketLabel(market: string): string {
@@ -88,9 +92,19 @@ export function selectionLabel(market: string, selection: string, homeTeam: stri
     if (selection === "away") return awayTeam;
     if (selection === "draw") return "Empate";
   }
-  if (market === "over_under_2.5") {
-    if (selection === "over") return "Más de 2.5 goles";
-    if (selection === "under") return "Menos de 2.5 goles";
+  if (market.startsWith("over_under_")) {
+    const line = market.slice("over_under_".length);
+    if (selection === "over") return `Más de ${line} goles`;
+    if (selection === "under") return `Menos de ${line} goles`;
+  }
+  if (market === "double_chance") {
+    if (selection === "1X") return `${homeTeam} o empate`;
+    if (selection === "X2") return `Empate o ${awayTeam}`;
+    if (selection === "12") return `${homeTeam} o ${awayTeam}`;
+  }
+  if (market === "team_scores") {
+    if (selection === "home") return `Marca ${homeTeam}`;
+    if (selection === "away") return `Marca ${awayTeam}`;
   }
   if (market === "asian_handicap") {
     if (selection === "home") return `${homeTeam} (hándicap)`;

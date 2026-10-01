@@ -90,7 +90,7 @@ python scripts/refresh_odds.py         # optional: pre-match odds
 python scripts/refresh_predictions.py  # probabilities for upcoming matches
 ```
 
-Re-run `ingest_fixtures.py`, `refresh_odds.py` and `refresh_predictions.py` whenever you want the latest results. `python scripts/generate_predictions.py` runs the backtest on the last completed season.
+Re-run `ingest_fixtures.py`, `refresh_odds.py` and `refresh_predictions.py` whenever you want the latest results. `python scripts/generate_predictions.py` runs the backtest on the last completed season. `python scripts/backtest_pattern_model.py` runs the pre-registered backtest of the high-probability model (see [docs/MODELO_PATRONES.md](docs/MODELO_PATRONES.md)).
 
 ### 4. Frontend
 
@@ -127,8 +127,8 @@ python -m pytest
 | `GET /matches/{id}/stats` | Point-in-time form, head-to-head, xG and Elo |
 | `GET /matches/{id}/referee-stats?referee_scope=` | Previous matches of the appointed referee and of both teams (cards and booking points comparison) |
 | `GET /matches/{id}/predictions` | Model probabilities for a match |
-| `GET /recommendations` | Upcoming value picks (requires odds) |
-| `GET /recommendations/history` | Past picks with their real outcome |
+| `GET /recommendations?strategy=` | Upcoming picks (requires odds): `valor` (EV, default) or `alta_probabilidad` (high-probability model) |
+| `GET /recommendations/history?strategy=` | Past picks with their real outcome, what the market expected and ROI where real odds exist |
 
 ## Project structure
 
