@@ -1,0 +1,435 @@
+{
+  "congelado": "2026-10-01T13:11:04",
+  "entrenamiento_final": [
+    "2122",
+    "2223",
+    "2324",
+    "2425"
+  ],
+  "test": [
+    "2526",
+    "2627"
+  ],
+  "umbrales": {
+    "mercado": {
+      "tau": 0.6,
+      "delta": null
+    },
+    "dixon_coles": {
+      "tau": 0.7,
+      "delta": 0.01
+    },
+    "modelo": {
+      "tau": 0.62,
+      "delta": 0.03
+    },
+    "mercado_dc": {
+      "tau": 0.64,
+      "delta": 0.01
+    },
+    "patrones": {
+      "tau": 0.72,
+      "delta": 0.01
+    }
+  },
+  "validacion": {
+    "mercado": {
+      "tau": 0.6,
+      "delta": null,
+      "A": {
+        "n": 760,
+        "acierto": 86.8,
+        "prob_mercado_media": 84.6,
+        "prob_modelo_media": 84.6,
+        "margen_sobre_mercado_pp": 2.2,
+        "con_cuota": 103,
+        "roi_pct": -7.2,
+        "por_mercado": {
+          "doble_oportunidad": {
+            "n": 103,
+            "acierto": 84.5
+          },
+          "goles_1.5": {
+            "n": 73,
+            "acierto": 83.6
+          },
+          "goles_3.5": {
+            "n": 178,
+            "acierto": 84.8
+          },
+          "marca_equipo": {
+            "n": 406,
+            "acierto": 88.9
+          }
+        }
+      }
+    },
+    "dixon_coles": {
+      "tau": 0.7,
+      "delta": 0.01,
+      "A": {
+        "n": 760,
+        "acierto": 72.5,
+        "prob_mercado_media": 72.8,
+        "prob_modelo_media": 78.5,
+        "margen_sobre_mercado_pp": -0.3,
+        "con_cuota": 339,
+        "roi_pct": -5.0,
+        "por_mercado": {
+          "1x2": {
+            "n": 42,
+            "acierto": 69.0
+          },
+          "ambos_marcan": {
+            "n": 6,
+            "acierto": 33.3
+          },
+          "doble_oportunidad": {
+            "n": 247,
+            "acierto": 77.3
+          },
+          "goles_1.5": {
+            "n": 92,
+            "acierto": 76.1
+          },
+          "goles_2.5": {
+            "n": 50,
+            "acierto": 58.0
+          },
+          "goles_3.5": {
+            "n": 215,
+            "acierto": 70.2
+          },
+          "marca_equipo": {
+            "n": 108,
+            "acierto": 73.1
+          }
+        }
+      },
+      "B": {
+        "n": 636,
+        "acierto": 71.2,
+        "prob_mercado_media": 70.9,
+        "prob_modelo_media": 77.8,
+        "margen_sobre_mercado_pp": 0.3,
+        "con_cuota": 250,
+        "roi_pct": -4.5,
+        "por_mercado": {
+          "1x2": {
+            "n": 42,
+            "acierto": 69.0
+          },
+          "ambos_marcan": {
+            "n": 6,
+            "acierto": 33.3
+          },
+          "doble_oportunidad": {
+            "n": 159,
+            "acierto": 75.5
+          },
+          "goles_1.5": {
+            "n": 70,
+            "acierto": 75.7
+          },
+          "goles_2.5": {
+            "n": 49,
+            "acierto": 57.1
+          },
+          "goles_3.5": {
+            "n": 211,
+            "acierto": 70.1
+          },
+          "marca_equipo": {
+            "n": 99,
+            "acierto": 73.7
+          }
+        }
+      }
+    },
+    "modelo": {
+      "tau": 0.62,
+      "delta": 0.03,
+      "A": {
+        "n": 760,
+        "acierto": 72.0,
+        "prob_mercado_media": 70.8,
+        "prob_modelo_media": 74.0,
+        "margen_sobre_mercado_pp": 1.2,
+        "con_cuota": 444,
+        "roi_pct": -2.5,
+        "por_mercado": {
+          "1x2": {
+            "n": 116,
+            "acierto": 65.5
+          },
+          "ambos_marcan": {
+            "n": 108,
+            "acierto": 57.4
+          },
+          "doble_oportunidad": {
+            "n": 163,
+            "acierto": 74.8
+          },
+          "goles_1.5": {
+            "n": 9,
+            "acierto": 88.9
+          },
+          "goles_2.5": {
+            "n": 165,
+            "acierto": 72.1
+          },
+          "goles_3.5": {
+            "n": 27,
+            "acierto": 88.9
+          },
+          "marca_equipo": {
+            "n": 172,
+            "acierto": 79.1
+          }
+        }
+      },
+      "B": {
+        "n": 413,
+        "acierto": 69.5,
+        "prob_mercado_media": 69.0,
+        "prob_modelo_media": 73.0,
+        "margen_sobre_mercado_pp": 0.5,
+        "con_cuota": 236,
+        "roi_pct": -0.7,
+        "por_mercado": {
+          "1x2": {
+            "n": 88,
+            "acierto": 69.3
+          },
+          "ambos_marcan": {
+            "n": 103,
+            "acierto": 57.3
+          },
+          "doble_oportunidad": {
+            "n": 32,
+            "acierto": 78.1
+          },
+          "goles_1.5": {
+            "n": 1,
+            "acierto": 100.0
+          },
+          "goles_2.5": {
+            "n": 116,
+            "acierto": 72.4
+          },
+          "goles_3.5": {
+            "n": 14,
+            "acierto": 78.6
+          },
+          "marca_equipo": {
+            "n": 59,
+            "acierto": 78.0
+          }
+        }
+      }
+    },
+    "mercado_dc": {
+      "tau": 0.64,
+      "delta": 0.01,
+      "A": {
+        "n": 760,
+        "acierto": 72.0,
+        "prob_mercado_media": 72.0,
+        "prob_modelo_media": 74.8,
+        "margen_sobre_mercado_pp": -0.0,
+        "con_cuota": 524,
+        "roi_pct": -4.9,
+        "por_mercado": {
+          "1x2": {
+            "n": 116,
+            "acierto": 69.8
+          },
+          "ambos_marcan": {
+            "n": 60,
+            "acierto": 61.7
+          },
+          "doble_oportunidad": {
+            "n": 224,
+            "acierto": 75.4
+          },
+          "goles_1.5": {
+            "n": 23,
+            "acierto": 82.6
+          },
+          "goles_2.5": {
+            "n": 184,
+            "acierto": 65.8
+          },
+          "goles_3.5": {
+            "n": 4,
+            "acierto": 50.0
+          },
+          "marca_equipo": {
+            "n": 149,
+            "acierto": 79.2
+          }
+        }
+      },
+      "B": {
+        "n": 729,
+        "acierto": 71.6,
+        "prob_mercado_media": 72.0,
+        "prob_modelo_media": 74.8,
+        "margen_sobre_mercado_pp": -0.4,
+        "con_cuota": 508,
+        "roi_pct": -5.5,
+        "por_mercado": {
+          "1x2": {
+            "n": 116,
+            "acierto": 69.8
+          },
+          "ambos_marcan": {
+            "n": 60,
+            "acierto": 61.7
+          },
+          "doble_oportunidad": {
+            "n": 208,
+            "acierto": 74.0
+          },
+          "goles_1.5": {
+            "n": 20,
+            "acierto": 85.0
+          },
+          "goles_2.5": {
+            "n": 184,
+            "acierto": 65.8
+          },
+          "goles_3.5": {
+            "n": 4,
+            "acierto": 50.0
+          },
+          "marca_equipo": {
+            "n": 137,
+            "acierto": 80.3
+          }
+        }
+      }
+    },
+    "patrones": {
+      "tau": 0.72,
+      "delta": 0.01,
+      "A": {
+        "n": 760,
+        "acierto": 72.0,
+        "prob_mercado_media": 71.9,
+        "prob_modelo_media": 80.0,
+        "margen_sobre_mercado_pp": 0.1,
+        "con_cuota": 248,
+        "roi_pct": -6.2,
+        "por_mercado": {
+          "1x2": {
+            "n": 13,
+            "acierto": 53.8
+          },
+          "doble_oportunidad": {
+            "n": 234,
+            "acierto": 75.6
+          },
+          "goles_1.5": {
+            "n": 103,
+            "acierto": 73.8
+          },
+          "goles_2.5": {
+            "n": 1,
+            "acierto": 0.0
+          },
+          "goles_3.5": {
+            "n": 41,
+            "acierto": 61.0
+          },
+          "marca_equipo": {
+            "n": 368,
+            "acierto": 71.2
+          }
+        }
+      },
+      "B": {
+        "n": 645,
+        "acierto": 69.6,
+        "prob_mercado_media": 69.7,
+        "prob_modelo_media": 79.5,
+        "margen_sobre_mercado_pp": -0.0,
+        "con_cuota": 180,
+        "roi_pct": -10.4,
+        "por_mercado": {
+          "1x2": {
+            "n": 10,
+            "acierto": 50.0
+          },
+          "doble_oportunidad": {
+            "n": 169,
+            "acierto": 69.2
+          },
+          "goles_1.5": {
+            "n": 79,
+            "acierto": 77.2
+          },
+          "goles_2.5": {
+            "n": 1,
+            "acierto": 0.0
+          },
+          "goles_3.5": {
+            "n": 41,
+            "acierto": 61.0
+          },
+          "marca_equipo": {
+            "n": 345,
+            "acierto": 69.9
+          }
+        }
+      }
+    },
+    "log_loss": {
+      "mercado": {
+        "1x2": 0.5632,
+        "doble_oportunidad": 0.5632,
+        "goles_1.5": 0.5246,
+        "goles_2.5": 0.6716,
+        "goles_3.5": 0.5807,
+        "ambos_marcan": 0.6875,
+        "marca_equipo": 0.5254
+      },
+      "dixon_coles": {
+        "1x2": 0.5735,
+        "doble_oportunidad": 0.5735,
+        "goles_1.5": 0.5335,
+        "goles_2.5": 0.6776,
+        "goles_3.5": 0.5889,
+        "ambos_marcan": 0.6989,
+        "marca_equipo": 0.5352
+      },
+      "modelo": {
+        "1x2": 0.564,
+        "doble_oportunidad": 0.564,
+        "goles_1.5": 0.5246,
+        "goles_2.5": 0.6746,
+        "goles_3.5": 0.5883,
+        "ambos_marcan": 0.6863,
+        "marca_equipo": 0.5246
+      },
+      "mercado_dc": {
+        "1x2": 0.5637,
+        "doble_oportunidad": 0.5637,
+        "goles_1.5": 0.5247,
+        "goles_2.5": 0.6748,
+        "goles_3.5": 0.5842,
+        "ambos_marcan": 0.6861,
+        "marca_equipo": 0.5245
+      },
+      "patrones": {
+        "1x2": 0.5813,
+        "doble_oportunidad": 0.5813,
+        "goles_1.5": 0.5348,
+        "goles_2.5": 0.6839,
+        "goles_3.5": 0.6047,
+        "ambos_marcan": 0.6843,
+        "marca_equipo": 0.5434
+      }
+    }
+  }
+}
