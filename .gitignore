@@ -17,6 +17,7 @@ data/*.db-wal
 data/*.db-journal
 data/*.sqlite3
 data/soccerdata_cache/
+data/model_cache/
 backend/logs/
 
 # Frontend
