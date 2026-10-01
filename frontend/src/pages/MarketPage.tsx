@@ -144,6 +144,8 @@ function MarketView({
   const leagueRate = market.matchLevel && leagueViews ? hitRate(leagueViews, option) : null;
 
   const seasonLabel = effectiveSeason ? formatSeason(effectiveSeason) : "esta temporada";
+  // Partidos jugados sin arbitro en ninguna fuente: no cuentan para nadie.
+  const withoutReferee = mode === "referee" && results ? results.filter((r) => !r.referee).length : 0;
   const hasMissing = rows.some((r) => r.overall.missing > 0);
   const groupNoun = mode === "team" ? "equipo" : "árbitro";
 
@@ -270,6 +272,14 @@ function MarketView({
       )}
 
       {market.note && <p className="small muted intro-note">{market.note}</p>}
+
+      {!loading && !error && rows.length > 0 && withoutReferee > 0 && (
+        <p className="small muted intro-note">
+          {withoutReferee === 1 ? "1 partido" : `${withoutReferee} partidos`} de {seasonLabel} no{" "}
+          {withoutReferee === 1 ? "tiene" : "tienen"} árbitro en las fuentes de datos y no{" "}
+          {withoutReferee === 1 ? "cuenta" : "cuentan"} para ningún árbitro: sus cifras pueden estar incompletas.
+        </p>
+      )}
 
       {loading && <LoadingView label="Cargando partidos..." />}
       {error && <ErrorView message={`No se pudo conectar con la API: ${error}`} />}
