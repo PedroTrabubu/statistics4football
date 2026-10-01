@@ -173,11 +173,15 @@ export interface Recommendation {
   selection: string;
   prob_market_implied: number;
   prob_model: number;
-  ev: number;
+  /** null en mercados sin cuota real (estrategia "alta probabilidad"). */
+  ev: number | null;
   confidence: number;
   risk_level: RiskLevel;
   matches_used: number;
 }
+
+/** "valor": EV contra la cuota (Dixon-Coles). "alta_probabilidad": modelo de patrones. */
+export type RecommendationStrategy = "valor" | "alta_probabilidad";
 
 export type RecommendationOutcome = "won" | "lost" | "pending";
 
@@ -191,6 +195,7 @@ export interface RecommendationHistoryItem {
   away_goals: number;
   market: string;
   selection: string;
+  prob_market_implied: number | null;
   prob_model: number;
   ev: number | null;
   matches_used: number;
@@ -205,6 +210,10 @@ export interface RecommendationHistoryBreakdown {
   lost: number;
   pending: number;
   hit_rate: number | null;
+  /** Probabilidad media que el mercado daba a esas mismas selecciones. */
+  market_expected_hit_rate: number | null;
+  /** Selecciones con cuota real: el ROI solo se calcula sobre estas. */
+  with_odds: number;
   pnl_units: number;
   roi: number | null;
 }
@@ -215,6 +224,10 @@ export interface RecommendationHistorySummary {
   lost: number;
   pending: number;
   hit_rate: number | null;
+  /** Probabilidad media que el mercado daba a esas mismas selecciones. */
+  market_expected_hit_rate: number | null;
+  /** Selecciones con cuota real: el ROI solo se calcula sobre estas. */
+  with_odds: number;
   pnl_units: number;
   roi: number | null;
 }

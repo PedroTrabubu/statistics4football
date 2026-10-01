@@ -64,6 +64,7 @@ class RecommendationHistoryOut(BaseModel):
     away_goals: int
     market: str
     selection: str
+    prob_market_implied: float | None
     prob_model: float
     ev: float | None
     matches_used: int
@@ -85,6 +86,10 @@ class RecommendationHistoryBreakdown(BaseModel):
     lost: int
     pending: int
     hit_rate: float | None
+    # Media de la probabilidad de mercado de las selecciones resueltas.
+    market_expected_hit_rate: float | None
+    # Selecciones con cuota real: el ROI se calcula solo sobre estas.
+    with_odds: int
     pnl_units: float
     roi: float | None
 
@@ -95,6 +100,10 @@ class RecommendationHistorySummary(BaseModel):
     lost: int
     pending: int
     hit_rate: float | None
+    # Media de la probabilidad de mercado de las selecciones resueltas.
+    market_expected_hit_rate: float | None
+    # Selecciones con cuota real: el ROI se calcula solo sobre estas.
+    with_odds: int
     pnl_units: float
     roi: float | None
 
@@ -118,6 +127,7 @@ def recommendation_history_to_out(pred: ModelPrediction, won: bool | None, pnl_u
         away_goals=match.away_goals or 0,
         market=pred.market,
         selection=pred.selection,
+        prob_market_implied=pred.prob_market_implied,
         prob_model=pred.prob_model,
         ev=pred.ev,
         matches_used=pred.matches_used,

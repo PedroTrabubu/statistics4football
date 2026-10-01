@@ -8,6 +8,7 @@ import type {
   Prediction,
   Recommendation,
   RecommendationHistoryResponse,
+  RecommendationStrategy,
   RefereeScope,
   RiskLevel,
   Team,
@@ -117,6 +118,7 @@ export interface RecommendationFilters {
   market?: string;
   risk_level?: RiskLevel;
   min_ev?: number;
+  strategy?: RecommendationStrategy;
   limit?: number;
 }
 
@@ -127,6 +129,7 @@ export function getRecommendations(filters: RecommendationFilters = {}): Promise
 export interface RecommendationHistoryFilters {
   league_id?: number;
   market?: string;
+  strategy?: RecommendationStrategy;
   limit?: number;
 }
 
