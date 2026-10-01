@@ -140,7 +140,15 @@ export interface SplitStats {
   matches_with_corners: number;
   corners_for_avg: number | null;
   corners_against_avg: number | null;
+  matches_with_ht: number;
+  ht_over_0_5_pct: number | null;
+  ht_win_pct: number | null;
+  matches_with_cards: number;
+  yellow_for_avg: number | null;
+  yellow_against_avg: number | null;
 }
+
+export type FormResult = "W" | "D" | "L";
 
 export interface TeamSeasonStats {
   team_id: number;
@@ -149,6 +157,10 @@ export interface TeamSeasonStats {
   overall: SplitStats;
   home: SplitStats;
   away: SplitStats;
+  /** Ultimos 5 partidos de la temporada (local o visitante). */
+  last5: SplitStats;
+  /** Resultados de esos partidos, del mas antiguo al mas reciente. */
+  form: FormResult[];
 }
 
 export interface Recommendation {

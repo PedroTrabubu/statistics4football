@@ -765,6 +765,57 @@ h4 {
 .season-stats-table td.sorted {
   background: color-mix(in srgb, var(--primary) 7%, transparent);
 }
+.season-stats-table td.sorted[style] {
+  box-shadow: inset 2px 0 0 var(--primary), inset -2px 0 0 var(--primary);
+}
+.season-stats-table .group-row th {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.season-stats-table th.group-head {
+  text-align: center;
+  color: var(--ink);
+  border-left: 1px solid var(--border);
+}
+.season-stats-table .group-start {
+  border-left: 1px solid var(--border);
+}
+
+.filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.86rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.form-dots {
+  display: inline-flex;
+  gap: 0.2rem;
+}
+.form-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+.form-W {
+  background: var(--green-bg);
+  color: var(--green);
+}
+.form-D {
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+.form-L {
+  background: var(--red-bg);
+  color: var(--red);
+}
 
 /* Risk badges */
 .badge {
