@@ -39,6 +39,16 @@ class SplitStats:
     corners_for: int = 0
     corners_against: int = 0
 
+    # Descanso y tarjetas: mismo criterio que los corners, se promedian solo
+    # sobre los partidos que traen ese dato.
+    matches_with_ht: int = 0
+    ht_over_0_5: int = 0
+    ht_wins: int = 0
+
+    matches_with_cards: int = 0
+    yellow_for: int = 0
+    yellow_against: int = 0
+
     @property
     def points(self) -> int:
         return self.wins * 3 + self.draws
@@ -97,6 +107,26 @@ class SplitStats:
         )
 
 
+    @property
+    def ht_over_0_5_pct(self) -> float | None:
+        return None if self.matches_with_ht == 0 else round(100 * self.ht_over_0_5 / self.matches_with_ht, 1)
+
+    @property
+    def ht_win_pct(self) -> float | None:
+        return None if self.matches_with_ht == 0 else round(100 * self.ht_wins / self.matches_with_ht, 1)
+
+    @property
+    def yellow_for_avg(self) -> float | None:
+        return None if self.matches_with_cards == 0 else round(self.yellow_for / self.matches_with_cards, 2)
+
+    @property
+    def yellow_against_avg(self) -> float | None:
+        return None if self.matches_with_cards == 0 else round(self.yellow_against / self.matches_with_cards, 2)
+
+
+RECENT_MATCHES = 5
+
+
 @dataclass
 class TeamSeasonStats:
     team_id: int
@@ -105,6 +135,10 @@ class TeamSeasonStats:
     overall: SplitStats = field(default_factory=SplitStats)
     home: SplitStats = field(default_factory=SplitStats)
     away: SplitStats = field(default_factory=SplitStats)
+    # Ultimos RECENT_MATCHES partidos de la temporada (local o visitante).
+    last5: SplitStats = field(default_factory=SplitStats)
+    # Resultados de esos partidos, del mas antiguo al mas reciente: "W"/"D"/"L".
+    form: list[str] = field(default_factory=list)
 
 
 def _add_match(split: SplitStats, goals_for: int, goals_against: int) -> None:
@@ -140,6 +174,26 @@ def _add_corners(split: SplitStats, corners_for: int, corners_against: int) -> N
     split.corners_against += corners_against
 
 
+def _add_half_time(split: SplitStats, ht_for: int, ht_against: int) -> None:
+    split.matches_with_ht += 1
+    if ht_for + ht_against > 0:
+        split.ht_over_0_5 += 1
+    if ht_for > ht_against:
+        split.ht_wins += 1
+
+
+def _add_cards(split: SplitStats, yellow_for: int, yellow_against: int) -> None:
+    split.matches_with_cards += 1
+    split.yellow_for += yellow_for
+    split.yellow_against += yellow_against
+
+
+def _result_letter(goals_for: int, goals_against: int) -> str:
+    if goals_for > goals_against:
+        return "W"
+    return "D" if goals_for == goals_against else "L"
+
+
 def compute_team_season_stats(db: Session, team: Team, season: Season) -> TeamSeasonStats:
     matches = (
         db.query(Match)
@@ -151,31 +205,50 @@ def compute_team_season_stats(db: Session, team: Team, season: Season) -> TeamSe
         .all()
     )
 
+    matches = sorted(
+        (m for m in matches if m.home_goals is not None and m.away_goals is not None),
+        key=lambda m: m.date,
+    )
+    recent_ids = {m.id for m in matches[-RECENT_MATCHES:]}
+
+    # Filas de ambos equipos: las tarjetas en contra salen de la fila del rival.
     match_ids = [m.id for m in matches]
-    corners_by_match: dict[int, TeamMatchStats] = {
-        row.match_id: row
-        for row in db.query(TeamMatchStats).filter(
-            TeamMatchStats.team_id == team.id,
-            TeamMatchStats.match_id.in_(match_ids),
-        )
+    rows_by_match: dict[tuple[int, int], TeamMatchStats] = {
+        (row.match_id, row.team_id): row
+        for row in db.query(TeamMatchStats).filter(TeamMatchStats.match_id.in_(match_ids))
     }
 
     stats = TeamSeasonStats(team_id=team.id, team_name=team.name, season=season.name)
     for match in matches:
-        if match.home_goals is None or match.away_goals is None:
-            continue
         is_home = match.home_team_id == team.id
         goals_for = match.home_goals if is_home else match.away_goals
         goals_against = match.away_goals if is_home else match.home_goals
+        opponent_id = match.away_team_id if is_home else match.home_team_id
 
-        _add_match(stats.overall, goals_for, goals_against)
-        split = stats.home if is_home else stats.away
-        _add_match(split, goals_for, goals_against)
+        splits = [stats.overall, stats.home if is_home else stats.away]
+        if match.id in recent_ids:
+            splits.append(stats.last5)
+            stats.form.append(_result_letter(goals_for, goals_against))
 
-        team_stats = corners_by_match.get(match.id)
-        if team_stats is not None and team_stats.corners_for is not None:
-            _add_corners(stats.overall, team_stats.corners_for, team_stats.corners_against or 0)
-            _add_corners(split, team_stats.corners_for, team_stats.corners_against or 0)
+        own = rows_by_match.get((match.id, team.id))
+        opponent = rows_by_match.get((match.id, opponent_id))
+        has_ht = match.home_ht_goals is not None and match.away_ht_goals is not None
+
+        for split in splits:
+            _add_match(split, goals_for, goals_against)
+            if own is not None and own.corners_for is not None:
+                _add_corners(split, own.corners_for, own.corners_against or 0)
+            if has_ht:
+                ht_for = match.home_ht_goals if is_home else match.away_ht_goals
+                ht_against = match.away_ht_goals if is_home else match.home_ht_goals
+                _add_half_time(split, ht_for, ht_against)
+            if (
+                own is not None
+                and opponent is not None
+                and own.yellow_cards is not None
+                and opponent.yellow_cards is not None
+            ):
+                _add_cards(split, own.yellow_cards, opponent.yellow_cards)
 
     return stats
 
