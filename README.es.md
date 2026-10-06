@@ -90,7 +90,7 @@ python scripts/refresh_odds.py         # opcional: cuotas pre-partido
 python scripts/refresh_predictions.py  # probabilidades de los próximos partidos
 ```
 
-Vuelve a ejecutar `ingest_fixtures.py`, `refresh_odds.py` y `refresh_predictions.py` cuando quieras los últimos resultados. `python scripts/generate_predictions.py` ejecuta el backtest sobre la última temporada terminada. `python scripts/backtest_pattern_model.py` ejecuta el backtest pre-registrado del modelo de alta probabilidad (ver [docs/MODELO_PATRONES.md](docs/MODELO_PATRONES.md)).
+Vuelve a ejecutar `ingest_fixtures.py`, `refresh_odds.py` y `refresh_predictions.py` cuando quieras los últimos resultados. `python scripts/generate_predictions.py` ejecuta el backtest sobre la última temporada terminada. `python scripts/refresh_picks.py` genera las combinadas de la próxima jornada y `python scripts/backtest_picks.py` ejecuta su backtest pre-registrado (ver [docs/PICKS_PROTOCOLO.md](docs/PICKS_PROTOCOLO.md)). `python scripts/backtest_pattern_model.py` ejecuta el backtest pre-registrado del modelo de alta probabilidad (ver [docs/MODELO_PATRONES.md](docs/MODELO_PATRONES.md)).
 
 ### 4. Frontend
 
@@ -127,6 +127,8 @@ python -m pytest
 | `GET /matches/{id}/stats` | Forma, enfrentamientos directos, xG y Elo point-in-time |
 | `GET /matches/{id}/referee-stats?referee_scope=` | Partidos anteriores del árbitro designado y de los dos equipos (comparativa de tarjetas y puntos de tarjeta) |
 | `GET /matches/{id}/predictions` | Probabilidades del modelo para un partido |
+| `GET /picks?league=` | Combinadas de la próxima jornada: cuatro niveles de cuota y una muy probable del mismo partido por partido |
+| `GET /picks/history?league=&kind=` | Combinadas pasadas con su resultado real y la probabilidad que prometía el modelo |
 | `GET /recommendations?strategy=` | Próximas selecciones (necesita cuotas): `valor` (EV, por defecto) o `alta_probabilidad` (modelo de alta probabilidad) |
 | `GET /recommendations/history?strategy=` | Selecciones pasadas con su resultado real, lo que esperaba el mercado y el ROI donde hay cuota real |
 

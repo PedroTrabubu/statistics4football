@@ -90,7 +90,7 @@ python scripts/refresh_odds.py         # optional: pre-match odds
 python scripts/refresh_predictions.py  # probabilities for upcoming matches
 ```
 
-Re-run `ingest_fixtures.py`, `refresh_odds.py` and `refresh_predictions.py` whenever you want the latest results. `python scripts/generate_predictions.py` runs the backtest on the last completed season. `python scripts/backtest_pattern_model.py` runs the pre-registered backtest of the high-probability model (see [docs/MODELO_PATRONES.md](docs/MODELO_PATRONES.md)).
+Re-run `ingest_fixtures.py`, `refresh_odds.py` and `refresh_predictions.py` whenever you want the latest results. `python scripts/generate_predictions.py` runs the backtest on the last completed season. `python scripts/refresh_picks.py` builds the accumulators for the next matchday and `python scripts/backtest_picks.py` runs their pre-registered backtest (see [docs/PICKS_PROTOCOLO.md](docs/PICKS_PROTOCOLO.md)). `python scripts/backtest_pattern_model.py` runs the pre-registered backtest of the high-probability model (see [docs/MODELO_PATRONES.md](docs/MODELO_PATRONES.md)).
 
 ### 4. Frontend
 
@@ -127,6 +127,8 @@ python -m pytest
 | `GET /matches/{id}/stats` | Point-in-time form, head-to-head, xG and Elo |
 | `GET /matches/{id}/referee-stats?referee_scope=` | Previous matches of the appointed referee and of both teams (cards and booking points comparison) |
 | `GET /matches/{id}/predictions` | Model probabilities for a match |
+| `GET /picks?league=` | Accumulators for the next matchday: four odds tiers plus a likely same-match combo per match |
+| `GET /picks/history?league=&kind=` | Past accumulators with their real outcome and the probability the model promised |
 | `GET /recommendations?strategy=` | Upcoming picks (requires odds): `valor` (EV, default) or `alta_probabilidad` (high-probability model) |
 | `GET /recommendations/history?strategy=` | Past picks with their real outcome, what the market expected and ROI where real odds exist |
 
