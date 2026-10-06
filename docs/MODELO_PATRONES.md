@@ -130,3 +130,23 @@ Como referencia, las recomendaciones por EV que había antes acertaban un 30% en
   pre-partido (`scripts/refresh_odds.py`).
 - Para reentrenar con más temporadas hay que repetir el protocolo completo (build, dev, test) con una nueva
   temporada de test que el modelo no haya visto.
+
+## Revisión con validación cruzada temporal (1 de octubre de 2026)
+
+Para comprobar si el margen de la estrategia B se repite fuera del test, se evaluaron 22/23, 23/24 y 24/25,
+entrenando cada vez solo con las temporadas anteriores, con τ = 0.62 y δ = 0.03 fijos. Script:
+`scripts/experiments_patterns.py`.
+
+| Fuentes | B: selecciones | B: acierto | B: el mercado esperaba | B: margen | B: ROI con cuota real | Log-loss |
+|---|---:|---:|---:|---:|---:|---:|
+| **Modelo actual** (mercado, Dixon-Coles, patrones) | 1009 | 68.7% | 68.7% | **+0.0 pp** | −4.4% (475) | 0.5906 |
+| + probabilidades de Pinnacle | 1072 | 69.4% | 68.6% | +0.8 pp | −3.5% (545) | 0.5906 |
+| Solo Pinnacle recalibrado | 350 | 63.7% | 66.8% | −3.0 pp | −9.5% (220) | 0.5887 |
+| Solo mercado medio recalibrado | 371 | 63.1% | 66.3% | −3.2 pp | −9.1% (218) | 0.5890 |
+
+**Conclusión.**
+- El margen de +6.2 puntos del test **no se repite** en las tres temporadas anteriores, donde es 0. Fue suerte de
+  ese periodo, no una ventaja del modelo.
+- La estrategia acierta alrededor de un 69% porque elige selecciones que el mercado ya da como probables.
+- Ninguna alternativa da un margen apreciable.
+- Pinnacle es la probabilidad más precisa (mejor log-loss), pero tampoco produce margen al elegir.
