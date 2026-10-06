@@ -66,9 +66,9 @@ export function RecommendationsPage() {
           <>
             <strong>Alta probabilidad:</strong> como máximo una selección por partido, cuando el modelo le da al menos
             un 62% y al menos 3 puntos más que el mercado. Combina las cuotas pre-partido, Dixon-Coles y los patrones
-            de cada equipo. En el backtest fuera de muestra (25/26 y 26/27) acertó un 74.8% cuando el mercado esperaba
-            un 68.5%. Los patrones por sí solos no aportaron información nueva: la ventaja, si existe, es pequeña y
-            aún no está demostrada.
+            de cada equipo. En 25/26 y 26/27 acertó un 74.8% cuando el mercado esperaba un 68.5%, pero en las tres
+            temporadas anteriores (22/23–24/25) acertó un 68.7%, exactamente lo que esperaba el mercado. Acierta mucho
+            porque elige selecciones probables, no porque sepa más que las casas.
           </>
         ) : (
           <>
