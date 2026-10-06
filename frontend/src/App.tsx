@@ -4,6 +4,7 @@ import { GlossaryPage } from "./pages/GlossaryPage";
 import { MarketPage, RefereePage } from "./pages/MarketPage";
 import { MatchDetailPage } from "./pages/MatchDetailPage";
 import { MatchesPage } from "./pages/MatchesPage";
+import { MyBetsPage } from "./pages/MyBetsPage";
 import { PicksPage } from "./pages/PicksPage";
 import { RecommendationsPage } from "./pages/RecommendationsPage";
 import { SeasonStatsPage } from "./pages/SeasonStatsPage";
@@ -20,6 +21,7 @@ function App() {
         <Route path="arbitros" element={<RefereePage />} />
         <Route path="picks" element={<PicksPage />} />
         <Route path="recommendations" element={<RecommendationsPage />} />
+        <Route path="mis-apuestas" element={<MyBetsPage />} />
         <Route path="glosario" element={<GlossaryPage />} />
       </Route>
     </Routes>

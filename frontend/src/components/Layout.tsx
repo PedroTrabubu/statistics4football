@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { MARKET_GROUPS, SIDEBAR_MARKETS, findMarket } from "../lib/markets";
-import { IconBook, IconMatches, IconMenu, IconStats, IconTarget, IconTicket } from "./icons";
+import { IconBook, IconMatches, IconMenu, IconStats, IconTarget, IconTicket, IconWallet } from "./icons";
 
 const NAV_ITEMS = [
   { to: "/", label: "Partidos", end: true, icon: IconMatches },
   { to: "/stats", label: "Clasificación", end: false, icon: IconStats },
   { to: "/picks", label: "Picks", end: false, icon: IconTicket },
   { to: "/recommendations", label: "Recomendaciones", end: false, icon: IconTarget },
+  { to: "/mis-apuestas", label: "Mis apuestas", end: false, icon: IconWallet },
   { to: "/glosario", label: "Glosario", end: false, icon: IconBook },
 ];
 
