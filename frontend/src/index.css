@@ -1258,3 +1258,139 @@ h4 {
     min-width: 0;
   }
 }
+
+/* Picks */
+.picks-heading {
+  margin: 1.8rem 0 0.8rem;
+}
+.picks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+.picks-grid-small {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+}
+.picks-window {
+  margin: 0 0 0.3rem;
+}
+.pick-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--primary);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 0.9rem 1rem;
+}
+.pick-card-media {
+  border-top-color: var(--accent);
+}
+.pick-card-alta {
+  border-top-color: var(--amber);
+}
+.pick-card-bomba {
+  border-top-color: var(--red);
+}
+.pick-card-mismo_partido {
+  border-top-color: var(--faint);
+}
+.pick-card-empty {
+  border-top-color: var(--border);
+}
+.pick-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.pick-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+.pick-card-header p {
+  margin: 0.15rem 0 0;
+}
+.pick-card-odds {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+}
+.pick-card-odds-value {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.pick-card-prob {
+  margin: 0.6rem 0 0.5rem;
+  font-size: 0.9rem;
+}
+.pick-legs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pick-leg {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.45rem 0 0.45rem 0.55rem;
+  border-top: 1px solid var(--border);
+  border-left: 3px solid transparent;
+}
+.pick-leg-won {
+  border-left-color: var(--green);
+}
+.pick-leg-lost {
+  border-left-color: var(--red);
+}
+.pick-leg-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.pick-leg-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.pick-leg-match {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.pick-leg-numbers {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.pick-leg-prob {
+  font-weight: 700;
+}
+.pick-leg-odds {
+  color: var(--muted);
+}
+.odds-tag {
+  display: inline-block;
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: help;
+}
+.odds-tag-real,
+.odds-tag-derivada {
+  background: var(--green-bg);
+  color: var(--green);
+}
+.odds-tag-estimada {
+  background: var(--amber-bg);
+  color: var(--amber);
+}

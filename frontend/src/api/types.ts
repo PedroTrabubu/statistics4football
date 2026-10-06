@@ -237,3 +237,60 @@ export interface RecommendationHistoryResponse {
   by_market: RecommendationHistoryBreakdown[];
   items: RecommendationHistoryItem[];
 }
+
+/** Picks (combinadas). Ver docs/PICKS_PROTOCOLO.md. */
+export type PickOddsKind = "real" | "derivada" | "estimada";
+export type PickKind = "segura" | "fiable" | "media" | "alta" | "bomba" | "mismo_partido";
+
+export interface PickLeg {
+  match_id: number;
+  date: string;
+  league_code: string;
+  home_team: string;
+  away_team: string;
+  market: string;
+  selection: string;
+  line: number | null;
+  family: string;
+  prob: number;
+  odds: number;
+  odds_kind: PickOddsKind;
+  outcome: RecommendationOutcome;
+  /** Dato real "local-visitante" con el que se resuelve (goles, córners o amarillas). */
+  actual: string | null;
+}
+
+export interface PickCombo {
+  id: number;
+  source: "backtest" | "live";
+  window: string;
+  scope: string;
+  kind: PickKind;
+  prob: number;
+  odds: number;
+  odds_kind: "real" | "estimada";
+  outcome: RecommendationOutcome;
+  legs: PickLeg[];
+}
+
+export interface PicksUpcoming {
+  window: string | null;
+  combos: PickCombo[];
+}
+
+export interface PickKindSummary {
+  kind: PickKind;
+  total: number;
+  won: number;
+  lost: number;
+  pending: number;
+  hit_rate: number | null;
+  predicted_hit_rate: number | null;
+  avg_odds: number | null;
+  roi_shown_odds: number | null;
+}
+
+export interface PicksHistory {
+  summary: PickKindSummary[];
+  combos: PickCombo[];
+}
