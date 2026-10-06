@@ -9,6 +9,8 @@ import type {
   Recommendation,
   RecommendationHistoryResponse,
   RecommendationStrategy,
+  PicksHistory,
+  PicksUpcoming,
   RefereeScope,
   RiskLevel,
   Team,
@@ -137,6 +139,14 @@ export function getRecommendationHistory(
   filters: RecommendationHistoryFilters = {},
 ): Promise<RecommendationHistoryResponse> {
   return request("/recommendations/history", { ...filters });
+}
+
+export function getPicks(league?: string): Promise<PicksUpcoming> {
+  return request("/picks", { league });
+}
+
+export function getPicksHistory(filters: { league?: string; kind?: string; limit?: number } = {}): Promise<PicksHistory> {
+  return request("/picks/history", { ...filters });
 }
 
 export { ApiError };
