@@ -48,7 +48,7 @@ def main() -> None:
                 continue
 
             # Patrones: todo lo jugado hasta ahora (se predice con la informacion de hoy).
-            tracker = build_tracker(db, league.id, before=datetime.now()) if pattern_params else None
+            tracker = build_tracker(db, league.id, before=datetime.utcnow()) if pattern_params else None
             with_patterns = 0
             for match in matches:
                 model = get_cached_league_model(db, league.id, as_of_date=match.date)

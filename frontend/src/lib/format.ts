@@ -41,9 +41,22 @@ export function formatOdds(value: number | null): string {
   return value.toFixed(2);
 }
 
+/** Las fechas de la API son UTC sin zona ("2026-10-09T19:00:00"): se marcan
+ * como UTC para que el navegador las muestre en su hora local. Una fecha sin
+ * hora ("2026-10-09") ya se interpreta como UTC. */
+export function parseApiDate(iso: string): Date {
+  const hasTime = iso.includes("T");
+  const hasZone = /([zZ]|[+-]\d{2}:?\d{2})$/.test(iso);
+  return new Date(hasTime && !hasZone ? `${iso}Z` : iso);
+}
+
+/** football-data.org pone 00:00 UTC a los partidos sin hora fijada todavía. */
+function isTimeUnknown(date: Date): boolean {
+  return date.getUTCHours() === 0 && date.getUTCMinutes() === 0;
+}
+
 export function formatDate(iso: string): string {
-  const date = new Date(iso);
-  return date.toLocaleDateString("es-ES", {
+  return parseApiDate(iso).toLocaleDateString("es-ES", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -52,7 +65,7 @@ export function formatDate(iso: string): string {
 
 /** 21/09/26: para listas densas de partidos. */
 export function formatShortDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "2-digit" });
+  return parseApiDate(iso).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "2-digit" });
 }
 
 /** "2526" -> "25/26" (formato de temporada de soccerdata). */
@@ -61,7 +74,10 @@ export function formatSeason(season: string): string {
 }
 
 export function formatDateTime(iso: string): string {
-  const date = new Date(iso);
+  const date = parseApiDate(iso);
+  if (isTimeUnknown(date)) {
+    return `${date.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" })} · hora por confirmar`;
+  }
   return date.toLocaleString("es-ES", {
     day: "2-digit",
     month: "short",
