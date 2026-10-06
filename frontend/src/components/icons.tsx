@@ -44,6 +44,15 @@ export function IconTarget(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function IconTicket(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 6.5h16v3a2.5 2.5 0 0 0 0 5v3H4v-3a2.5 2.5 0 0 0 0-5z" />
+      <path d="M9.5 9.5h5M9.5 14.5h5" />
+    </svg>
+  );
+}
+
 export function IconBook(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base(props)}>
