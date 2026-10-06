@@ -1394,3 +1394,670 @@ h4 {
   background: var(--amber-bg);
   color: var(--amber);
 }
+
+/* Mis apuestas */
+.bets-import {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  margin: 0 0 1.4rem;
+}
+.bets-import textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  resize: vertical;
+  background: var(--bg);
+  color: var(--ink);
+}
+.bets-import .filters {
+  margin: 0.7rem 0 0.4rem;
+}
+.bets-import details {
+  margin-top: 0.6rem;
+}
+.bets-import summary {
+  cursor: pointer;
+}
+.bets-file {
+  position: relative;
+  overflow: hidden;
+}
+.bets-file input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.bets-message {
+  color: var(--green);
+}
+.bets-message-error {
+  color: var(--red);
+}
+.bets-leaks {
+  border-left: 3px solid var(--red);
+  padding: 0.2rem 0 0.2rem 0.9rem;
+  margin: 1.4rem 0;
+}
+.bets-leaks ul,
+.bets-habits {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+.bets-leaks li,
+.bets-habits li {
+  margin: 0.3rem 0;
+}
+.bets-legs div {
+  font-size: 0.8rem;
+}
+.bets-warning {
+  color: var(--amber);
+}
+.low-sample-row td {
+  color: var(--faint);
+}
+.bet-status-won {
+  background: var(--green-bg);
+  color: var(--green);
+}
+.bet-status-lost {
+  background: var(--red-bg);
+  color: var(--red);
+}
+.bet-status-void,
+.bet-status-pending,
+.bet-status-unknown {
+  background: var(--surface-alt);
+  color: var(--muted);
+}
+.bet-status-cashout {
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+
+/* Gráfico de beneficio acumulado */
+.profit-chart {
+  position: relative;
+  width: 100%;
+  margin: 0 0 1.2rem;
+}
+.profit-chart svg {
+  display: block;
+  overflow: visible;
+}
+.profit-chart svg:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.chart-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.chart-zero {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.chart-axis {
+  fill: var(--muted);
+  font-size: 11px;
+  font-family: var(--font-body);
+}
+.chart-line {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.chart-end,
+.chart-dot {
+  fill: var(--primary);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+.chart-end-label {
+  fill: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+.chart-crosshair {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+.chart-tooltip {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.35rem 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.chart-tooltip strong {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+.chart-tooltip span {
+  color: var(--muted);
+}
+
+/* Resultado de cada importación */
+.import-report {
+  position: relative;
+  margin: 0.8rem 0 0.4rem;
+  padding: 0.9rem 2.6rem 0.7rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 8px;
+  background: var(--primary-soft);
+}
+.import-report p {
+  margin: 0 0 0.5rem;
+}
+.import-report-error {
+  border-left-color: var(--red);
+  background: var(--red-bg);
+  color: var(--red);
+}
+.import-report-title {
+  font-weight: 600;
+}
+.import-report-close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.import-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 0.6rem;
+}
+.import-chip {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.import-chip strong {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  margin-right: 0.15rem;
+}
+.import-chip-added {
+  border-color: var(--green);
+  color: var(--green);
+}
+.import-chip-updated {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.import-chip-unchanged {
+  color: var(--muted);
+}
+.import-chip-warning {
+  background: var(--amber-bg);
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.import-chip-error {
+  background: var(--red-bg);
+  border-color: var(--red);
+  color: var(--red);
+}
+.import-chip-zero {
+  opacity: 0.55;
+}
+.import-report-list ul {
+  margin: 0 0 0.6rem;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+}
+.import-tag-added {
+  background: var(--green-bg);
+  color: var(--green);
+}
+.import-tag-updated {
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+.bet-row-added td {
+  background: color-mix(in srgb, var(--green) 6%, transparent);
+}
+.bet-row-updated td {
+  background: color-mix(in srgb, var(--amber) 7%, transparent);
+}
+
+/* Promociones (supercuotas, operaciones de Winamax) */
+.promo-badge {
+  background: var(--amber-bg);
+  color: var(--amber);
+  margin: 0 0.25rem 0.15rem 0;
+}
+.promo-summary {
+  list-style: none;
+  margin: 0 0 0.6rem;
+  padding: 0;
+}
+.promo-summary li {
+  margin: 0.35rem 0;
+}
+.backup-text {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+/* Mis apuestas: bloque principal */
+.bets-hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 1.1rem 1.2rem 0.9rem;
+  margin: 0 0 1rem;
+}
+.bets-hero-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2.5rem;
+  align-items: flex-end;
+}
+.bets-hero-profit,
+.bets-hero-record,
+.bets-hero-second > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.bets-hero-record {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+.bets-hero-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+.bets-hero-value {
+  font-family: var(--font-mono);
+  font-size: clamp(2rem, 7vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.05;
+}
+.bets-hero-mid {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+.bets-record-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  align-items: baseline;
+}
+.bets-record-numbers strong {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+}
+.bets-record-bar {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--surface-alt);
+}
+.bets-record-won {
+  background: var(--green);
+}
+.bets-record-lost {
+  background: var(--red);
+}
+.bets-record-cashout {
+  background: var(--faint);
+}
+.bets-hero-second {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 2.5rem;
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+.bets-hero-note {
+  margin: 0.6rem 0 0;
+}
+.bets-insights {
+  border-left: 3px solid var(--primary);
+  padding: 0.1rem 0 0.1rem 0.9rem;
+  margin: 0 0 1.4rem;
+}
+.bets-insights p {
+  margin: 0.3rem 0;
+}
+
+/* Filtro de mes */
+.month-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.month-link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--primary);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.month-row-selected td {
+  background: var(--primary-soft);
+}
+
+/* Gráfico mensual */
+.chart-zero-solid {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+.chart-bar-group {
+  cursor: pointer;
+  outline: none;
+}
+.chart-bar-group:focus-visible .chart-bar {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.chart-bar-pos {
+  fill: var(--green);
+}
+.chart-bar-neg {
+  fill: var(--red);
+}
+.chart-bar-low {
+  opacity: 0.45;
+}
+.chart-bar-dimmed {
+  opacity: 0.25;
+}
+.chart-bar-selected {
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.chart-bar-group:hover .chart-bar {
+  opacity: 1;
+  filter: brightness(1.08);
+}
+
+/* Mis apuestas: "poco fiable", desglose con/sin promoción, evidencia, dinero real, partidos */
+.low-tag {
+  display: inline-block;
+  padding: 0.05rem 0.4rem;
+  border-radius: 4px;
+  background: var(--amber-bg);
+  color: var(--amber);
+  font-family: var(--font-body);
+  font-size: 0.66rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.bets-hero-hint {
+  max-width: 22rem;
+}
+.promo-split {
+  margin: 0 0 1.2rem;
+}
+.split-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 0.8rem;
+  margin: 0 0 0.5rem;
+}
+.split-card,
+.evidence-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+}
+.split-card h3,
+.evidence-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+.split-card dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+.split-card dt {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.split-card dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+.evidence-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 0.8rem;
+  margin: 0.4rem 0 1rem;
+}
+.evidence-card p {
+  margin: 0.3rem 0;
+}
+.real-money {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  margin: 0.4rem 0 1.4rem;
+}
+.real-money summary {
+  cursor: pointer;
+}
+.real-money-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  align-items: flex-end;
+  margin: 0.6rem 0;
+}
+.real-money-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.real-money-fields input {
+  width: 9rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-family: var(--font-mono);
+  background: var(--bg);
+  color: var(--ink);
+}
+.real-money-result {
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+}
+.real-money-result ul {
+  margin: 0.2rem 0 0;
+  padding-left: 1.1rem;
+}
+.matches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.match-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  background: var(--surface);
+}
+.match-item summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.3rem 1rem;
+  cursor: pointer;
+}
+.match-name {
+  font-weight: 600;
+}
+.match-figures {
+  font-size: 0.85rem;
+}
+.match-item ul {
+  margin: 0.5rem 0 0.2rem;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+}
+.dup-badge {
+  background: var(--amber-bg);
+  color: var(--amber);
+  margin-left: 0.4rem;
+}
+
+/* Gráfico mensual: dos series apiladas + total */
+.monthly-chart {
+  --series-without: #2a78d6;
+  --series-with: #eda100;
+}
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.1rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0 0 0.3rem;
+}
+.chart-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.legend-rect {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+.legend-without {
+  background: var(--series-without);
+}
+.legend-with {
+  background: var(--series-with);
+}
+.legend-line {
+  width: 14px;
+  height: 0;
+  border-top: 2px solid var(--ink);
+}
+.chart-seg {
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+.chart-seg-without {
+  fill: var(--series-without);
+}
+.chart-seg-with {
+  fill: var(--series-with);
+}
+.chart-total-mark {
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.chart-bar-group.chart-bar-low {
+  opacity: 0.45;
+}
+.chart-bar-group.chart-bar-dimmed {
+  opacity: 0.25;
+}
+.chart-bar-group.chart-bar-selected .chart-total-mark {
+  stroke-width: 3;
+}
+.chart-bar-group:hover,
+.chart-bar-group:focus-visible {
+  opacity: 1;
+}
+.chart-bar-group:focus-visible .chart-seg {
+  stroke: var(--ink);
+}
+
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+.section-head h2 {
+  margin-bottom: 0.4rem;
+}
+.chart-total-label {
+  fill: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+.tooltip-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.tooltip-row .legend-rect {
+  width: 9px;
+  height: 9px;
+}
