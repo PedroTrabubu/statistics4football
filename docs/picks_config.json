@@ -1,0 +1,267 @@
+{
+  "congelado": "2026-10-01T16:58:35",
+  "entrenamiento_final": [
+    "2122",
+    "2223",
+    "2324",
+    "2425"
+  ],
+  "test": [
+    "2526",
+    "2627"
+  ],
+  "familias_excluidas": [],
+  "suelo_patas_niveles": 0.3,
+  "probabilidades_patrones": false,
+  "decision_v3": {
+    "base_v2": {
+      "prometido": 21.03,
+      "patas_elegidas": 260,
+      "pred": 62.3,
+      "real": 59.6
+    },
+    "A_suelo_030": {
+      "prometido": 22.01,
+      "patas_elegidas": 158,
+      "pred": 49.2,
+      "real": 58.2,
+      "aceptada": true
+    },
+    "B_patrones": {
+      "prometido": 25.65,
+      "patas_elegidas": 250,
+      "pred": 66.9,
+      "real": 60.4,
+      "aceptada": false
+    }
+  },
+  "validacion": {
+    "calibracion": {
+      "resultado": {
+        "patas": 1275,
+        "pred_media": 70.7,
+        "acierto": 71.9,
+        "brier": 0.1895,
+        "patas_p60": 1048,
+        "pred_media_p60": 73.6,
+        "acierto_p60": 74.8
+      },
+      "goles_totales": {
+        "patas": 1971,
+        "pred_media": 70.3,
+        "acierto": 70.9,
+        "brier": 0.1974,
+        "patas_p60": 1652,
+        "pred_media_p60": 72.7,
+        "acierto_p60": 73.2
+      },
+      "goles_equipo": {
+        "patas": 2024,
+        "pred_media": 68.6,
+        "acierto": 69.7,
+        "brier": 0.1996,
+        "patas_p60": 1513,
+        "pred_media_p60": 72.3,
+        "acierto_p60": 74.1
+      },
+      "corners_totales": {
+        "patas": 3089,
+        "pred_media": 67.9,
+        "acierto": 67.3,
+        "brier": 0.2152,
+        "patas_p60": 2407,
+        "pred_media_p60": 70.8,
+        "acierto_p60": 70.4
+      },
+      "corners_equipo": {
+        "patas": 2636,
+        "pred_media": 70.1,
+        "acierto": 67.8,
+        "brier": 0.2103,
+        "patas_p60": 2208,
+        "pred_media_p60": 72.6,
+        "acierto_p60": 70.2
+      },
+      "amarillas_totales": {
+        "patas": 3208,
+        "pred_media": 73.1,
+        "acierto": 72.1,
+        "brier": 0.1937,
+        "patas_p60": 2840,
+        "pred_media_p60": 75.1,
+        "acierto_p60": 74.1
+      },
+      "amarillas_equipo": {
+        "patas": 2133,
+        "pred_media": 72.7,
+        "acierto": 70.7,
+        "brier": 0.1966,
+        "patas_p60": 1868,
+        "pred_media_p60": 74.8,
+        "acierto_p60": 73.1
+      }
+    },
+    "combinadas": {
+      "ENG-Premier League | alta": {
+        "combinadas": 34,
+        "acierto": 23.5,
+        "prob_predicha_media": 31.8,
+        "cuota_media": 3.02,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": -28.5,
+        "con_cuota_real": 34,
+        "roi_real": -28.5
+      },
+      "ENG-Premier League | bomba": {
+        "combinadas": 34,
+        "acierto": 17.6,
+        "prob_predicha_media": 12.0,
+        "cuota_media": 8.05,
+        "patas_media": 2.6,
+        "roi_cuota_mostrada": 42.4,
+        "con_cuota_real": 34,
+        "roi_real": 42.4
+      },
+      "ENG-Premier League | fiable": {
+        "combinadas": 34,
+        "acierto": 58.8,
+        "prob_predicha_media": 63.4,
+        "cuota_media": 1.46,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": -14.1,
+        "con_cuota_real": 29,
+        "roi_real": -9.2
+      },
+      "ENG-Premier League | media": {
+        "combinadas": 34,
+        "acierto": 55.9,
+        "prob_predicha_media": 50.5,
+        "cuota_media": 1.87,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": 4.3,
+        "con_cuota_real": 29,
+        "roi_real": 3.1
+      },
+      "ENG-Premier League | segura": {
+        "combinadas": 34,
+        "acierto": 67.6,
+        "prob_predicha_media": 65.6,
+        "cuota_media": 1.41,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": -4.8,
+        "con_cuota_real": 25,
+        "roi_real": -4.2
+      },
+      "ESP-La Liga | alta": {
+        "combinadas": 35,
+        "acierto": 45.7,
+        "prob_predicha_media": 31.6,
+        "cuota_media": 3.03,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": 38.9,
+        "con_cuota_real": 33,
+        "roi_real": 38.2
+      },
+      "ESP-La Liga | bomba": {
+        "combinadas": 35,
+        "acierto": 20.0,
+        "prob_predicha_media": 11.9,
+        "cuota_media": 8.07,
+        "patas_media": 2.5,
+        "roi_cuota_mostrada": 61.4,
+        "con_cuota_real": 32,
+        "roi_real": 76.5
+      },
+      "ESP-La Liga | fiable": {
+        "combinadas": 35,
+        "acierto": 77.1,
+        "prob_predicha_media": 63.3,
+        "cuota_media": 1.46,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": 12.7,
+        "con_cuota_real": 24,
+        "roi_real": 3.8
+      },
+      "ESP-La Liga | media": {
+        "combinadas": 35,
+        "acierto": 51.4,
+        "prob_predicha_media": 50.2,
+        "cuota_media": 1.87,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": -3.7,
+        "con_cuota_real": 34,
+        "roi_real": -0.9
+      },
+      "ESP-La Liga | segura": {
+        "combinadas": 35,
+        "acierto": 77.1,
+        "prob_predicha_media": 65.3,
+        "cuota_media": 1.41,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": 8.8,
+        "con_cuota_real": 21,
+        "roi_real": 21.1
+      },
+      "mismo_partido | mismo_partido": {
+        "combinadas": 708,
+        "acierto": 70.9,
+        "prob_predicha_media": 70.8,
+        "cuota_media": 1.29,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": -8.9,
+        "con_cuota_real": 0,
+        "roi_real": null
+      },
+      "todas | alta": {
+        "combinadas": 37,
+        "acierto": 40.5,
+        "prob_predicha_media": 31.9,
+        "cuota_media": 3.02,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": 22.4,
+        "con_cuota_real": 36,
+        "roi_real": 25.8
+      },
+      "todas | bomba": {
+        "combinadas": 37,
+        "acierto": 16.2,
+        "prob_predicha_media": 12.1,
+        "cuota_media": 8.06,
+        "patas_media": 2.3,
+        "roi_cuota_mostrada": 30.5,
+        "con_cuota_real": 36,
+        "roi_real": 34.1
+      },
+      "todas | fiable": {
+        "combinadas": 37,
+        "acierto": 75.7,
+        "prob_predicha_media": 64.1,
+        "cuota_media": 1.46,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": 10.4,
+        "con_cuota_real": 34,
+        "roi_real": 7.4
+      },
+      "todas | media": {
+        "combinadas": 37,
+        "acierto": 45.9,
+        "prob_predicha_media": 50.8,
+        "cuota_media": 1.86,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": -14.3,
+        "con_cuota_real": 36,
+        "roi_real": -17.0
+      },
+      "todas | segura": {
+        "combinadas": 37,
+        "acierto": 75.7,
+        "prob_predicha_media": 66.3,
+        "cuota_media": 1.41,
+        "patas_media": 2.0,
+        "roi_cuota_mostrada": 6.8,
+        "con_cuota_real": 35,
+        "roi_real": 4.9
+      }
+    }
+  }
+}

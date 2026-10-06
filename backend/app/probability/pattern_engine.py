@@ -107,6 +107,23 @@ def build_prediction_rows(
     return rows
 
 
+def pattern_features(
+    db: Session, match: Match, dc_model: DixonColesModel, tracker: PatternTracker
+) -> tuple[dict[str, dict[str, float]], dict[str, float]] | None:
+    """(features por seleccion, cuotas) del partido; None sin cuotas 1X2."""
+    odds = prematch_odds(db, match.id)
+    p_mkt = market_probabilities(odds)
+    if p_mkt is None:
+        return None
+    dc = selection_probs_from_matrix(dc_model.score_matrix(match.home_team_id, match.away_team_id))
+    patterns = tracker.features(match.home_team_id, match.away_team_id)
+    features = {
+        k: {"mkt": p_mkt[k], "dc": dc[k], "patv": patterns[k]["pat_venue"], "pata": patterns[k]["pat_all"]}
+        for k in SELECTION_KEYS
+    }
+    return features, odds
+
+
 def generate_pattern_predictions_for_match(
     db: Session,
     match: Match,
@@ -117,17 +134,10 @@ def generate_pattern_predictions_for_match(
     """`tracker` debe contener solo partidos anteriores a `match` (ver build_tracker)."""
     db.query(ModelPrediction).filter_by(match_id=match.id, model_version=MODEL_VERSION).delete()
 
-    odds = prematch_odds(db, match.id)
-    p_mkt = market_probabilities(odds)
-    if p_mkt is None:
+    computed = pattern_features(db, match, dc_model, tracker)
+    if computed is None:
         return []
-
-    dc = selection_probs_from_matrix(dc_model.score_matrix(match.home_team_id, match.away_team_id))
-    patterns = tracker.features(match.home_team_id, match.away_team_id)
-    features = {
-        k: {"mkt": p_mkt[k], "dc": dc[k], "patv": patterns[k]["pat_venue"], "pata": patterns[k]["pat_all"]}
-        for k in SELECTION_KEYS
-    }
+    features, odds = computed
     rows = build_prediction_rows(
         match.id, features, odds, params, tracker.matches_available(match.home_team_id, match.away_team_id)
     )

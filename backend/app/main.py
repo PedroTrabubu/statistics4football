@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routers import admin, health, leagues, matches, recommendations, teams
+from app.api.routers import admin, health, leagues, matches, picks, recommendations, teams
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 
@@ -27,6 +27,7 @@ app.include_router(leagues.router)
 app.include_router(teams.router)
 app.include_router(matches.router)
 app.include_router(recommendations.router)
+app.include_router(picks.router)
 app.include_router(admin.router)
 
 
