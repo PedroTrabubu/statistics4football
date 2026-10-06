@@ -6,6 +6,7 @@ Elo (ClubElo) se reconcilian contra los partidos/equipos creados aqui.
 
 import logging
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from sqlalchemy.orm import Session
@@ -26,6 +27,17 @@ from app.ingestion.soccerdata_client import get_match_history_reader
 
 logger = logging.getLogger(__name__)
 
+
+
+UK_TZ = ZoneInfo("Europe/London")
+UTC = ZoneInfo("UTC")
+
+
+def uk_local_to_utc(local: datetime) -> datetime:
+    """La hora del CSV de Football-Data.co.uk es la de Reino Unido. Toda la base
+    guarda UTC sin zona (como football-data.org), y la web la convierte a la
+    hora local del navegador."""
+    return local.replace(tzinfo=UK_TZ).astimezone(UTC).replace(tzinfo=None)
 
 def _get_or_create_league(db: Session, code: str) -> League:
     league = db.query(League).filter_by(code=code).one_or_none()
@@ -104,7 +116,7 @@ def backfill_match_history(
             home_team = _get_or_create_team(db, row["home_team"], league.id)
             away_team = _get_or_create_team(db, row["away_team"], league.id)
 
-            match_datetime = match_date.to_pydatetime()
+            match_datetime = uk_local_to_utc(match_date.to_pydatetime())
             match = (
                 db.query(Match)
                 .filter_by(

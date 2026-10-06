@@ -20,6 +20,8 @@ apscheduler>=3.10.0,<4.0.0
 numpy>=1.26.0,<3.0.0
 pandas>=2.0.0,<3.0.0
 scipy>=1.11.0,<2.0.0
+# Zonas horarias en Windows (zoneinfo): conversion de horas del CSV a UTC.
+tzdata>=2024.1
 
 # --- Ingesta historica (reutiliza soccerdata en vez de reinventar scraping) ---
 # Nota: trae seleniumbase como dependencia (necesario para FBref, mas pesado).
