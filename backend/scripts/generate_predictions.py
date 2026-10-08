@@ -36,7 +36,7 @@ def main() -> None:
     settings = get_settings()
     db = SessionLocal()
     try:
-        leagues = db.query(League).filter(League.code.in_(settings.leagues)).all()
+        leagues = db.query(League).filter(League.code.in_(settings.model_leagues)).all()
 
         for league in leagues:
             # Solo temporadas con partidos jugados: la temporada en curso creada

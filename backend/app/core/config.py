@@ -18,7 +18,10 @@ class Settings(BaseSettings):
 
     database_url: str = f"sqlite:///{PROJECT_ROOT / 'data' / 'stadistics4bet.db'}"
 
-    active_leagues: str = "ENG-Premier League,ESP-La Liga"
+    active_leagues: str = "ENG-Premier League,ESP-La Liga,ESP-La Liga 2,FRA-Ligue 1"
+    # Ligas en las que Picks y Recomendaciones están validados. Una liga nueva
+    # se carga y se ve en la web, pero no entra aquí hasta pasar su backtest.
+    validated_leagues: str = "ENG-Premier League,ESP-La Liga"
 
     soccerdata_dir: str = str(PROJECT_ROOT / "data" / "soccerdata_cache")
 
@@ -33,6 +36,10 @@ class Settings(BaseSettings):
     @property
     def leagues(self) -> list[str]:
         return [league.strip() for league in self.active_leagues.split(",") if league.strip()]
+
+    @property
+    def model_leagues(self) -> list[str]:
+        return [league.strip() for league in self.validated_leagues.split(",") if league.strip()]
 
 
 @lru_cache

@@ -37,7 +37,7 @@ export function LeagueSwitch({
           className={value === null ? "league-button league-button-all league-button-active" : "league-button league-button-all"}
           onClick={() => onChange(null)}
         >
-          <span className="league-button-name">Ambas</span>
+          <span className="league-button-name">{leagues.length === 2 ? "Ambas" : "Todas"}</span>
         </button>
       )}
     </div>

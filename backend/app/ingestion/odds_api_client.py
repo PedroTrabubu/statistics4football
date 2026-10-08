@@ -22,6 +22,8 @@ BASE_URL = "https://api.the-odds-api.com/v4"
 LEAGUE_SPORT_KEY_MAP: dict[str, str] = {
     "ENG-Premier League": "soccer_epl",
     "ESP-La Liga": "soccer_spain_la_liga",
+    "ESP-La Liga 2": "soccer_spain_segunda_division",
+    "FRA-Ligue 1": "soccer_france_ligue_one",
 }
 
 MARKETS = "h2h,totals"

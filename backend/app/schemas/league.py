@@ -8,3 +8,6 @@ class LeagueOut(BaseModel):
     code: str
     name: str
     country: str | None = None
+    # Picks y Recomendaciones validados en esta liga (VALIDATED_LEAGUES).
+    validated: bool = False
+

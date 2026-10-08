@@ -9,7 +9,7 @@ import { RiskBadge } from "../components/RiskBadge";
 import { SampleBadge } from "../components/SampleBadge";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
 import { formatDateTime, formatPercent, formatPnl, formatRoiPct, marketLabel, selectionLabel } from "../lib/format";
-import { leagueName, useSelectedLeagueCode } from "../lib/leagues";
+import { leagueName, onlyValidated, useSelectedLeagueCode } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 
 type Tab = "upcoming" | "history";
@@ -34,8 +34,9 @@ function formatEdge(model: number, market: number | null): string {
 export function RecommendationsPage() {
   const [strategy, setStrategy] = useState<RecommendationStrategy>("alta_probabilidad");
   const [tab, setTab] = useState<Tab>("upcoming");
-  const [leagueCode, setLeagueCode] = useSelectedLeagueCode();
-  const { data: leagues } = useApi(() => getLeagues(), []);
+  const [selectedCode, setLeagueCode] = useSelectedLeagueCode();
+  const { data: allLeagues } = useApi(() => getLeagues(), []);
+  const { leagues, code: leagueCode, pending } = onlyValidated(allLeagues, selectedCode);
   const leagueId = leagues?.find((l) => l.code === leagueCode)?.id;
 
   return (
@@ -48,6 +49,7 @@ export function RecommendationsPage() {
       </p>
 
       <LeagueSwitch leagues={leagues} value={leagueCode} onChange={setLeagueCode} allowAll />
+      {pending && <p className="small muted">{pending}</p>}
 
       <div className="tab-group tab-group-spaced">
         {(Object.keys(STRATEGY_LABELS) as RecommendationStrategy[]).map((key) => (
