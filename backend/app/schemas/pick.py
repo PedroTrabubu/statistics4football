@@ -7,6 +7,7 @@ class PickLegOut(BaseModel):
     match_id: int
     date: datetime
     league_code: str
+    matchday: int | None = None
     home_team: str
     away_team: str
     market: str

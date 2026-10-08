@@ -22,6 +22,7 @@ from app.db.models import (
     Team,
     TeamMatchStats,
 )
+from app.ingestion.matchdays import refresh_estimated_matchdays
 from app.ingestion.odds_columns import extract_all_odds
 from app.ingestion.soccerdata_client import get_match_history_reader
 from app.ingestion.team_leagues import refresh_team_leagues
@@ -216,6 +217,7 @@ def backfill_match_history(
             rows_ingested += 1
 
         moved = refresh_team_leagues(db)
+        refresh_estimated_matchdays(db)
         db.commit()
         run.status = IngestionStatus.SUCCESS
         run.rows_ingested = rows_ingested

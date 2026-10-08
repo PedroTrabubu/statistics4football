@@ -8,7 +8,7 @@ import { OutcomeBadge } from "../components/OutcomeBadge";
 import { RiskBadge } from "../components/RiskBadge";
 import { SampleBadge } from "../components/SampleBadge";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
-import { formatDateTime, formatPercent, formatPnl, formatRoiPct, marketLabel, selectionLabel } from "../lib/format";
+import { formatDateTime, formatMatchday, formatPercent, formatPnl, formatRoiPct, marketLabel, joinParts, selectionLabel } from "../lib/format";
 import { leagueName, onlyValidated, useSelectedLeagueCode } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 
@@ -154,7 +154,7 @@ function UpcomingHighProbability({ leagueId }: LeagueFilterProps) {
                       {rec.home_team} vs {rec.away_team}
                     </Link>
                     <div className="muted small">
-                      {leagueName(rec.league_code)} · {formatDateTime(rec.date)}
+                      {joinParts(leagueName(rec.league_code), formatMatchday(rec.matchday), formatDateTime(rec.date))}
                     </div>
                   </td>
                   <td className="rec-match">{marketLabel(rec.market)}</td>
@@ -249,7 +249,7 @@ function UpcomingValue({ leagueId }: LeagueFilterProps) {
                       {rec.home_team} vs {rec.away_team}
                     </Link>
                     <div className="muted small">
-                      {leagueName(rec.league_code)} · {formatDateTime(rec.date)}
+                      {joinParts(leagueName(rec.league_code), formatMatchday(rec.matchday), formatDateTime(rec.date))}
                     </div>
                   </td>
                   <td className="rec-match">{marketLabel(rec.market)}</td>
@@ -410,7 +410,7 @@ function RecommendationHistory({ leagueId, strategy }: LeagueFilterProps & { str
                         {rec.home_team} vs {rec.away_team}
                       </Link>
                       <div className="muted small">
-                        {leagueName(rec.league_code)} · {formatDateTime(rec.date)}
+                        {joinParts(leagueName(rec.league_code), formatMatchday(rec.matchday), formatDateTime(rec.date))}
                       </div>
                     </td>
                     <td className="rec-match">{marketLabel(rec.market)}</td>

@@ -1,5 +1,6 @@
 import type {
   League,
+  LeagueMatchdays,
   Match,
   MatchFeatures,
   MatchRefereeStats,
@@ -53,6 +54,11 @@ export function getTeams(leagueId?: number): Promise<Team[]> {
   return request("/teams", { league_id: leagueId });
 }
 
+/** Jornadas de una temporada (por defecto, la del próximo partido) y cuál mostrar por defecto. */
+export function getLeagueMatchdays(leagueId: number, season?: string): Promise<LeagueMatchdays> {
+  return request(`/leagues/${leagueId}/matchdays`, { season });
+}
+
 export function getLeagueSeasons(leagueId: number): Promise<string[]> {
   return request(`/leagues/${leagueId}/seasons`);
 }
@@ -91,6 +97,7 @@ export interface MatchFilters {
   season?: string;
   status?: MatchStatus;
   team_id?: number;
+  matchday?: number;
   limit?: number;
   offset?: number;
 }

@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Integer, String
+from sqlalchemy import JSON, Boolean, DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -31,6 +31,12 @@ class Match(Base):
     # Formato del CSV de MatchHistory ("A Taylor"); los nombres completos de
     # football-data.org se normalizan a ese formato (ver fixtures_backfill.referee_short_name).
     referee: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+    # Jornada. Exacta si viene de football-data.org; si no, deducida de las
+    # fechas (`matchday_estimated`, ver app/ingestion/matchdays.py), y se
+    # recalcula en cada ingesta.
+    matchday: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    matchday_estimated: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
 
     status: Mapped[MatchStatus] = mapped_column(
         Enum(MatchStatus, native_enum=False), default=MatchStatus.SCHEDULED, index=True

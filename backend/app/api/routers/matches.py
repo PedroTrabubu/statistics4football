@@ -30,6 +30,7 @@ def list_matches(
     season: str | None = None,
     status: MatchStatus | None = None,
     team_id: int | None = None,
+    matchday: int | None = None,
     date_from: datetime | None = None,
     date_to: datetime | None = None,
     limit: int = Query(50, le=200),
@@ -41,6 +42,8 @@ def list_matches(
         query = query.filter(Match.league_id == league_id)
     if season is not None:
         query = query.join(Season, Season.id == Match.season_id).filter(Season.name == season)
+    if matchday is not None:
+        query = query.filter(Match.matchday == matchday)
     if status is not None:
         query = query.filter(Match.status == status)
     if team_id is not None:
