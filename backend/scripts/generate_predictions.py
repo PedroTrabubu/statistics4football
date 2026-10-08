@@ -17,8 +17,10 @@ todo lo disponible hasta "hoy" antes de predecir.
 
 Uso:
     python scripts/generate_predictions.py
+    python scripts/generate_predictions.py --liga "ESP-La Liga 2" --temporadas 2526,2627
 """
 
+import argparse
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -26,17 +28,22 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.core.config import get_settings
-from app.db.models import League, Match, MatchOdds, MatchStatus
+from app.db.models import League, Match, MatchOdds, MatchStatus, Season
 from app.db.session import SessionLocal
 from app.probability.engine import fit_league_model, generate_predictions_for_match
 from app.probability.outcomes import resolve_selection
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Backtest walk-forward de las recomendaciones de valor.")
+    parser.add_argument("--liga", action="append", help="liga a evaluar (por defecto, las validadas)")
+    parser.add_argument("--temporadas", help="temporadas separadas por comas (por defecto, la ultima con partidos jugados)")
+    args = parser.parse_args()
+
     settings = get_settings()
     db = SessionLocal()
     try:
-        leagues = db.query(League).filter(League.code.in_(settings.model_leagues)).all()
+        leagues = db.query(League).filter(League.code.in_(args.liga or settings.model_leagues)).all()
 
         for league in leagues:
             # Solo temporadas con partidos jugados: la temporada en curso creada
@@ -54,22 +61,22 @@ def main() -> None:
                 print(f"{league.code}: no hay suficientes temporadas para backtest, se omite.")
                 continue
 
-            test_season = seasons[-1]
+            test_seasons = args.temporadas.split(",") if args.temporadas else [seasons[-1]]
             test_matches_all = (
                 db.query(Match)
                 .filter(
                     Match.league_id == league.id,
-                    Match.season.has(name=test_season),
+                    Match.season.has(Season.name.in_(test_seasons)),
                     Match.status == MatchStatus.HISTORICAL,
                 )
                 .order_by(Match.date.asc())
                 .all()
             )
             if not test_matches_all:
-                print(f"{league.code}: temporada {test_season} sin partidos, se omite.")
+                print(f"{league.code}: temporadas {test_seasons} sin partidos, se omite.")
                 continue
 
-            print(f"\n{league.code}: entrenando con {seasons[:-1]}, backtest en {test_season}")
+            print(f"\n{league.code}: backtest en {test_seasons}, reajustando cada mes con todo lo anterior")
 
             # Meses de la temporada de test, en orden: cada mes se predice con
             # un modelo reajustado con todo lo anterior a ese mes.

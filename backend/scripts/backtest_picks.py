@@ -6,6 +6,11 @@
     python scripts/backtest_picks.py export   # guarda el modelo probado para la web
     python scripts/backtest_picks.py history  # vuelca las combinadas del test al historico de la web
 
+Ligas nuevas (protocolo en docs/LIGAS_NUEVAS.md), con el modelo de la web sin tocar:
+
+    python scripts/backtest_picks.py build-ligas  # dataset de LaLiga Hypermotion y Ligue 1
+    python scripts/backtest_picks.py ligas        # una sola vez: criterios de validacion por liga
+
 `dev` nunca lee filas del test; `test` exige la configuracion congelada.
 """
 
@@ -20,14 +25,15 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from app.core.config import get_settings  # noqa: E402
 from app.db.models import League, Match, MatchOdds, MatchStatus, TeamMatchStats  # noqa: E402
 from app.db.session import SessionLocal  # noqa: E402
 from app.picks.combos import Combo  # noqa: E402
 from app.picks.count_model import N_FEATURES, SIDES, STATS, CountTracker, fit_count_model  # noqa: E402
-from app.picks.engine import PARAMS_PATH, PATTERN_TO_LEG, PicksParams, market_goals, window_key  # noqa: E402
+from app.picks.engine import PARAMS_PATH, PATTERN_TO_LEG, PicksParams, load_params, market_goals, window_key  # noqa: E402
 from app.picks.legs import FAMILIES, MIN_PROB, Leg, LegKey, match_legs, resolve_leg  # noqa: E402
 from app.probability.pattern_model import FEATURE_SOURCES, fit_logistic, logit  # noqa: E402
-from app.picks.service import build_window_combos, delete_combos, save_combos  # noqa: E402
+from app.picks.service import SCOPE_SAME_MATCH, build_window_combos, delete_combos, save_combos  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 CACHE_DIR = ROOT / "data" / "model_cache"
@@ -39,6 +45,8 @@ WARMUP = ["2021"]
 TRAIN = ["2122", "2223", "2324"]
 VALIDATION = ["2425"]
 TEST = ["2526", "2627"]
+# Ligas del protocolo: el modelo de la web se entrena y se prueba solo con ellas.
+PROTOCOL_LEAGUES = ["ENG-Premier League", "ESP-La Liga"]
 
 # Regla de validacion del protocolo.
 CALIB_MIN_PROB = 0.60
@@ -59,11 +67,11 @@ def _feature_cols(stat: str, side: str) -> list[str]:
 # --- build -------------------------------------------------------------------
 
 
-def build() -> None:
+def build(league_codes: list[str] | None = None, path: Path = DATASET) -> None:
     db = SessionLocal()
     records = []
     try:
-        for league in db.query(League).all():
+        for league in db.query(League).filter(League.code.in_(league_codes or PROTOCOL_LEAGUES)).all():
             matches = (
                 db.query(Match)
                 .filter(
@@ -137,8 +145,8 @@ def build() -> None:
         db.close()
 
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame.from_records(records).to_csv(DATASET, index=False)
-    print(f"Dataset: {len(records)} partidos -> {DATASET}")
+    pd.DataFrame.from_records(records).to_csv(path, index=False)
+    print(f"Dataset: {len(records)} partidos -> {path}")
 
 
 # --- modelo y evaluacion -----------------------------------------------------
@@ -444,25 +452,135 @@ def export() -> None:
 
 
 def history() -> None:
-    """Guarda las combinadas del test (mismo modelo y reglas) como historico de la web."""
+    """Guarda las combinadas del test (mismo modelo y reglas) como historico de la web.
+
+    Las ligas nuevas ya validadas (docs/LIGAS_NUEVAS.md) añaden, en el mismo
+    periodo, sus combinadas por nivel y del mismo partido. "Todas" sigue siendo
+    la mezcla de Premier y LaLiga del protocolo."""
     params = _tested_params()
     df = load_dataset()
     result = evaluate(df[df.season.isin(TEST)], params, _test_overrides(params))
+    combos = list(result["combos"])
+    extra_leagues = validated_new_leagues()
+    if extra_leagues:
+        new_df = pd.read_csv(NEW_LEAGUES_DATASET, dtype={"season": str, "window": str})
+        for league in extra_leagues:
+            league_df = new_df[(new_df.league == league) & new_df.season.isin(TEST)]
+            combos += [
+                (w, s, c) for w, s, c in evaluate(league_df, params)["combos"] if s in (league, SCOPE_SAME_MATCH)
+            ]
     db = SessionLocal()
     try:
         delete_combos(db, source="backtest")
         by_window: dict[str, list] = defaultdict(list)
-        for window, scope, combo in result["combos"]:
+        for window, scope, combo in combos:
             by_window[window].append((scope, combo))
-        for window, combos in by_window.items():
-            save_combos(db, "backtest", window, combos)
+        for window, window_combos in by_window.items():
+            save_combos(db, "backtest", window, window_combos)
         db.commit()
-        print(f"Historico de picks: {len(result['combos'])} combinadas en {len(by_window)} jornadas")
+        print(
+            f"Historico de picks: {len(combos)} combinadas en {len(by_window)} jornadas"
+            f" (ligas nuevas validadas: {extra_leagues or 'ninguna'})"
+        )
     finally:
         db.close()
 
 
+# --- ligas nuevas (docs/LIGAS_NUEVAS.md) -------------------------------------
+
+NEW_LEAGUES_DATASET = CACHE_DIR / "picks_dataset_ligas_nuevas.csv"
+NEW_LEAGUES_SEASONS = TRAIN + VALIDATION + TEST  # todo fuera de muestra: el modelo no vio estas ligas
+NEW_LEAGUES = ["ESP-La Liga 2", "FRA-Ligue 1"]
+
+
+def validated_new_leagues() -> list[str]:
+    """Las ligas nuevas que pasaron la validacion y estan en VALIDATED_LEAGUES."""
+    return [code for code in NEW_LEAGUES if code in get_settings().model_leagues]
+
+
+def build_new_leagues() -> None:
+    build(NEW_LEAGUES, NEW_LEAGUES_DATASET)
+
+
+def new_leagues() -> None:
+    """Una sola ejecucion: el modelo de la web, sin tocar, en cada liga nueva."""
+    params = load_params()
+    if params is None:
+        sys.exit("Falta picks_params.json: es el modelo que se evalua.")
+    if params.use_pattern_probs:
+        sys.exit("El modelo usa probabilidades de patrones: esta evaluacion no las calcula para las ligas nuevas.")
+    if not NEW_LEAGUES_DATASET.exists():
+        sys.exit("Falta el dataset de las ligas nuevas: ejecuta primero `build-ligas`.")
+    df = pd.read_csv(NEW_LEAGUES_DATASET, dtype={"season": str, "window": str})
+    df = df[df.season.isin(NEW_LEAGUES_SEASONS)]
+    print(f"Modelo: entrenado con {params.trained_on}, suelo de patas por nivel {params.tier_min_prob}")
+
+    result = evaluate(df, params)
+    league_of = {int(r.match_id): r.league for _, r in df.iterrows()}
+    results = {}
+    for league in sorted(df.league.unique()):
+        legs = [(leg, won) for leg, won in result["legs"] if league_of[leg.match_id] == league]
+        calib = calibration(legs)
+        failing = [
+            fam
+            for fam, c in calib.items()
+            if c["patas_p60"] >= CALIB_MIN_LEGS and c["acierto_p60"] < c["pred_media_p60"] - 100 * CALIB_MAX_GAP
+        ]
+
+        tier_combos = [c for _, scope, c in result["combos"] if scope == league]
+        chosen = [
+            (leg.prob, won)
+            for combo in tier_combos
+            for leg in combo.legs
+            if (won := leg_won(leg, result["outcomes"][leg.match_id])) is not None
+        ]
+        n_chosen, pred_chosen, real_chosen = _calib(chosen)
+
+        same_match = [
+            (w, s, c)
+            for w, s, c in result["combos"]
+            if c.kind == "mismo_partido" and league_of[c.legs[0].match_id] == league
+        ]
+        n_same, pred_same, real_same = _calib(
+            [(c.prob, won) for _, _, c in same_match if (won := combo_won(c, result["outcomes"])) is not None]
+        )
+
+        criteria = {
+            "3_calibracion_por_familia": not failing,
+            "4_patas_elegidas": n_chosen >= CALIB_MIN_LEGS and real_chosen >= pred_chosen - 100 * CALIB_MAX_GAP,
+            "5_mismo_partido": n_same > 0 and real_same >= pred_same - 100 * CALIB_MAX_GAP,
+        }
+        league_combos = [(w, s, c) for w, s, c in result["combos"] if s == league] + same_match
+        combos = summarize_combos({"combos": league_combos, "outcomes": result["outcomes"]})
+        results[league] = {
+            "partidos": int((df.league == league).sum()),
+            "calibracion": calib,
+            "familias_descalibradas": failing,
+            "patas_elegidas": {"n": n_chosen, "pred": pred_chosen, "real": real_chosen},
+            "mismo_partido": {"n": n_same, "pred": pred_same, "real": real_same},
+            "combinadas": combos,
+            "criterios": criteria,
+        }
+        print_report(f"{league}: {results[league]['partidos']} partidos", calib, combos)
+        print(f"Patas elegidas para los niveles: n={n_chosen} pred={pred_chosen}% real={real_chosen}%")
+        print(f"Mismo partido: n={n_same} pred={pred_same}% real={real_same}%")
+        for name, ok in criteria.items():
+            print(f"  criterio {name}: {'CUMPLE' if ok else 'NO CUMPLE'}")
+
+    out = CACHE_DIR / "ligas_nuevas_picks.json"
+    out.write_text(json.dumps(results, indent=2, ensure_ascii=False, default=bool), encoding="utf-8")
+    print(f"\nResultados en {out}")
+
+
 if __name__ == "__main__":
     stage = sys.argv[1] if len(sys.argv) > 1 else ""
-    stages = {"build": build, "dev": dev, "test": test, "export": export, "history": history}
+    stages = {
+        "build": build,
+        "dev": dev,
+        "test": test,
+        "export": export,
+        "history": history,
+        "build-ligas": build_new_leagues,
+        "ligas": new_leagues,
+    }
     stages.get(stage, lambda: sys.exit(__doc__))()
