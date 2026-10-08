@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     active_leagues: str = "ENG-Premier League,ESP-La Liga,ESP-La Liga 2,FRA-Ligue 1"
     # Ligas en las que Picks y Recomendaciones están validados. Una liga nueva
     # se carga y se ve en la web, pero no entra aquí hasta pasar su backtest.
-    validated_leagues: str = "ENG-Premier League,ESP-La Liga"
+    validated_leagues: str = "ENG-Premier League,ESP-La Liga,ESP-La Liga 2"
 
     soccerdata_dir: str = str(PROJECT_ROOT / "data" / "soccerdata_cache")
 

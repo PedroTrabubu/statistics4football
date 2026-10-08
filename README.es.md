@@ -59,7 +59,7 @@ Copia `.env.example` a `.env` en la raíz del proyecto y rellena tus claves:
 | `FOOTBALL_DATA_ORG_API_KEY` | Sí | Resultados y calendario de la temporada en curso |
 | `THE_ODDS_API_KEY` | No | Cuotas pre-partido de los próximos partidos |
 | `ACTIVE_LEAGUES` | No | Ligas que se cargan (por defecto: `ENG-Premier League,ESP-La Liga,ESP-La Liga 2,FRA-Ligue 1`) |
-| `VALIDATED_LEAGUES` | No | Ligas con Picks y Recomendaciones, una vez pasado su backtest (por defecto: `ENG-Premier League,ESP-La Liga`) |
+| `VALIDATED_LEAGUES` | No | Ligas con Picks y Recomendaciones, una vez pasado su backtest (por defecto: `ENG-Premier League,ESP-La Liga,ESP-La Liga 2`; ver [docs/LIGAS_NUEVAS.md](docs/LIGAS_NUEVAS.md)) |
 | `EV_THRESHOLD` | No | Valor esperado mínimo para marcar una selección como "value" (por defecto: `0.05`) |
 
 `.env` está en el `.gitignore` y nunca se sube al repositorio.
