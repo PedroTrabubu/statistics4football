@@ -5,7 +5,7 @@ import type { PickCombo, PickKind, PickLeg } from "../api/types";
 import { LeagueSwitch } from "../components/LeagueSwitch";
 import { OutcomeBadge } from "../components/OutcomeBadge";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
-import { formatDateTime, formatRoiPct } from "../lib/format";
+import { formatDateTime, formatMatchday, formatRoiPct, joinParts } from "../lib/format";
 import { leagueName, onlyValidated, useSelectedLeagueCode } from "../lib/leagues";
 import { ODDS_KIND_TITLES, PICK_KIND_LABELS, TIER_KINDS, oneInN, pickLegLabel, pickLegUnit } from "../lib/picks";
 import { useApi } from "../lib/useApi";
@@ -141,7 +141,7 @@ function LegRow({ leg, showMatch, settled }: { leg: PickLeg; showMatch: boolean;
         <span className="pick-leg-label">{pickLegLabel(leg)}</span>
         {showMatch && (
           <Link to={`/matches/${leg.match_id}`} className="pick-leg-match small">
-            {leg.home_team} – {leg.away_team} · {leagueName(leg.league_code)} · {formatDateTime(leg.date)}
+            {joinParts(`${leg.home_team} – ${leg.away_team}`, leagueName(leg.league_code), formatMatchday(leg.matchday), formatDateTime(leg.date))}
           </Link>
         )}
         {settled && leg.actual && (
@@ -169,7 +169,7 @@ function ComboCard({ combo, compact = false }: { combo: PickCombo; compact?: boo
         <div>
           <h3>{compact ? `${first.home_team} – ${first.away_team}` : PICK_KIND_LABELS[combo.kind]}</h3>
           <p className="small muted">
-            {compact ? `${leagueName(first.league_code)} · ${formatDateTime(first.date)}` : TIER_HINTS[combo.kind]}
+            {compact ? joinParts(leagueName(first.league_code), formatMatchday(first.matchday), formatDateTime(first.date)) : TIER_HINTS[combo.kind]}
           </p>
         </div>
         <div className="pick-card-odds">

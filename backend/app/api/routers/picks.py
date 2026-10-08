@@ -44,6 +44,7 @@ def _combo_out(combo: PickCombo, stats: dict) -> tuple[PickComboOut, bool | None
                 match_id=m.id,
                 date=m.date,
                 league_code=m.league.code,
+                matchday=m.matchday,
                 home_team=m.home_team.name,
                 away_team=m.away_team.name,
                 market=leg.market,

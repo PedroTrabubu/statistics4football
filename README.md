@@ -86,6 +86,7 @@ From `backend/`, with the virtual environment active:
 python scripts/ingest_historical.py    # past seasons: results, corners, cards, odds
 python scripts/ingest_xg.py            # xG from Understat
 python scripts/ingest_elo.py           # Elo ratings from ClubElo
+python scripts/ingest_matchdays.py     # matchdays of past seasons (run once)
 python scripts/ingest_fixtures.py      # current season: results, stats, upcoming fixtures and their odds
 python scripts/refresh_odds.py         # optional: fresher odds in validated leagues (uses credits)
 python scripts/refresh_predictions.py  # probabilities for upcoming matches

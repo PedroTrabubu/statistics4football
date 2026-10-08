@@ -16,6 +16,25 @@ export interface Team {
   league_id: number | null;
 }
 
+export interface MatchdayInfo {
+  matchday: number;
+  start: string;
+  end: string;
+  played: number;
+  total: number;
+}
+
+export interface LeagueMatchdays {
+  /** Temporadas con partidos, la más reciente primero. */
+  seasons: string[];
+  season: string | null;
+  /** Jornada que se muestra por defecto. */
+  current: number | null;
+  /** Jornadas deducidas de las fechas (la fuente no las da). */
+  estimated: boolean;
+  matchdays: MatchdayInfo[];
+}
+
 export interface Match {
   id: number;
   date: string;
@@ -32,6 +51,9 @@ export interface Match {
   home_ht_goals: number | null;
   away_ht_goals: number | null;
   referee: string | null;
+  matchday: number | null;
+  /** Jornada deducida de las fechas: la fuente no la da. */
+  matchday_estimated: boolean;
 }
 
 export interface TeamMatchStats {
@@ -169,6 +191,7 @@ export interface Recommendation {
   match_id: number;
   date: string;
   league_code: string;
+  matchday: number | null;
   home_team: string;
   away_team: string;
   market: string;
@@ -191,6 +214,7 @@ export interface RecommendationHistoryItem {
   match_id: number;
   date: string;
   league_code: string;
+  matchday: number | null;
   home_team: string;
   away_team: string;
   home_goals: number;
@@ -248,6 +272,7 @@ export interface PickLeg {
   match_id: number;
   date: string;
   league_code: string;
+  matchday: number | null;
   home_team: string;
   away_team: string;
   market: string;

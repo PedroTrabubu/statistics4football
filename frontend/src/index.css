@@ -492,6 +492,35 @@ h4 {
   border-color: var(--primary);
 }
 
+/* Partidos por jornada */
+.matchday-browser + .matchday-browser {
+  margin-top: 2.2rem;
+}
+.matchday-nav button {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.88rem;
+}
+.matchday-nav button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.matchday-nav button:not(:disabled):hover {
+  border-color: var(--primary);
+}
+.matchday-nav button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+.matchday-note {
+  margin: -0.8rem 0 1.2rem;
+}
+
 /* Status views */
 .status-view {
   padding: 1.5rem;

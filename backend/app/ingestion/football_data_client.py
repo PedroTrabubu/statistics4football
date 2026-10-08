@@ -59,10 +59,12 @@ class FootballDataClient:
             return response.json()
         raise RuntimeError(f"football-data.org: rate limit persistente en {path}")
 
-    def get_season_matches(self, competition_code: str) -> list[dict]:
-        """Todos los partidos de la temporada en curso de la competicion,
-        jugados (FINISHED, con marcador) y por jugar (SCHEDULED/TIMED/...).
-        Sin filtro de `status`, football-data.org devuelve por defecto solo
-        la temporada activa (`currentSeason`)."""
-        data = self._get(f"/competitions/{competition_code}/matches")
+    def get_season_matches(self, competition_code: str, season_start_year: int | None = None) -> list[dict]:
+        """Todos los partidos de una temporada de la competicion, jugados
+        (FINISHED, con marcador) y por jugar (SCHEDULED/TIMED/...). Sin
+        `season_start_year`, la temporada activa (`currentSeason`). El plan
+        gratuito solo da las temporadas recientes: las demas responden 403
+        (httpx.HTTPStatusError)."""
+        params = {"season": season_start_year} if season_start_year is not None else None
+        data = self._get(f"/competitions/{competition_code}/matches", params)
         return data.get("matches", [])

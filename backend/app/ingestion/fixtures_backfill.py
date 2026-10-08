@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 from app.core.config import Settings
 from app.db.models import IngestionRun, IngestionStatus, League, Match, MatchStatus, Season, Team
 from app.ingestion.football_data_client import LEAGUE_CODE_MAP, FootballDataClient
+from app.ingestion.matchdays import refresh_estimated_matchdays
 from app.ingestion.team_leagues import refresh_team_leagues
 from app.ingestion.team_names import TEAM_ALIASES, normalize
 
@@ -164,6 +165,9 @@ def sync_current_season_matches(db: Session, settings: Settings, leagues: list[s
                         }
 
                     match.date = match_date
+                    if row.get("matchday") is not None:
+                        match.matchday = row["matchday"]
+                        match.matchday_estimated = False
                     match.home_goals = home_goals
                     match.away_goals = away_goals
                     match.status = MatchStatus.HISTORICAL if is_finished else MatchStatus.SCHEDULED
@@ -184,6 +188,7 @@ def sync_current_season_matches(db: Session, settings: Settings, leagues: list[s
                     rows_ingested += 1
 
         refresh_team_leagues(db)
+        refresh_estimated_matchdays(db)
         db.commit()
         run.status = IngestionStatus.SUCCESS
         run.rows_ingested = rows_ingested

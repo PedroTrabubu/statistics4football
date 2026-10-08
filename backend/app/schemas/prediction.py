@@ -23,6 +23,7 @@ class RecommendationOut(BaseModel):
     match_id: int
     date: datetime
     league_code: str
+    matchday: int | None = None
     home_team: str
     away_team: str
     market: str
@@ -41,6 +42,7 @@ def recommendation_to_out(pred: ModelPrediction) -> RecommendationOut:
         match_id=match.id,
         date=match.date,
         league_code=match.league.code,
+        matchday=match.matchday,
         home_team=match.home_team.name,
         away_team=match.away_team.name,
         market=pred.market,
@@ -58,6 +60,7 @@ class RecommendationHistoryOut(BaseModel):
     match_id: int
     date: datetime
     league_code: str
+    matchday: int | None = None
     home_team: str
     away_team: str
     home_goals: int
@@ -121,6 +124,7 @@ def recommendation_history_to_out(pred: ModelPrediction, won: bool | None, pnl_u
         match_id=match.id,
         date=match.date,
         league_code=match.league.code,
+        matchday=match.matchday,
         home_team=match.home_team.name,
         away_team=match.away_team.name,
         home_goals=match.home_goals or 0,
