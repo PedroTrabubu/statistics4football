@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 from app.core.config import Settings
 from app.db.models import IngestionRun, IngestionStatus, League, Match, MatchStatus, Season, Team
 from app.ingestion.football_data_client import LEAGUE_CODE_MAP, FootballDataClient
+from app.ingestion.team_leagues import refresh_team_leagues
 from app.ingestion.team_names import TEAM_ALIASES, normalize
 
 logger = logging.getLogger(__name__)
@@ -74,11 +75,10 @@ def _team_for(db: Session, cache: dict[str, Team], source_name: str, league_id: 
     team = db.query(Team).filter_by(name=canonical).one_or_none()
 
     if team is None:
+        # En todas las ligas: un recién ascendido ya existe, pero con su liga anterior.
         normalized = normalize(canonical)
-        team = next(
-            (t for t in db.query(Team).filter_by(league_id=league_id).all() if normalize(t.name) == normalized),
-            None,
-        )
+        candidates = [t for t in db.query(Team).all() if normalize(t.name) == normalized]
+        team = next((t for t in candidates if t.league_id == league_id), candidates[0] if candidates else None)
 
     if team is None:
         team = Team(name=canonical, league_id=league_id)
@@ -183,6 +183,7 @@ def sync_current_season_matches(db: Session, settings: Settings, leagues: list[s
 
                     rows_ingested += 1
 
+        refresh_team_leagues(db)
         db.commit()
         run.status = IngestionStatus.SUCCESS
         run.rows_ingested = rows_ingested

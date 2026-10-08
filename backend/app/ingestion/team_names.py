@@ -42,6 +42,9 @@ TEAM_ALIASES: dict[str, str] = {
     "Rayo Vallecano": "Vallecano",
     "West Bromwich Albion": "West Brom",
     "Wolverhampton Wanderers": "Wolves",
+    "Clermont Foot": "Clermont",
+    "Paris Saint Germain": "Paris SG",
+    "Saint-Etienne": "St Etienne",
     # football-data.org -> MatchHistory (o nombre corto elegido para equipos
     # nuevos sin historico en BD, siguiendo la convencion de football-data.co.uk)
     "AFC Bournemouth": "Bournemouth",
@@ -84,6 +87,28 @@ TEAM_ALIASES: dict[str, str] = {
     "Sevilla FC": "Sevilla",
     "Valencia CF": "Valencia",
     "Villarreal CF": "Villarreal",
+    "AJ Auxerre": "Auxerre",
+    "AS Monaco FC": "Monaco",
+    "Angers SCO": "Angers",
+    "ES Troyes AC": "Troyes",
+    "FC Lorient": "Lorient",
+    "Le Havre AC": "Le Havre",
+    "Le Mans FC": "Le Mans",
+    "Lille OSC": "Lille",
+    "OGC Nice": "Nice",
+    "Olympique Lyonnais": "Lyon",
+    "Olympique de Marseille": "Marseille",
+    "Paris Saint-Germain FC": "Paris SG",
+    "RC Strasbourg Alsace": "Strasbourg",
+    "Racing Club de Lens": "Lens",
+    "Stade Brestois 29": "Brest",
+    "Stade Rennais FC 1901": "Rennes",
+    "Toulouse FC": "Toulouse",
+    "AS Saint-Étienne": "St Etienne",
+    "FC Metz": "Metz",
+    "FC Nantes": "Nantes",
+    "Montpellier HSC": "Montpellier",
+    "Stade de Reims": "Reims",
     # the-odds-api.com -> MatchHistory (nombres largos/oficiales distintos a
     # los ya cubiertos arriba; el resto de equipos de the-odds-api.com ya
     # resuelven via alias existentes o via normalize())

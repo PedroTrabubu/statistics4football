@@ -23,7 +23,9 @@ def main() -> None:
     settings = get_settings()
     db = SessionLocal()
     try:
-        run = backfill_prematch_odds(db, settings, leagues=settings.leagues)
+        # Solo ligas validadas: cada liga gasta créditos del plan gratuito, y en
+        # el resto las cuotas pre-partido ya llegan gratis con ingest_fixtures.py.
+        run = backfill_prematch_odds(db, settings, leagues=settings.model_leagues)
         print(f"the-odds-api: status={run.status.value} partidos_actualizados={run.rows_ingested}")
         if run.notes:
             print(run.notes)

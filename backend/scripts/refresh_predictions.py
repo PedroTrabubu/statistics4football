@@ -34,7 +34,7 @@ def main() -> None:
         print("Sin pattern_model_params.json: solo se generan predicciones de valor (Dixon-Coles).")
     db = SessionLocal()
     try:
-        leagues = db.query(League).filter(League.code.in_(settings.leagues)).all()
+        leagues = db.query(League).filter(League.code.in_(settings.model_leagues)).all()
         total = 0
         for league in leagues:
             matches = (

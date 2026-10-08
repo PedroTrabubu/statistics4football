@@ -58,7 +58,8 @@ Copia `.env.example` a `.env` en la raíz del proyecto y rellena tus claves:
 |---|---|---|
 | `FOOTBALL_DATA_ORG_API_KEY` | Sí | Resultados y calendario de la temporada en curso |
 | `THE_ODDS_API_KEY` | No | Cuotas pre-partido de los próximos partidos |
-| `ACTIVE_LEAGUES` | No | Ligas que se cargan (por defecto: `ENG-Premier League,ESP-La Liga`) |
+| `ACTIVE_LEAGUES` | No | Ligas que se cargan (por defecto: `ENG-Premier League,ESP-La Liga,ESP-La Liga 2,FRA-Ligue 1`) |
+| `VALIDATED_LEAGUES` | No | Ligas con Picks y Recomendaciones, una vez pasado su backtest (por defecto: `ENG-Premier League,ESP-La Liga`) |
 | `EV_THRESHOLD` | No | Valor esperado mínimo para marcar una selección como "value" (por defecto: `0.05`) |
 
 `.env` está en el `.gitignore` y nunca se sube al repositorio.
@@ -85,12 +86,12 @@ Desde `backend/`, con el entorno virtual activado:
 python scripts/ingest_historical.py    # temporadas pasadas: resultados, córners, tarjetas, cuotas
 python scripts/ingest_xg.py            # xG de Understat
 python scripts/ingest_elo.py           # rating Elo de ClubElo
-python scripts/ingest_fixtures.py      # temporada en curso: resultados y próximos partidos
-python scripts/refresh_odds.py         # opcional: cuotas pre-partido
+python scripts/ingest_fixtures.py      # temporada en curso: resultados, estadísticas, próximos partidos y sus cuotas
+python scripts/refresh_odds.py         # opcional: cuotas más frescas en las ligas validadas (gasta créditos)
 python scripts/refresh_predictions.py  # probabilidades de los próximos partidos
 ```
 
-Vuelve a ejecutar `ingest_fixtures.py`, `refresh_odds.py` y `refresh_predictions.py` cuando quieras los últimos resultados. `python scripts/generate_predictions.py` ejecuta el backtest sobre la última temporada terminada. `python scripts/refresh_picks.py` genera las combinadas de la próxima jornada y `python scripts/backtest_picks.py` ejecuta su backtest pre-registrado (ver [docs/PICKS_PROTOCOLO.md](docs/PICKS_PROTOCOLO.md)). `python scripts/backtest_pattern_model.py` ejecuta el backtest pre-registrado del modelo de alta probabilidad (ver [docs/MODELO_PATRONES.md](docs/MODELO_PATRONES.md)).
+Vuelve a ejecutar `ingest_fixtures.py`, `refresh_odds.py` y `refresh_predictions.py` cuando quieras los últimos resultados. De LaLiga Hypermotion solo se ve la próxima jornada: football-data.org no la incluye gratis, y su calendario sale del `fixtures.csv` de Football-Data.co.uk, que se renueva a mitad de semana y antes del fin de semana. `python scripts/generate_predictions.py` ejecuta el backtest sobre la última temporada terminada. `python scripts/refresh_picks.py` genera las combinadas de la próxima jornada y `python scripts/backtest_picks.py` ejecuta su backtest pre-registrado (ver [docs/PICKS_PROTOCOLO.md](docs/PICKS_PROTOCOLO.md)). `python scripts/backtest_pattern_model.py` ejecuta el backtest pre-registrado del modelo de alta probabilidad (ver [docs/MODELO_PATRONES.md](docs/MODELO_PATRONES.md)).
 
 ### 4. Frontend
 

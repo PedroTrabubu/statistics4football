@@ -22,6 +22,8 @@ BASE_URL = "https://api.football-data.org/v4"
 LEAGUE_CODE_MAP: dict[str, str] = {
     "ENG-Premier League": "PL",
     "ESP-La Liga": "PD",
+    "FRA-Ligue 1": "FL1",
+    # LaLiga Hypermotion no está en el plan gratuito.
 }
 
 
