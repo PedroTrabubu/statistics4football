@@ -49,6 +49,17 @@ def season_name_for(day: date) -> str:
     return f"{start % 100:02d}{(start + 1) % 100:02d}"
 
 
+FIRST_SEASON = "2021"
+
+
+def seasons_until(day: date) -> list[str]:
+    """Desde la 20/21 hasta la temporada que contiene ese día, incluida. Sin
+    temporadas explícitas, soccerdata deja fuera la temporada en curso de
+    julio a diciembre."""
+    first, last = int(FIRST_SEASON[:2]), int(season_name_for(day)[:2])
+    return [f"{y:02d}{y + 1:02d}" for y in range(first, last + 1)]
+
+
 def _get_or_create_league(db: Session, code: str) -> League:
     league = db.query(League).filter_by(code=code).one_or_none()
     if league is None:

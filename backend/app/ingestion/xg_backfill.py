@@ -5,7 +5,7 @@ desde MatchHistory) por equipos (resueltos via TeamResolver) + fecha.
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 from sqlalchemy import func
@@ -18,9 +18,12 @@ from app.ingestion.team_names import TeamResolver
 logger = logging.getLogger(__name__)
 
 
+MAX_DATE_GAP = timedelta(days=3)
+
+
 def _find_match(db: Session, home_team_id: int, away_team_id: int, match_date: pd.Timestamp) -> Match | None:
     day = match_date.date()
-    return (
+    match = (
         db.query(Match)
         .filter(
             Match.home_team_id == home_team_id,
@@ -29,6 +32,22 @@ def _find_match(db: Session, home_team_id: int, away_team_id: int, match_date: p
         )
         .one_or_none()
     )
+    if match is not None:
+        return match
+    # Understat a veces da a toda una jornada la misma fecha o se desvía un par
+    # de días. El mismo local-visitante solo se juega una vez por temporada, así
+    # que el más cercano a pocos días es ese partido.
+    when = match_date.to_pydatetime()
+    nearby = (
+        db.query(Match)
+        .filter(
+            Match.home_team_id == home_team_id,
+            Match.away_team_id == away_team_id,
+            Match.date.between(when - MAX_DATE_GAP, when + MAX_DATE_GAP),
+        )
+        .all()
+    )
+    return min(nearby, key=lambda m: abs(m.date - when), default=None)
 
 
 def _upsert_team_stats(
