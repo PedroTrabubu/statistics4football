@@ -20,6 +20,7 @@ import {
   type TeamMatchView,
 } from "../lib/markets";
 import { DEFAULT_LEAGUE_CODE, useSelectedLeagueCode } from "../lib/leagues";
+import { matchesSearch } from "../lib/teamSearch";
 import { useApi } from "../lib/useApi";
 
 type Mode = "team" | "referee";
@@ -85,6 +86,8 @@ function MarketView({
   const [viewMode, setViewMode] = useState<ViewMode>("split");
   const [lastN, setLastN] = useState<number | null>(null);
   const [sort, setSort] = useState<SortMode>("pct");
+  // Se conserva al cambiar de mercado o de liga: así se sigue a un equipo.
+  const [query, setQuery] = useState("");
 
   const { data: leagues } = useApi(() => getLeagues(), []);
 
@@ -137,6 +140,7 @@ function MarketView({
         b.overall.total - a.overall.total ||
         a.group.name.localeCompare(b.group.name, "es"),
   );
+  const visible = rows.filter((r) => matchesSearch(r.group.name, query));
 
   // Media de la liga por partido: solo tiene sentido si el mercado da lo
   // mismo mire desde el equipo que se mire (ver MarketDef.matchLevel).
@@ -161,6 +165,15 @@ function MarketView({
       <LeagueSwitch leagues={leagues} value={leagueCode} onChange={(code) => code && setLeagueCode(code)} />
 
       <div className="filters">
+        <input
+          type="search"
+          className="market-search"
+          aria-label={`Buscar ${groupNoun}`}
+          placeholder={`Buscar ${groupNoun}…`}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+
         {mode === "referee" && (
           <select aria-label="Mercado" value={market.slug} onChange={(e) => onMarketChange?.(e.target.value)}>
             {REFEREE_MARKETS.map((m) => (
@@ -293,9 +306,13 @@ function MarketView({
         />
       )}
 
-      {!loading && !error && rows.length > 0 && (
+      {!loading && !error && rows.length > 0 && visible.length === 0 && (
+        <EmptyView message={`Ningún ${groupNoun} de esta liga coincide con «${query.trim()}». Prueba en otra liga.`} />
+      )}
+
+      {!loading && !error && visible.length > 0 && (
         <div className="market-teams">
-          {rows.map(({ group, overall }) => (
+          {visible.map(({ group, overall }) => (
             <GroupCard
               key={group.key}
               group={group}
@@ -309,7 +326,7 @@ function MarketView({
         </div>
       )}
 
-      {!loading && !error && rows.length > 0 && (
+      {!loading && !error && visible.length > 0 && (
         <p className="muted small">
           Verde: se cumplió «{option.label}». Rojo: no se cumplió.
           {market.detail && ` La columna de la derecha es: ${market.detail.label.toLowerCase()} (local - visitante).`}
