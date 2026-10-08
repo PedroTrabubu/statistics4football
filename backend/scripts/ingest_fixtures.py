@@ -3,7 +3,8 @@
 1. football-data.org: partidos jugados (con marcador real) y por jugar de
    las ligas que da su plan gratuito. Requiere FOOTBALL_DATA_ORG_API_KEY.
 2. CSV de la temporada en Football-Data.co.uk: resultados, cuotas, córners y
-   tarjetas de los partidos ya jugados, en todas las ligas activas.
+   tarjetas de los partidos ya jugados, en todas las ligas activas. Y su xG
+   de Understat, en las ligas que cubre.
 3. fixtures.csv de Football-Data.co.uk: la próxima jornada con sus cuotas
    pre-partido (único calendario de LaLiga Hypermotion).
 
@@ -27,6 +28,8 @@ from app.ingestion.fixtures_csv import sync_fixtures_csv
 from app.ingestion.historical_backfill import backfill_match_history, season_name_for
 from app.ingestion.odds_api_client import LEAGUE_SPORT_KEY_MAP
 from app.ingestion.referee_overrides import apply_referee_overrides
+from app.ingestion.soccerdata_client import leagues_with_source
+from app.ingestion.xg_backfill import backfill_understat_xg
 
 
 def main() -> None:
@@ -45,6 +48,12 @@ def main() -> None:
         except ConnectionError as exc:
             # Al empezar la temporada su CSV aún no existe.
             print(f"AVISO Football-Data.co.uk {season}: {exc}")
+
+        try:
+            run = backfill_understat_xg(db, leagues=leagues_with_source(settings.leagues, "Understat"), seasons=[season])
+            print(f"Understat xG {season}: status={run.status.value} partidos_actualizados={run.rows_ingested}")
+        except Exception as exc:  # noqa: BLE001  (el xG es un extra: no frena el resto)
+            print(f"AVISO Understat {season}: {exc}")
 
         odds_api_leagues = (
             {code for code in settings.model_leagues if code in LEAGUE_SPORT_KEY_MAP}

@@ -6,12 +6,14 @@ Uso (desde backend/, con el venv activado):
 """
 
 import sys
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.core.config import get_settings
 from app.db.session import SessionLocal
+from app.ingestion.historical_backfill import seasons_until
 from app.ingestion.soccerdata_client import leagues_with_source
 from app.ingestion.xg_backfill import backfill_understat_xg
 
@@ -21,7 +23,11 @@ def main() -> None:
     db = SessionLocal()
     try:
         # Understat no cubre todas las ligas (LaLiga Hypermotion, por ejemplo).
-        run = backfill_understat_xg(db, leagues=leagues_with_source(settings.leagues, "Understat"))
+        run = backfill_understat_xg(
+            db,
+            leagues=leagues_with_source(settings.leagues, "Understat"),
+            seasons=seasons_until(date.today()),
+        )
         print(f"Understat xG: status={run.status.value} partidos_actualizados={run.rows_ingested}")
         print(run.notes)
     finally:
