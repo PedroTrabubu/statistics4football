@@ -59,7 +59,7 @@ Copy `.env.example` to `.env` in the project root and fill in your keys:
 | `FOOTBALL_DATA_ORG_API_KEY` | Yes | Current season results and fixtures |
 | `THE_ODDS_API_KEY` | No | Pre-match odds for upcoming matches |
 | `ACTIVE_LEAGUES` | No | Leagues to load (default: `ENG-Premier League,ESP-La Liga,ESP-La Liga 2,FRA-Ligue 1`) |
-| `VALIDATED_LEAGUES` | No | Leagues where Picks and Recommendations are offered, once backtested (default: `ENG-Premier League,ESP-La Liga`) |
+| `VALIDATED_LEAGUES` | No | Leagues where Picks and Recommendations are offered, once backtested (default: `ENG-Premier League,ESP-La Liga,ESP-La Liga 2`; see [docs/LIGAS_NUEVAS.md](docs/LIGAS_NUEVAS.md)) |
 | `EV_THRESHOLD` | No | Minimum expected value to flag a value pick (default: `0.05`) |
 
 `.env` is in `.gitignore` and is never committed.

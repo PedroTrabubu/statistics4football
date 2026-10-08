@@ -8,6 +8,11 @@ Tres fases, en este orden:
     python scripts/backtest_pattern_model.py export  # guarda el modelo probado en el test para la web
     python scripts/backtest_pattern_model.py history # vuelca sus selecciones del test al historico de la web
 
+Ligas nuevas (protocolo en docs/LIGAS_NUEVAS.md), con el modelo de la web sin tocar:
+
+    python scripts/backtest_pattern_model.py build-ligas  # dataset de LaLiga Hypermotion y Ligue 1
+    python scripts/backtest_pattern_model.py ligas        # una sola vez: criterios de validacion por liga
+
 `dev` nunca lee filas del test. `test` se niega a ejecutarse sin la
 configuracion congelada por `dev`.
 """
@@ -23,6 +28,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from app.core.config import get_settings  # noqa: E402
 from app.db.models import League, Match, MatchOdds, MatchStatus, ModelPrediction  # noqa: E402
 from app.db.session import SessionLocal  # noqa: E402
 from app.probability.engine import fit_league_model  # noqa: E402
@@ -37,6 +43,7 @@ from app.probability.pattern_model import (  # noqa: E402
     PatternTracker,
     choose_selection,
     fit_logistic,
+    load_params,
     logit,
     market_probabilities,
     selection_probs_from_matrix,
@@ -51,6 +58,8 @@ WARMUP = ["2021"]
 TRAIN = ["2122", "2223", "2324"]
 VALIDATION = ["2425"]
 TEST = ["2526", "2627"]
+# Ligas del protocolo: el modelo de la web se entrena y se prueba solo con ellas.
+PROTOCOL_LEAGUES = ["ENG-Premier League", "ESP-La Liga"]
 
 TARGET_HIT_RATE = 0.72
 MIN_PICKS_TAU = 100
@@ -82,11 +91,11 @@ def _prematch_odds(db, match_ids: list[int]) -> dict[int, dict[str, float]]:
     return out
 
 
-def build() -> None:
+def build(league_codes: list[str] | None = None, path: Path = DATASET) -> None:
     db = SessionLocal()
     records = []
     try:
-        for league in db.query(League).all():
+        for league in db.query(League).filter(League.code.in_(league_codes or PROTOCOL_LEAGUES)).all():
             matches = (
                 db.query(Match)
                 .filter(
@@ -149,8 +158,8 @@ def build() -> None:
         db.close()
 
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame.from_records(records).to_csv(DATASET, index=False)
-    print(f"Dataset: {len(records)} partidos -> {DATASET}")
+    pd.DataFrame.from_records(records).to_csv(path, index=False)
+    print(f"Dataset: {len(records)} partidos -> {path}")
 
 
 # --- modelos -----------------------------------------------------------------
@@ -384,10 +393,16 @@ def export() -> None:
 def history() -> None:
     """Guarda como pattern_v1 las predicciones de los partidos del test, con
     el mismo modelo y la misma regla del test: es el historico real fuera de
-    muestra que muestra la web (sin elegir nada a posteriori)."""
+    muestra que muestra la web (sin elegir nada a posteriori). Incluye las
+    ligas nuevas ya validadas (docs/LIGAS_NUEVAS.md), en el mismo periodo."""
     params = _tested_params()
     test_df = load_dataset()
-    test_df = test_df[test_df.season.isin(TEST)].reset_index(drop=True)
+    test_df = test_df[test_df.season.isin(TEST)]
+    extra_leagues = validated_new_leagues()
+    if extra_leagues:
+        new_df = pd.read_csv(NEW_LEAGUES_DATASET, dtype={"season": str})
+        test_df = pd.concat([test_df, new_df[new_df.league.isin(extra_leagues) & new_df.season.isin(TEST)]])
+    test_df = test_df.reset_index(drop=True)
 
     db = SessionLocal()
     try:
@@ -398,7 +413,7 @@ def history() -> None:
 
         # Muestra point-in-time de cada partido: partidos previos de cada equipo.
         matches_used: dict[int, int] = {}
-        for league in db.query(League).all():
+        for league in db.query(League).filter(League.code.in_(PROTOCOL_LEAGUES + extra_leagues)).all():
             tracker = PatternTracker()
             for m in (
                 db.query(Match)
@@ -433,12 +448,93 @@ def history() -> None:
             n_picks += sum(r.is_recommended for r in rows)
             db.add_all(rows)
         db.commit()
-        print(f"Historico pattern_v1: {len(test_df)} partidos, {n_picks} selecciones recomendadas")
+        print(
+            f"Historico pattern_v1: {len(test_df)} partidos, {n_picks} selecciones recomendadas"
+            f" (ligas nuevas validadas: {extra_leagues or 'ninguna'})"
+        )
     finally:
         db.close()
 
 
+# --- ligas nuevas (docs/LIGAS_NUEVAS.md) -------------------------------------
+
+NEW_LEAGUES_DATASET = CACHE_DIR / "pattern_dataset_ligas_nuevas.csv"
+NEW_LEAGUES_SEASONS = TRAIN + VALIDATION + TEST  # todo fuera de muestra: el modelo no vio estas ligas
+NEW_LEAGUES_MIN_PICKS = 200
+NEW_LEAGUES_MAX_GAP_PP = 3.0
+NEW_LEAGUES_MAX_DC_GAP = 0.010
+NEW_LEAGUES = ["ESP-La Liga 2", "FRA-Ligue 1"]
+
+
+def validated_new_leagues() -> list[str]:
+    """Las ligas nuevas que pasaron la validacion y estan en VALIDATED_LEAGUES."""
+    return [code for code in NEW_LEAGUES if code in get_settings().model_leagues]
+
+
+def build_new_leagues() -> None:
+    build(NEW_LEAGUES, NEW_LEAGUES_DATASET)
+
+
+def _dc_gap(df: pd.DataFrame) -> float:
+    """Log-loss de Dixon-Coles menos el del mercado en 1X2 (positivo: peor que el mercado)."""
+    preds = {
+        "mercado": {k: df[f"mkt_{k}"].to_numpy() for k in SELECTION_KEYS},
+        "dixon_coles": {k: df[f"dc_{k}"].to_numpy() for k in SELECTION_KEYS},
+    }
+    ll = log_losses(df, preds)
+    return ll["dixon_coles"]["1x2"] - ll["mercado"]["1x2"]
+
+
+def new_leagues() -> None:
+    """Una sola ejecucion: el modelo de la web, sin tocar, en cada liga nueva."""
+    params = load_params()
+    if params is None:
+        sys.exit("Falta pattern_model_params.json: es el modelo que se evalua.")
+    if not NEW_LEAGUES_DATASET.exists():
+        sys.exit("Falta el dataset de las ligas nuevas: ejecuta primero `build-ligas`.")
+    df_all = pd.read_csv(NEW_LEAGUES_DATASET, dtype={"season": str})
+    df_all = df_all[df_all.season.isin(NEW_LEAGUES_SEASONS)]
+    reference = load_dataset()
+    reference_gap = _dc_gap(reference[reference.season.isin(NEW_LEAGUES_SEASONS)].reset_index(drop=True))
+    print(f"Modelo: entrenado con {params.trained_on}, tau={params.tau}, delta={params.delta}")
+    print(f"Referencia Premier + LaLiga {NEW_LEAGUES_SEASONS}: Dixon-Coles - mercado (log-loss 1X2) = {reference_gap:+.4f}")
+
+    results = {"referencia_dc_menos_mercado": round(reference_gap, 4)}
+    for league, df in df_all.groupby("league"):
+        df = df.reset_index(drop=True)
+        probs = {k: params.models[k].predict(_features(df, k, FEATURE_SOURCES)) for k in SELECTION_KEYS}
+        res = evaluate_picks(df, probs, pick(df, probs, params.tau, params.delta))
+        gap = _dc_gap(df)
+        criteria = {
+            "1_muestra": res["n"] >= NEW_LEAGUES_MIN_PICKS,
+            "2_acierta_lo_que_promete": res["n"] > 0 and res["acierto"] >= res["prob_modelo_media"] - NEW_LEAGUES_MAX_GAP_PP,
+            "6_dixon_coles": gap <= reference_gap + NEW_LEAGUES_MAX_DC_GAP,
+        }
+        results[league] = {"partidos": len(df), "alta_probabilidad": res, "dc_menos_mercado": round(gap, 4), "criterios": criteria}
+        print(f"\n=== {league}: {len(df)} partidos ===")
+        print(
+            f"  Alta probabilidad: selecciones={res['n']} acierto={res['acierto']}% prometido={res['prob_modelo_media']}%"
+            f" mercado esperaba={res['prob_mercado_media']}% ROI={res['roi_pct']}% ({res['con_cuota']} con cuota)"
+        )
+        print(f"  {res['por_mercado']}")
+        print(f"  Dixon-Coles - mercado (log-loss 1X2) = {gap:+.4f}")
+        for name, ok in criteria.items():
+            print(f"  criterio {name}: {'CUMPLE' if ok else 'NO CUMPLE'}")
+
+    out = CACHE_DIR / "ligas_nuevas_patrones.json"
+    out.write_text(json.dumps(results, indent=2, ensure_ascii=False, default=bool), encoding="utf-8")
+    print(f"\nResultados en {out}")
+
+
 if __name__ == "__main__":
     stage = sys.argv[1] if len(sys.argv) > 1 else ""
-    stages = {"build": build, "dev": dev, "test": test, "export": export, "history": history}
+    stages = {
+        "build": build,
+        "dev": dev,
+        "test": test,
+        "export": export,
+        "history": history,
+        "build-ligas": build_new_leagues,
+        "ligas": new_leagues,
+    }
     stages.get(stage, lambda: sys.exit(__doc__))()
