@@ -940,6 +940,11 @@ h4 {
 .market-league-rate {
   margin: -0.6rem 0 1.2rem;
 }
+/* Buscador de equipos / árbitros en Mercados */
+.market-search {
+  flex: 1 1 14rem;
+  max-width: 22rem;
+}
 .market-teams {
   display: flex;
   flex-direction: column;
