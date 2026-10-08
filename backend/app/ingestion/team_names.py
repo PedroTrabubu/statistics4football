@@ -42,6 +42,8 @@ TEAM_ALIASES: dict[str, str] = {
     "Rayo Vallecano": "Vallecano",
     "West Bromwich Albion": "West Brom",
     "Wolverhampton Wanderers": "Wolves",
+    "Deportivo La Coruna": "La Coruna",
+    "Racing Santander": "Santander",
     "Clermont Foot": "Clermont",
     "Paris Saint Germain": "Paris SG",
     "Saint-Etienne": "St Etienne",
