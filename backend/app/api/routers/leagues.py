@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from app.core.config import Settings, get_settings
 from app.db.models import League, Match, MatchStatus, Season
 from app.db.session import get_db
 from app.schemas.league import LeagueOut
@@ -16,8 +17,11 @@ router = APIRouter(prefix="/leagues", tags=["leagues"])
 
 
 @router.get("", response_model=list[LeagueOut])
-def list_leagues(db: Session = Depends(get_db)) -> list[League]:
-    return db.query(League).order_by(League.name).all()
+def list_leagues(db: Session = Depends(get_db), settings: Settings = Depends(get_settings)) -> list[LeagueOut]:
+    return [
+        LeagueOut.model_validate(league).model_copy(update={"validated": league.code in settings.model_leagues})
+        for league in db.query(League).order_by(League.name)
+    ]
 
 
 @router.get("/{league_id}/seasons", response_model=list[str])

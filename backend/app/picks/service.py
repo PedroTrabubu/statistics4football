@@ -4,6 +4,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.db.models import League, Match, MatchStatus, PickCombo, PickLeg, TeamMatchStats
 from app.picks.combos import TIERS, Combo, build_same_match_combo, build_tier_combo
 from app.picks.count_model import STATS, CountTracker
@@ -105,11 +106,17 @@ def _count_trackers(db: Session, league_id: int) -> dict[str, CountTracker]:
 
 
 def next_window_matches(db: Session, now: datetime | None = None) -> tuple[str | None, list[Match]]:
-    """Partidos programados de la proxima jornada (ventana martes-lunes del primer partido por jugar)."""
+    """Partidos programados de la proxima jornada (ventana martes-lunes del primer partido por jugar),
+    solo de las ligas en las que los Picks estan validados."""
     now = now or datetime.utcnow()  # la base guarda UTC
     upcoming = (
         db.query(Match)
-        .filter(Match.status == MatchStatus.SCHEDULED, Match.date >= now)
+        .join(League, League.id == Match.league_id)
+        .filter(
+            Match.status == MatchStatus.SCHEDULED,
+            Match.date >= now,
+            League.code.in_(get_settings().model_leagues),
+        )
         .order_by(Match.date.asc())
         .all()
     )

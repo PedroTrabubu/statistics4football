@@ -3,7 +3,8 @@ from typing import Literal
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.db.models import Match, MatchStatus, ModelPrediction, RiskLevel
+from app.core.config import Settings, get_settings
+from app.db.models import League, Match, MatchStatus, ModelPrediction, RiskLevel
 from app.db.session import get_db
 from app.probability.engine import MODEL_VERSION as VALUE_MODEL_VERSION
 from app.probability.pattern_model import MODEL_VERSION as PATTERN_MODEL_VERSION
@@ -25,6 +26,22 @@ Strategy = Literal["valor", "alta_probabilidad"]
 MODEL_VERSIONS: dict[str, str] = {"valor": VALUE_MODEL_VERSION, "alta_probabilidad": PATTERN_MODEL_VERSION}
 
 
+def _recommended(db: Session, settings: Settings, strategy: Strategy, status: MatchStatus):
+    """Selecciones marcadas por el modelo, solo en ligas validadas: la ficha de
+    un partido guarda predicciones de cualquier liga, validada o no."""
+    return (
+        db.query(ModelPrediction)
+        .join(Match, Match.id == ModelPrediction.match_id)
+        .join(League, League.id == Match.league_id)
+        .filter(
+            ModelPrediction.is_recommended.is_(True),
+            ModelPrediction.model_version == MODEL_VERSIONS[strategy],
+            Match.status == status,
+            League.code.in_(settings.model_leagues),
+        )
+    )
+
+
 @router.get("", response_model=list[RecommendationOut])
 def list_recommendations(
     league_id: int | None = None,
@@ -34,6 +51,7 @@ def list_recommendations(
     strategy: Strategy = "valor",
     limit: int = Query(50, le=200),
     db: Session = Depends(get_db),
+    settings: Settings = Depends(get_settings),
 ) -> list[RecommendationOut]:
     """Recomendaciones para partidos aun por jugar (nunca partidos ya
     finalizados: esos son historico, ver GET /recommendations/history).
@@ -42,15 +60,7 @@ def list_recommendations(
     Requiere que las predicciones de los partidos programados esten
     generadas de antemano — ver scripts/refresh_predictions.py, re-ejecutable
     en cualquier momento."""
-    query = (
-        db.query(ModelPrediction)
-        .join(Match, Match.id == ModelPrediction.match_id)
-        .filter(
-            ModelPrediction.is_recommended.is_(True),
-            ModelPrediction.model_version == MODEL_VERSIONS[strategy],
-            Match.status == MatchStatus.SCHEDULED,
-        )
-    )
+    query = _recommended(db, settings, strategy, MatchStatus.SCHEDULED)
     if league_id is not None:
         query = query.filter(Match.league_id == league_id)
     if market is not None:
@@ -98,6 +108,7 @@ def list_recommendation_history(
     strategy: Strategy = "valor",
     limit: int = Query(50, le=200),
     db: Session = Depends(get_db),
+    settings: Settings = Depends(get_settings),
 ) -> RecommendationHistoryListOut:
     """Historico de recomendaciones sobre partidos ya jugados: que se marco
     como valor (is_recommended) y si acerto o no, con el PnL real (no solo
@@ -108,15 +119,7 @@ def list_recommendation_history(
 
     Se alimenta de scripts/generate_predictions.py (backtest walk-forward
     sobre la temporada mas reciente ya jugada)."""
-    query = (
-        db.query(ModelPrediction)
-        .join(Match, Match.id == ModelPrediction.match_id)
-        .filter(
-            ModelPrediction.is_recommended.is_(True),
-            ModelPrediction.model_version == MODEL_VERSIONS[strategy],
-            Match.status == MatchStatus.HISTORICAL,
-        )
-    )
+    query = _recommended(db, settings, strategy, MatchStatus.HISTORICAL)
     if league_id is not None:
         query = query.filter(Match.league_id == league_id)
     if market is not None:

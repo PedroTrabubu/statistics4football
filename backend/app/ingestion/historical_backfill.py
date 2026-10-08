@@ -5,7 +5,7 @@ Elo (ClubElo) se reconcilian contra los partidos/equipos creados aqui.
 """
 
 import logging
-from datetime import datetime
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -24,6 +24,7 @@ from app.db.models import (
 )
 from app.ingestion.odds_columns import extract_all_odds
 from app.ingestion.soccerdata_client import get_match_history_reader
+from app.ingestion.team_leagues import refresh_team_leagues
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,14 @@ def uk_local_to_utc(local: datetime) -> datetime:
     guarda UTC sin zona (como football-data.org), y la web la convierte a la
     hora local del navegador."""
     return local.replace(tzinfo=UK_TZ).astimezone(UTC).replace(tzinfo=None)
+
+
+def season_name_for(day: date) -> str:
+    """Temporada que contiene ese día, en el formato de Football-Data.co.uk
+    ("2627" para 2026-27). Las temporadas empiezan en julio."""
+    start = day.year if day.month >= 7 else day.year - 1
+    return f"{start % 100:02d}{(start + 1) % 100:02d}"
+
 
 def _get_or_create_league(db: Session, code: str) -> League:
     league = db.query(League).filter_by(code=code).one_or_none()
@@ -206,12 +215,13 @@ def backfill_match_history(
 
             rows_ingested += 1
 
+        moved = refresh_team_leagues(db)
         db.commit()
         run.status = IngestionStatus.SUCCESS
         run.rows_ingested = rows_ingested
         run.finished_at = datetime.utcnow()
         db.commit()
-        logger.info("MatchHistory backfill: %d partidos procesados", rows_ingested)
+        logger.info("MatchHistory backfill: %d partidos procesados, %d equipos cambian de liga", rows_ingested, moved)
     except Exception as exc:  # noqa: BLE001
         db.rollback()
         run.status = IngestionStatus.FAILED

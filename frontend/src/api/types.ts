@@ -6,6 +6,8 @@ export interface League {
   code: string;
   name: string;
   country: string | null;
+  /** Picks y Recomendaciones validados en esta liga. */
+  validated: boolean;
 }
 
 export interface Team {

@@ -262,7 +262,13 @@ def get_team_season_stats(
     if season_name is None:
         season = latest_season_with_history(db, team.league_id)
     else:
-        season = db.query(Season).filter_by(league_id=team.league_id, name=season_name).one_or_none()
+        # En la liga en la que jugó esa temporada, que puede no ser la actual.
+        season = (
+            db.query(Season)
+            .join(Match, Match.season_id == Season.id)
+            .filter(Season.name == season_name, or_(Match.home_team_id == team.id, Match.away_team_id == team.id))
+            .first()
+        )
 
     if season is None:
         return None
@@ -309,6 +315,13 @@ def compute_league_season_stats(
     if season is None:
         return []
 
-    teams = db.query(Team).filter_by(league_id=league_id).order_by(Team.name).all()
+    # Los equipos que jugaron esa temporada en esa liga, no los que tienen hoy
+    # esa liga: un equipo que luego ascendió o descendió tiene otra liga actual.
+    team_ids = {
+        team_id
+        for row in db.query(Match.home_team_id, Match.away_team_id).filter(Match.season_id == season.id)
+        for team_id in row
+    }
+    teams = db.query(Team).filter(Team.id.in_(team_ids)).order_by(Team.name).all()
     stats = [compute_team_season_stats(db, team, season) for team in teams]
     return [s for s in stats if s.overall.matches_played > 0]

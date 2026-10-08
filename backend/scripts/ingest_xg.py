@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.core.config import get_settings
 from app.db.session import SessionLocal
+from app.ingestion.soccerdata_client import leagues_with_source
 from app.ingestion.xg_backfill import backfill_understat_xg
 
 
@@ -19,7 +20,8 @@ def main() -> None:
     settings = get_settings()
     db = SessionLocal()
     try:
-        run = backfill_understat_xg(db, leagues=settings.leagues)
+        # Understat no cubre todas las ligas (LaLiga Hypermotion, por ejemplo).
+        run = backfill_understat_xg(db, leagues=leagues_with_source(settings.leagues, "Understat"))
         print(f"Understat xG: status={run.status.value} partidos_actualizados={run.rows_ingested}")
         print(run.notes)
     finally:

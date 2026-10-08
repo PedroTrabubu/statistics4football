@@ -6,7 +6,7 @@ import { LeagueSwitch } from "../components/LeagueSwitch";
 import { OutcomeBadge } from "../components/OutcomeBadge";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
 import { formatDateTime, formatRoiPct } from "../lib/format";
-import { leagueName, useSelectedLeagueCode } from "../lib/leagues";
+import { leagueName, onlyValidated, useSelectedLeagueCode } from "../lib/leagues";
 import { ODDS_KIND_TITLES, PICK_KIND_LABELS, TIER_KINDS, oneInN, pickLegLabel, pickLegUnit } from "../lib/picks";
 import { useApi } from "../lib/useApi";
 
@@ -35,8 +35,9 @@ function formatWindow(window: string): string {
 
 export function PicksPage() {
   const [tab, setTab] = useState<Tab>("upcoming");
-  const [leagueCode, setLeagueCode] = useSelectedLeagueCode();
-  const { data: leagues } = useApi(() => getLeagues(), []);
+  const [selectedCode, setLeagueCode] = useSelectedLeagueCode();
+  const { data: allLeagues } = useApi(() => getLeagues(), []);
+  const { leagues, code: leagueCode, pending } = onlyValidated(allLeagues, selectedCode);
 
   return (
     <div>
@@ -48,6 +49,7 @@ export function PicksPage() {
       </p>
 
       <LeagueSwitch leagues={leagues} value={leagueCode} onChange={setLeagueCode} allowAll />
+      {pending && <p className="small muted">{pending}</p>}
 
       <div className="tab-group tab-group-spaced">
         <button
