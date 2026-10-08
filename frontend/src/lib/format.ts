@@ -73,6 +73,27 @@ export function formatSeason(season: string): string {
   return `${season.slice(0, 2)}/${season.slice(2)}`;
 }
 
+/** "Jornada 8"; null si no se conoce. */
+export function formatMatchday(matchday: number | null | undefined): string | null {
+  return matchday == null ? null : `Jornada ${matchday}`;
+}
+
+/** Las partes que haya, unidas con " · " (liga · jornada · fecha). */
+export function joinParts(...parts: (string | null | undefined)[]): string {
+  return parts.filter(Boolean).join(" · ");
+}
+
+/** "9–12 oct" o "28 sept – 1 oct": fechas de una jornada. */
+export function formatDateRange(startIso: string, endIso: string): string {
+  const start = parseApiDate(startIso);
+  const end = parseApiDate(endIso);
+  const day = (d: Date) => d.toLocaleDateString("es-ES", { day: "numeric" });
+  const dayMonth = (d: Date) => d.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+  if (start.toDateString() === end.toDateString()) return dayMonth(start);
+  if (start.getMonth() === end.getMonth()) return `${day(start)}–${dayMonth(end)}`;
+  return `${dayMonth(start)} – ${dayMonth(end)}`;
+}
+
 export function formatDateTime(iso: string): string {
   const date = parseApiDate(iso);
   if (isTimeUnknown(date)) {

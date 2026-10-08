@@ -21,6 +21,9 @@ class MatchOut(BaseModel):
     home_ht_goals: int | None = None
     away_ht_goals: int | None = None
     referee: str | None = None
+    matchday: int | None = None
+    # Jornada deducida de las fechas, no dada por la fuente (ver app/ingestion/matchdays.py).
+    matchday_estimated: bool = False
 
 
 class TeamMatchStatsOut(BaseModel):
@@ -65,6 +68,8 @@ def match_to_out(match: Match) -> MatchOut:
         home_ht_goals=match.home_ht_goals,
         away_ht_goals=match.away_ht_goals,
         referee=match.referee,
+        matchday=match.matchday,
+        matchday_estimated=match.matchday_estimated,
     )
 
 

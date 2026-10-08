@@ -5,7 +5,7 @@ import { RefereePanel } from "../components/RefereePanel";
 import { SeasonStatsSummary } from "../components/SeasonStatsSummary";
 import { ErrorView, LoadingView } from "../components/StatusView";
 import { StatsPanel } from "../components/StatsPanel";
-import { formatDateTime, formatSeason } from "../lib/format";
+import { formatDateTime, formatMatchday, formatSeason, joinParts } from "../lib/format";
 import { leagueName } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 
@@ -50,7 +50,12 @@ export function MatchDetailPage() {
         {match.away_team}
       </h1>
       <p className="muted">
-        {leagueName(match.league_code)} · Temporada {formatSeason(match.season)} · {formatDateTime(match.date)}
+        {joinParts(
+          leagueName(match.league_code),
+          `Temporada ${formatSeason(match.season)}`,
+          formatMatchday(match.matchday),
+          formatDateTime(match.date),
+        )}
       </p>
 
       <section className="detail-section">

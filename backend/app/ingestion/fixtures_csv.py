@@ -28,6 +28,7 @@ from app.ingestion.historical_backfill import (
     season_name_for,
     uk_local_to_utc,
 )
+from app.ingestion.matchdays import refresh_estimated_matchdays
 from app.ingestion.odds_columns import extract_all_odds
 from app.ingestion.soccerdata_client import LEAGUE_DICT, fetch_football_data_csv, leagues_with_source
 from app.ingestion.team_leagues import refresh_team_leagues
@@ -115,6 +116,7 @@ def sync_fixtures_csv(db: Session, leagues: list[str], odds_api_leagues: set[str
                 with_odds += 1
 
         refresh_team_leagues(db)
+        refresh_estimated_matchdays(db)
         db.commit()
         run.status = IngestionStatus.SUCCESS
         run.rows_ingested = created + updated

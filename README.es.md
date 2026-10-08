@@ -86,6 +86,7 @@ Desde `backend/`, con el entorno virtual activado:
 python scripts/ingest_historical.py    # temporadas pasadas: resultados, córners, tarjetas, cuotas
 python scripts/ingest_xg.py            # xG de Understat
 python scripts/ingest_elo.py           # rating Elo de ClubElo
+python scripts/ingest_matchdays.py     # jornadas de las temporadas pasadas (una sola vez)
 python scripts/ingest_fixtures.py      # temporada en curso: resultados, estadísticas, próximos partidos y sus cuotas
 python scripts/refresh_odds.py         # opcional: cuotas más frescas en las ligas validadas (gasta créditos)
 python scripts/refresh_predictions.py  # probabilidades de los próximos partidos
