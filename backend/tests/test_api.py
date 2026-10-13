@@ -234,3 +234,60 @@ def test_match_referee_stats_is_point_in_time() -> None:
     season_only = client.get(f"/matches/{match_id}/referee-stats").json()
     all_seasons = client.get(f"/matches/{match_id}/referee-stats", params={"referee_scope": "all"}).json()
     assert len(all_seasons["referee_matches"]) >= len(season_only["referee_matches"])
+
+
+def test_match_history_is_point_in_time_and_two_seasons() -> None:
+    db = SessionLocal()
+    try:
+        match = (
+            db.query(Match)
+            .filter(Match.status == MatchStatus.HISTORICAL)
+            .order_by(Match.date.desc())
+            .first()
+        )
+        assert match is not None
+        match_id, match_date, league_id = match.id, match.date.isoformat(), match.league_id
+    finally:
+        db.close()
+
+    response = client.get(f"/matches/{match_id}/history")
+    assert response.status_code == 200
+    body = response.json()
+    seasons = client.get(f"/leagues/{league_id}/seasons").json()
+    assert body["seasons"] == seasons[:2]
+    matches = body["matches"]
+    assert len(matches) > 0
+    # Nada del propio partido ni posterior: los patrones no pueden ver el futuro.
+    assert all(m["date"] < match_date and m["id"] != match_id for m in matches)
+    assert all(m["status"] == "historical" and m["league_id"] == league_id for m in matches)
+    assert {m["season"] for m in matches} <= set(body["seasons"])
+    dates = [m["date"] for m in matches]
+    assert dates == sorted(dates, reverse=True)
+    # Ya jugado: su resultado va aparte, para comprobar los picks.
+    assert body["played"]["id"] == match_id
+    assert body["played"]["home_goals"] is not None
+
+
+def test_match_history_of_unplayed_match_has_no_result() -> None:
+    db = SessionLocal()
+    try:
+        match = db.query(Match).filter(Match.status == MatchStatus.SCHEDULED).first()
+        assert match is not None
+        match_id = match.id
+    finally:
+        db.close()
+    assert client.get(f"/matches/{match_id}/history").json()["played"] is None
+
+
+def test_match_history_404_for_unknown_match() -> None:
+    assert client.get("/matches/999999999/history").status_code == 404
+
+
+def test_large_responses_are_gzipped() -> None:
+    db = SessionLocal()
+    try:
+        league = db.query(League).filter_by(code="ENG-Premier League").one()
+    finally:
+        db.close()
+    response = client.get(f"/leagues/{league.id}/results", headers={"Accept-Encoding": "gzip"})
+    assert response.headers.get("content-encoding") == "gzip"

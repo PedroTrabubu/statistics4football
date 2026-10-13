@@ -43,6 +43,18 @@ class MatchResultOut(MatchOut):
     away_stats: TeamMatchStatsOut | None
 
 
+class MatchHistoryOut(BaseModel):
+    """Partidos de la liga jugados antes de uno dado (su temporada y la
+    anterior), mas recientes primero: el historial con el que el frontend
+    busca patrones de los dos equipos y mide que es habitual en la liga."""
+
+    seasons: list[str]
+    matches: list[MatchResultOut]
+    # El propio partido con su resultado, si ya se jugo: para comprobar si sus
+    # picks se cumplieron. Nunca entra en `matches`.
+    played: MatchResultOut | None = None
+
+
 class MatchRefereeStatsOut(BaseModel):
     referee: str | None
     referee_scope: str
