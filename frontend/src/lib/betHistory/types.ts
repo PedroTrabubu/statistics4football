@@ -1,4 +1,8 @@
-/** Apuestas importadas del historial de una casa (de momento, Winamax). */
+/** Apuestas importadas del historial de una casa (Winamax o bet365). */
+
+export type Bookmaker = "winamax" | "bet365";
+
+export const BOOKMAKER_LABELS: Record<Bookmaker, string> = { winamax: "Winamax", bet365: "bet365" };
 
 export type BetStatus = "won" | "lost" | "void" | "cashout" | "pending" | "unknown";
 export type SelectionResult = "won" | "lost" | "void" | null;
@@ -33,7 +37,7 @@ export interface BetLeg {
 
 export interface ParsedBet {
   id: string;
-  bookmaker: "winamax";
+  bookmaker: Bookmaker;
   ref: string | null;
   /** Fecha y hora en que se hizo la apuesta, hora local: "2026-10-06T14:09". */
   placedAt: string | null;
