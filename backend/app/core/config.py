@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     football_data_org_api_key: str = ""
     api_football_rapidapi_key: str = ""
     the_odds_api_key: str = ""
+    # Respaldo de la clave pública de laliga.com (designaciones arbitrales),
+    # solo si no se puede leer de su web. Ver app/ingestion/designations.py.
+    laliga_subscription_key: str = ""
 
     ev_threshold: float = 0.05
 

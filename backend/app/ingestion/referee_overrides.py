@@ -1,8 +1,8 @@
 """Arbitros corregidos a mano (data/arbitros_manual.csv).
 
 football-data.org a veces devuelve la lista de arbitros vacia en partidos ya
-jugados, y el CSV de MatchHistory no trae arbitro para LaLiga: esos partidos
-quedan sin arbitro en ninguna fuente. Este fichero los completa, con dos
+jugados, el CSV de MatchHistory no trae arbitro para LaLiga y ESPN tampoco
+los tiene todos: esos partidos quedan sin arbitro. Este fichero los completa, con dos
 fuentes por fila para poder comprobar cada dato. Se aplica al final de cada
 ingesta y siempre prevalece sobre lo que traigan las fuentes automaticas.
 
@@ -32,7 +32,12 @@ def apply_referee_overrides(db: Session, path: Path = OVERRIDES_PATH) -> tuple[i
     home, away = aliased(Team), aliased(Team)
     updated, unmatched = 0, []
     with path.open(encoding="utf-8", newline="") as f:
-        for row in csv.DictReader(f):
+        for raw in csv.DictReader(f):
+            # Un espacio de más al escribir a mano ("ESP-La Liga, 2026-10-10")
+            # no debe dejar la fila sin partido.
+            row = {(k or "").strip(): (v or "").strip() for k, v in raw.items()}
+            if not row.get("fecha"):
+                continue
             label = f"{row['fecha']} {row['local']} - {row['visitante']}"
             match = (
                 db.query(Match)
