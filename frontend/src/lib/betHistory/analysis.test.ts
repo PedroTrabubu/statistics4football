@@ -10,6 +10,7 @@ import {
   oddsBucket,
   promotionGroups,
   settle,
+  stakeBucket,
   summarize,
   type SettledBet,
 } from "./analysis";
@@ -73,16 +74,32 @@ describe("agrupaciones", () => {
       bet({ odds: 2, status: "lost", returned: 0 }),
     ]);
     const [g] = groupBy(rows, (r) => oddsBucket(r.bet.odds));
-    expect(g).toMatchObject({ key: "2,00 – 2,99", bets: 4, wins: 1, hitRate: 0.25, impliedRate: 0.5, ownStaked: 40, profit: -20 });
+    expect(g).toMatchObject({ key: "2,00 – 2,49", bets: 4, wins: 1, hitRate: 0.25, impliedRate: 0.5, ownStaked: 40, profit: -20 });
     expect(g.roi).toBeCloseTo(-0.5);
   });
 
   it("tipos y tramos", () => {
     expect(betType(bet({ type: "combinada", legsCount: 3 }))).toBe("Combinada de 3");
     expect(betType(bet({ type: "combinada", legsCount: 7 }))).toBe("Combinada de 5 o más");
-    expect(oddsBucket(1.25)).toBe("1,01 – 1,29");
-    expect(oddsBucket(9)).toBe("8,00 o más");
+    expect(oddsBucket(1.25)).toBe("1,01 – 1,49");
+    // Cada tramo empieza en su cuota.
+    expect(oddsBucket(1.5)).toBe("1,50 – 1,99");
+    expect(oddsBucket(2.5)).toBe("2,50 – 2,99");
+    expect(oddsBucket(9)).toBe("5,00 – 9,99");
+    expect(oddsBucket(100)).toBe("40,00 o más");
     expect(oddsBucket(1)).toBeNull();
+  });
+
+  it("tramos de importe: los importes redondos abren su tramo", () => {
+    const of = (stake: number, freebet = false) => stakeBucket(settle(bet({ stake, freebet, returned: 0, status: "lost" }))!);
+    expect(of(0.5)).toBe("Menos de 1 €");
+    expect(of(1)).toBe("1 – 1,99 €");
+    expect(of(2)).toBe("2 – 2,99 €");
+    expect(of(5)).toBe("5 – 9,99 €");
+    expect(of(9.99)).toBe("5 – 9,99 €");
+    expect(of(10)).toBe("10 – 19,99 €");
+    expect(of(40)).toBe("40 € o más");
+    expect(of(5, true)).toBeNull(); // las freebets no cuentan como importe
   });
 
   it("familias de mercado de Winamax", () => {
