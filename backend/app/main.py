@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from app.api.routers import admin, health, leagues, matches, picks, recommendations, teams
 from app.core.config import get_settings
@@ -21,6 +22,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Historiales y resultados de temporada son JSON grandes y repetitivos:
+# comprimidos ocupan ~10 veces menos.
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.include_router(health.router)
 app.include_router(leagues.router)

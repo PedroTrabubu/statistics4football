@@ -9,7 +9,7 @@ from app.core.config import Settings, get_settings
 from app.db.models import Match, MatchStatus, Season
 from app.db.session import get_db
 from app.probability.engine import generate_predictions_for_match, get_cached_league_model
-from app.schemas.match import MatchOut, MatchRefereeStatsOut, match_to_out, match_to_result_out
+from app.schemas.match import MatchHistoryOut, MatchOut, MatchRefereeStatsOut, match_to_out, match_to_result_out
 from app.schemas.prediction import PredictionOut
 from app.schemas.stats import MatchFeaturesOut
 from app.stats.features import compute_match_features
@@ -114,6 +114,33 @@ def _played_before(db: Session, match: Match) -> SAQuery:
             selectinload(Match.team_stats),
         )
         .order_by(Match.date.desc())
+    )
+
+
+# Temporadas de historial para los patrones: la del partido y la anterior.
+HISTORY_SEASONS = 2
+
+
+@router.get("/{match_id}/history", response_model=MatchHistoryOut)
+def get_match_history(match_id: int, db: Session = Depends(get_db)) -> MatchHistoryOut:
+    """Partidos de la liga ya jugados antes de este, de su temporada y de la
+    anterior. Point-in-time como referee-stats: nunca el propio partido ni nada
+    posterior. El frontend saca de aqui los patrones de cada equipo y la
+    frecuencia de cada suceso en la liga."""
+    match = _get_match_or_404(db, match_id)
+    seasons = (
+        db.query(Season)
+        .filter(Season.league_id == match.league_id, Season.name <= match.season.name)
+        .order_by(Season.name.desc())
+        .limit(HISTORY_SEASONS)
+        .all()
+    )
+    rows = _played_before(db, match).filter(Match.season_id.in_([s.id for s in seasons])).all()
+    played = match_to_result_out(match) if match.status == MatchStatus.HISTORICAL else None
+    return MatchHistoryOut(
+        seasons=[s.name for s in seasons],
+        matches=[match_to_result_out(m) for m in rows],
+        played=played,
     )
 
 

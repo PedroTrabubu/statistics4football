@@ -67,6 +67,15 @@ export interface TeamMatchStats {
 
 export type RefereeScope = "season" | "all";
 
+/** GET /matches/{id}/history: partidos de la liga jugados antes de uno dado,
+ * de su temporada y la anterior (mas recientes primero). */
+export interface MatchHistory {
+  seasons: string[];
+  matches: MatchResult[];
+  /** El propio partido con su resultado, si ya se jugo (nunca en `matches`). */
+  played: MatchResult | null;
+}
+
 /** GET /matches/{id}/referee-stats: partidos previos del arbitro y de cada equipo. */
 export interface MatchRefereeStats {
   referee: string | null;
