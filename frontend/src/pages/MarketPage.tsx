@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { getLeagueResults, getLeagueSeasons, getLeagues } from "../api/client";
 import { LeagueSwitch } from "../components/LeagueSwitch";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
+import { TeamName } from "../components/TeamCrest";
 import { formatSeason, formatShortDate } from "../lib/format";
 import {
   MARKETS,
@@ -87,7 +88,13 @@ function MarketView({
   const [lastN, setLastN] = useState<number | null>(null);
   const [sort, setSort] = useState<SortMode>("pct");
   // Se conserva al cambiar de mercado o de liga: así se sigue a un equipo.
-  const [query, setQuery] = useState("");
+  // ?arbitro=Nombre (enlace desde la ficha de un partido): ya filtrado.
+  const [params] = useSearchParams();
+  const [query, setQuery] = useState(params.get("arbitro") ?? "");
+  // Comparar: dos tarjetas marcadas se quedan solas, una al lado de la otra.
+  const [picked, setPicked] = useState<string[]>([]);
+  const toggle = (key: string) =>
+    setPicked((now) => (now.includes(key) ? now.filter((k) => k !== key) : [...now, key].slice(-2)));
 
   const { data: leagues } = useApi(() => getLeagues(), []);
 
@@ -140,7 +147,11 @@ function MarketView({
         b.overall.total - a.overall.total ||
         a.group.name.localeCompare(b.group.name, "es"),
   );
-  const visible = rows.filter((r) => matchesSearch(r.group.name, query));
+  const comparing = picked.filter((k) => rows.some((r) => r.group.key === k));
+  const visible =
+    comparing.length === 2
+      ? comparing.map((k) => rows.find((r) => r.group.key === k)!)
+      : rows.filter((r) => matchesSearch(r.group.name, query));
 
   // Media de la liga por partido: solo tiene sentido si el mercado da lo
   // mismo mire desde el equipo que se mire (ver MarketDef.matchLevel).
@@ -300,7 +311,7 @@ function MarketView({
         <EmptyView
           message={
             mode === "referee" && results && results.length > 0
-              ? `No hay datos de árbitro para esta liga en ${seasonLabel}. La fuente histórica solo trae el árbitro en la Premier League; en LaLiga solo lo tiene la temporada en curso.`
+              ? `No hay datos de árbitro para esta liga en ${seasonLabel}. Fuera de la Premier League, los árbitros vienen de ESPN, que no los tiene antes de la 21/22.`
               : "No hay partidos jugados para esta liga y temporada."
           }
         />
@@ -308,6 +319,17 @@ function MarketView({
 
       {!loading && !error && rows.length > 0 && visible.length === 0 && (
         <EmptyView message={`Ningún ${groupNoun} de esta liga coincide con «${query.trim()}». Prueba en otra liga.`} />
+      )}
+
+      {comparing.length > 0 && (
+        <p className="small market-compare-note">
+          {comparing.length === 2
+            ? `Comparando ${comparing.map((k) => rows.find((r) => r.group.key === k)!.group.name).join(" y ")}.`
+            : `Marca otro ${groupNoun} para compararlo con ${rows.find((r) => r.group.key === comparing[0])!.group.name}.`}{" "}
+          <button type="button" className="link-button" onClick={() => setPicked([])}>
+            Quitar
+          </button>
+        </p>
       )}
 
       {!loading && !error && visible.length > 0 && (
@@ -321,6 +343,9 @@ function MarketView({
               option={option}
               view={view}
               take={take}
+              league={leagueCode}
+              checked={picked.includes(group.key)}
+              onToggle={() => toggle(group.key)}
             />
           ))}
         </div>
@@ -346,6 +371,9 @@ function GroupCard({
   option,
   view,
   take,
+  league,
+  checked,
+  onToggle,
 }: {
   group: MatchGroup;
   overall: HitRate;
@@ -353,6 +381,9 @@ function GroupCard({
   option: MarketOption;
   view: ViewMode;
   take: (views: TeamMatchView[]) => TeamMatchView[];
+  league: string;
+  checked: boolean;
+  onToggle: () => void;
 }) {
   const all = take(group.all);
   const avg = market.average ? average(all, market.average.value) : null;
@@ -361,7 +392,11 @@ function GroupCard({
     <section className="market-team">
       <header className="market-team-header">
         <div>
-          <h2>{group.name}</h2>
+          {/* Por equipo, con su escudo; por arbitro, solo el nombre. */}
+          <h2>{group.teamId !== null ? <TeamName team={group.name} league={league} size="md" /> : group.name}</h2>
+          <label className="market-compare small">
+            <input type="checkbox" checked={checked} onChange={onToggle} /> Comparar
+          </label>
           {avg !== null && market.average && (
             <p className="small muted market-average">
               {avg.toFixed(1)} {market.average.label}
@@ -465,7 +500,7 @@ function MatchList({
             <tr key={match.id} className={rowClass}>
               <td className="market-date">{formatShortDate(match.date)}</td>
               <td className={match.home_team_id === teamId ? "market-home market-self" : "market-home"}>
-                {match.home_team}
+                <TeamName team={match.home_team} league={match.league_code} reverse />
               </td>
               <td className="market-score">
                 <Link to={`/matches/${match.id}`}>
@@ -473,7 +508,7 @@ function MatchList({
                 </Link>
               </td>
               <td className={match.away_team_id === teamId ? "market-away market-self" : "market-away"}>
-                {match.away_team}
+                <TeamName team={match.away_team} league={match.league_code} />
               </td>
               {market.detail && (
                 <td className="market-detail" title={market.detail.label}>

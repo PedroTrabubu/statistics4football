@@ -4,6 +4,7 @@ import { getLeagues, getLeagueSeasonStats, getLeagueSeasons } from "../api/clien
 import type { FormResult, SplitStats, TeamSeasonStats } from "../api/types";
 import { LeagueSwitch } from "../components/LeagueSwitch";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
+import { TeamName } from "../components/TeamCrest";
 import { formatPct } from "../lib/format";
 import { DEFAULT_LEAGUE_CODE, useSelectedLeagueCode } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
@@ -110,13 +111,45 @@ const COLUMNS: Column[] = [
   avgColumn("Tarjetas", "ya", "Del rival", "Media de amarillas del rival por partido", (s) => s.yellow_against_avg),
 ];
 
-/** Grupos consecutivos de COLUMNS para la fila superior de la cabecera. */
-const COLUMN_GROUPS = COLUMNS.reduce<{ group: ColumnGroup; span: number }[]>((acc, col) => {
-  const last = acc[acc.length - 1];
-  if (last?.group === col.group) last.span += 1;
-  else acc.push({ group: col.group, span: 1 });
-  return acc;
-}, []);
+/** Grupos consecutivos de esas columnas para la fila superior de la cabecera. */
+function columnGroups(columns: Column[]) {
+  return columns.reduce<{ group: ColumnGroup; span: number }[]>((acc, col) => {
+    const last = acc[acc.length - 1];
+    if (last?.group === col.group) last.span += 1;
+    else acc.push({ group: col.group, span: 1 });
+    return acc;
+  }, []);
+}
+
+const GROUP_ORDER: ColumnGroup[] = ["General", "Goles", "Descanso", "Corners", "Tarjetas"];
+const GROUP_LABEL: Record<ColumnGroup, string> = {
+  General: "General",
+  Goles: "Goles",
+  Descanso: "Descanso",
+  Corners: "Córners",
+  Tarjetas: "Tarjetas",
+};
+/** Al mostrar un grupo, la tabla se ordena por su columna principal. */
+const GROUP_SORT: Record<ColumnGroup, string> = { General: "pts", Goles: "o25", Descanso: "ht05", Corners: "cf", Tarjetas: "yf" };
+const PRESETS: { label: string; groups: ColumnGroup[] }[] = [
+  { label: "Clasificación", groups: ["General"] },
+  { label: "Goles", groups: ["Goles", "Descanso"] },
+  { label: "Córners y tarjetas", groups: ["Corners", "Tarjetas"] },
+];
+const GROUPS_KEY = "season-stats-groups";
+const groupClass = (g: ColumnGroup) => `grp-${g.toLowerCase()}`;
+
+/** Grupos elegidos la última vez en este navegador; si no, General y Goles
+ * (solo General en el móvil, para que se lea sin desplazar). */
+function initialGroups(): ColumnGroup[] {
+  try {
+    const saved: unknown = JSON.parse(localStorage.getItem(GROUPS_KEY) ?? "null");
+    if (Array.isArray(saved) && saved.length > 0 && saved.every((g) => GROUP_ORDER.includes(g))) return saved;
+  } catch {
+    // sin almacenamiento: los de por defecto
+  }
+  return window.innerWidth < 700 ? ["General"] : ["General", "Goles"];
+}
 
 const MIN_MATCHES_OPTIONS = [0, 3, 5, 10];
 const LOW_SAMPLE = 5;
@@ -153,6 +186,28 @@ export function SeasonStatsPage() {
   const [season, setSeason] = useState<string | undefined>(undefined);
   const [split, setSplit] = useState<SplitKey>("overall");
   const [sort, setSort] = useState<{ key: string; dir: SortDir }>({ key: "pts", dir: "desc" });
+  const [groups, setGroupsState] = useState<ColumnGroup[]>(initialGroups);
+  function setGroups(next: (prev: ColumnGroup[]) => ColumnGroup[], sortBy?: ColumnGroup) {
+    setGroupsState((prev) => {
+      const ordered = GROUP_ORDER.filter((g) => next(prev).includes(g));
+      try {
+        localStorage.setItem(GROUPS_KEY, JSON.stringify(ordered));
+      } catch {
+        // sin almacenamiento: solo para esta visita
+      }
+      return ordered;
+    });
+    if (sortBy) setSort({ key: GROUP_SORT[sortBy], dir: "desc" });
+  }
+  function toggleGroup(group: ColumnGroup) {
+    if (groups.includes(group)) {
+      setGroups((prev) => (prev.length > 1 ? prev.filter((g) => g !== group) : prev));
+    } else {
+      setGroups((prev) => [...prev, group], group);
+    }
+  }
+  const shown = COLUMNS.filter((c) => groups.includes(c.group));
+  const shownGroups = columnGroups(shown);
   const [minMatches, setMinMatches] = useState(0);
   const [heatmap, setHeatmap] = useState(true);
 
@@ -299,6 +354,28 @@ export function SeasonStatsPage() {
         </p>
       )}
 
+      <div className="column-groups" role="group" aria-label="Columnas de la tabla">
+        <span className="small muted">Ver:</span>
+        {GROUP_ORDER.map((group) => (
+          <button
+            key={group}
+            type="button"
+            className={`group-chip ${groupClass(group)}`}
+            aria-pressed={groups.includes(group)}
+            onClick={() => toggleGroup(group)}
+          >
+            {GROUP_LABEL[group]}
+          </button>
+        ))}
+        <span className="column-presets small">
+          {PRESETS.map((preset) => (
+            <button key={preset.label} type="button" className="link-button" onClick={() => setGroups(() => preset.groups, preset.groups[0])}>
+              {preset.label}
+            </button>
+          ))}
+        </span>
+      </div>
+
       {loading && <LoadingView label="Cargando estadísticas..." />}
       {error && <ErrorView message={`No se pudo conectar con la API: ${error}`} />}
       {!loading && !error && standings?.length === 0 && (
@@ -309,26 +386,28 @@ export function SeasonStatsPage() {
       )}
 
       {!loading && !error && sorted && sorted.length > 0 && (
-        <div className="table-scroll">
+        <div className="table-scroll season-stats-scroll">
           <table className="predictions-table season-stats-table">
             <thead>
               <tr className="group-row">
-                <th colSpan={3} />
-                {COLUMN_GROUPS.map(({ group, span }) => (
-                  <th key={group} colSpan={span} className="group-head">
-                    {group}
+                <th className="sticky-pos" />
+                <th className="sticky-team" />
+                <th />
+                {shownGroups.map(({ group, span }) => (
+                  <th key={group} colSpan={span} className={`group-head ${groupClass(group)}`}>
+                    {GROUP_LABEL[group]}
                   </th>
                 ))}
               </tr>
               <tr>
-                <th className="num">#</th>
-                <th>Equipo</th>
+                <th className="num sticky-pos">#</th>
+                <th className="sticky-team">Equipo</th>
                 <th title="Últimos 5 partidos de la temporada, del más antiguo al más reciente">Racha</th>
-                {COLUMNS.map((col, i) => {
+                {shown.map((col, i) => {
                   const active = sort.key === col.key;
                   const classes = ["num", "sortable"];
                   if (active) classes.push("sorted");
-                  if (i > 0 && COLUMNS[i - 1].group !== col.group) classes.push("group-start");
+                  if (i > 0 && shown[i - 1].group !== col.group) classes.push("group-start", groupClass(col.group));
                   return (
                     <th
                       key={col.key}
@@ -351,16 +430,18 @@ export function SeasonStatsPage() {
                 const lowSample = isLowSample(s);
                 return (
                   <tr key={team.team_id}>
-                    <td className="num muted">{position.get(team.team_id)}</td>
-                    <td>{team.team_name}</td>
+                    <td className="num muted sticky-pos">{position.get(team.team_id)}</td>
+                    <td className="sticky-team">
+                      <TeamName team={team.team_name} league={leagueCode} />
+                    </td>
                     <td>
                       <FormDots form={team.form} />
                     </td>
-                    {COLUMNS.map((col, i) => {
+                    {shown.map((col, i) => {
                       const classes = ["num"];
                       if (col.lowSampleAware && lowSample) classes.push("low-sample");
                       if (sort.key === col.key) classes.push("sorted");
-                      if (i > 0 && COLUMNS[i - 1].group !== col.group) classes.push("group-start");
+                      if (i > 0 && shown[i - 1].group !== col.group) classes.push("group-start", groupClass(col.group));
                       return (
                         <td key={col.key} className={classes.join(" ")} style={heatStyle(col, s)}>
                           {col.render(s)}
