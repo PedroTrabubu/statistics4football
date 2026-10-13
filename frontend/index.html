@@ -1,10 +1,37 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Statistics 4 Bets</title>
+    <!-- Metadatos de la portada (/): es lo que leen buscadores y redes, que no
+         ejecutan JavaScript. Las paginas de la herramienta cambian el titulo.
+         og:url y las URLs absolutas de la imagen las pone el build cuando hay
+         VITE_SITE_URL (ver .env.example y vite.config.ts). -->
+    <title>Statistics 4 Bets · Estadísticas de fútbol para entender cada partido</title>
+    <meta
+      name="description"
+      content="Goles, córners, tarjetas, tiros, faltas y árbitros por equipo y liga, con la frecuencia histórica detrás de cada porcentaje. No es una casa de apuestas."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Statistics 4 Bets" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:title" content="Estadísticas de fútbol para entender cada partido" />
+    <meta
+      property="og:description"
+      content="Goles, córners, tarjetas, tiros, faltas y árbitros por equipo y liga, con la frecuencia histórica detrás de cada porcentaje. No es una casa de apuestas."
+    />
+    <!-- public/og-image.png, generada desde scripts/og-image.html -->
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Statistics 4 Bets: estadísticas de fútbol para entender cada partido, con escudos de equipos de LaLiga, LaLiga Hypermotion, Ligue 1 y Premier League."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/og-image.png" />
   </head>
   <body>
     <div id="root"></div>

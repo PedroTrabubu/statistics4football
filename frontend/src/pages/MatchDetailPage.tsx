@@ -1,17 +1,38 @@
+import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getMatch, getMatchPredictions, getMatchStats, getTeamSeasonStatsOrNull } from "../api/client";
+import { getMatch, getMatchHistory, getMatchPredictions, getMatchStats, getTeamSeasonStatsOrNull } from "../api/client";
+import { MatchdayCarousel } from "../components/MatchdayCarousel";
 import { PredictionsTable } from "../components/PredictionsTable";
+import { ProbablePicks } from "../components/ProbablePicks";
 import { RefereePanel } from "../components/RefereePanel";
 import { SeasonStatsSummary } from "../components/SeasonStatsSummary";
 import { ErrorView, LoadingView } from "../components/StatusView";
 import { StatsPanel } from "../components/StatsPanel";
+import { TeamCrest } from "../components/TeamCrest";
 import { formatDateTime, formatMatchday, formatSeason, joinParts } from "../lib/format";
-import { leagueName } from "../lib/leagues";
+import { leagueName, useSelectedLeagueCode } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
+
+/** Accesos directos bajo la cabecera, a cada bloque de la ficha. `short`: en
+ * movil, para que quepan en dos filas. */
+const SECTIONS = [
+  { id: "forma", label: "Forma reciente", short: "Forma" },
+  { id: "arbitro", label: "Árbitro", short: "Árbitro" },
+  { id: "picks", label: "Picks muy probables", short: "Picks" },
+  { id: "probabilidades", label: "Probabilidades y valor esperado", short: "Probabilidades y EV" },
+  { id: "otros-partidos", label: "Otros partidos", short: "Otros partidos" },
+];
 
 export function MatchDetailPage() {
   const { matchId } = useParams<{ matchId: string }>();
+  const [, setLeagueCode] = useSelectedLeagueCode();
   const id = Number(matchId);
+
+  // Al abrir otro partido (por ejemplo, desde el carrusel del final), arriba.
+  useEffect(() => {
+    if (window.location.hash) return;
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [id]);
 
   const { data: match, loading: loadingMatch, error: matchError } = useApi(() => getMatch(id), [id]);
   const { data: stats, loading: loadingStats, error: statsError } = useApi(
@@ -23,6 +44,9 @@ export function MatchDetailPage() {
     loading: loadingPredictions,
     error: predictionsError,
   } = useApi(() => getMatchPredictions(id), [id]);
+  // Partidos de la liga anteriores a este: patrones de los equipos y lo
+  // habitual en la liga (picks muy probables y hechos del arbitro).
+  const history = useApi(() => getMatchHistory(id), [id]);
   const { data: seasonStats, loading: loadingSeasonStats } = useApi(
     () =>
       match
@@ -41,15 +65,11 @@ export function MatchDetailPage() {
 
   return (
     <div>
-      <Link to="/" className="back-link">
+      <Link to="/partidos" className="back-link">
         ← Volver a partidos
       </Link>
 
-      <h1 className="match-score-heading">
-        {match.home_team} {played ? `${match.home_goals} - ${match.away_goals}` : "vs"}{" "}
-        {match.away_team}
-      </h1>
-      <p className="muted">
+      <p className="muted match-meta">
         {joinParts(
           leagueName(match.league_code),
           `Temporada ${formatSeason(match.season)}`,
@@ -58,10 +78,45 @@ export function MatchDetailPage() {
         )}
       </p>
 
-      <section className="detail-section">
+      {/* Los escudos son los protagonistas de la cabecera. */}
+      <h1 className="match-hero">
+        <span className="match-hero-team">
+          <TeamCrest team={match.home_team} league={match.league_code} size="xl" eager />
+          <span className="match-hero-name">{match.home_team}</span>
+        </span>{" "}
+        <span className={played ? "match-hero-score" : "match-hero-score match-hero-vs"}>
+          {played ? `${match.home_goals} - ${match.away_goals}` : "vs"}
+        </span>{" "}
+        <span className="match-hero-team">
+          <TeamCrest team={match.away_team} league={match.league_code} size="xl" eager />
+          <span className="match-hero-name">{match.away_team}</span>
+        </span>
+      </h1>
+
+      <nav className="match-sections" aria-label="Secciones del partido">
+        <ul>
+          {SECTIONS.filter((s) => s.id !== "otros-partidos" || match.matchday !== null).map((s) => (
+            <li key={s.id}>
+              <a href={`#${s.id}`}>
+                <span className="label-long">{s.label}</span>
+                <span className="label-short">{s.short}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <section className="detail-section" id="forma">
         {loadingStats && <LoadingView label="Calculando estadísticas..." />}
         {statsError && <ErrorView message={`No se pudieron calcular las estadísticas: ${statsError}`} />}
-        {stats && <StatsPanel features={stats} homeTeam={match.home_team} awayTeam={match.away_team} />}
+        {stats && (
+          <StatsPanel
+            features={stats}
+            homeTeam={match.home_team}
+            awayTeam={match.away_team}
+            league={match.league_code}
+          />
+        )}
       </section>
 
       <section className="detail-section">
@@ -74,16 +129,38 @@ export function MatchDetailPage() {
             homeTeam={match.home_team}
             awayTeam={match.away_team}
             leagueId={match.league_id}
+            league={match.league_code}
           />
         )}
       </section>
 
-      <section className="detail-section">
-        <h2>Árbitro{match.referee ? `: ${match.referee}` : ""}</h2>
-        <RefereePanel match={match} />
+      <section className="detail-section" id="arbitro">
+        <h2>
+          Árbitro
+          {match.referee && (
+            <>
+              :{" "}
+              <Link
+                to={`/arbitros?arbitro=${encodeURIComponent(match.referee)}`}
+                onClick={() => setLeagueCode(match.league_code)}
+                title="Ver sus estadísticas en Árbitros"
+              >
+                {match.referee}
+              </Link>
+            </>
+          )}
+        </h2>
+        <RefereePanel match={match} history={history.data?.matches} />
       </section>
 
-      <section className="detail-section">
+      {/* Justo antes del modelo: primero lo que se ha repetido, despues lo que
+          estima el modelo para 1X2, más/menos 2.5 y ambos marcan. */}
+      <section className="detail-section" id="picks">
+        <h2>Picks muy probables</h2>
+        <ProbablePicks match={match} history={history.data} loading={history.loading} error={history.error} />
+      </section>
+
+      <section className="detail-section" id="probabilidades">
         <h2>Probabilidades y valor esperado (EV)</h2>
         <p className="muted">
           El EV nunca se muestra solo: siempre va acompañado de un nivel de confianza y de riesgo.
@@ -100,6 +177,8 @@ export function MatchDetailPage() {
           />
         )}
       </section>
+
+      <MatchdayCarousel key={match.id} match={match} />
     </div>
   );
 }

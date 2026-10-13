@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { MARKET_GROUPS, SIDEBAR_MARKETS, findMarket } from "../lib/markets";
-import { IconBook, IconMatches, IconMenu, IconStats, IconTarget, IconTicket, IconWallet } from "./icons";
+import { IconBook, IconCheck, IconMatches, IconMenu, IconStats, IconTarget, IconTicket, IconWallet } from "./icons";
+import { SiteFooter } from "./SiteFooter";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Partidos", end: true, icon: IconMatches },
+  { to: "/partidos", label: "Partidos", end: false, icon: IconMatches },
   { to: "/stats", label: "Clasificación", end: false, icon: IconStats },
   { to: "/picks", label: "Picks", end: false, icon: IconTicket },
+  { to: "/picks-probables", label: "Picks probables", end: false, icon: IconCheck },
   { to: "/recommendations", label: "Recomendaciones", end: false, icon: IconTarget },
   { to: "/mis-apuestas", label: "Mis apuestas", end: false, icon: IconWallet },
   { to: "/glosario", label: "Glosario", end: false, icon: IconBook },
@@ -23,6 +25,8 @@ export function Layout() {
 
   return (
     <div className="app-shell">
+      {/* index.html lleva el titulo de la portada; React 19 sube este a <head>. */}
+      <title>Statistics 4 Bets</title>
       <header className="app-navbar">
         <button
           type="button"
@@ -89,21 +93,7 @@ export function Layout() {
             <Outlet />
           </main>
 
-          <footer className="app-footer">
-            <div className="app-footer-inner">
-              <p className="small muted">
-                Statistics 4 Bets muestra estadísticas históricas de fútbol para analizar mercados de apuestas. No son
-                predicciones garantizadas ni recomendaciones de apuesta.
-              </p>
-              <p className="small muted">
-                Juega con control. Si el juego deja de ser un entretenimiento, busca ayuda en{" "}
-                <a href="https://www.jugarbien.es" target="_blank" rel="noreferrer">
-                  jugarbien.es
-                </a>
-                . Prohibido a menores de 18 años.
-              </p>
-            </div>
-          </footer>
+          <SiteFooter />
         </div>
       </div>
     </div>

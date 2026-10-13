@@ -94,6 +94,20 @@ export function formatDateRange(startIso: string, endIso: string): string {
   return `${dayMonth(start)} – ${dayMonth(end)}`;
 }
 
+/** "sáb, 10 oct · 14:00": el saque de un partido en tarjetas pequeñas. */
+export function formatKickoff(iso: string): string {
+  const date = parseApiDate(iso);
+  const unknown = isTimeUnknown(date);
+  const day = date.toLocaleDateString("es-ES", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    ...(unknown ? { timeZone: "UTC" } : {}),
+  });
+  if (unknown) return `${day} · hora por confirmar`;
+  return `${day} · ${date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
 export function formatDateTime(iso: string): string {
   const date = parseApiDate(iso);
   if (isTimeUnknown(date)) {

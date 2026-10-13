@@ -1,0 +1,140 @@
+<!doctype html>
+<!--
+  Fuente de public/og-image.png (1200x630), la imagen que sale al compartir la web.
+  Para regenerarla, desde frontend/ y con Chrome instalado:
+
+    chrome --headless=new --allow-file-access-from-files --hide-scrollbars --window-size=1200,630 \
+      --virtual-time-budget=5000 --screenshot=public/og-image.png scripts/og-image.html
+
+  (En Windows, chrome es "C:\Program Files\Google\Chrome\Application\chrome.exe" y las
+  rutas, absolutas.) Las fuentes vienen de Google Fonts: hace falta conexion.
+-->
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,480;9..144,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@600&display=block"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+      }
+      body {
+        display: grid;
+        grid-template-columns: 1fr 440px;
+        background: #f5f6f1;
+        color: #1a2420;
+        font-family: "IBM Plex Sans", sans-serif;
+      }
+      .text {
+        display: flex;
+        flex-direction: column;
+        padding: 64px 56px 56px 72px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 56px;
+        border-radius: 13px;
+        background: linear-gradient(155deg, #1e6b45, #123f2b);
+        color: #fff;
+        font-family: "IBM Plex Mono", monospace;
+        font-weight: 600;
+        font-size: 20px;
+      }
+      .name {
+        font-family: "Fraunces", serif;
+        font-weight: 650;
+        font-size: 34px;
+      }
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 64px 0 22px;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #1e6b45;
+      }
+      .eyebrow::before {
+        content: "";
+        width: 36px;
+        height: 3px;
+        border-radius: 3px;
+        background: #c9a227;
+      }
+      h1 {
+        margin: 0;
+        font-family: "Fraunces", serif;
+        font-weight: 650;
+        font-size: 64px;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+      }
+      .foot {
+        margin-top: auto;
+        font-size: 19px;
+        color: #5b655c;
+      }
+      .crests {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(4, 1fr);
+        gap: 18px;
+        padding: 44px 44px;
+        background: linear-gradient(160deg, #142922, #0f1e17);
+      }
+      .crests span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 10px 24px -16px rgba(0, 0, 0, 0.6);
+      }
+      .crests img {
+        width: 76px;
+        height: 76px;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="text">
+      <div class="brand">
+        <span class="mark">S4B</span>
+        <span class="name">Statistics 4 Bets</span>
+      </div>
+      <p class="eyebrow">Análisis estadístico de fútbol</p>
+      <h1>Estadísticas de fútbol para entender cada partido</h1>
+      <p class="foot">LaLiga · LaLiga Hypermotion · Ligue 1 · Premier League</p>
+    </div>
+    <div class="crests">
+      <span><img src="../src/assets/logos/teams/esp-laliga1/spain_real-madrid.football-logos.cc.svg" alt="" /></span>
+      <span><img src="../src/assets/logos/teams/esp-laliga1/spain_barcelona.football-logos.cc.svg" alt="" /></span>
+      <span><img src="../src/assets/logos/teams/esp-laliga2/spain_sporting-gijon.football-logos.cc.svg" alt="" /></span>
+      <span><img src="../src/assets/logos/teams/esp-laliga2/spain_valladolid.football-logos.cc.svg" alt="" /></span>
+      <span><img src="../src/assets/logos/teams/fr-ligue1/france_paris-saint-germain.football-logos.cc.svg" alt="" /></span>
+      <span><img src="../src/assets/logos/teams/fr-ligue1/france_marseille.football-logos.cc.svg" alt="" /></span>
+      <span><img src="../src/assets/logos/teams/en-premierleague/england_arsenal.football-logos.cc.svg" alt="" /></span>
+      <span><img src="../src/assets/logos/teams/en-premierleague/england_liverpool.football-logos.cc.svg" alt="" /></span>
+    </div>
+  </body>
+</html>
