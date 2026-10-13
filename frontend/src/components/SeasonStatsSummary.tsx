@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { TeamSeasonStats } from "../api/types";
 import { formatPct } from "../lib/format";
+import { TeamName } from "./TeamCrest";
 
 function Row({ label, home, away }: { label: string; home: string; away: string }) {
   return (
@@ -18,12 +19,14 @@ export function SeasonStatsSummary({
   homeTeam,
   awayTeam,
   leagueId,
+  league,
 }: {
   homeStats: TeamSeasonStats | null;
   awayStats: TeamSeasonStats | null;
   homeTeam: string;
   awayTeam: string;
   leagueId: number;
+  league?: string;
 }) {
   if (homeStats === null && awayStats === null) {
     return (
@@ -44,9 +47,13 @@ export function SeasonStatsSummary({
       <table className="stats-table">
         <thead>
           <tr>
-            <th>{homeTeam}</th>
+            <th>
+              <TeamName team={homeTeam} league={league} />
+            </th>
             <th></th>
-            <th>{awayTeam}</th>
+            <th>
+              <TeamName team={awayTeam} league={league} />
+            </th>
           </tr>
         </thead>
         <tbody>
