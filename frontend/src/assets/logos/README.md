@@ -19,6 +19,8 @@ La web los encuentra al compilar (`src/lib/logos.ts`), así que basta con dejar 
 | LaLiga | `esp-la-liga` |
 | LaLiga Hypermotion | `esp-la-liga-2` |
 | Ligue 1 | `fra-ligue-1` |
+| Bundesliga | `ger-bundesliga` |
+| Serie A | `ita-serie-a` |
 | Champions League | `int-champions-league` |
 
 ## Equipos (`teams/<liga>/`)
@@ -29,6 +31,8 @@ La web los encuentra al compilar (`src/lib/logos.ts`), así que basta con dejar 
 | LaLiga | `esp-laliga1` |
 | LaLiga Hypermotion | `esp-laliga2` |
 | Ligue 1 | `fr-ligue1` |
+| Bundesliga | `bundesliga` |
+| Serie A | `serieA` |
 | Champions League | `championsleague` (solo los equipos de fuera de nuestras ligas) |
 
 Una liga nueva necesita su carpeta y una entrada en `TEAM_FOLDERS` de `src/lib/logos.ts`. En la Champions, los equipos de nuestras ligas usan su escudo de siempre (se busca en todas las carpetas).
@@ -49,7 +53,9 @@ Al añadir un escudo cuyo nombre no coincide con el de la API, añade su alias. 
 - **Solo en el histórico:**
   - Premier League: Burnley, Leicester, Luton, Norwich, Sheffield United, Southampton, Watford, West Brom, West Ham y Wolves.
   - LaLiga Hypermotion: Alcorcon, Amorebieta, Cartagena, Cultural Leonesa, Ferrol, Fuenlabrada, Huesca, Ibiza, Logrones, Lugo, Mirandes, Ponferradina y Zaragoza.
-  - Champions League 25/26: Ajax, Atalanta, Bayer Leverkusen, Benfica, Eintracht Frankfurt, FC Copenhague, Juventus, Kairat Almaty, Olympiacos, Pafos, Qarabag y Union Saint-Gilloise.
+  - Champions League 25/26: Ajax, Benfica, FC Copenhague, Kairat Almaty, Olympiacos, Pafos, Qarabag y Union Saint-Gilloise.
+  - Bundesliga: Bielefeld, Bochum, Darmstadt, Greuther Furth, Heidenheim, Hertha, Holstein Kiel, St Pauli y Wolfsburg.
+  - Serie A: Benevento, Cremonese, Crotone, Empoli, Pisa, Salernitana, Sampdoria, Spezia y Verona.
   - Ligue 1: Ajaccio, Bordeaux, Clermont, Dijon, Metz, Montpellier, Nantes, Nimes, Reims y St Etienne.
 
 ### Ficheros a revisar
@@ -64,4 +70,5 @@ Al añadir un escudo cuyo nombre no coincide con el de la API, añade su alias. 
 | `esp-laliga1/spain_getafe…svg` | 613 KB | lleva una imagen rasterizada dentro |
 | `esp-laliga2/spain_las-palmas…svg` | 288 KB | muchos trazados |
 | `en-premierleague/england_coventry-city…svg` | 253 KB | lleva una imagen rasterizada dentro |
+| `serieA/italy_roma…svg` | 242 KB | |
 | `fr-ligue1/france_nice…svg` | 152 KB | |

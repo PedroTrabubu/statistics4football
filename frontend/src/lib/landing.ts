@@ -19,6 +19,8 @@ export const LANDING_LEAGUES: LandingLeague[] = [
   { code: "ENG-Premier League", glow: "176, 124, 255" },
   // El logo de Ligue 1 es negro: en blanco se lee sobre el fondo oscuro.
   { code: "FRA-Ligue 1", glow: "226, 232, 222", logoStyle: { filter: "invert(1)" } },
+  { code: "GER-Bundesliga", glow: "255, 196, 0" },
+  { code: "ITA-Serie A", glow: "0, 160, 90" },
   { code: "INT-Champions League", glow: "86, 132, 255" },
 ];
 
