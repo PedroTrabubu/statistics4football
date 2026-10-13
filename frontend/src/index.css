@@ -3477,10 +3477,10 @@ h4 {
   margin: 0 0 0.6rem;
   text-align: center;
 }
-.match-sections {
+.section-nav {
   margin: 0 0 1.25rem;
 }
-.match-sections ul {
+.section-nav ul {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -3489,7 +3489,7 @@ h4 {
   padding: 0;
   list-style: none;
 }
-.match-sections a {
+.section-nav a {
   display: inline-block;
   padding: 0.4rem 0.9rem;
   border: 1px solid var(--border);
@@ -3502,31 +3502,31 @@ h4 {
     border-color 0.15s ease,
     color 0.15s ease;
 }
-.match-sections a:hover {
+.section-nav a:hover {
   border-color: var(--primary);
   color: var(--primary);
   text-decoration: none;
 }
-.match-sections a:focus-visible {
+.section-nav a:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
-.match-sections .label-short {
+.section-nav .label-short {
   display: none;
 }
 @media (max-width: 520px) {
-  .match-sections a {
+  .section-nav a {
     padding: 0.38rem 0.75rem;
   }
-  .match-sections .label-long {
+  .section-nav .label-long {
     display: none;
   }
-  .match-sections .label-short {
+  .section-nav .label-short {
     display: inline;
   }
 }
 /* Al saltar a un bloque, que no quede debajo de la barra superior fija. */
-.detail-section[id] {
+section[id] {
   scroll-margin-top: calc(var(--navbar-h) + 1rem);
 }
 

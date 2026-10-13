@@ -6,6 +6,7 @@ import { PredictionsTable } from "../components/PredictionsTable";
 import { ProbablePicks } from "../components/ProbablePicks";
 import { RefereePanel } from "../components/RefereePanel";
 import { SeasonStatsSummary } from "../components/SeasonStatsSummary";
+import { SectionNav } from "../components/SectionNav";
 import { ErrorView, LoadingView } from "../components/StatusView";
 import { StatsPanel } from "../components/StatsPanel";
 import { TeamCrest } from "../components/TeamCrest";
@@ -93,18 +94,10 @@ export function MatchDetailPage() {
         </span>
       </h1>
 
-      <nav className="match-sections" aria-label="Secciones del partido">
-        <ul>
-          {SECTIONS.filter((s) => s.id !== "otros-partidos" || match.matchday !== null).map((s) => (
-            <li key={s.id}>
-              <a href={`#${s.id}`}>
-                <span className="label-long">{s.label}</span>
-                <span className="label-short">{s.short}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <SectionNav
+        label="Secciones del partido"
+        sections={SECTIONS.filter((s) => s.id !== "otros-partidos" || match.matchday !== null)}
+      />
 
       <section className="detail-section" id="forma">
         {loadingStats && <LoadingView label="Calculando estadísticas..." />}
