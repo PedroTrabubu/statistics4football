@@ -1,10 +1,11 @@
 """Próximos partidos y sus cuotas desde el fixtures.csv de Football-Data.co.uk.
 
-Es la única fuente de calendario para las ligas que football-data.org no da
-en su plan gratuito (LaLiga Hypermotion). Solo trae la próxima jornada: lo
-renuevan a mitad de semana y antes del fin de semana. Sus columnas de cuotas
-son las de los CSV históricos, así que la "Market Average" pre-partido es la
-misma que usan los backtests.
+En las ligas que football-data.org no da en su plan gratuito (LaLiga
+Hypermotion) es la fuente de la hora de la próxima jornada; el resto del
+calendario, con fechas provisionales, lo trae ESPN (`espn.py`). Solo trae la
+próxima jornada: lo renuevan a mitad de semana y antes del fin de semana. Sus
+columnas de cuotas son las de los CSV históricos, así que la "Market Average"
+pre-partido es la misma que usan los backtests.
 
 Un partido se identifica igual que en `historical_backfill.py` (liga,
 temporada, local, visitante): cuando llega su resultado en el CSV de la

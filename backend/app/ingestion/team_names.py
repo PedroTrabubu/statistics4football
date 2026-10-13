@@ -139,6 +139,37 @@ TEAM_ALIASES: dict[str, str] = {
     "Athletic Bilbao": "Ath Bilbao",
     "Atlético Madrid": "Ath Madrid",
     "Deportivo La Coruña": "La Coruna",
+    # ESPN -> MatchHistory (el resto resuelven por su nombre corto o normalize())
+    "AC Ajaccio": "Ajaccio",
+    "AD Alcorcón": "Alcorcon",
+    "CD Sabadell": "Sabadell",
+    "Deportivo": "La Coruna",
+    "FC Andorra": "Andorra",
+    "FC Cartagena": "Cartagena",
+    "Paris Saint-Germain": "Paris SG",
+    "Racing Ferrol": "Ferrol",
+    "RC Celta Fortuna": "Celta B",
+    "Real Sociedad II": "Sociedad B",
+    "Real Zaragoza": "Zaragoza",
+    "Sporting Gijón": "Sp Gijon",
+    # Pinnacle (guest API) -> MatchHistory
+    "Celta Vigo II": "Celta B",
+    "Sporting Gijon": "Sp Gijon",
+    # API de laliga.com (designaciones arbitrales) -> MatchHistory
+    "R. Racing Club": "Santander",
+    "RC Deportivo": "La Coruna",
+    "Atlético de Madrid": "Ath Madrid",
+    "CD Tenerife": "Tenerife",
+    "SD Eibar": "Eibar",
+    "Burgos CF": "Burgos",
+    "Albacete BP": "Albacete",
+    "Real Sporting": "Sp Gijon",
+    "CD Castellón": "Castellon",
+    "R. Sociedad B": "Sociedad B",
+    "CD Eldense": "Eldense",
+    "Córdoba CF": "Cordoba",
+    "AD Ceuta FC": "Ceuta",
+    "CE Sabadell": "Sabadell",
 }
 
 
