@@ -7,6 +7,9 @@ import { useApi } from "../lib/useApi";
 import { MatchRow } from "./MatchRow";
 import { EmptyView, ErrorView, LoadingView } from "./StatusView";
 
+/** Filas que suelen verse sin scroll: sus escudos se cargan sin esperar. */
+const EAGER_ROWS = 6;
+
 /** Partidos de una liga por temporada y jornada; se abre en la jornada actual. */
 export function MatchdayBrowser({ league, showTitle = false }: { league: League; showTitle?: boolean }) {
   const [season, setSeason] = useState<string | undefined>(undefined);
@@ -51,33 +54,36 @@ export function MatchdayBrowser({ league, showTitle = false }: { league: League;
             ))}
           </select>
 
-          <button type="button" disabled={index <= 0} onClick={() => goTo(index - 1)} aria-label="Jornada anterior">
-            ←
-          </button>
-          <select
-            aria-label="Jornada"
-            value={selected ?? ""}
-            onChange={(e) => setMatchday(Number(e.target.value))}
-          >
-            {info.matchdays.map((m) => (
-              <option key={m.matchday} value={m.matchday}>
-                Jornada {m.matchday} · {formatDateRange(m.start, m.end)}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            disabled={index < 0 || index >= info.matchdays.length - 1}
-            onClick={() => goTo(index + 1)}
-            aria-label="Jornada siguiente"
-          >
-            →
-          </button>
-          {current && (
-            <span className="small muted">
-              {current.played}/{current.total} jugados
-            </span>
-          )}
+          {/* Temporada a la izquierda; la jornada, con sus flechas, a la derecha. */}
+          <div className="matchday-nav-group">
+            {current && (
+              <span className="small muted">
+                {current.played}/{current.total} jugados
+              </span>
+            )}
+            <button type="button" disabled={index <= 0} onClick={() => goTo(index - 1)} aria-label="Jornada anterior">
+              ←
+            </button>
+            <select
+              aria-label="Jornada"
+              value={selected ?? ""}
+              onChange={(e) => setMatchday(Number(e.target.value))}
+            >
+              {info.matchdays.map((m) => (
+                <option key={m.matchday} value={m.matchday}>
+                  Jornada {m.matchday} · {formatDateRange(m.start, m.end)}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              disabled={index < 0 || index >= info.matchdays.length - 1}
+              onClick={() => goTo(index + 1)}
+              aria-label="Jornada siguiente"
+            >
+              →
+            </button>
+          </div>
         </div>
       )}
       {info?.estimated && (
@@ -94,8 +100,8 @@ export function MatchdayBrowser({ league, showTitle = false }: { league: League;
       )}
       {!matches.loading && ordered.length > 0 && (
         <div className="match-list">
-          {ordered.map((match) => (
-            <MatchRow key={match.id} match={match} />
+          {ordered.map((match, i) => (
+            <MatchRow key={match.id} match={match} eager={i < EAGER_ROWS} />
           ))}
         </div>
       )}

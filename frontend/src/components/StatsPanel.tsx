@@ -1,4 +1,5 @@
 import type { MatchFeatures } from "../api/types";
+import { TeamName } from "./TeamCrest";
 
 function FormRow({ label, home, away }: { label: string; home: string | number; away: string | number }) {
   return (
@@ -14,10 +15,12 @@ export function StatsPanel({
   features,
   homeTeam,
   awayTeam,
+  league,
 }: {
   features: MatchFeatures;
   homeTeam: string;
   awayTeam: string;
+  league?: string;
 }) {
   const {
     home_form,
@@ -38,9 +41,13 @@ export function StatsPanel({
       <table className="stats-table">
         <thead>
           <tr>
-            <th>{homeTeam}</th>
+            <th>
+              <TeamName team={homeTeam} league={league} />
+            </th>
             <th></th>
-            <th>{awayTeam}</th>
+            <th>
+              <TeamName team={awayTeam} league={league} />
+            </th>
           </tr>
         </thead>
         <tbody>

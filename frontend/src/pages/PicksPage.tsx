@@ -5,6 +5,7 @@ import type { PickCombo, PickKind, PickLeg } from "../api/types";
 import { LeagueSwitch } from "../components/LeagueSwitch";
 import { OutcomeBadge } from "../components/OutcomeBadge";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
+import { MatchTeams } from "../components/TeamCrest";
 import { formatDateTime, formatMatchday, formatRoiPct, joinParts } from "../lib/format";
 import { leagueName, onlyValidated, useSelectedLeagueCode } from "../lib/leagues";
 import { ODDS_KIND_TITLES, PICK_KIND_LABELS, TIER_KINDS, oneInN, pickLegLabel, pickLegUnit } from "../lib/picks";
@@ -141,7 +142,8 @@ function LegRow({ leg, showMatch, settled }: { leg: PickLeg; showMatch: boolean;
         <span className="pick-leg-label">{pickLegLabel(leg)}</span>
         {showMatch && (
           <Link to={`/matches/${leg.match_id}`} className="pick-leg-match small">
-            {joinParts(`${leg.home_team} – ${leg.away_team}`, leagueName(leg.league_code), formatMatchday(leg.matchday), formatDateTime(leg.date))}
+            <MatchTeams home={leg.home_team} away={leg.away_team} league={leg.league_code} middle="–" />
+            <span>{joinParts(leagueName(leg.league_code), formatMatchday(leg.matchday), formatDateTime(leg.date))}</span>
           </Link>
         )}
         {settled && leg.actual && (
@@ -167,7 +169,13 @@ function ComboCard({ combo, compact = false }: { combo: PickCombo; compact?: boo
     <article className={`pick-card pick-card-${combo.kind}`}>
       <header className="pick-card-header">
         <div>
-          <h3>{compact ? `${first.home_team} – ${first.away_team}` : PICK_KIND_LABELS[combo.kind]}</h3>
+          <h3>
+            {compact ? (
+              <MatchTeams home={first.home_team} away={first.away_team} league={first.league_code} middle="–" size="md" />
+            ) : (
+              PICK_KIND_LABELS[combo.kind]
+            )}
+          </h3>
           <p className="small muted">
             {compact ? joinParts(leagueName(first.league_code), formatMatchday(first.matchday), formatDateTime(first.date)) : TIER_HINTS[combo.kind]}
           </p>

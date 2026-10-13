@@ -8,6 +8,7 @@ import { OutcomeBadge } from "../components/OutcomeBadge";
 import { RiskBadge } from "../components/RiskBadge";
 import { SampleBadge } from "../components/SampleBadge";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
+import { MatchTeams } from "../components/TeamCrest";
 import { formatDateTime, formatMatchday, formatPercent, formatPnl, formatRoiPct, marketLabel, joinParts, selectionLabel } from "../lib/format";
 import { leagueName, onlyValidated, useSelectedLeagueCode } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
@@ -151,7 +152,7 @@ function UpcomingHighProbability({ leagueId }: LeagueFilterProps) {
                 <tr key={`${rec.match_id}-${rec.market}-${rec.selection}`}>
                   <td className="rec-match">
                     <Link to={`/matches/${rec.match_id}`}>
-                      {rec.home_team} vs {rec.away_team}
+                      <MatchTeams home={rec.home_team} away={rec.away_team} league={rec.league_code} middle="vs" />
                     </Link>
                     <div className="muted small">
                       {joinParts(leagueName(rec.league_code), formatMatchday(rec.matchday), formatDateTime(rec.date))}
@@ -246,7 +247,7 @@ function UpcomingValue({ leagueId }: LeagueFilterProps) {
                 <tr key={`${rec.match_id}-${rec.market}-${rec.selection}-${i}`}>
                   <td className="rec-match">
                     <Link to={`/matches/${rec.match_id}`}>
-                      {rec.home_team} vs {rec.away_team}
+                      <MatchTeams home={rec.home_team} away={rec.away_team} league={rec.league_code} middle="vs" />
                     </Link>
                     <div className="muted small">
                       {joinParts(leagueName(rec.league_code), formatMatchday(rec.matchday), formatDateTime(rec.date))}
@@ -407,7 +408,7 @@ function RecommendationHistory({ leagueId, strategy }: LeagueFilterProps & { str
                   <tr key={`${rec.match_id}-${rec.market}-${rec.selection}-${i}`}>
                     <td className="rec-match">
                       <Link to={`/matches/${rec.match_id}`}>
-                        {rec.home_team} vs {rec.away_team}
+                        <MatchTeams home={rec.home_team} away={rec.away_team} league={rec.league_code} middle="vs" />
                       </Link>
                       <div className="muted small">
                         {joinParts(leagueName(rec.league_code), formatMatchday(rec.matchday), formatDateTime(rec.date))}
