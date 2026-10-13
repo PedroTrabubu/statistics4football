@@ -22,7 +22,13 @@ os.environ.setdefault("SOCCERDATA_DIR", _settings.soccerdata_dir)
 # porque soccerdata lo lee al importarse.
 CUSTOM_LEAGUES: dict[str, dict[str, str]] = {
     # LaLiga Hypermotion (Segunda División). Termina en junio por los playoffs de ascenso.
-    "ESP-La Liga 2": {"MatchHistory": "SP2", "ClubElo": "ESP_2", "season_start": "Aug", "season_end": "Jun"},
+    "ESP-La Liga 2": {
+        "MatchHistory": "SP2",
+        "ClubElo": "ESP_2",
+        "ESPN": "esp.2",
+        "season_start": "Aug",
+        "season_end": "Jun",
+    },
 }
 
 
