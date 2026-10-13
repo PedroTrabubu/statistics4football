@@ -1,6 +1,6 @@
 /** Las apuestas importadas se guardan solo en este navegador (localStorage). */
 
-import type { ParsedBet } from "./types";
+import type { Bookmaker, ParsedBet } from "./types";
 
 const KEY = "s4b:mis-apuestas:v1";
 
@@ -27,6 +27,7 @@ export function clearBets(): void {
   try {
     localStorage.removeItem(KEY);
     localStorage.removeItem(REAL_MONEY_KEY);
+    localStorage.removeItem(LEGACY_REAL_MONEY_KEY);
   } catch {
     // Sin almacenamiento disponible: no hay nada que borrar.
   }
@@ -34,49 +35,99 @@ export function clearBets(): void {
 
 // --- Dinero real (lo que el usuario apunta a mano) ------------------------------
 
-const REAL_MONEY_KEY = "s4b:mis-apuestas:dinero-real:v1";
+const REAL_MONEY_KEY = "s4b:mis-apuestas:dinero-real:v3";
+/** La versión 1 guardaba un solo bloque, de toda la cuenta de Winamax y sin año. */
+const LEGACY_REAL_MONEY_KEY = "s4b:mis-apuestas:dinero-real:v1";
 
-/** Movimientos reales de la cuenta, apuntados a mano: no salen del historial de apuestas. */
+/**
+ * Movimientos reales de la cuenta en un año natural, apuntados a mano a partir
+ * del extracto de la casa: no salen del historial de apuestas.
+ */
 export interface RealMoney {
+  /** Saldo al 1 de enero. */
+  opening: number | null;
   deposited: number | null;
   withdrawn: number | null;
-  balance: number | null;
+  /** Saldo al 31 de diciembre o, si el año no ha acabado, el actual. */
+  closing: number | null;
   updatedAt: string | null;
 }
 
-export const EMPTY_REAL_MONEY: RealMoney = { deposited: null, withdrawn: null, balance: null, updatedAt: null };
+export const EMPTY_REAL_MONEY: RealMoney = { opening: null, deposited: null, withdrawn: null, closing: null, updatedAt: null };
+
+/**
+ * Clave de los datos de toda la cuenta, sin año: los que se apuntaban antes de
+ * separar por años. Se comparan con todas las apuestas importadas de la casa.
+ */
+export const WHOLE_ACCOUNT = "cuenta";
+
+/** Dinero real de cada casa por año ("2026") o de toda la cuenta (WHOLE_ACCOUNT). */
+export type RealMoneyByBook = Partial<Record<Bookmaker, Record<string, RealMoney>>>;
 
 export function hasRealMoney(m: RealMoney | null | undefined): boolean {
-  return !!m && (m.deposited !== null || m.withdrawn !== null || m.balance !== null);
+  return !!m && (m.opening !== null || m.deposited !== null || m.withdrawn !== null || m.closing !== null);
 }
 
-/** Resultado real = retirado + saldo - ingresado (solo si están los tres datos). */
+/** Resultado real = saldo final - saldo inicial - ingresado + retirado (solo con los cuatro datos). */
 export function realResult(m: RealMoney): number | null {
-  if (m.deposited === null || m.withdrawn === null || m.balance === null) return null;
-  return Math.round((m.withdrawn + m.balance - m.deposited) * 100) / 100;
+  if (m.opening === null || m.deposited === null || m.withdrawn === null || m.closing === null) return null;
+  return Math.round((m.closing - m.opening - m.deposited + m.withdrawn) * 100) / 100;
 }
 
 function cleanRealMoney(raw: unknown): RealMoney {
-  const r = (raw ?? {}) as Partial<Record<keyof RealMoney, unknown>>;
+  const r = (raw ?? {}) as Partial<Record<keyof RealMoney | "balance", unknown>>;
   const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
+  // Bloque de toda la cuenta de antes: sin saldo inicial (la cuenta empezó en 0) y "balance" como saldo final.
+  const legacy = !("closing" in r) && "balance" in r;
   return {
+    opening: legacy ? 0 : num(r.opening),
     deposited: num(r.deposited),
     withdrawn: num(r.withdrawn),
-    balance: num(r.balance),
+    closing: legacy ? num(r.balance) : num(r.closing),
     updatedAt: typeof r.updatedAt === "string" ? r.updatedAt : null,
   };
 }
 
-export function loadRealMoney(): RealMoney {
+function isLegacyBlock(r: Record<string, unknown>): boolean {
+  return "balance" in r && !("closing" in r);
+}
+
+/**
+ * Solo las casas y años con algún dato. Los formatos anteriores (un bloque de
+ * toda la cuenta, suelto o por casa) pasan a WHOLE_ACCOUNT; un bloque suelto es de Winamax.
+ */
+function cleanRealMoneyByBook(raw: unknown): RealMoneyByBook {
+  if (!raw || typeof raw !== "object") return {};
+  const r = raw as Record<string, unknown>;
+  if (isLegacyBlock(r)) {
+    const single = cleanRealMoney(r);
+    return hasRealMoney(single) ? { winamax: { [WHOLE_ACCOUNT]: single } } : {};
+  }
+  const out: RealMoneyByBook = {};
+  for (const book of ["winamax", "bet365"] as const) {
+    const entries = r[book];
+    if (!entries || typeof entries !== "object") continue;
+    const e = entries as Record<string, unknown>;
+    const periods: [string, unknown][] = isLegacyBlock(e) ? [[WHOLE_ACCOUNT, e]] : Object.entries(e);
+    const kept = periods
+      .filter(([key]) => key === WHOLE_ACCOUNT || /^\d{4}$/.test(key))
+      .map(([key, value]) => [key, cleanRealMoney(value)] as const)
+      .filter(([, m]) => hasRealMoney(m));
+    if (kept.length) out[book] = Object.fromEntries(kept);
+  }
+  return out;
+}
+
+export function loadRealMoney(): RealMoneyByBook {
   try {
-    const raw = localStorage.getItem(REAL_MONEY_KEY);
-    return raw ? cleanRealMoney(JSON.parse(raw)) : EMPTY_REAL_MONEY;
+    const raw = localStorage.getItem(REAL_MONEY_KEY) ?? localStorage.getItem(LEGACY_REAL_MONEY_KEY);
+    return raw ? cleanRealMoneyByBook(JSON.parse(raw)) : {};
   } catch {
-    return EMPTY_REAL_MONEY;
+    return {};
   }
 }
 
-export function saveRealMoney(m: RealMoney): boolean {
+export function saveRealMoney(m: RealMoneyByBook): boolean {
   try {
     localStorage.setItem(REAL_MONEY_KEY, JSON.stringify(m));
     return true;
@@ -143,9 +194,10 @@ export function describeUpdate({ before, after }: BetUpdate): string {
 const BACKUP_KIND = "statistics4bets/mis-apuestas";
 
 /** Contenido del archivo .json de copia de seguridad. */
-export function exportBackup(bets: ParsedBet[], realMoney: RealMoney | null = null, now: Date = new Date()): string {
+export function exportBackup(bets: ParsedBet[], realMoney: RealMoneyByBook | null = null, now: Date = new Date()): string {
+  const money = cleanRealMoneyByBook(realMoney);
   return JSON.stringify(
-    { kind: BACKUP_KIND, version: 2, exportedAt: now.toISOString(), bets, realMoney: hasRealMoney(realMoney) ? realMoney : null },
+    { kind: BACKUP_KIND, version: 4, exportedAt: now.toISOString(), bets, realMoney: Object.keys(money).length ? money : null },
     null,
     1,
   );
@@ -153,8 +205,8 @@ export function exportBackup(bets: ParsedBet[], realMoney: RealMoney | null = nu
 
 export interface Backup {
   bets: ParsedBet[];
-  /** null si la copia no trae dinero real (o es de la versión 1). */
-  realMoney: RealMoney | null;
+  /** Por casa y año; null si la copia no trae dinero real (o es de la versión 1). */
+  realMoney: RealMoneyByBook | null;
 }
 
 export function backupFileName(now: Date = new Date()): string {
@@ -181,10 +233,16 @@ export function parseBackup(raw: string): Backup {
   );
   if (valid.length === 0) throw new Error("La copia no contiene apuestas.");
   const realMoneyRaw = Array.isArray(data) ? null : (data as { realMoney?: unknown }).realMoney;
-  const realMoney = realMoneyRaw ? cleanRealMoney(realMoneyRaw) : null;
+  const realMoney = cleanRealMoneyByBook(realMoneyRaw);
   return {
     // Copias de versiones anteriores: campos que se añadieron después.
-    bets: valid.map((b) => ({ ...b, promotions: b.promotions ?? [], warnings: b.warnings ?? [], legs: b.legs ?? [] })),
-    realMoney: hasRealMoney(realMoney) ? realMoney : null,
+    bets: valid.map((b) => ({
+      ...b,
+      bookmaker: b.bookmaker ?? "winamax",
+      promotions: b.promotions ?? [],
+      warnings: b.warnings ?? [],
+      legs: b.legs ?? [],
+    })),
+    realMoney: Object.keys(realMoney).length ? realMoney : null,
   };
 }

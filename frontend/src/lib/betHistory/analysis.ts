@@ -93,14 +93,19 @@ export function groupBy(rows: SettledBet[], keyOf: (r: SettledBet) => string | n
 
 // --- Dimensiones ----------------------------------------------------------------
 
+/** Cada tramo empieza en su cuota: [desde, hasta). El de 2 va partido porque es donde hay más apuestas. */
 export const ODDS_BUCKETS: [number, number, string][] = [
-  [1, 1.3, "1,01 – 1,29"],
-  [1.3, 1.6, "1,30 – 1,59"],
-  [1.6, 2, "1,60 – 1,99"],
-  [2, 3, "2,00 – 2,99"],
-  [3, 5, "3,00 – 4,99"],
-  [5, 8, "5,00 – 7,99"],
-  [8, Infinity, "8,00 o más"],
+  [1, 1.5, "1,01 – 1,49"],
+  [1.5, 2, "1,50 – 1,99"],
+  [2, 2.5, "2,00 – 2,49"],
+  [2.5, 3, "2,50 – 2,99"],
+  [3, 4, "3,00 – 3,99"],
+  [4, 5, "4,00 – 4,99"],
+  [5, 10, "5,00 – 9,99"],
+  [10, 20, "10,00 – 19,99"],
+  [20, 30, "20,00 – 29,99"],
+  [30, 40, "30,00 – 39,99"],
+  [40, Infinity, "40,00 o más"],
 ];
 
 export function oddsBucket(odds: number | null): string | null {
@@ -116,19 +121,28 @@ export function betType(bet: ParsedBet): string {
   return "Otro";
 }
 
+/**
+ * Cada tramo empieza en su importe: [desde, hasta). Casi todas las apuestas
+ * son de importes redondos (1, 2, 5, 10 €), y así una de 5 € va en «5 – 9,99 €»
+ * y no al final del tramo de abajo.
+ */
 export const STAKE_BUCKETS: [number, number, string][] = [
-  [0, 2, "Hasta 2 €"],
-  [2, 5, "2 – 5 €"],
-  [5, 10, "5 – 10 €"],
-  [10, 25, "10 – 25 €"],
-  [25, 50, "25 – 50 €"],
-  [50, Infinity, "Más de 50 €"],
+  [0, 1, "Menos de 1 €"],
+  [1, 2, "1 – 1,99 €"],
+  [2, 3, "2 – 2,99 €"],
+  [3, 4, "3 – 3,99 €"],
+  [4, 5, "4 – 4,99 €"],
+  [5, 10, "5 – 9,99 €"],
+  [10, 20, "10 – 19,99 €"],
+  [20, 30, "20 – 29,99 €"],
+  [30, 40, "30 – 39,99 €"],
+  [40, Infinity, "40 € o más"],
 ];
 
 export function stakeBucket(r: SettledBet): string | null {
-  if (r.bet.freebet || r.bet.stake === null) return null;
+  if (r.bet.freebet || r.bet.stake === null || r.bet.stake <= 0) return null;
   const s = r.bet.stake;
-  return STAKE_BUCKETS.find(([lo, hi]) => s > lo && s <= hi)?.[2] ?? (s === 0 ? null : STAKE_BUCKETS[0][2]);
+  return STAKE_BUCKETS.find(([lo, hi]) => s >= lo && s < hi)?.[2] ?? null;
 }
 
 export const WEEKDAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -145,10 +159,10 @@ export function dayPart(r: SettledBet): string | null {
   return DAY_PARTS[h < 6 ? 0 : h < 14 ? 1 : h < 20 ? 2 : 3];
 }
 
-/** Familia de mercado a partir del texto de Winamax. */
+/** Familia de mercado a partir del texto de la casa. */
 export function marketFamily(market: string, pick = ""): string {
   const m = `${market} ${pick}`.toLowerCase();
-  if (m.includes("crea tu apuesta")) return "Crea tu apuesta";
+  if (m.includes("crea tu apuesta") || m.includes("crear apuesta")) return "Crea tu apuesta";
   if (/c[oó]rner/.test(m)) return "Córners";
   if (/tarjeta|expulsi/.test(m)) return "Tarjetas";
   if (m.includes("ambos equipos marcan")) return "Ambos marcan";
@@ -163,10 +177,14 @@ export function marketFamily(market: string, pick = ""): string {
   return "Otros";
 }
 
-/** Mercado de una apuesta simple; las combinadas no tienen un solo mercado. */
+/**
+ * Mercado de una apuesta simple; las combinadas no tienen un solo mercado, y
+ * las sencillas de bet365 no lo traen (solo la selección).
+ */
 export function singleMarket(r: SettledBet): string | null {
   if (r.bet.type !== "simple" || r.bet.legs.length !== 1) return null;
   const leg = r.bet.legs[0];
+  if (r.bet.bookmaker === "bet365" && !leg.builder && !leg.market) return null;
   return marketFamily(leg.market, leg.pick);
 }
 
@@ -199,6 +217,30 @@ export function summarize(bets: ParsedBet[], settled: SettledBet[]): Summary {
     freebetStake: round2(fb.reduce((s, r) => s + r.freebetStake, 0)),
     freebetProfit: round2(fb.reduce((s, r) => s + r.profit, 0)),
     ownProfit: round2(own.reduce((s, r) => s + r.profit, 0)),
+  };
+}
+
+/** Lo que se compara con el dinero real de una casa en un periodo (un año o toda la cuenta). */
+export interface MoneyHistory {
+  profit: number;
+  freebetProfit: number;
+  first: string | null;
+  last: string | null;
+  pending: number;
+  /** Apuestas resueltas. */
+  bets: number;
+}
+
+export function moneyHistory(bets: ParsedBet[]): MoneyHistory {
+  const all = bets.map(settle).filter((r): r is SettledBet => r !== null);
+  const dates = bets.map((b) => b.placedAt).filter((d): d is string => d !== null).sort();
+  return {
+    profit: round2(all.reduce((sum, r) => sum + r.profit, 0)),
+    freebetProfit: round2(all.filter((r) => r.bet.freebet).reduce((sum, r) => sum + r.profit, 0)),
+    first: dates[0] ?? null,
+    last: dates[dates.length - 1] ?? null,
+    pending: bets.filter((b) => b.status === "pending" || b.status === "unknown").length,
+    bets: all.length,
   };
 }
 

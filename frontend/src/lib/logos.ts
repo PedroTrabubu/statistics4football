@@ -90,6 +90,15 @@ export const TEAM_ALIASES: Record<string, string> = {
   monaco: "as-monaco",
   "paris-sg": "paris-saint-germain",
   strasbourg: "rc-strasbourg-alsace",
+  // Nombres de las casas de apuestas (Mis apuestas)
+  "athletic-bilbao": "athletic-club",
+  "atletico-de-madrid": "atletico-madrid",
+  "celta-vigo": "celta",
+  "deportivo-de-a-coruna": "deportivo-la-coruna",
+  "fc-barcelona": "barcelona",
+  psg: "paris-saint-germain",
+  "racing-de-santander": "racing",
+  "sevilla-fc": "sevilla",
 };
 
 /** Busca el escudo primero en la carpeta de la liga y luego en todas (un

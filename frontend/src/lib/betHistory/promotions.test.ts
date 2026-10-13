@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { expectedLongestLosingStreak, insights, settle, sportOf, type SettledBet } from "./analysis";
-import { matchGroups } from "./matches";
 import { excludingPromotions, fixedStakePromotions, promoEvidence, promoSplit, wilson } from "./promotions";
 import type { BetLeg, ParsedBet } from "./types";
 
@@ -102,28 +101,6 @@ describe("evidencia de una promoción", () => {
       ...Array.from({ length: 10 }, () => lost({ promotions: ["La Gran Supercuota"] })),
     ]);
     expect(promoEvidence(rows, "La Gran Supercuota")?.supported).toBe(true);
-  });
-});
-
-describe("apuestas por partido", () => {
-  it("agrupa por partido, suma el importe expuesto y marca posibles duplicadas", () => {
-    const rows = settled([
-      bet({ placedAt: "2026-09-12T20:00" }),
-      bet({ placedAt: "2026-09-12T20:03" }), // igual y 3 minutos después
-      lost({ placedAt: "2026-09-12T21:30", legs: [leg({ market: "Goles", pick: "Más de 2,5" })] }),
-      bet({ legs: [leg({ participants: ["Sevilla FC", "Valencia"] })] }),
-    ]);
-    const [g] = matchGroups(rows);
-    expect(g.label).toBe("Real Madrid – Rayo Vallecano");
-    expect(g.bets).toHaveLength(3);
-    expect(g.exposed).toBe(30);
-    expect(g.profit).toBe(10);
-    expect(g.possibleDuplicates.size).toBe(2);
-    expect(matchGroups(rows).map((m) => m.label)).not.toContain("Sevilla FC – Valencia");
-  });
-
-  it("las apuestas sin partido se dejan fuera", () => {
-    expect(matchGroups(settled([bet({ legs: [] }), bet({ legs: [] }), bet({ legs: [] })]))).toEqual([]);
   });
 });
 

@@ -3,12 +3,13 @@ import { MonthlyChart } from "../components/MonthlyChart";
 import {
   HabitsBlock,
   LowSampleTag,
-  MatchesSection,
+  TeamsSection,
   PromoEvidenceCard,
   PromoSplitCards,
-  RealMoneyPanel,
+  RealMoneySection,
 } from "../components/MyBetsSections";
 import { ProfitChart } from "../components/ProfitChart";
+import { SectionNav } from "../components/SectionNav";
 import {
   DAY_PARTS,
   ODDS_BUCKETS,
@@ -37,20 +38,25 @@ import {
   sportOf,
   stakeBucket,
   summarize,
+  moneyHistory,
   weekday,
+  yearKey,
+  stats,
   type GroupStats,
+  type MoneyHistory,
   type MonthSplit,
   type SettledBet,
   type Summary,
 } from "../lib/betHistory/analysis";
+import { looksLikeBet365, parseBet365History } from "../lib/betHistory/bet365";
 import { LOW_SAMPLE, euro, moneyClass, pct, roiPct, roiPer100, signedPp } from "../lib/betHistory/format";
-import { matchGroups } from "../lib/betHistory/matches";
+import { teamGroups } from "../lib/betHistory/teams";
+import { getTeamCrest } from "../lib/logos";
 import { excludingPromotions, fixedStakePromotions, promoEvidence, promoSplit } from "../lib/betHistory/promotions";
 import {
   backupFileName,
   clearBets,
   describeUpdate,
-  EMPTY_REAL_MONEY,
   exportBackup,
   hasRealMoney,
   loadBets,
@@ -62,12 +68,16 @@ import {
   type Backup,
   type BetUpdate,
   type RealMoney,
+  type RealMoneyByBook,
+  WHOLE_ACCOUNT,
 } from "../lib/betHistory/storage";
-import type { ParsedBet } from "../lib/betHistory/types";
+import { BOOKMAKER_LABELS, type Bookmaker, type ParsedBet } from "../lib/betHistory/types";
 import { parseWinamaxHistory } from "../lib/betHistory/winamax";
 
-type Period = "all" | "30" | "90" | "365";
-const PERIODS: Record<Period, string> = { all: "Todo", "30": "Últimos 30 días", "90": "Últimos 90 días", "365": "Último año" };
+const BOOKMAKERS = Object.keys(BOOKMAKER_LABELS) as Bookmaker[];
+
+/** Un año ("2026") o toda la cuenta (WHOLE_ACCOUNT) de una casa. */
+type MoneyPeriod = { book: Bookmaker; period: string };
 
 const STATUS_LABELS: Record<ParsedBet["status"], string> = {
   won: "Ganada",
@@ -111,21 +121,37 @@ export function MyBetsPage() {
   const [backupText, setBackupText] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [pasted, setPasted] = useState("");
-  const [period, setPeriod] = useState<Period>("all");
+  /** Año natural elegido ("2026"), "all" para todos; null = el más reciente con apuestas. */
+  const [yearChoice, setYearChoice] = useState<string | null>(null);
+  const [book, setBook] = useState<Bookmaker | "">("");
   const [sport, setSport] = useState("");
-  /** Mes elegido en la vista mensual ("2026-10"); tiene prioridad sobre el periodo. */
+  /** Mes elegido en la vista mensual ("2026-10"); tiene prioridad sobre el año. */
   const [month, setMonth] = useState<string | null>(null);
-  const [realMoney, setRealMoney] = useState<RealMoney>(() => loadRealMoney());
+  const [realMoney, setRealMoney] = useState<RealMoneyByBook>(() => loadRealMoney());
 
-  function onSaveRealMoney(m: RealMoney) {
-    setRealMoney(m);
-    saveRealMoney(m);
+  /** Guarda (o, con null, borra) el dinero real de una casa en un año o en toda la cuenta. */
+  function onSaveRealMoney({ book: k, period }: MoneyPeriod, m: RealMoney | null) {
+    const periods = { ...realMoney[k] };
+    if (m) periods[period] = m;
+    else delete periods[period];
+    const next = { ...realMoney, [k]: periods };
+    setRealMoney(next);
+    saveRealMoney(next);
   }
 
-  /** Restaura una copia: une las apuestas y, si aquí no hay dinero real apuntado, toma el de la copia. */
+  /** Restaura una copia: une las apuestas y, en cada casa y año sin dinero real apuntado aquí, toma el de la copia. */
   function restoreBackup(backup: Backup) {
     applyIncoming(backup.bets, 0, "backup");
-    if (backup.realMoney && !hasRealMoney(realMoney)) onSaveRealMoney(backup.realMoney);
+    let next = realMoney;
+    for (const k of BOOKMAKERS) {
+      for (const [period, m] of Object.entries(backup.realMoney?.[k] ?? {})) {
+        if (!hasRealMoney(next[k]?.[period])) next = { ...next, [k]: { ...next[k], [period]: m } };
+      }
+    }
+    if (next !== realMoney) {
+      setRealMoney(next);
+      saveRealMoney(next);
+    }
   }
 
   function importHtml(html: string) {
@@ -139,11 +165,11 @@ export function MyBetsPage() {
       }
       return;
     }
-    const { bets: parsed, failed } = parseWinamaxHistory(html);
+    const { bets: parsed, failed } = looksLikeBet365(html) ? parseBet365History(html) : parseWinamaxHistory(html);
     if (parsed.length === 0) {
       setReport({
         kind: "error",
-        text: "No he encontrado apuestas en ese HTML. Asegúrate de copiar la lista de «Mis apuestas → Finalizadas» de Winamax (ver los pasos de abajo).",
+        text: "No he encontrado apuestas en ese HTML. Asegúrate de copiar la lista de «Mis apuestas → Finalizadas» de Winamax o la del historial de apuestas deportivas de bet365 (ver los pasos de abajo).",
       });
       return;
     }
@@ -226,47 +252,62 @@ export function MyBetsPage() {
     if (!window.confirm("¿Borrar todas las apuestas importadas y el dinero real apuntado en este navegador?")) return;
     clearBets();
     setBets([]);
-    setRealMoney(EMPTY_REAL_MONEY);
+    setRealMoney({});
     setLastImport(new Map());
     setReport({ kind: "cleared" });
   }
 
   const sports = useMemo(() => [...new Set(bets.map(sportOf))].sort((a, b) => a.localeCompare(b, "es")), [bets]);
 
-  // El deporte se aplica a todo, también a la vista mensual.
-  const base = useMemo(() => bets.filter((b) => !sport || sportOf(b) === sport), [bets, sport]);
-  // El mes elegido (o, si no hay, el periodo) filtra el resto de la página.
+  const books = useMemo(() => BOOKMAKERS.filter((k) => bets.some((b) => b.bookmaker === k)), [bets]);
+  // Años naturales con apuestas, del más reciente al más antiguo.
+  const allYears = useMemo(
+    () => [...new Set(bets.map(yearKey).filter((y): y is string => y !== null))].sort().reverse(),
+    [bets],
+  );
+  const year =
+    yearChoice === "all" ? null : yearChoice && allYears.includes(yearChoice) ? yearChoice : (allYears[0] ?? null);
+
+  // La casa y el deporte se aplican a todo, también a las vistas por año y por mes.
+  const base = useMemo(
+    () => bets.filter((b) => (!book || b.bookmaker === book) && (!sport || sportOf(b) === sport)),
+    [bets, book, sport],
+  );
+  // El mes elegido (o, si no hay, el año) filtra el resto de la página.
   const filtered = useMemo(() => {
     if (month) return base.filter((b) => inPeriod(b, month));
-    const from = period === "all" ? null : Date.now() - Number(period) * 86_400_000;
-    return base.filter((b) => from === null || (b.placedAt !== null && new Date(b.placedAt).getTime() >= from));
-  }, [base, month, period]);
+    return year ? base.filter((b) => inPeriod(b, year)) : base;
+  }, [base, month, year]);
 
   const settled = useMemo(() => filtered.map(settle).filter((r): r is SettledBet => r !== null), [filtered]);
   const baseSettled = useMemo(() => base.map(settle).filter((r): r is SettledBet => r !== null), [base]);
   const months = useMemo(() => monthlySplit(baseSettled), [baseSettled]);
   const years = useMemo(() => yearlySplit(baseSettled), [baseSettled]);
 
-  // Para comparar con el dinero real: todo el historial importado, sin filtros.
-  const history = useMemo(() => {
-    const all = bets.map(settle).filter((r): r is SettledBet => r !== null);
-    const dates = bets.map((b) => b.placedAt).filter((d): d is string => d !== null).sort();
-    return {
-      profit: Math.round(all.reduce((sum, r) => sum + r.profit, 0) * 100) / 100,
-      freebetProfit: Math.round(all.filter((r) => r.bet.freebet).reduce((sum, r) => sum + r.profit, 0) * 100) / 100,
-      first: dates[0] ?? null,
-      last: dates[dates.length - 1] ?? null,
-      pending: bets.filter((b) => b.status === "pending" || b.status === "unknown").length,
-      bets: all.length,
+  // Para comparar con el dinero real: las apuestas de la casa en ese año (o todas), de todos los deportes.
+  const moneyHistoryOf = useMemo(() => {
+    const cache = new Map<string, MoneyHistory>();
+    return ({ book: k, period }: MoneyPeriod): MoneyHistory => {
+      const id = `${k}|${period}`;
+      if (!cache.has(id)) {
+        const rows = bets.filter((b) => b.bookmaker === k && (period === WHOLE_ACCOUNT || yearKey(b) === period));
+        cache.set(id, moneyHistory(rows));
+      }
+      return cache.get(id) as MoneyHistory;
     };
   }, [bets]);
+
+  function selectYear(key: string | null) {
+    setYearChoice(key ?? "all");
+    setMonth(null);
+  }
 
   return (
     <div>
       <h1>Mis apuestas</h1>
       <p className="page-lead">
-        Pega tu historial de Winamax y mira en qué ganas y en qué pierdes dinero: por cuota, tipo de apuesta, deporte,
-        mercado, importe y hábitos.
+        Pega tu historial de Winamax o de bet365 y mira en qué ganas y en qué pierdes dinero, año a año: por cuota, tipo
+        de apuesta, deporte, mercado, importe y hábitos.
       </p>
 
       <section className="bets-import">
@@ -278,7 +319,7 @@ export function MyBetsPage() {
         <textarea
           value={pasted}
           onChange={(e) => setPasted(e.target.value)}
-          placeholder="Pega aquí el HTML del historial de Winamax (o el texto de una copia de seguridad)…"
+          placeholder="Pega aquí el HTML del historial de Winamax o de bet365 (o el texto de una copia de seguridad)…"
           rows={5}
           aria-label="HTML del historial de apuestas"
         />
@@ -344,6 +385,28 @@ export function MyBetsPage() {
             <li>Puedes importar varias veces: las apuestas repetidas no se duplican.</li>
           </ol>
         </details>
+        <details className="small muted">
+          <summary>Cómo sacar el historial de bet365</summary>
+          <ol>
+            <li>
+              En bet365, abre el <strong>Historial</strong> de tu cuenta, elige <strong>Apuestas deportivas</strong> y
+              las fechas que quieras, y baja hasta el final para que se carguen todas.
+            </li>
+            <li>
+              Igual que con Winamax: guarda la página con Ctrl+S («Página web completa») y súbela, o copia el elemento
+              de la lista con «Inspeccionar → Copiar elemento» y pégalo arriba.
+            </li>
+            <li>
+              bet365 no indica en el historial si una apuesta se ganó o se perdió: se deduce de lo cobrado. Si cobraste
+              menos de lo que pagaba la cuota (cash out o una selección anulada), sale como «Cash out». Las apuestas
+              con créditos de apuesta cuentan como freebets.
+            </li>
+            <li>
+              Las sencillas solo traen la selección («Real Madrid»), sin el partido ni el mercado, así que no entran en
+              «Por mercado» ni en «Partidos».
+            </li>
+          </ol>
+        </details>
       </section>
 
       {bets.length === 0 ? (
@@ -351,22 +414,24 @@ export function MyBetsPage() {
       ) : (
         <>
           <div className="filters">
-            <select
-              aria-label="Periodo"
-              value={month ? `mes:${month}` : period}
-              onChange={(e) => {
-                if (e.target.value.startsWith("mes:")) return;
-                setMonth(null);
-                setPeriod(e.target.value as Period);
-              }}
-            >
-              {month && <option value={`mes:${month}`}>{monthLabel(month)}</option>}
-              {(Object.keys(PERIODS) as Period[]).map((p) => (
-                <option key={p} value={p}>
-                  {PERIODS[p]}
+            <select aria-label="Año" value={year ?? "all"} onChange={(e) => selectYear(e.target.value === "all" ? null : e.target.value)}>
+              {allYears.map((y) => (
+                <option key={y} value={y}>
+                  Año {y}
                 </option>
               ))}
+              <option value="all">Todos los años</option>
             </select>
+            {books.length > 1 && (
+              <select aria-label="Casa" value={book} onChange={(e) => setBook(e.target.value as Bookmaker | "")}>
+                <option value="">Todas las casas</option>
+                {books.map((k) => (
+                  <option key={k} value={k}>
+                    {BOOKMAKER_LABELS[k]}
+                  </option>
+                ))}
+              </select>
+            )}
             <select aria-label="Deporte" value={sport} onChange={(e) => setSport(e.target.value)}>
               <option value="">Todos los deportes</option>
               {sports.map((s) => (
@@ -376,8 +441,8 @@ export function MyBetsPage() {
               ))}
             </select>
             {month && (
-              <button type="button" className="month-chip" onClick={() => setMonth(null)} aria-label="Quitar el filtro de periodo">
-                {/^\d{4}$/.test(month) ? "Año" : "Mes"}: {monthLabel(month)} <span aria-hidden="true">✕</span>
+              <button type="button" className="month-chip" onClick={() => setMonth(null)} aria-label="Quitar el filtro de mes">
+                Mes: {monthLabel(month)} <span aria-hidden="true">✕</span>
               </button>
             )}
           </div>
@@ -389,11 +454,15 @@ export function MyBetsPage() {
               settled={settled}
               months={months}
               years={years}
+              baseSettled={baseSettled}
+              books={book ? [book] : books}
+              year={year}
+              onSelectYear={selectYear}
               selectedMonth={month}
               onSelectMonth={setMonth}
               realMoney={realMoney}
               onSaveRealMoney={onSaveRealMoney}
-              history={history}
+              moneyHistoryOf={moneyHistoryOf}
               lastImport={lastImport}
             />
           )}
@@ -478,7 +547,7 @@ function ImportReportPanel({ report, onClose }: { report: ImportReport; onClose:
   );
 }
 
-function Headline({ s }: { s: Summary }) {
+function Headline({ s, period }: { s: Summary; period: string }) {
   const gap = s.hitRate !== null && s.impliedRate !== null ? s.hitRate - s.impliedRate : null;
   const share = (n: number) => (s.bets ? `${(100 * n) / s.bets}%` : "0%");
   return (
@@ -486,7 +555,7 @@ function Headline({ s }: { s: Summary }) {
       <div className="bets-hero-top">
         <div className="bets-hero-profit">
           <span className="bets-hero-label">
-            Beneficio neto <LowSampleTag n={s.bets} />
+            Beneficio neto {period} <LowSampleTag n={s.bets} />
           </span>
           <span className={`bets-hero-value ${moneyClass(s.profit)}`}>{euro(s.profit, true)}</span>
           <span className="small muted">
@@ -618,37 +687,120 @@ function MonthlyTable({
   );
 }
 
+/** Resultado de cada año natural, el periodo con el que se declaran las ganancias del juego. */
+function YearSection({
+  years,
+  settled,
+  books,
+  selected,
+  onSelect,
+}: {
+  years: MonthSplit[];
+  settled: SettledBet[];
+  books: Bookmaker[];
+  selected: string | null;
+  onSelect: (key: string | null) => void;
+}) {
+  const byBook = books.length > 1;
+  return (
+    <section id="anual">
+      <h2>Año a año</h2>
+      <p className="small muted">
+        Por año natural, del 1 de enero al 31 de diciembre: es el periodo con el que se declaran las ganancias del juego
+        en la renta. Cada apuesta cuenta en el año en que la hiciste; una de finales de diciembre que se resolvió en enero
+        podría ir al año siguiente. El beneficio incluye lo ganado con freebets. Pulsa un año para ver solo ese año.
+      </p>
+      <div className="table-scroll">
+        <table className="predictions-table">
+          <thead>
+            <tr>
+              <th>Año</th>
+              <th className="num">Apuestas</th>
+              <th className="num">Acierto</th>
+              <th className="num">Apostado</th>
+              <th className="num">Beneficio</th>
+              {byBook && books.map((k) => <th key={k} className="num">{BOOKMAKER_LABELS[k]}</th>)}
+              <th className="num">ROI</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...years].reverse().map(({ key, total: y }) => (
+              <tr key={key} className={selected === key ? "month-row-selected" : undefined}>
+                <td className="rec-match">
+                  <button
+                    type="button"
+                    className="month-link"
+                    aria-pressed={selected === key}
+                    onClick={() => onSelect(selected === key ? null : key)}
+                  >
+                    {key}
+                  </button>{" "}
+                  <LowSampleTag n={y.bets} />
+                </td>
+                <td className="num">{y.bets}</td>
+                <td className="num">
+                  {pct(y.hitRate)}
+                  <span className="muted small"> ({y.wins}/{y.decided})</span>
+                </td>
+                <td className="num">{euro(y.ownStaked)}</td>
+                <td className={`num ${moneyClass(y.profit)}`}>
+                  <strong>{euro(y.profit, true)}</strong>
+                </td>
+                {byBook &&
+                  books.map((k) => {
+                    const g = stats(k, settled.filter((r) => r.bet.bookmaker === k && yearKey(r.bet) === key));
+                    return (
+                      <td key={k} className={`num ${moneyClass(g.profit)}`}>
+                        {g.bets ? euro(g.profit, true) : "—"}
+                      </td>
+                    );
+                  })}
+                <td className={`num ${moneyClass(y.roi)}`}>{roiPct(y.roi)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
 function Analysis({
   bets,
   settled,
   months,
   years,
+  baseSettled,
+  books,
+  year,
+  onSelectYear,
   selectedMonth,
   onSelectMonth,
   realMoney,
   onSaveRealMoney,
-  history,
+  moneyHistoryOf,
   lastImport,
 }: {
   bets: ParsedBet[];
   settled: SettledBet[];
   months: MonthSplit[];
   years: MonthSplit[];
+  /** Todas las apuestas resueltas de la casa y el deporte elegidos, de todos los años. */
+  baseSettled: SettledBet[];
+  books: Bookmaker[];
+  year: string | null;
+  onSelectYear: (key: string | null) => void;
   selectedMonth: string | null;
   onSelectMonth: (key: string | null) => void;
-  realMoney: RealMoney;
-  onSaveRealMoney: (m: RealMoney) => void;
-  history: { profit: number; first: string | null; last: string | null; pending: number; freebetProfit: number; bets: number };
+  realMoney: RealMoneyByBook;
+  onSaveRealMoney: (p: MoneyPeriod, m: RealMoney | null) => void;
+  moneyHistoryOf: (p: MoneyPeriod) => MoneyHistory;
   lastImport: Map<string, ImportTag>;
 }) {
   const s = summarize(bets, settled);
   const sentences = insights(settled);
-  // Año que se ve en "Mes a mes": el del mes elegido o, si no hay, el más reciente. null = todos.
-  const latestYear = years.length ? years[years.length - 1].key : null;
-  const [year, setYear] = useState<string | null>(() => selectedMonth?.slice(0, 4) ?? latestYear);
-  const shownYear = year !== null && years.some((y) => y.key === year) ? year : null;
-  const shownMonths = shownYear ? months.filter((m) => m.key.startsWith(shownYear)) : months;
-  const yearTotal = shownYear ? (years.find((y) => y.key === shownYear)?.total ?? null) : null;
+  const shownMonths = year ? months.filter((m) => m.key.startsWith(year)) : months;
+  const period = selectedMonth ? `en ${monthLabel(selectedMonth)}` : year ? `en ${year}` : "en todos los años";
   const dimensions = {
     "Cuota": groupBy(settled, (r) => oddsBucket(r.bet.odds), ODDS_BUCKETS.map((b) => b[2])),
     "Tipo de apuesta": groupBy(settled, (r) => betType(r.bet), TYPE_ORDER),
@@ -669,17 +821,33 @@ function Analysis({
     STAKE_BUCKETS.map((b) => b[2]),
   );
   const evidence = promos
-    .filter((g) => /supercuota/i.test(g.key))
+    .filter((g) => /supercuota|superaumento/i.test(g.key))
     .map((g) => promoEvidence(settled, g.key))
     .filter((e) => e !== null);
-  const matches = matchGroups(settled);
+  // Una sencilla de bet365 sin partido cuenta para el equipo elegido si tiene escudo (no "Empate" ni un jugador).
+  const teams = teamGroups(settled, (name) => getTeamCrest(null, name) !== undefined);
   const leaks = biggestLeaks(dimensions);
   const h = habits(settled);
   const builder = builderSelections(settled);
 
   return (
     <>
-      <Headline s={s} />
+      <SectionNav
+        label="Secciones de mis apuestas"
+        sections={[
+          { id: "anual", label: "Año a año", short: "Por año" },
+          { id: "mensual", label: "Mes a mes", short: "Por mes" },
+          { id: "evolucion", label: "Evolución" },
+          { id: "dinero-real", label: "Dinero real" },
+          ...(leaks.length > 0 ? [{ id: "donde-pierdes", label: "Dónde pierdes más", short: "Dónde pierdes" }] : []),
+          { id: "por-categoria", label: "Cuota, importe, deporte…", short: "Categorías" },
+          ...(promos.length > 0 ? [{ id: "promociones", label: "Promociones" }] : []),
+          { id: "habitos", label: "Hábitos" },
+          ...(teams.length > 0 ? [{ id: "equipos", label: "Equipos y tenistas", short: "Equipos" }] : []),
+          { id: "apuestas", label: "Apuestas importadas", short: "Apuestas" },
+        ]}
+      />
+      <Headline s={s} period={period} />
       <PromoSplitCards split={split} />
 
       {settled.length < 30 && (
@@ -697,41 +865,10 @@ function Analysis({
         </div>
       )}
 
+      <YearSection years={years} settled={baseSettled} books={books} selected={year} onSelect={onSelectYear} />
 
-      <section>
-        <div className="section-head">
-          <h2>Mes a mes{shownYear ? ` · ${shownYear}` : ""}</h2>
-          {years.length > 1 && (
-            <div className="tab-group" role="group" aria-label="Año">
-              {years.map((y) => (
-                <button
-                  key={y.key}
-                  type="button"
-                  className={shownYear === y.key ? "tab-button tab-button-active" : "tab-button"}
-                  aria-pressed={shownYear === y.key}
-                  onClick={() => setYear(y.key)}
-                >
-                  {y.key}
-                </button>
-              ))}
-              <button
-                type="button"
-                className={shownYear === null ? "tab-button tab-button-active" : "tab-button"}
-                aria-pressed={shownYear === null}
-                onClick={() => setYear(null)}
-              >
-                Todos
-              </button>
-            </div>
-          )}
-        </div>
-        {yearTotal && (
-          <p className="small">
-            Total de {shownYear}: <strong>{yearTotal.bets}</strong> apuestas · acierto {pct(yearTotal.hitRate)} · beneficio{" "}
-            <strong className={moneyClass(yearTotal.profit)}>{euro(yearTotal.profit, true)}</strong> · ROI{" "}
-            <span className={moneyClass(yearTotal.roi)}>{roiPct(yearTotal.roi)}</span> <LowSampleTag n={yearTotal.bets} />
-          </p>
-        )}
+      <section id="mensual">
+        <h2>Mes a mes{year ? ` · ${year}` : ""}</h2>
         <p className="small muted">
           Por la fecha en que hiciste la apuesta. Pulsa un mes (en el gráfico o en la tabla) para ver solo ese mes en el
           resto de la página; púlsalo otra vez, o «Mes ✕» arriba, para quitar el filtro.
@@ -741,14 +878,21 @@ function Analysis({
         <p className="small muted">Con menos de {LOW_SAMPLE} apuestas (en gris) el mes es poco fiable.</p>
       </section>
 
-      <h2>Evolución del beneficio</h2>
-      <ProfitChart points={cumulativeProfit(settled)} />
+      <section id="evolucion">
+        <h2>Evolución del beneficio{year && !selectedMonth ? ` · ${year}` : ""}</h2>
+        <ProfitChart points={cumulativeProfit(settled)} />
+      </section>
 
-      {/* key: el formulario se recarga si el dinero real cambia por fuera (copia restaurada, datos borrados). */}
-      <RealMoneyPanel key={realMoney.updatedAt ?? "vacío"} money={realMoney} onSave={onSaveRealMoney} history={history} />
+      <RealMoneySection
+        books={books}
+        year={year}
+        realMoney={realMoney}
+        history={moneyHistoryOf}
+        onSave={onSaveRealMoney}
+      />
 
       {leaks.length > 0 && (
-        <section className="bets-leaks">
+        <section className="bets-leaks" id="donde-pierdes">
           <h2>Dónde pierdes más</h2>
           <ul>
             {leaks.map(({ dimension, group }) => (
@@ -771,13 +915,14 @@ function Analysis({
       )}
 
       <Breakdown
+        id="por-categoria"
         title="Por cuota"
         rows={dimensions["Cuota"]}
         note="La columna clave es la diferencia: cuánto aciertas por encima o por debajo de lo que implica la cuota."
       />
       <Breakdown title="Simples y combinadas" rows={dimensions["Tipo de apuesta"]} />
       {promos.length > 0 && (
-        <section>
+        <section id="promociones">
           <h2>Promociones</h2>
           <ul className="promo-summary">
             {promos.map((g) => (
@@ -801,7 +946,7 @@ function Analysis({
           <Breakdown
             title="Por promoción"
             rows={dimensions["Promoción"]}
-            note="Supercuotas y operaciones de Winamax (Bang to the Moon, misiones...). Una apuesta con dos promociones cuenta en las dos."
+            note="Supercuotas y operaciones de Winamax (Bang to the Moon, misiones...) y aumentos de bet365 (de cuota y de ganancias). Una apuesta con dos promociones cuenta en las dos."
           />
         </section>
       )}
@@ -814,7 +959,10 @@ function Analysis({
       {builder.length > 0 && (
         <section>
           <h2>Selecciones dentro de «Crea tu apuesta»</h2>
-          <p className="small muted">Winamax da el resultado de cada selección, así que aquí sí se ve cuáles fallan.</p>
+          <p className="small muted">
+            Winamax da el resultado de cada selección, así que aquí sí se ve cuáles fallan. bet365 no lo da: sus «Crear
+            apuesta» no entran aquí.
+          </p>
           <div className="table-scroll">
             <table className="predictions-table">
               <thead>
@@ -842,7 +990,7 @@ function Analysis({
       <Breakdown
         title="Por importe — todas las apuestas"
         rows={dimensions["Importe"]}
-        note="Por el importe de cada apuesta (las freebets no cuentan)."
+        note="Por el importe de cada apuesta (las freebets no cuentan). Cada tramo empieza en su importe: una apuesta de 5 € va en «5 – 9,99 €»."
       />
       {fixedPromos.length > 0 && (
         <Breakdown
@@ -863,17 +1011,17 @@ function Analysis({
         expectedStreak={expectedLongestLosingStreak(s.decided, s.hitRate)}
       />
 
-      <MatchesSection groups={matches} />
+      <TeamsSection groups={teams} />
 
       <BetList bets={bets} settled={settled} lastImport={lastImport} />
     </>
   );
 }
 
-function Breakdown({ title, rows, note }: { title: string; rows: GroupStats[]; note?: string }) {
+function Breakdown({ id, title, rows, note }: { id?: string; title: string; rows: GroupStats[]; note?: string }) {
   if (rows.length === 0) return null;
   return (
-    <section>
+    <section id={id}>
       <h2>{title}</h2>
       {note && <p className="small muted">{note}</p>}
       <div className="table-scroll">
@@ -929,7 +1077,7 @@ function BetList({ bets, settled, lastImport }: { bets: ParsedBet[]; settled: Se
   const pool = onlyLast && lastImport.size ? bets.filter((b) => lastImport.has(b.id)) : bets;
   const shown = showAll ? pool : pool.slice(0, 30);
   return (
-    <section>
+    <section id="apuestas">
       <h2>Apuestas importadas</h2>
       <p className="small muted">Para comprobar que se han leído bien. Las más recientes primero.</p>
       {lastImport.size > 0 && (
@@ -943,6 +1091,7 @@ function BetList({ bets, settled, lastImport }: { bets: ParsedBet[]; settled: Se
           <thead>
             <tr>
               <th>Fecha</th>
+              <th>Casa</th>
               <th>Tipo</th>
               <th>Deporte</th>
               <th>Selecciones</th>
@@ -961,6 +1110,7 @@ function BetList({ bets, settled, lastImport }: { bets: ParsedBet[]; settled: Se
                     {lastImport.get(b.id) === "added" && <span className="badge import-tag-added">Nueva</span>}
                     {lastImport.get(b.id) === "updated" && <span className="badge import-tag-updated">Actualizada</span>}{" "}
                     {b.placedAt ? new Date(b.placedAt).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" }) : "—"}</td>
+                  <td className="rec-match">{BOOKMAKER_LABELS[b.bookmaker] ?? b.bookmaker}</td>
                   <td className="rec-match">{b.typeLabel || "—"}</td>
                   <td className="rec-match">{sportOf(b)}</td>
                   <td className="rec-match bets-legs">
@@ -975,9 +1125,9 @@ function BetList({ bets, settled, lastImport }: { bets: ParsedBet[]; settled: Se
                     )}
                     {b.legs.map((l, i) => (
                       <div key={i}>
-                        {l.participants.slice(0, 2).join(" – ")}:{" "}
+                        {l.participants.length > 0 && `${l.participants.slice(0, 2).join(" – ")}: `}
                         {l.builder ? l.pick : [l.market, l.pick].filter(Boolean).join(" · ")}
-                        {l.boosted && <span className="muted"> (supercuota)</span>}
+                        {l.boosted && <span className="muted"> ({b.bookmaker === "bet365" ? "cuota aumentada" : "supercuota"})</span>}
                       </div>
                     ))}
                     {b.warnings.length > 0 && <div className="bets-warning">{b.warnings.join(" ")}</div>}

@@ -2198,9 +2198,6 @@ h4 {
   padding: 0.7rem 1rem;
   margin: 0.4rem 0 1.4rem;
 }
-.real-money summary {
-  cursor: pointer;
-}
 .real-money-fields {
   display: flex;
   flex-wrap: wrap;
@@ -2230,39 +2227,65 @@ h4 {
   margin: 0.2rem 0 0;
   padding-left: 1.1rem;
 }
-.matches-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-.match-item {
+/* Dinero real por año: el total de las casas arriba y una tarjeta por casa, lado a lado si caben. */
+.real-money-year-total {
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  margin: 0.4rem 0 0.8rem;
+}
+.real-money-year-total p {
+  margin: 0.15rem 0;
+}
+.real-money-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 0 1rem;
+}
+.real-money h3 {
+  margin: 0.2rem 0 0;
+  font-size: 1rem;
+}
+.real-money-total td {
+  border-top: 2px solid var(--border);
+}
+/* Equipos y tenistas: una tarjeta por cada uno, con su escudo o una pelota de tenis. */
+.team-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: 0.7rem;
+  margin: 0.4rem 0 0.8rem;
+}
+.team-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
   background: var(--surface);
 }
-.match-item summary {
+.team-card p {
+  margin: 0.15rem 0;
+}
+.team-card-head {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.3rem 1rem;
-  cursor: pointer;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
 }
-.match-name {
+.team-card-name {
   font-weight: 600;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
-.match-figures {
-  font-size: 0.85rem;
+.team-card-rate strong {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
 }
-.match-item ul {
-  margin: 0.5rem 0 0.2rem;
-  padding-left: 1.1rem;
-  font-size: 0.82rem;
-}
-.dup-badge {
-  background: var(--amber-bg);
-  color: var(--amber);
-  margin-left: 0.4rem;
+/* Mismo tamaño que el escudo mediano (32 px), para que las cabeceras cuadren. */
+.tennis-ball {
+  flex: none;
+  width: 32px;
+  height: 32px;
 }
 
 /* Gráfico mensual: dos series apiladas + total */

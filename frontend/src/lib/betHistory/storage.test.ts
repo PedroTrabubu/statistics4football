@@ -37,12 +37,17 @@ describe("copia de seguridad", () => {
   it("se exporta y se vuelve a leer igual", async () => {
     const { exportBackup, parseBackup, backupFileName } = await import("./storage");
     const bets = [
-      { ...b("1", "won", "2026-10-01T10:00"), promotions: ["Supercuota"], legs: [] },
-      { ...b("2", "lost", "2026-10-02T10:00"), promotions: [], legs: [] },
+      { ...b("1", "won", "2026-10-01T10:00"), bookmaker: "winamax", promotions: ["Supercuota"], legs: [] },
+      { ...b("2", "lost", "2026-10-02T10:00"), bookmaker: "bet365", promotions: [], legs: [] },
     ] as ParsedBet[];
     expect(parseBackup(exportBackup(bets))).toEqual({ bets, realMoney: null });
-    const money = { deposited: 300, withdrawn: 50, balance: 120.5, updatedAt: "2026-10-07T10:00" };
-    expect(parseBackup(exportBackup(bets, money)).realMoney).toEqual(money);
+    const y2026 = { opening: 12.6, deposited: 30, withdrawn: 0, closing: 7.25, updatedAt: "2026-03-01T10:00" };
+    const y2025 = { opening: 0, deposited: 40, withdrawn: 0, closing: 12.6, updatedAt: "2026-03-01T10:00" };
+    const empty = { opening: null, deposited: null, withdrawn: null, closing: null, updatedAt: null };
+    // Cada casa y cada año con lo suyo; lo que no tiene datos no se guarda.
+    expect(
+      parseBackup(exportBackup(bets, { bet365: { "2026": y2026, "2025": y2025 }, winamax: { "2026": empty } })).realMoney,
+    ).toEqual({ bet365: { "2026": y2026, "2025": y2025 } });
     expect(backupFileName(new Date(2026, 9, 7))).toBe("mis-apuestas-2026-10-07.json");
   });
 
@@ -53,19 +58,30 @@ describe("copia de seguridad", () => {
     expect(() => parseBackup('{"kind": "statistics4bets/mis-apuestas", "bets": []}')).toThrow("no contiene apuestas");
   });
 
+  it("el dinero real de antes (un bloque sin año) pasa a «toda la cuenta» de Winamax", async () => {
+    const { parseBackup, realResult, WHOLE_ACCOUNT } = await import("./storage");
+    const money = { deposited: 150, withdrawn: 75, balance: 40.5, updatedAt: "2026-03-01T10:25" };
+    const v2 = { kind: "statistics4bets/mis-apuestas", version: 2, bets: [b("1", "won", "x")], realMoney: money };
+    const whole = parseBackup(JSON.stringify(v2)).realMoney?.winamax?.[WHOLE_ACCOUNT];
+    expect(whole).toEqual({ opening: 0, deposited: 150, withdrawn: 75, closing: 40.5, updatedAt: "2026-03-01T10:25" });
+    // El mismo resultado que daba antes: retirado + saldo - ingresado.
+    expect(realResult(whole!)).toBe(-34.5);
+  });
+
   it("completa campos que faltan en copias antiguas", async () => {
     const { parseBackup } = await import("./storage");
     const {
       bets: [old],
       realMoney,
     } = parseBackup(JSON.stringify({ kind: "statistics4bets/mis-apuestas", bets: [{ id: "9", status: "won" }] }));
-    expect(old).toMatchObject({ id: "9", promotions: [], warnings: [], legs: [] });
+    expect(old).toMatchObject({ id: "9", bookmaker: "winamax", promotions: [], warnings: [], legs: [] });
     expect(realMoney).toBeNull();
   });
 
-  it("resultado real = retirado + saldo - ingresado", async () => {
+  it("resultado real del año = saldo final - saldo inicial - ingresado + retirado", async () => {
     const { realResult } = await import("./storage");
-    expect(realResult({ deposited: 300, withdrawn: 50, balance: 120.5, updatedAt: null })).toBe(-129.5);
-    expect(realResult({ deposited: 300, withdrawn: null, balance: 120.5, updatedAt: null })).toBeNull();
+    // Un extracto de ejemplo: 7,25 - 12,60 - 30 + 0.
+    expect(realResult({ opening: 12.6, deposited: 30, withdrawn: 0, closing: 7.25, updatedAt: null })).toBe(-35.35);
+    expect(realResult({ opening: 12.6, deposited: 30, withdrawn: null, closing: 7.25, updatedAt: null })).toBeNull();
   });
 });
