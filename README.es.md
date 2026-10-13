@@ -10,7 +10,7 @@ Todas las estadísticas se calculan con resultados reales. Las de cada partido s
 
 - **Tablas por temporada:** para cada equipo, en total, como local y como visitante. Incluyen victorias, empates, derrotas, puntos, goles a favor y en contra, over 1.5/2.5/3.5, ambos marcan, portería a cero, no marcó, córners y tarjetas.
 - **Mercados por equipo:** para cada equipo, el porcentaje de acierto y la lista completa de sus partidos, en verde si se cumplió el mercado y en rojo si no, separados en local y visitante. Incluye ambos marcan (también con resultado), goles del partido y del equipo, goles por parte, descanso/final, resultado y portería a cero. Goles, córners, tarjetas, puntos de tarjeta, tiros, tiros a puerta y faltas se pueden consultar del partido, del equipo, del rival o de cada equipo, con líneas de más de y menos de (y hándicap de córners).
-- **Árbitros:** la misma vista agrupada por árbitro, para tarjetas, puntos de tarjeta, córners y goles. Premier League en todas las temporadas; LaLiga solo en la temporada en curso.
+- **Árbitros:** la misma vista agrupada por árbitro, para tarjetas, puntos de tarjeta, córners y goles, en todas las ligas y temporadas.
 - **Ficha de partido:** forma, enfrentamientos directos, xG reciente, Elo, córners y disciplina de los dos equipos, con un resumen de la temporada de cada uno.
 - **Probabilidades de partido:** 1X2, over/under 2.5 y ambos marcan, con un modelo Dixon-Coles ajustado sobre las últimas tres temporadas aproximadamente. Cada probabilidad indica cuántos partidos la respaldan, así que un equipo recién ascendido sin historial aparece marcado como muestra pequeña en lugar de mostrarse con una confianza falsa.
 - **Comparación con el mercado (opcional):** cuando hay cuotas pre-partido, la probabilidad del modelo se compara con la probabilidad implícita de las casas de apuestas (quitando su margen). Una pestaña de histórico muestra todas las selecciones pasadas con su resultado real, incluidos los fallos.
@@ -38,7 +38,10 @@ Es una herramienta de análisis, no un sistema de apuestas. El backtest fuera de
 | xG por partido | [Understat](https://understat.com/) mediante soccerdata |
 | Rating Elo | [ClubElo](http://clubelo.com/) mediante soccerdata |
 | Resultados y calendario de la temporada en curso | [football-data.org](https://www.football-data.org/) (plan gratuito) |
+| Árbitros de LaLiga, LaLiga Hypermotion y Ligue 1, y calendario de LaLiga Hypermotion | [ESPN](https://www.espn.com/soccer/) (API pública, sin clave) |
 | Cuotas pre-partido (opcional) | [The Odds API](https://the-odds-api.com/) (plan gratuito) |
+| Cuotas de Pinnacle, de la apertura al cierre (uso privado, no se muestran en la web) | API pública de Pinnacle (sin clave) |
+| Árbitros designados antes de cada partido | APIs de [laliga.com](https://www.laliga.com/) (LaLiga y LaLiga Hypermotion), [premierleague.com](https://www.premierleague.com/) y [ligue1.com](https://ligue1.com/) |
 
 Football-Data.co.uk también publica la temporada en curso (se actualiza un par de veces por semana); football-data.org completa los resultados más recientes entre medias.
 
@@ -87,12 +90,15 @@ python scripts/ingest_historical.py    # temporadas pasadas: resultados, córner
 python scripts/ingest_xg.py            # xG de Understat
 python scripts/ingest_elo.py           # rating Elo de ClubElo
 python scripts/ingest_matchdays.py     # jornadas de las temporadas pasadas (una sola vez)
+python scripts/ingest_espn.py          # árbitros de las temporadas pasadas (una sola vez, ~1 hora)
 python scripts/ingest_fixtures.py      # temporada en curso: resultados, estadísticas, próximos partidos y sus cuotas
 python scripts/refresh_odds.py         # opcional: cuotas más frescas en las ligas validadas (gasta créditos)
 python scripts/refresh_predictions.py  # probabilidades de los próximos partidos
 ```
 
-Vuelve a ejecutar `ingest_fixtures.py`, `refresh_odds.py` y `refresh_predictions.py` cuando quieras los últimos resultados. De LaLiga Hypermotion solo se ve la próxima jornada: football-data.org no la incluye gratis, y su calendario sale del `fixtures.csv` de Football-Data.co.uk, que se renueva a mitad de semana y antes del fin de semana. `python scripts/generate_predictions.py` ejecuta el backtest sobre la última temporada terminada. `python scripts/refresh_picks.py` genera las combinadas de la próxima jornada y `python scripts/backtest_picks.py` ejecuta su backtest pre-registrado (ver [docs/PICKS_PROTOCOLO.md](docs/PICKS_PROTOCOLO.md)). `python scripts/backtest_pattern_model.py` ejecuta el backtest pre-registrado del modelo de alta probabilidad (ver [docs/MODELO_PATRONES.md](docs/MODELO_PATRONES.md)).
+`python scripts/scheduler.py --loop` ejecuta solo `ingest_fixtures.py` antes y después de cada partido (resultados, estadísticas y árbitros designados) y captura las cuotas de Pinnacle; en Windows queda registrado en el Programador de tareas (ver [docs/PROGRAMADOR.md](docs/PROGRAMADOR.md)). `refresh_odds.py` y `refresh_predictions.py` se siguen ejecutando a mano. football-data.org no incluye gratis LaLiga Hypermotion: su calendario sale de ESPN, con fechas provisionales hasta que se fija la hora, y la hora y las cuotas de la próxima jornada salen del `fixtures.csv` de Football-Data.co.uk, que se renueva a mitad de semana y antes del fin de semana. `python scripts/generate_predictions.py` ejecuta el backtest sobre la última temporada terminada. `python scripts/refresh_picks.py` genera las combinadas de la próxima jornada y `python scripts/backtest_picks.py` ejecuta su backtest pre-registrado (ver [docs/PICKS_PROTOCOLO.md](docs/PICKS_PROTOCOLO.md)). `python scripts/backtest_pattern_model.py` ejecuta el backtest pre-registrado del modelo de alta probabilidad (ver [docs/MODELO_PATRONES.md](docs/MODELO_PATRONES.md)).
+
+`python scripts/pinnacle_capture.py --loop` guarda las cuotas de Pinnacle de la apertura al cierre, y `python scripts/report_picks_vs_pinnacle.py` mide los picks contra ellas. Puesta en marcha, datos y reglas en [docs/PINNACLE.md](docs/PINNACLE.md); protocolo y resultados en [docs/PINNACLE_PROTOCOLO.md](docs/PINNACLE_PROTOCOLO.md).
 
 ### 4. Frontend
 
@@ -106,6 +112,8 @@ npm run dev
 ```
 
 Abre http://localhost:5173.
+
+Para publicarla, pon el dominio en `VITE_SITE_URL` (ver `frontend/.env.example`): el build añade `og:url` y hace absoluta la URL de la imagen que sale al compartir. Sin dominio no se pinta `og:url`.
 
 ### Tests
 
