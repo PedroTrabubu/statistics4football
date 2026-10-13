@@ -77,3 +77,15 @@ def test_unknown_match_is_reported(db: Session, match: Match, tmp_path):
     assert updated == 0
     assert unmatched == ["2026-08-24 Elche - Barcelona"]
     assert db.get(Match, match.id).referee is None
+
+
+def test_spaces_around_fields_do_not_leave_the_row_unmatched(db: Session, match: Match, tmp_path):
+    path = tmp_path / "arbitros.csv"
+    path.write_text(
+        HEADER + "ESP-La Liga, 2026-08-23,Elche ,Barcelona, A Quintero González , confirmado,\n\n", encoding="utf-8"
+    )
+
+    updated, unmatched = apply_referee_overrides(db, path)
+
+    assert (updated, unmatched) == (1, [])
+    assert db.get(Match, match.id).referee == "A Quintero González"
