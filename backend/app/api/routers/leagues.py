@@ -21,9 +21,11 @@ router = APIRouter(prefix="/leagues", tags=["leagues"])
 
 @router.get("", response_model=list[LeagueOut])
 def list_leagues(db: Session = Depends(get_db), settings: Settings = Depends(get_settings)) -> list[LeagueOut]:
+    """Las ligas activas: las de contexto (solo para el historial de los equipos
+    de Champions) no salen en la web."""
     return [
         LeagueOut.model_validate(league).model_copy(update={"validated": league.code in settings.model_leagues})
-        for league in db.query(League).order_by(League.name)
+        for league in db.query(League).filter(League.code.in_(settings.leagues)).order_by(League.name)
     ]
 
 

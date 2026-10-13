@@ -231,6 +231,17 @@ TEAM_ALIASES: dict[str, str] = {
     "US Sassuolo Calcio": "Sassuolo",
     "Udinese Calcio": "Udinese",
     "Venezia FC": "Venezia",
+    # Ligas de contexto: ESPN y Pinnacle (Champions) -> MatchHistory
+    "AEK Athens": "AEK",
+    "Ajax Amsterdam": "Ajax",
+    "FC Porto": "Porto",
+    "Feyenoord Rotterdam": "Feyenoord",
+    "Olympiacos": "Olympiakos",
+    "Sporting CP": "Sp Lisbon",
+    "Union St.-Gilloise": "St. Gilloise",
+    "PSV": "PSV Eindhoven",
+    # Pinnacle (Champions) -> ESPN, equipos de ligas que no cargamos
+    "Viking": "Viking FK",
 }
 
 

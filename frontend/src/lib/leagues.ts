@@ -17,6 +17,12 @@ const DISPLAY: Record<string, { name: string; short: string; country: string }> 
   "GER-Bundesliga": { name: "Bundesliga", short: "Bundesliga", country: "Alemania" },
   "ITA-Serie A": { name: "Serie A", short: "Serie A", country: "Italia" },
   "INT-Champions League": { name: "Champions League", short: "Champions", country: "Europa" },
+  // De contexto: solo aparecen en el historial de los equipos de Champions.
+  "POR-Primeira Liga": { name: "Primeira Liga", short: "Primeira", country: "Portugal" },
+  "NED-Eredivisie": { name: "Eredivisie", short: "Eredivisie", country: "Países Bajos" },
+  "BEL-Pro League": { name: "Pro League", short: "Pro League", country: "Bélgica" },
+  "TUR-Super Lig": { name: "Süper Lig", short: "Süper Lig", country: "Turquía" },
+  "GRE-Super League": { name: "Super League", short: "Super League", country: "Grecia" },
 };
 
 export function leagueName(code: string): string {

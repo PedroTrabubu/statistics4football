@@ -5,6 +5,7 @@ Elo (ClubElo) se reconcilian contra los partidos/equipos creados aqui.
 """
 
 import logging
+from collections import Counter
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
@@ -114,6 +115,8 @@ def backfill_match_history(
     solo dia) no coincide con la hora UTC que guarda football-data.org, y eso
     duplicaba partidos de la temporada en curso. La fecha solo se fija al
     crear el partido, para no pisar la hora UTC mas precisa de football-data.org.
+    Las ligas con playoffs en el mismo CSV (Belgica, Grecia) repiten cruces: el
+    n-esimo del CSV (que viene por fecha) es el n-esimo de la BD por fecha.
     """
     run = IngestionRun(source="soccerdata.match_history", status=IngestionStatus.RUNNING)
     db.add(run)
@@ -126,6 +129,7 @@ def backfill_match_history(
         # Filas espurias (lineas en blanco al final del CSV, etc.) quedan con
         # league/date en NaN tras el mapeo a IDs canonicos: se descartan.
         df = df.dropna(subset=["league", "date"])
+        seen: Counter = Counter()
 
         for _, row in df.iterrows():
             match_date = row["date"]
@@ -138,7 +142,10 @@ def backfill_match_history(
             away_team = _get_or_create_team(db, row["away_team"], league.id)
 
             match_datetime = uk_local_to_utc(match_date.to_pydatetime())
-            match = (
+            pairing = (league.id, season.id, home_team.id, away_team.id)
+            occurrence = seen[pairing]
+            seen[pairing] += 1
+            same_pairing = (
                 db.query(Match)
                 .filter_by(
                     league_id=league.id,
@@ -146,8 +153,10 @@ def backfill_match_history(
                     home_team_id=home_team.id,
                     away_team_id=away_team.id,
                 )
-                .one_or_none()
+                .order_by(Match.date, Match.id)
+                .all()
             )
+            match = same_pairing[occurrence] if occurrence < len(same_pairing) else None
 
             home_goals = row.get("FTHG")
             away_goals = row.get("FTAG")

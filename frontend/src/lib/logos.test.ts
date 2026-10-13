@@ -116,11 +116,11 @@ describe("escudos del proyecto", () => {
   // Los 36 de la fase de liga 26/27, con los nombres de ESPN (los de nuestras
   // ligas, con el suyo de siempre).
   const CHAMPIONS_2627 = [
-    "AEK Athens", "Roma", "Arsenal", "Aston Villa", "Ath Madrid", "Barcelona", "Bayern Munich", "Betis",
-    "Bodo/Glimt", "Dortmund", "Club Brugge", "Como", "FC Porto", "Fenerbahce", "Feyenoord Rotterdam",
+    "AEK", "Roma", "Arsenal", "Aston Villa", "Ath Madrid", "Barcelona", "Bayern Munich", "Betis",
+    "Bodo/Glimt", "Dortmund", "Club Brugge", "Como", "Porto", "Fenerbahce", "Feyenoord",
     "Galatasaray", "Inter", "LASK Linz", "Lens", "Lille", "Liverpool", "Man City", "Man United", "Napoli",
     "PSV Eindhoven", "Paris SG", "RB Leipzig", "Real Madrid", "Sabah FK", "Shakhtar Donetsk", "Slavia Prague",
-    "Slovan Bratislava", "Sporting CP", "Stuttgart", "Viking FK", "Villarreal",
+    "Slovan Bratislava", "Sp Lisbon", "Stuttgart", "Viking FK", "Villarreal",
   ];
 
   it("todos los equipos de la Champions 26/27 tienen escudo", () => {
