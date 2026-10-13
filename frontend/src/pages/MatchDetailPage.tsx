@@ -11,7 +11,7 @@ import { ErrorView, LoadingView } from "../components/StatusView";
 import { StatsPanel } from "../components/StatsPanel";
 import { TeamCrest } from "../components/TeamCrest";
 import { formatDateTime, formatMatchday, formatSeason, joinParts } from "../lib/format";
-import { leagueName, useSelectedLeagueCode } from "../lib/leagues";
+import { CHAMPIONS_LEAGUE_CODE, leagueName, useSelectedLeagueCode } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 
 /** Accesos directos bajo la cabecera, a cada bloque de la ficha. `short`: en
@@ -63,6 +63,8 @@ export function MatchDetailPage() {
   if (matchError || !match) return <ErrorView message={`No se pudo cargar el partido: ${matchError}`} />;
 
   const played = match.status === "historical";
+  // Sin cuotas de mercado (la Champions: Football-Data.co.uk no la cubre), ni EV ni «Valor».
+  const marketOdds = match.league_code !== CHAMPIONS_LEAGUE_CODE;
 
   return (
     <div>
@@ -74,7 +76,7 @@ export function MatchDetailPage() {
         {joinParts(
           leagueName(match.league_code),
           `Temporada ${formatSeason(match.season)}`,
-          formatMatchday(match.matchday),
+          formatMatchday(match.matchday, match.league_code),
           formatDateTime(match.date),
         )}
       </p>
@@ -96,7 +98,9 @@ export function MatchDetailPage() {
 
       <SectionNav
         label="Secciones del partido"
-        sections={SECTIONS.filter((s) => s.id !== "otros-partidos" || match.matchday !== null)}
+        sections={SECTIONS.filter((s) => s.id !== "otros-partidos" || match.matchday !== null).map((s) =>
+          s.id === "probabilidades" && !marketOdds ? { ...s, label: "Probabilidades", short: "Probabilidades" } : s,
+        )}
       />
 
       <section className="detail-section" id="forma">
@@ -154,10 +158,22 @@ export function MatchDetailPage() {
       </section>
 
       <section className="detail-section" id="probabilidades">
-        <h2>Probabilidades y valor esperado (EV)</h2>
-        <p className="muted">
-          El EV nunca se muestra solo: siempre va acompañado de un nivel de confianza y de riesgo.
-        </p>
+        {marketOdds ? (
+          <>
+            <h2>Probabilidades y valor esperado (EV)</h2>
+            <p className="muted">
+              El EV nunca se muestra solo: siempre va acompañado de un nivel de confianza y de riesgo.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2>Probabilidades</h2>
+            <p className="muted">
+              No hay cuotas de mercado para esta competición, así que no se calcula el valor esperado ni se marca
+              ningún «Valor». Con tu cuota, «Tu EV» sí se calcula.
+            </p>
+          </>
+        )}
         {loadingPredictions && <LoadingView label="Generando predicciones..." />}
         {predictionsError && (
           <ErrorView message={`No se pudieron generar las predicciones: ${predictionsError}`} />
@@ -167,6 +183,7 @@ export function MatchDetailPage() {
             predictions={predictions}
             homeTeam={match.home_team}
             awayTeam={match.away_team}
+            marketOdds={marketOdds}
           />
         )}
       </section>

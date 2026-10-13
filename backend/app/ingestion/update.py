@@ -13,6 +13,7 @@ scripts/ingest_fixtures.py (a mano) y el programador (scripts/scheduler.py).
    corrección de errores claros del CSV (cero tarjetas que ESPN sí tiene, datos
    que faltan).
 6. Designaciones arbitrales oficiales de los próximos partidos.
+   Champions League: todo desde ESPN (app/ingestion/champions.py).
 7. data/arbitros_manual.csv, que siempre prevalece.
 
 Cada paso que falla se anota y no impide los siguientes.
@@ -26,6 +27,7 @@ from datetime import date
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
+from app.ingestion.champions import LEAGUE_CODE as CHAMPIONS, sync_champions
 from app.ingestion.designations import sync_designations
 from app.ingestion.espn import sync_espn
 from app.ingestion.espn_stats import correct_stats_from_espn, fill_stats_from_espn
@@ -56,7 +58,8 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
         return f"status={run.status.value} partidos_procesados={run.rows_ingested} {run.notes or ''}".strip()
 
     def match_history() -> str:
-        run = backfill_match_history(db, leagues=settings.leagues, seasons=[season])
+        # Solo las ligas que tiene Football-Data.co.uk (la Champions no está).
+        run = backfill_match_history(db, leagues=leagues_with_source(settings.leagues, "MatchHistory"), seasons=[season])
         return f"status={run.status.value} partidos_procesados={run.rows_ingested}"
 
     def understat() -> str:
@@ -88,6 +91,10 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
         run = sync_designations(db, settings.leagues, 2000 + int(season[:2]))
         return f"status={run.status.value} {run.notes}"
 
+    def champions() -> str:
+        run = sync_champions(db, [season])
+        return f"status={run.status.value} {run.notes}"
+
     def overrides() -> str:
         updated, unmatched = apply_referee_overrides(db)
         extra = "".join(f"\n  AVISO: arbitros_manual.csv sin partido para {label}" for label in unmatched)
@@ -101,5 +108,7 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
     step("Estadísticas provisionales (ESPN)", espn_stats)
     step("Correcciones de estadísticas (ESPN)", espn_corrections)
     step("Designaciones", designations)
+    if CHAMPIONS in settings.leagues:
+        step("Champions League (ESPN)", champions)
     step("Árbitros corregidos a mano", overrides)
     return failures

@@ -10,7 +10,8 @@ from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
-from app.db.models import Match
+from app.core.competitions import CHAMPIONS_LEAGUE
+from app.db.models import League, Match
 from app.stats.discipline import DisciplineForm, compute_discipline_form
 from app.stats.elo import get_elo_at
 from app.stats.form import TeamForm, compute_team_form
@@ -31,15 +32,25 @@ class MatchFeatures:
     away_elo: float | None
 
 
+def excluded_leagues(db: Session, match: Match) -> list[int]:
+    """Ligas que no cuentan en la forma de los equipos de este partido. En las
+    ligas, la Champions no cuenta (sus cifras siguen como antes de añadirla);
+    en la Champions cuenta todo: los partidos de liga de cada equipo son su
+    contexto, y los equipos de otras ligas solo tienen los de Champions."""
+    champions = [league_id for (league_id,) in db.query(League.id).filter(League.code == CHAMPIONS_LEAGUE)]
+    return [] if match.league_id in champions else champions
+
+
 def compute_match_features(db: Session, match: Match, num_matches: int = 5) -> MatchFeatures:
+    skip = excluded_leagues(db, match)
     return MatchFeatures(
-        home_form=compute_team_form(db, match.home_team_id, match.date, num_matches),
-        away_form=compute_team_form(db, match.away_team_id, match.date, num_matches),
-        h2h=compute_h2h(db, match.home_team_id, match.away_team_id, match.date, num_matches),
-        home_xg_form=compute_xg_form(db, match.home_team_id, match.date, num_matches),
-        away_xg_form=compute_xg_form(db, match.away_team_id, match.date, num_matches),
-        home_discipline=compute_discipline_form(db, match.home_team_id, match.date, num_matches),
-        away_discipline=compute_discipline_form(db, match.away_team_id, match.date, num_matches),
+        home_form=compute_team_form(db, match.home_team_id, match.date, num_matches, skip),
+        away_form=compute_team_form(db, match.away_team_id, match.date, num_matches, skip),
+        h2h=compute_h2h(db, match.home_team_id, match.away_team_id, match.date, num_matches, skip),
+        home_xg_form=compute_xg_form(db, match.home_team_id, match.date, num_matches, skip),
+        away_xg_form=compute_xg_form(db, match.away_team_id, match.date, num_matches, skip),
+        home_discipline=compute_discipline_form(db, match.home_team_id, match.date, num_matches, skip),
+        away_discipline=compute_discipline_form(db, match.away_team_id, match.date, num_matches, skip),
         home_elo=get_elo_at(db, match.home_team_id, match.date),
         away_elo=get_elo_at(db, match.away_team_id, match.date),
     )

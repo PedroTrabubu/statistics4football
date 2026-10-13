@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { getLeagueMatchdays, getMatches } from "../api/client";
 import type { League } from "../api/types";
-import { formatDateRange, formatSeason } from "../lib/format";
+import { formatDateRange, formatMatchday, formatSeason } from "../lib/format";
 import { leagueName } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 import { MatchRow } from "./MatchRow";
@@ -71,7 +71,7 @@ export function MatchdayBrowser({ league, showTitle = false }: { league: League;
             >
               {info.matchdays.map((m) => (
                 <option key={m.matchday} value={m.matchday}>
-                  Jornada {m.matchday} · {formatDateRange(m.start, m.end)}
+                  {formatMatchday(m.matchday, league.code)} · {formatDateRange(m.start, m.end)}
                 </option>
               ))}
             </select>

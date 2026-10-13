@@ -2,7 +2,8 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMatches } from "../api/client";
 import type { Match } from "../api/types";
-import { formatKickoff } from "../lib/format";
+import { formatKickoff, formatMatchday } from "../lib/format";
+import { CHAMPIONS_LEAGUE_CODE } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 import { ErrorView, LoadingView } from "./StatusView";
 import { TeamName } from "./TeamCrest";
@@ -51,7 +52,11 @@ export function MatchdayCarousel({ match }: { match: Match }) {
   return (
     <section className="detail-section matchday-carousel" id="otros-partidos" aria-labelledby={titleId}>
       <div className="section-head">
-        <h2 id={titleId}>Otros partidos de la jornada {match.matchday}</h2>
+        <h2 id={titleId}>
+          {match.league_code === CHAMPIONS_LEAGUE_CODE
+            ? `Otros partidos · ${formatMatchday(match.matchday, match.league_code)}`
+            : `Otros partidos de la jornada ${match.matchday}`}
+        </h2>
         {!(edges.start && edges.end) && (
           <div className="carousel-buttons">
             <button type="button" aria-label="Partidos anteriores" disabled={edges.start} onClick={() => scroll(-1)}>

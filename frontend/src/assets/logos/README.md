@@ -19,6 +19,7 @@ La web los encuentra al compilar (`src/lib/logos.ts`), así que basta con dejar 
 | LaLiga | `esp-la-liga` |
 | LaLiga Hypermotion | `esp-la-liga-2` |
 | Ligue 1 | `fra-ligue-1` |
+| Champions League | `int-champions-league` |
 
 ## Equipos (`teams/<liga>/`)
 
@@ -28,8 +29,9 @@ La web los encuentra al compilar (`src/lib/logos.ts`), así que basta con dejar 
 | LaLiga | `esp-laliga1` |
 | LaLiga Hypermotion | `esp-laliga2` |
 | Ligue 1 | `fr-ligue1` |
+| Champions League | `championsleague` (solo los equipos de fuera de nuestras ligas) |
 
-Una liga nueva necesita su carpeta y una entrada en `TEAM_FOLDERS` de `src/lib/logos.ts`.
+Una liga nueva necesita su carpeta y una entrada en `TEAM_FOLDERS` de `src/lib/logos.ts`. En la Champions, los equipos de nuestras ligas usan su escudo de siempre (se busca en todas las carpetas).
 
 ### Cómo se encuentra el escudo de un equipo
 
@@ -42,11 +44,12 @@ Al añadir un escudo cuyo nombre no coincide con el de la API, añade su alias. 
 
 ### Equipos sin escudo
 
-- **Temporada 26/27:** Tenerife.
+- **Temporada 26/27:** ninguno (también los 36 de la Champions).
 - **Filiales:** Celta B, Sociedad B y Villarreal B usan el escudo de su primer equipo.
 - **Solo en el histórico:**
   - Premier League: Burnley, Leicester, Luton, Norwich, Sheffield United, Southampton, Watford, West Brom, West Ham y Wolves.
   - LaLiga Hypermotion: Alcorcon, Amorebieta, Cartagena, Cultural Leonesa, Ferrol, Fuenlabrada, Huesca, Ibiza, Logrones, Lugo, Mirandes, Ponferradina y Zaragoza.
+  - Champions League 25/26: Ajax, Atalanta, Bayer Leverkusen, Benfica, Eintracht Frankfurt, FC Copenhague, Juventus, Kairat Almaty, Olympiacos, Pafos, Qarabag y Union Saint-Gilloise.
   - Ligue 1: Ajaccio, Bordeaux, Clermont, Dijon, Metz, Montpellier, Nantes, Nimes, Reims y St Etienne.
 
 ### Ficheros a revisar

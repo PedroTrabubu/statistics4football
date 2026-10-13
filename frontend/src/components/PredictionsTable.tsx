@@ -10,10 +10,13 @@ export function PredictionsTable({
   predictions,
   homeTeam,
   awayTeam,
+  marketOdds = true,
 }: {
   predictions: Prediction[];
   homeTeam: string;
   awayTeam: string;
+  /** false: la competición no tiene cuotas de mercado; sin EV de mercado ni «Valor». */
+  marketOdds?: boolean;
 }) {
   // Cuota que el usuario introduce manualmente, por seleccion. Solo vive en
   // el navegador: nunca se envia ni se guarda (ver seccion "Cuotas y valor
@@ -37,7 +40,7 @@ export function PredictionsTable({
         // Partidos futuros sin cuotas ingeridas: "Prob. mercado"/"EV mercado"
         // salen null en las 2-3 filas del mercado. En vez de una tabla llena
         // de guiones, se ocultan esas dos columnas para este mercado.
-        const hasMarketData = preds.some((p) => p.prob_market_implied !== null);
+        const hasMarketData = marketOdds && preds.some((p) => p.prob_market_implied !== null);
 
         return (
           <div key={market} className="predictions-market">
@@ -67,10 +70,10 @@ export function PredictionsTable({
                     const yourImplied = odds !== null ? impliedProbability(odds) : null;
 
                     return (
-                      <tr key={p.selection} className={p.is_recommended ? "row-recommended" : undefined}>
+                      <tr key={p.selection} className={marketOdds && p.is_recommended ? "row-recommended" : undefined}>
                         <td>
                           {label}
-                          {p.is_recommended && <span className="value-tag">VALOR</span>}
+                          {marketOdds && p.is_recommended && <span className="value-tag">VALOR</span>}
                         </td>
                         {hasMarketData && <td>{formatPercent(p.prob_market_implied)}</td>}
                         <td>{formatPercent(p.prob_model)}</td>

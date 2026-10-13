@@ -74,6 +74,9 @@ export interface MatchHistory {
   matches: MatchResult[];
   /** El propio partido con su resultado, si ya se jugo (nunca en `matches`). */
   played: MatchResult | null;
+  /** Solo en la Champions: partidos de los dos equipos en sus ligas, contexto
+   * para sus patrones (nunca para la frecuencia de la competición). */
+  context?: MatchResult[];
 }
 
 /** GET /matches/{id}/referee-stats: partidos previos del arbitro y de cada equipo. */

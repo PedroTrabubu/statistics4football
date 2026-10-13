@@ -73,9 +73,25 @@ export function formatSeason(season: string): string {
   return `${season.slice(0, 2)}/${season.slice(2)}`;
 }
 
-/** "Jornada 8"; null si no se conoce. */
-export function formatMatchday(matchday: number | null | undefined): string | null {
-  return matchday == null ? null : `Jornada ${matchday}`;
+/** Eliminatorias de la Champions: siguen a las 8 jornadas de la fase de liga
+ * (ver backend/app/ingestion/champions.py). */
+const CHAMPIONS_ROUNDS: Record<number, string> = {
+  9: "Playoff · ida",
+  10: "Playoff · vuelta",
+  11: "Octavos · ida",
+  12: "Octavos · vuelta",
+  13: "Cuartos · ida",
+  14: "Cuartos · vuelta",
+  15: "Semifinales · ida",
+  16: "Semifinales · vuelta",
+  17: "Final",
+};
+
+/** "Jornada 8" (en la Champions, "Octavos · ida"...); null si no se conoce. */
+export function formatMatchday(matchday: number | null | undefined, leagueCode?: string | null): string | null {
+  if (matchday == null) return null;
+  if (leagueCode === "INT-Champions League" && CHAMPIONS_ROUNDS[matchday]) return CHAMPIONS_ROUNDS[matchday];
+  return `Jornada ${matchday}`;
 }
 
 /** Las partes que haya, unidas con " · " (liga · jornada · fecha). */

@@ -5,6 +5,7 @@ directamente desde el CSV de MatchHistory (ver historical_backfill.py) sin
 necesitar una fuente de datos nueva.
 """
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -23,7 +24,7 @@ class DisciplineForm:
 
 
 def compute_discipline_form(
-    db: Session, team_id: int, before_date: datetime, num_matches: int = 5
+    db: Session, team_id: int, before_date: datetime, num_matches: int = 5, exclude_league_ids: Sequence[int] = ()
 ) -> DisciplineForm:
     rows = (
         db.query(TeamMatchStats)
@@ -33,6 +34,7 @@ def compute_discipline_form(
             Match.status == MatchStatus.HISTORICAL,
             Match.date < before_date,
             TeamMatchStats.corners_for.is_not(None),
+            Match.league_id.notin_(exclude_league_ids),
         )
         .order_by(Match.date.desc())
         .limit(num_matches)

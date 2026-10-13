@@ -56,6 +56,7 @@ export const TEAM_FOLDERS: Record<string, string> = {
   "ESP-La Liga": "esp-laliga1",
   "ESP-La Liga 2": "esp-laliga2",
   "FRA-Ligue 1": "fr-ligue1",
+  "INT-Champions League": "championsleague",
 };
 
 /** Nombre de la API (Football-Data.co.uk, normalizado) -> nombre del
@@ -90,6 +91,19 @@ export const TEAM_ALIASES: Record<string, string> = {
   monaco: "as-monaco",
   "paris-sg": "paris-saint-germain",
   strasbourg: "rc-strasbourg-alsace",
+  // Champions League (nombres de ESPN)
+  "as-roma": "roma",
+  "bayern-munich": "bayern-munchen",
+  como: "como-1907",
+  "feyenoord-rotterdam": "feyenoord",
+  internazionale: "inter",
+  "lask-linz": "lask",
+  "psv-eindhoven": "psv",
+  "sabah-fk": "sabah",
+  "shakhtar-donetsk": "shakhtar",
+  "slavia-prague": "czech-republic-slavia-praha",
+  "slovan-bratislava": "s-bratislava",
+  "viking-fk": "viking",
   // Nombres de las casas de apuestas (Mis apuestas)
   "athletic-bilbao": "athletic-club",
   "atletico-de-madrid": "atletico-madrid",
