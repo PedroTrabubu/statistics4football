@@ -5,6 +5,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Query as SAQuery
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from app.core.competitions import CHAMPIONS_LEAGUE
 from app.core.config import Settings, get_settings
 from app.db.models import Match, MatchStatus, Season
 from app.db.session import get_db
@@ -137,10 +138,36 @@ def get_match_history(match_id: int, db: Session = Depends(get_db)) -> MatchHist
     )
     rows = _played_before(db, match).filter(Match.season_id.in_([s.id for s in seasons])).all()
     played = match_to_result_out(match) if match.status == MatchStatus.HISTORICAL else None
+    context = []
+    if match.league.code == CHAMPIONS_LEAGUE:
+        context = (
+            db.query(Match)
+            .join(Season, Season.id == Match.season_id)
+            .filter(
+                Match.league_id != match.league_id,
+                Match.status == MatchStatus.HISTORICAL,
+                Match.date < match.date,
+                Season.name.in_([s.name for s in seasons]),
+                or_(
+                    Match.home_team_id.in_([match.home_team_id, match.away_team_id]),
+                    Match.away_team_id.in_([match.home_team_id, match.away_team_id]),
+                ),
+            )
+            .options(
+                joinedload(Match.league),
+                joinedload(Match.season),
+                joinedload(Match.home_team),
+                joinedload(Match.away_team),
+                selectinload(Match.team_stats),
+            )
+            .order_by(Match.date.desc())
+            .all()
+        )
     return MatchHistoryOut(
         seasons=[s.name for s in seasons],
         matches=[match_to_result_out(m) for m in rows],
         played=played,
+        context=[match_to_result_out(m) for m in context],
     )
 
 

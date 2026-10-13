@@ -40,6 +40,7 @@ LEAGUE_IDS: dict[str, int] = {
     "ESP-La Liga": 2196,
     "ESP-La Liga 2": 2432,
     "FRA-Ligue 1": 2036,
+    "INT-Champions League": 2627,
 }
 
 # "units" del matchup -> de que va la cuota.

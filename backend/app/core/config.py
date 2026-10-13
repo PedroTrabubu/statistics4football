@@ -18,7 +18,7 @@ class Settings(BaseSettings):
 
     database_url: str = f"sqlite:///{PROJECT_ROOT / 'data' / 'stadistics4bet.db'}"
 
-    active_leagues: str = "ENG-Premier League,ESP-La Liga,ESP-La Liga 2,FRA-Ligue 1"
+    active_leagues: str = "ENG-Premier League,ESP-La Liga,ESP-La Liga 2,FRA-Ligue 1,INT-Champions League"
     # Ligas en las que Picks y Recomendaciones están validados. Una liga nueva
     # se carga y se ve en la web, pero no entra aquí hasta pasar su backtest.
     validated_leagues: str = "ENG-Premier League,ESP-La Liga,ESP-La Liga 2"

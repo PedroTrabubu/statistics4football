@@ -506,20 +506,39 @@ const STRENGTH_ORDER: Record<Strength, number> = { alta: 0, media: 1, baja: 2 };
 /** Picks del partido: patrones de los dos equipos, contrastados con el rival,
  * de mas fuerte a mas debil. Un suceso del partido (goles, tarjetas...) que
  * sale en los dos equipos se queda una vez, con el mejor de los dos. */
-export function probablePicks(match: Match, history: MatchResult[], max = MAX_PICKS): ProbablePick[] {
+export function probablePicks(
+  match: Match,
+  history: MatchResult[],
+  max = MAX_PICKS,
+  context: MatchResult[] = [],
+): ProbablePick[] {
   const prior = priorMatches(match, history);
-  return picksFromPrior(match, prior, leagueRates(prior), max);
+  return picksFromPrior(match, prior, leagueRates(prior), max, teamPrior(match, prior, context));
+}
+
+/** Partidos con los que se buscan los patrones de cada equipo. `context`: sus
+ * partidos de otras competiciones (en la Champions, los de su liga). Solo
+ * amplían los patrones de los equipos; la frecuencia en la competición sigue
+ * saliendo de `prior`. */
+function teamPrior(match: Match, prior: MatchResult[], context: MatchResult[]): MatchResult[] {
+  return context.length ? priorMatches(match, [...prior, ...context]) : prior;
 }
 
 /** Los patrones de esas familias de los dos equipos, contrastados con el rival. */
-function teamPicks(match: Match, prior: MatchResult[], rates: LeagueRates, families: FamilySpec[]): ProbablePick[] {
+function teamPicks(
+  match: Match,
+  prior: MatchResult[],
+  rates: LeagueRates,
+  families: FamilySpec[],
+  forTeams: MatchResult[] = prior,
+): ProbablePick[] {
   const sides = [
     { side: "home" as const, id: match.home_team_id, name: match.home_team },
     { side: "away" as const, id: match.away_team_id, name: match.away_team },
   ];
   const contexts = {
-    home: teamContexts(prior, match.home_team_id, "home", match.season),
-    away: teamContexts(prior, match.away_team_id, "away", match.season),
+    home: teamContexts(forTeams, match.home_team_id, "home", match.season),
+    away: teamContexts(forTeams, match.away_team_id, "away", match.season),
   };
   const picks: ProbablePick[] = [];
   for (const team of sides) {
@@ -538,15 +557,21 @@ function teamPicks(match: Match, prior: MatchResult[], rates: LeagueRates, famil
 
 /** Picks del duelo de córners (nuevos, aparte de los demás): los que ya
  * cumplen el umbral del motor, con su fuerza y el cruce con el rival. */
-export function cornerDuelPicks(match: Match, history: MatchResult[]): ProbablePick[] {
+export function cornerDuelPicks(match: Match, history: MatchResult[], context: MatchResult[] = []): ProbablePick[] {
   const prior = priorMatches(match, history);
-  return teamPicks(match, prior, leagueRates(prior), DUEL_FAMILIES);
+  return teamPicks(match, prior, leagueRates(prior), DUEL_FAMILIES, teamPrior(match, prior, context));
 }
 
 /** Picks de un partido a partir de sus partidos anteriores (ya filtrados, los
  * mas recientes primero) y de las frecuencias de la liga en esos partidos. */
-function picksFromPrior(match: Match, prior: MatchResult[], rates: LeagueRates, max: number): ProbablePick[] {
-  const ranked = teamPicks(match, prior, rates, FAMILIES);
+function picksFromPrior(
+  match: Match,
+  prior: MatchResult[],
+  rates: LeagueRates,
+  max: number,
+  forTeams: MatchResult[] = prior,
+): ProbablePick[] {
+  const ranked = teamPicks(match, prior, rates, FAMILIES, forTeams);
   const seen = new Set<string>();
   return ranked
     .filter((p) => {

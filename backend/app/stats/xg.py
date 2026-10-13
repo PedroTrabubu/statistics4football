@@ -1,5 +1,6 @@
 """Media movil de xG (a favor/en contra) de un equipo, point-in-time."""
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -16,7 +17,7 @@ class XgForm:
 
 
 def compute_xg_form(
-    db: Session, team_id: int, before_date: datetime, num_matches: int = 5
+    db: Session, team_id: int, before_date: datetime, num_matches: int = 5, exclude_league_ids: Sequence[int] = ()
 ) -> XgForm:
     rows = (
         db.query(TeamMatchStats)
@@ -26,6 +27,7 @@ def compute_xg_form(
             Match.status == MatchStatus.HISTORICAL,
             Match.date < before_date,
             TeamMatchStats.xg.is_not(None),
+            Match.league_id.notin_(exclude_league_ids),
         )
         .order_by(Match.date.desc())
         .limit(num_matches)

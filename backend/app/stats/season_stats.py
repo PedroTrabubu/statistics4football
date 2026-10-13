@@ -12,7 +12,8 @@ from dataclasses import dataclass, field
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from app.db.models import Match, MatchStatus, Season, Team, TeamMatchStats
+from app.core.competitions import CHAMPIONS_LEAGUE, CHAMPIONS_LEAGUE_PHASE_MATCHDAYS
+from app.db.models import League, Match, MatchStatus, Season, Team, TeamMatchStats
 
 
 @dataclass
@@ -194,16 +195,18 @@ def _result_letter(goals_for: int, goals_against: int) -> str:
     return "D" if goals_for == goals_against else "L"
 
 
-def compute_team_season_stats(db: Session, team: Team, season: Season) -> TeamSeasonStats:
-    matches = (
-        db.query(Match)
-        .filter(
-            Match.season_id == season.id,
-            Match.status == MatchStatus.HISTORICAL,
-            or_(Match.home_team_id == team.id, Match.away_team_id == team.id),
-        )
-        .all()
+def compute_team_season_stats(
+    db: Session, team: Team, season: Season, max_matchday: int | None = None
+) -> TeamSeasonStats:
+    """`max_matchday`: solo hasta esa jornada (la fase de liga de la Champions)."""
+    query = db.query(Match).filter(
+        Match.season_id == season.id,
+        Match.status == MatchStatus.HISTORICAL,
+        or_(Match.home_team_id == team.id, Match.away_team_id == team.id),
     )
+    if max_matchday is not None:
+        query = query.filter(Match.matchday <= max_matchday)
+    matches = query.all()
 
     matches = sorted(
         (m for m in matches if m.home_goals is not None and m.away_goals is not None),
@@ -262,13 +265,17 @@ def get_team_season_stats(
     if season_name is None:
         season = latest_season_with_history(db, team.league_id)
     else:
-        # En la liga en la que jugó esa temporada, que puede no ser la actual.
-        season = (
+        # En la liga en la que jugó esa temporada, que puede no ser la actual. Un
+        # equipo que también jugó la Champions: la de su liga.
+        seasons = (
             db.query(Season)
             .join(Match, Match.season_id == Season.id)
+            .join(League, League.id == Season.league_id)
             .filter(Season.name == season_name, or_(Match.home_team_id == team.id, Match.away_team_id == team.id))
-            .first()
+            .order_by((League.code == CHAMPIONS_LEAGUE).asc())
+            .all()
         )
+        season = seasons[0] if seasons else None
 
     if season is None:
         return None
@@ -323,5 +330,8 @@ def compute_league_season_stats(
         for team_id in row
     }
     teams = db.query(Team).filter(Team.id.in_(team_ids)).order_by(Team.name).all()
-    stats = [compute_team_season_stats(db, team, season) for team in teams]
+    # Champions: la tabla es la de la fase de liga; las eliminatorias no cuentan.
+    league = db.get(League, league_id)
+    max_matchday = CHAMPIONS_LEAGUE_PHASE_MATCHDAYS if league is not None and league.code == CHAMPIONS_LEAGUE else None
+    stats = [compute_team_season_stats(db, team, season, max_matchday) for team in teams]
     return [s for s in stats if s.overall.matches_played > 0]

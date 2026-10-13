@@ -62,7 +62,7 @@ export function ProbablePicks({
   loading: boolean;
   error: string | null;
 }) {
-  const picks = useMemo(() => (history ? probablePicks(match, history.matches) : []), [match, history]);
+  const picks = useMemo(() => (history ? probablePicks(match, history.matches, undefined, history.context ?? []) : []), [match, history]);
   const played = history?.played ?? null;
   // Nuevo: duelo de córners, aparte de los picks y de sus cifras.
   const duel = useMemo(
@@ -72,7 +72,7 @@ export function ProbablePicks({
   const duelPicks = useMemo(
     () =>
       history
-        ? cornerDuelPicks(match, history.matches).map((pick) => ({
+        ? cornerDuelPicks(match, history.matches, history.context ?? []).map((pick) => ({
             pick,
             hit: played ? pickOutcome(pick, played) : undefined,
           }))
@@ -123,6 +123,12 @@ export function ProbablePicks({
       )}
 
       {loading && !history && <LoadingView label="Buscando patrones..." />}
+      {history?.context && history.context.length > 0 && (
+        <p className="small muted">
+          Champions: los patrones de cada equipo incluyen también sus partidos de liga de estas temporadas; lo
+          habitual en la competición se mide solo con partidos de Champions.
+        </p>
+      )}
       {error && <ErrorView message={`No se pudo cargar el historial de los equipos: ${error}`} />}
       {history && picks.length === 0 && <EmptyView message="No hay patrones con suficiente muestra para este partido." />}
 

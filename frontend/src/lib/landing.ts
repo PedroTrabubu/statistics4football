@@ -12,13 +12,14 @@ export interface LandingLeague {
   logoStyle?: CSSProperties;
 }
 
-/** Mismo orden que el resto de la web: LaLiga primero y el resto por nombre. */
+/** Mismo orden que el resto de la web (LEAGUE_ORDER de leagues.ts). */
 export const LANDING_LEAGUES: LandingLeague[] = [
   { code: "ESP-La Liga", glow: "255, 75, 68" },
   { code: "ESP-La Liga 2", glow: "0, 212, 214" },
+  { code: "ENG-Premier League", glow: "176, 124, 255" },
   // El logo de Ligue 1 es negro: en blanco se lee sobre el fondo oscuro.
   { code: "FRA-Ligue 1", glow: "226, 232, 222", logoStyle: { filter: "invert(1)" } },
-  { code: "ENG-Premier League", glow: "176, 124, 255" },
+  { code: "INT-Champions League", glow: "86, 132, 255" },
 ];
 
 export interface StatCategory {

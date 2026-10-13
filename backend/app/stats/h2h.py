@@ -1,5 +1,6 @@
 """Historial de enfrentamientos directos entre dos equipos, point-in-time."""
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -25,6 +26,7 @@ def compute_h2h(
     team_b_id: int,
     before_date: datetime,
     num_matches: int = 5,
+    exclude_league_ids: Sequence[int] = (),
 ) -> HeadToHead:
     matches = (
         db.query(Match)
@@ -35,6 +37,7 @@ def compute_h2h(
                 and_(Match.home_team_id == team_a_id, Match.away_team_id == team_b_id),
                 and_(Match.home_team_id == team_b_id, Match.away_team_id == team_a_id),
             ),
+            Match.league_id.notin_(exclude_league_ids),
         )
         .order_by(Match.date.desc())
         .limit(num_matches)

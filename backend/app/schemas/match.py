@@ -53,6 +53,10 @@ class MatchHistoryOut(BaseModel):
     # El propio partido con su resultado, si ya se jugo: para comprobar si sus
     # picks se cumplieron. Nunca entra en `matches`.
     played: MatchResultOut | None = None
+    # Solo en la Champions: los partidos de los dos equipos en sus ligas, en
+    # las mismas temporadas. Son el contexto de cada equipo; nunca entran en la
+    # frecuencia de la competición, que sale de `matches`.
+    context: list[MatchResultOut] = []
 
 
 class MatchRefereeStatsOut(BaseModel):

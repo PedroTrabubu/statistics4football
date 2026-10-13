@@ -101,7 +101,21 @@ describe("escudos del proyecto", () => {
     const missing = Object.entries(CURRENT).flatMap(([league, teams]) =>
       teams.filter((team) => getTeamCrest(league, team) === undefined),
     );
-    expect(missing).toEqual(["Tenerife"]);
+    expect(missing).toEqual([]);
+  });
+
+  // Los 36 de la fase de liga 26/27, con los nombres de ESPN (los de nuestras
+  // ligas, con el suyo de siempre).
+  const CHAMPIONS_2627 = [
+    "AEK Athens", "AS Roma", "Arsenal", "Aston Villa", "Ath Madrid", "Barcelona", "Bayern Munich", "Betis",
+    "Bodo/Glimt", "Borussia Dortmund", "Club Brugge", "Como", "FC Porto", "Fenerbahce", "Feyenoord Rotterdam",
+    "Galatasaray", "Internazionale", "LASK Linz", "Lens", "Lille", "Liverpool", "Man City", "Man United", "Napoli",
+    "PSV Eindhoven", "Paris SG", "RB Leipzig", "Real Madrid", "Sabah FK", "Shakhtar Donetsk", "Slavia Prague",
+    "Slovan Bratislava", "Sporting CP", "VfB Stuttgart", "Viking FK", "Villarreal",
+  ];
+
+  it("todos los equipos de la Champions 26/27 tienen escudo", () => {
+    expect(CHAMPIONS_2627.filter((team) => getTeamCrest("INT-Champions League", team) === undefined)).toEqual([]);
   });
 
   it("cada equipo de la temporada tiene su propio escudo (salvo los filiales)", () => {

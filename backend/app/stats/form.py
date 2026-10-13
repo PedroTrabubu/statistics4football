@@ -1,6 +1,7 @@
 """Forma reciente de un equipo, calculada point-in-time (solo partidos
 anteriores a una fecha dada, nunca el propio partido ni partidos futuros)."""
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -32,7 +33,7 @@ class TeamForm:
 
 
 def _recent_matches(
-    db: Session, team_id: int, before_date: datetime, num_matches: int
+    db: Session, team_id: int, before_date: datetime, num_matches: int, exclude_league_ids: Sequence[int] = ()
 ) -> list[Match]:
     return (
         db.query(Match)
@@ -40,6 +41,7 @@ def _recent_matches(
             Match.status == MatchStatus.HISTORICAL,
             Match.date < before_date,
             or_(Match.home_team_id == team_id, Match.away_team_id == team_id),
+            Match.league_id.notin_(exclude_league_ids),
         )
         .order_by(Match.date.desc())
         .limit(num_matches)
@@ -48,9 +50,9 @@ def _recent_matches(
 
 
 def compute_team_form(
-    db: Session, team_id: int, before_date: datetime, num_matches: int = 5
+    db: Session, team_id: int, before_date: datetime, num_matches: int = 5, exclude_league_ids: Sequence[int] = ()
 ) -> TeamForm:
-    matches = _recent_matches(db, team_id, before_date, num_matches)
+    matches = _recent_matches(db, team_id, before_date, num_matches, exclude_league_ids)
 
     points = wins = draws = losses = goals_for = goals_against = 0
     for match in matches:
