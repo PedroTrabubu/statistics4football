@@ -56,6 +56,8 @@ export const TEAM_FOLDERS: Record<string, string> = {
   "ESP-La Liga": "esp-laliga1",
   "ESP-La Liga 2": "esp-laliga2",
   "FRA-Ligue 1": "fr-ligue1",
+  "GER-Bundesliga": "bundesliga",
+  "ITA-Serie A": "serieA",
   "INT-Champions League": "championsleague",
 };
 
@@ -91,10 +93,21 @@ export const TEAM_ALIASES: Record<string, string> = {
   monaco: "as-monaco",
   "paris-sg": "paris-saint-germain",
   strasbourg: "rc-strasbourg-alsace",
+  // Bundesliga
+  "bayern-munich": "bayern-munchen",
+  dortmund: "borussia-dortmund",
+  "ein-frankfurt": "eintracht-frankfurt",
+  elversberg: "sv-elversberg",
+  "fc-koln": "koln",
+  hamburg: "hamburger-sv",
+  leverkusen: "bayer-leverkusen",
+  mainz: "mainz-05",
+  mgladbach: "borussia-monchengladbach",
+  stuttgart: "vfb-stuttgart",
+  // Serie A
+  como: "como-1907",
   // Champions League (nombres de ESPN)
   "as-roma": "roma",
-  "bayern-munich": "bayern-munchen",
-  como: "como-1907",
   "feyenoord-rotterdam": "feyenoord",
   internazionale: "inter",
   "lask-linz": "lask",

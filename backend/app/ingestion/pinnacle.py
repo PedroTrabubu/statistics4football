@@ -40,6 +40,8 @@ LEAGUE_IDS: dict[str, int] = {
     "ESP-La Liga": 2196,
     "ESP-La Liga 2": 2432,
     "FRA-Ligue 1": 2036,
+    "GER-Bundesliga": 1842,
+    "ITA-Serie A": 2436,
     "INT-Champions League": 2627,
 }
 

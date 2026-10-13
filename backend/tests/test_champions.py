@@ -19,6 +19,7 @@ from app.ingestion.champions import (
     parse_summary,
     sync_champions,
 )
+from app.ingestion.team_leagues import refresh_team_leagues
 from app.stats.features import compute_match_features
 
 
@@ -171,6 +172,25 @@ def test_sync_creates_matches_with_90_minute_score_and_new_teams(db, monkeypatch
     # Volver a cargar no duplica.
     sync_champions(db, ["2526"], now=datetime(2026, 3, 20))
     assert db.query(Match).filter_by(league_id=league.id).count() == 2
+
+
+def test_team_keeps_its_league_when_its_last_match_is_champions(db):
+    laliga, champions = League(code="ESP-La Liga", name="LaLiga"), League(code=ucl.LEAGUE_CODE, name="Champions League")
+    db.add_all([laliga, champions])
+    db.flush()
+    rm, bayern = Team(name="Real Madrid", league_id=laliga.id), Team(name="Bayern Munich", league_id=champions.id)
+    getafe = Team(name="Getafe", league_id=laliga.id)
+    s_liga, s_ucl = Season(league_id=laliga.id, name="2627"), Season(league_id=champions.id, name="2627")
+    db.add_all([rm, bayern, getafe, s_liga, s_ucl])
+    db.flush()
+    db.add_all([
+        Match(league_id=laliga.id, season_id=s_liga.id, home_team_id=rm.id, away_team_id=getafe.id, date=datetime(2026, 9, 1)),
+        Match(league_id=champions.id, season_id=s_ucl.id, home_team_id=bayern.id, away_team_id=rm.id, date=datetime(2026, 9, 20)),
+    ])  # fmt: skip
+    db.flush()
+
+    assert refresh_team_leagues(db) == 0
+    assert (rm.league_id, bayern.league_id) == (laliga.id, champions.id)
 
 
 def test_league_form_ignores_champions_and_champions_form_includes_league(db):

@@ -14,6 +14,8 @@ const DISPLAY: Record<string, { name: string; short: string; country: string }> 
   "ENG-Premier League": { name: "Premier League", short: "Premier", country: "Inglaterra" },
   "ESP-La Liga 2": { name: "LaLiga Hypermotion", short: "Hypermotion", country: "España" },
   "FRA-Ligue 1": { name: "Ligue 1", short: "Ligue 1", country: "Francia" },
+  "GER-Bundesliga": { name: "Bundesliga", short: "Bundesliga", country: "Alemania" },
+  "ITA-Serie A": { name: "Serie A", short: "Serie A", country: "Italia" },
   "INT-Champions League": { name: "Champions League", short: "Champions", country: "Europa" },
 };
 
@@ -30,7 +32,15 @@ export function leagueCountry(code: string): string | null {
 }
 
 /** Orden de las ligas en toda la web. Una que no esté aquí va al final, por nombre. */
-export const LEAGUE_ORDER = ["ESP-La Liga", "ESP-La Liga 2", "ENG-Premier League", "FRA-Ligue 1", CHAMPIONS_LEAGUE_CODE];
+export const LEAGUE_ORDER = [
+  "ESP-La Liga",
+  "ESP-La Liga 2",
+  "ENG-Premier League",
+  "FRA-Ligue 1",
+  "GER-Bundesliga",
+  "ITA-Serie A",
+  CHAMPIONS_LEAGUE_CODE,
+];
 
 function leagueRank(code: string): number {
   const i = LEAGUE_ORDER.indexOf(code);

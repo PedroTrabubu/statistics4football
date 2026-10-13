@@ -31,6 +31,8 @@ describe("portada", () => {
       "LaLiga Hypermotion",
       "Premier League",
       "Ligue 1",
+      "Bundesliga",
+      "Serie A",
       "Champions League",
     ]);
   });

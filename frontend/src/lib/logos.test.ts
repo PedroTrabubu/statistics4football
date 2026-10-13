@@ -95,6 +95,15 @@ describe("escudos del proyecto", () => {
       "Angers", "Auxerre", "Brest", "Le Havre", "Le Mans", "Lens", "Lille", "Lorient", "Lyon", "Marseille",
       "Monaco", "Nice", "Paris FC", "Paris SG", "Rennes", "Strasbourg", "Toulouse", "Troyes",
     ],
+    "GER-Bundesliga": [
+      "Augsburg", "Bayern Munich", "Dortmund", "Ein Frankfurt", "Elversberg", "FC Koln", "Freiburg", "Hamburg",
+      "Hoffenheim", "Leverkusen", "M'gladbach", "Mainz", "Paderborn", "RB Leipzig", "Schalke 04", "Stuttgart",
+      "Union Berlin", "Werder Bremen",
+    ],
+    "ITA-Serie A": [
+      "Atalanta", "Bologna", "Cagliari", "Como", "Fiorentina", "Frosinone", "Genoa", "Inter", "Juventus", "Lazio",
+      "Lecce", "Milan", "Monza", "Napoli", "Parma", "Roma", "Sassuolo", "Torino", "Udinese", "Venezia",
+    ],
   };
 
   it("todos los equipos de la temporada tienen escudo salvo los que faltan en la carpeta", () => {
@@ -107,11 +116,11 @@ describe("escudos del proyecto", () => {
   // Los 36 de la fase de liga 26/27, con los nombres de ESPN (los de nuestras
   // ligas, con el suyo de siempre).
   const CHAMPIONS_2627 = [
-    "AEK Athens", "AS Roma", "Arsenal", "Aston Villa", "Ath Madrid", "Barcelona", "Bayern Munich", "Betis",
-    "Bodo/Glimt", "Borussia Dortmund", "Club Brugge", "Como", "FC Porto", "Fenerbahce", "Feyenoord Rotterdam",
-    "Galatasaray", "Internazionale", "LASK Linz", "Lens", "Lille", "Liverpool", "Man City", "Man United", "Napoli",
+    "AEK Athens", "Roma", "Arsenal", "Aston Villa", "Ath Madrid", "Barcelona", "Bayern Munich", "Betis",
+    "Bodo/Glimt", "Dortmund", "Club Brugge", "Como", "FC Porto", "Fenerbahce", "Feyenoord Rotterdam",
+    "Galatasaray", "Inter", "LASK Linz", "Lens", "Lille", "Liverpool", "Man City", "Man United", "Napoli",
     "PSV Eindhoven", "Paris SG", "RB Leipzig", "Real Madrid", "Sabah FK", "Shakhtar Donetsk", "Slavia Prague",
-    "Slovan Bratislava", "Sporting CP", "VfB Stuttgart", "Viking FK", "Villarreal",
+    "Slovan Bratislava", "Sporting CP", "Stuttgart", "Viking FK", "Villarreal",
   ];
 
   it("todos los equipos de la Champions 26/27 tienen escudo", () => {
@@ -125,7 +134,7 @@ describe("escudos del proyecto", () => {
     expect(new Set(urls).size).toBe(urls.length);
   });
 
-  it("las cuatro ligas tienen logo", () => {
+  it("todas las ligas tienen logo", () => {
     for (const code of Object.keys(CURRENT)) expect(leagueLogo(code)).not.toBeNull();
   });
 });
