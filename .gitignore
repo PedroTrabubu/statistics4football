@@ -17,7 +17,13 @@ data/*.db-wal
 data/*.db-journal
 data/*.sqlite3
 data/soccerdata_cache/
+data/espn_cache/
 data/model_cache/
+# Crudos de las capturas de Pinnacle e informes generados (CSV)
+data/pinnacle_raw/
+data/reports/
+# Bloqueo del programador (scripts/scheduler.py)
+data/scheduler.lock
 backend/logs/
 
 # Frontend
