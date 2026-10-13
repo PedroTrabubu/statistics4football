@@ -4,6 +4,7 @@ las escrituras que disparan (predictions) son idempotentes."""
 
 from fastapi.testclient import TestClient
 
+from app.core.config import get_settings
 from app.db.models import League, Match, MatchStatus, Team
 from app.db.session import SessionLocal
 from app.main import app
@@ -16,6 +17,7 @@ def test_list_leagues_returns_configured_leagues() -> None:
     assert response.status_code == 200
     codes = {league["code"] for league in response.json()}
     assert {"ENG-Premier League", "ESP-La Liga"}.issubset(codes)
+    assert not codes & set(get_settings().context)  # las de contexto no salen en la web
 
 
 def test_list_teams_filtered_by_league() -> None:

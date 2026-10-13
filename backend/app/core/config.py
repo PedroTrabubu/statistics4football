@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     # Ligas en las que Picks y Recomendaciones están validados. Una liga nueva
     # se carga y se ve en la web, pero no entra aquí hasta pasar su backtest.
     validated_leagues: str = "ENG-Premier League,ESP-La Liga,ESP-La Liga 2"
+    # Ligas de contexto: solo sus resultados y estadísticas (Football-Data), para
+    # el historial de los equipos de Champions. No salen en la web ni en los
+    # picks, ni tienen calendario, árbitros, xG ni cuotas de Pinnacle.
+    context_leagues: str = "POR-Primeira Liga,NED-Eredivisie,BEL-Pro League,TUR-Super Lig,GRE-Super League"
 
     soccerdata_dir: str = str(PROJECT_ROOT / "data" / "soccerdata_cache")
 
@@ -43,6 +47,10 @@ class Settings(BaseSettings):
     @property
     def model_leagues(self) -> list[str]:
         return [league.strip() for league in self.validated_leagues.split(",") if league.strip()]
+
+    @property
+    def context(self) -> list[str]:
+        return [league.strip() for league in self.context_leagues.split(",") if league.strip()]
 
 
 @lru_cache

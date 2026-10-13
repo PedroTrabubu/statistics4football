@@ -48,18 +48,28 @@ AH_PREFIXES = {
 }
 
 
+def _price(row: pd.Series, col: str) -> float | None:
+    """La cuota de esa columna, o None si falta o no es un número (algún CSV
+    trae "#": B365CH del Utrecht-Feyenoord de la Eredivisie 22/23)."""
+    if col not in row.index:
+        return None
+    value = pd.to_numeric(row[col], errors="coerce")
+    return None if pd.isna(value) else float(value)
+
+
 def extract_1x2(row: pd.Series) -> list[dict]:
     odds = []
     for prefix, bookmaker in ONEXTWO_PREFIXES.items():
         for suffix, selection in (("H", "home"), ("D", "draw"), ("A", "away")):
             col = f"{prefix}{suffix}"
-            if col in row.index and pd.notna(row[col]):
+            price = _price(row, col)
+            if price is not None:
                 odds.append(
                     {
                         "bookmaker": bookmaker,
                         "market": "1x2",
                         "selection": selection,
-                        "odds": float(row[col]),
+                        "odds": price,
                         "line": None,
                     }
                 )
@@ -71,13 +81,14 @@ def extract_over_under_2_5(row: pd.Series) -> list[dict]:
     for prefix, bookmaker in OU25_PREFIXES.items():
         for suffix, selection in ((">2.5", "over"), ("<2.5", "under")):
             col = f"{prefix}{suffix}"
-            if col in row.index and pd.notna(row[col]):
+            price = _price(row, col)
+            if price is not None:
                 odds.append(
                     {
                         "bookmaker": bookmaker,
                         "market": "over_under_2.5",
                         "selection": selection,
-                        "odds": float(row[col]),
+                        "odds": price,
                         "line": 2.5,
                     }
                 )
@@ -94,13 +105,14 @@ def extract_asian_handicap(row: pd.Series) -> list[dict]:
             continue
         for suffix, selection in (("AHH", "home"), ("AHA", "away")):
             col = f"{prefix}{suffix}"
-            if col in row.index and pd.notna(row[col]):
+            price = _price(row, col)
+            if price is not None:
                 odds.append(
                     {
                         "bookmaker": bookmaker,
                         "market": "asian_handicap",
                         "selection": selection,
-                        "odds": float(row[col]),
+                        "odds": price,
                         "line": float(used_line),
                     }
                 )

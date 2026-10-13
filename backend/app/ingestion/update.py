@@ -58,8 +58,9 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
         return f"status={run.status.value} partidos_procesados={run.rows_ingested} {run.notes or ''}".strip()
 
     def match_history() -> str:
-        # Solo las ligas que tiene Football-Data.co.uk (la Champions no está).
-        run = backfill_match_history(db, leagues=leagues_with_source(settings.leagues, "MatchHistory"), seasons=[season])
+        # Solo las ligas que tiene Football-Data.co.uk (la Champions no está), y las de contexto.
+        leagues = leagues_with_source(settings.leagues + settings.context, "MatchHistory")
+        run = backfill_match_history(db, leagues=leagues, seasons=[season])
         return f"status={run.status.value} partidos_procesados={run.rows_ingested}"
 
     def understat() -> str:

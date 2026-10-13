@@ -21,7 +21,8 @@ def main() -> None:
     db = SessionLocal()
     try:
         # La Champions no está en Football-Data.co.uk: scripts/ingest_champions.py.
-        run = backfill_match_history(db, leagues=leagues_with_source(settings.leagues, "MatchHistory"))
+        leagues = leagues_with_source(settings.leagues + settings.context, "MatchHistory")
+        run = backfill_match_history(db, leagues=leagues)
         print(f"MatchHistory: status={run.status.value} filas_procesadas={run.rows_ingested}")
         updated, unmatched = apply_referee_overrides(db)
         print(f"Arbitros corregidos a mano: {updated} actualizados")

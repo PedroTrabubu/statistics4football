@@ -29,6 +29,13 @@ CUSTOM_LEAGUES: dict[str, dict[str, str]] = {
         "season_start": "Aug",
         "season_end": "Jun",
     },
+    # Ligas de contexto (ver context_leagues en app/core/config.py). Bélgica y
+    # Grecia traen sus playoffs en el mismo CSV.
+    "POR-Primeira Liga": {"MatchHistory": "P1", "ESPN": "por.1", "season_start": "Aug", "season_end": "Jun"},
+    "NED-Eredivisie": {"MatchHistory": "N1", "ESPN": "ned.1", "season_start": "Aug", "season_end": "Jun"},
+    "BEL-Pro League": {"MatchHistory": "B1", "ESPN": "bel.1", "season_start": "Jul", "season_end": "Jun"},
+    "TUR-Super Lig": {"MatchHistory": "T1", "ESPN": "tur.1", "season_start": "Aug", "season_end": "Jun"},
+    "GRE-Super League": {"MatchHistory": "G1", "ESPN": "gre.1", "season_start": "Aug", "season_end": "Jun"},
 }
 
 

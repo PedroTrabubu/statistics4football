@@ -106,6 +106,10 @@ export const TEAM_ALIASES: Record<string, string> = {
   stuttgart: "vfb-stuttgart",
   // Serie A
   como: "como-1907",
+  // Ligas de contexto (equipos de Champions)
+  aek: "aek-athens",
+  porto: "fc-porto",
+  "sp-lisbon": "sporting-cp",
   // Champions League (nombres de ESPN)
   "as-roma": "roma",
   "feyenoord-rotterdam": "feyenoord",
