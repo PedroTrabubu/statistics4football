@@ -44,6 +44,15 @@ export function IconTarget(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function IconCheck(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M8.3 12.4l2.5 2.5 5-5.3" />
+    </svg>
+  );
+}
+
 export function IconTicket(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base(props)}>

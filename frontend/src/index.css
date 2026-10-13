@@ -418,24 +418,41 @@ h4 {
   color: var(--ink);
 }
 .match-row-league {
-  font-size: 0.76rem;
-  color: var(--faint);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.match-row-teams {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.35rem;
+  min-width: 0;
+  font-size: 0.76rem;
+  color: var(--faint);
+}
+.match-row-league .league-logo {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+.match-row-league-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Como un marcador: local + escudo, "vs" o el resultado en el centro y escudo
+   + visitante. Los nombres quedan cerca y los escudos, alineados de fila a
+   fila junto al centro. (Doble clase: gana a la regla de .match-teams, la de
+   las parejas en linea.) */
+.match-teams.match-row-teams {
+  display: grid;
+  /* Centro de ancho fijo (cabe "10 - 2"): asi los escudos no se mueven entre filas. */
+  grid-template-columns: minmax(0, 1fr) 3.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
   min-width: 0;
   font-weight: 500;
 }
-.match-row-team {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.match-row-teams .match-teams-middle {
+  text-align: center;
   white-space: nowrap;
+  color: inherit;
 }
 .match-row-score {
   font-family: var(--font-mono);
@@ -496,6 +513,34 @@ h4 {
 .matchday-browser + .matchday-browser {
   margin-top: 2.2rem;
 }
+.matchday-nav {
+  justify-content: space-between;
+}
+.matchday-nav-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-left: auto;
+}
+/* Movil: la jornada baja a su propia linea, entera y sin partirse. */
+@media (max-width: 640px) {
+  .matchday-nav-group {
+    flex: 1 1 100%;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    min-width: 0;
+    margin-left: 0;
+  }
+  .matchday-nav-group > span {
+    white-space: nowrap;
+  }
+  .matchday-nav-group select {
+    flex: 1;
+    min-width: 0;
+  }
+}
 .matchday-nav button {
   padding: 0.4rem 0.75rem;
   border: 1px solid var(--border);
@@ -549,10 +594,54 @@ h4 {
   margin-top: 0;
 }
 
-.match-score-heading {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 650;
+/* Cabecera de la ficha de partido: escudos grandes encima de cada nombre. */
+.match-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem 1.5rem;
+  margin: 0.25rem 0 0.75rem;
+  padding: 1.6rem 1.25rem 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  font-size: 1.55rem;
+  line-height: 1.15;
+}
+.match-hero-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+  text-align: center;
+}
+.match-hero-name {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.match-hero-score {
+  font-family: var(--font-mono);
+  font-size: 2.3rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.match-hero-vs {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--faint);
+}
+@media (max-width: 640px) {
+  .match-hero {
+    gap: 0.75rem;
+    padding: 1.1rem 0.75rem 1rem;
+    font-size: 1.1rem;
+  }
+  .match-hero-score {
+    font-size: 1.6rem;
+  }
 }
 
 /* Stats table */
@@ -770,7 +859,8 @@ h4 {
 .season-stats-table td.low-sample {
   color: var(--faint);
 }
-.season-stats-table th.sortable button {
+.season-stats-table th.sortable button,
+.team-ranking-table th.sortable button {
   all: unset;
   cursor: pointer;
   display: inline-flex;
@@ -778,20 +868,25 @@ h4 {
   gap: 0.2rem;
 }
 .season-stats-table th.sortable button:hover,
-.season-stats-table th.sorted button {
+.season-stats-table th.sorted button,
+.team-ranking-table th.sortable button:hover,
+.team-ranking-table th.sorted button {
   color: var(--primary);
 }
-.season-stats-table th.sortable button:focus-visible {
+.season-stats-table th.sortable button:focus-visible,
+.team-ranking-table th.sortable button:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
   border-radius: 3px;
 }
-.season-stats-table .sort-arrow {
+.season-stats-table .sort-arrow,
+.team-ranking-table .sort-arrow {
   display: inline-block;
   width: 0.7em;
   font-size: 0.6rem;
 }
-.season-stats-table td.sorted {
+.season-stats-table td.sorted,
+.team-ranking-table td.sorted {
   background: color-mix(in srgb, var(--primary) 7%, transparent);
 }
 .season-stats-table td.sorted[style] {
@@ -927,9 +1022,120 @@ h4 {
     grid-area: status;
     align-self: start;
   }
-  .match-row-teams {
+  .match-teams.match-row-teams {
     grid-area: teams;
+    grid-template-columns: minmax(0, 1fr) 3rem minmax(0, 1fr);
+    gap: 0.5rem;
+    font-size: 0.92rem;
   }
+  .match-row .team-crest-lg {
+    --crest: 36px;
+  }
+  .match-row .team-name-lg {
+    gap: 0.5rem;
+  }
+  .team-crest-xl {
+    --crest: 64px;
+  }
+}
+
+/* Logos de liga: caja fija (el tamaño, segun el sitio) con el logo entero. */
+.league-logo {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+}
+.league-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Escudos. Caja cuadrada fija por tamaño (el escudo dentro, entero y
+   centrado) para que formas distintas no descuadren filas ni tablas. */
+.team-crest {
+  --crest: 24px;
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--crest);
+  height: var(--crest);
+  vertical-align: middle;
+}
+.team-crest-md {
+  --crest: 32px;
+}
+.team-crest-lg {
+  --crest: 44px;
+}
+.team-crest-xl {
+  --crest: 88px;
+}
+.team-crest img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* Sin escudo: silueta neutra con las iniciales, del mismo tamaño. */
+.team-crest-shield {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: var(--surface-alt);
+  stroke: var(--border);
+  stroke-width: 1.2px;
+  vector-effect: non-scaling-stroke;
+}
+.team-crest-initials {
+  position: relative;
+  margin-top: calc(var(--crest) * -0.05);
+  font-family: var(--font-mono);
+  font-size: calc(var(--crest) * 0.3);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.team-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  max-width: 100%;
+  vertical-align: middle;
+}
+.team-name-lg {
+  gap: 0.7rem;
+}
+.team-name-reverse {
+  flex-direction: row-reverse;
+}
+/* En pantallas estrechas se corta el nombre, nunca el escudo. */
+.team-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Pareja de equipos en linea (picks, recomendaciones). */
+.match-teams {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.45rem;
+  max-width: 100%;
+  vertical-align: middle;
+}
+.match-teams-middle {
+  color: var(--faint);
 }
 
 /* Mercados: tarjeta por equipo con barra de % y la
@@ -1241,13 +1447,12 @@ h4 {
 }
 .league-button {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 0.05rem;
-  min-width: 11rem;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.7rem;
+  min-width: 9rem;
   min-height: 3.6rem;
-  padding: 0.55rem 1.1rem;
+  padding: 0.55rem 1rem 0.55rem 0.6rem;
   border: 1.5px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
@@ -1265,7 +1470,34 @@ h4 {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
+.league-button-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.05rem;
+  min-width: 0;
+}
+/* El logo, sobre una pastilla blanca: se ve igual en el boton activo (verde)
+   sin tocar sus colores. */
+.league-button .league-logo {
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0.3rem;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.league-button-active .league-logo {
+  box-shadow: none;
+}
+.league-name-short {
+  display: none;
+}
 .league-button-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-family: var(--font-display);
   font-size: 1.12rem;
   font-weight: 650;
@@ -1286,10 +1518,34 @@ h4 {
 .league-button-all {
   min-width: 7rem;
 }
+/* Movil: botones compactos que se reparten en filas segun su contenido, sin
+   el pais, para que ningun nombre se corte. */
 @media (max-width: 640px) {
   .league-button {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
+    min-height: 3rem;
+    gap: 0.5rem;
+    padding: 0.4rem 0.7rem;
+  }
+  .league-button .league-logo {
+    width: 2rem;
+    height: 2rem;
+    padding: 0.2rem;
+  }
+  .league-button-name {
+    font-size: 1rem;
+  }
+  .league-button-country,
+  .league-name-full {
+    display: none;
+  }
+  .league-name-short {
+    display: inline;
+  }
+  .league-button-all {
+    min-width: 0;
+    justify-content: center;
   }
 }
 
@@ -1390,7 +1646,12 @@ h4 {
   font-weight: 600;
   font-size: 0.9rem;
 }
+/* Los equipos, con sus escudos, en una linea; liga, jornada y fecha debajo. */
 .pick-leg-match {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
   color: var(--muted);
   overflow-wrap: anywhere;
 }
@@ -2094,4 +2355,1521 @@ h4 {
 .tooltip-row .legend-rect {
   width: 9px;
   height: 9px;
+}
+
+/* ------------------------------------------------------------------------
+   Portada (/): escaparate sin sidebar, con los mismos tokens que la
+   herramienta. Titulares en serif, mucho aire y una sola accion principal.
+   ------------------------------------------------------------------------ */
+.landing {
+  --landing-w: 1120px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-navbar {
+  padding: 0;
+}
+.landing-navbar-inner {
+  width: 100%;
+  max-width: var(--landing-w);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.landing-nav-link {
+  color: var(--ink);
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.35rem 0.1rem;
+  border-bottom: 1px solid transparent;
+}
+.landing-nav-link:hover {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  text-decoration: none;
+}
+
+.landing-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--landing-w);
+  margin: 0 auto;
+  padding: 0 1.25rem 3rem;
+}
+
+.landing a:focus-visible,
+.landing-gallery .ag-panel:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* Hero */
+.landing-hero {
+  position: relative;
+  padding: clamp(3rem, 9vh, 6rem) 0 clamp(2rem, 5vh, 3.5rem);
+}
+.landing-hero > :not(.landing-pitch) {
+  position: relative;
+  max-width: 46rem;
+}
+.landing-pitch {
+  position: absolute;
+  top: 50%;
+  right: -4rem;
+  width: 26rem;
+  height: 26rem;
+  transform: translateY(-50%);
+  fill: none;
+  stroke: color-mix(in srgb, var(--primary) 16%, transparent);
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+.landing-pitch .landing-pitch-spot {
+  fill: color-mix(in srgb, var(--primary) 22%, transparent);
+  stroke: none;
+}
+.landing-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0 0 1.1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.landing-eyebrow::before {
+  content: "";
+  width: 1.75rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.landing-hero h1 {
+  margin: 0;
+  font-size: clamp(2.3rem, 5.4vw, 3.9rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+}
+.landing-lead {
+  max-width: 36rem;
+  margin: 1.3rem 0 2rem;
+  font-size: clamp(1.02rem, 1.6vw, 1.16rem);
+  line-height: 1.6;
+  color: var(--muted);
+}
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.6rem;
+}
+.landing-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.85rem 1.6rem;
+  border-radius: 10px;
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: var(--shadow);
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.landing-cta:hover {
+  background: #185a3a;
+  color: var(--primary-ink);
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+.landing-cta-secondary {
+  color: var(--ink);
+  font-weight: 500;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--border);
+}
+.landing-cta-secondary:hover {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  text-decoration: none;
+}
+.landing-leagues-line {
+  margin: 2.4rem 0 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  color: var(--faint);
+}
+
+/* Secciones */
+.landing-section {
+  padding-top: clamp(2.75rem, 6vw, 4.5rem);
+}
+/* La galeria asoma bajo el hero para invitar a bajar. */
+.landing-hero + .landing-section {
+  padding-top: clamp(1.25rem, 3vw, 2.25rem);
+}
+.landing-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1.5rem;
+  margin-bottom: 1.4rem;
+}
+.landing-section-head h2 {
+  margin: 0;
+  font-size: clamp(1.55rem, 2.6vw, 2rem);
+}
+.landing-section-head p {
+  margin: 0;
+  max-width: 34rem;
+  color: var(--muted);
+}
+
+/* Galeria de ligas. El hueco mide lo mismo que la galeria mientras llega su
+   chunk (height={360} en escritorio; 4 filas de 76px en movil). */
+.landing-gallery-placeholder {
+  height: 360px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, var(--sidebar-bg-alt), var(--sidebar-bg));
+}
+.landing-gallery .ag-panel {
+  background: var(--sidebar-bg);
+  box-shadow: 0 18px 40px -26px rgba(15, 30, 23, 0.6);
+}
+.landing-gallery .ag-panel__text {
+  font-family: var(--font-display);
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+/* Proximos partidos de la liga abierta */
+.landing-preview {
+  margin-top: 2rem;
+}
+.landing-preview-title {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 650;
+}
+/* Todos los estados en la misma celda: las filas de carga (ocultas cuando no
+   cargan) marcan la altura minima y la pagina no salta al cambiar de liga. */
+.landing-preview-body {
+  display: grid;
+}
+.landing-preview-body > * {
+  grid-area: 1 / 1;
+}
+.landing-preview-body > .status-view {
+  align-self: center;
+}
+.landing-skeleton {
+  visibility: hidden;
+}
+.landing-skeleton.is-visible {
+  visibility: visible;
+}
+.match-row-skeleton {
+  pointer-events: none;
+}
+.match-row-skeleton .match-row-date,
+.match-row-skeleton .match-row-league,
+.match-row-skeleton .team-name-text,
+.match-row-skeleton .match-row-vs,
+.match-row-skeleton .status-pill {
+  color: transparent;
+  background: var(--surface-alt);
+  border-radius: 5px;
+}
+.match-row-skeleton .team-crest {
+  border-radius: 50%;
+  background: var(--surface-alt);
+}
+.landing-skeleton.is-visible .match-row-skeleton {
+  animation: landing-pulse 1.4s ease-in-out infinite;
+}
+.landing-preview-list {
+  animation: landing-fade-in 0.35s ease both;
+  transition: opacity 0.2s ease;
+}
+.landing-preview-list.is-stale {
+  opacity: 0.45;
+}
+.landing-more {
+  display: inline-block;
+  margin-top: 1.1rem;
+  font-weight: 600;
+}
+
+@keyframes landing-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes landing-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* Que puedes analizar */
+.landing-stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.75rem;
+}
+.landing-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  height: 100%;
+  padding: 1rem 1.1rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--ink);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+.landing-stat:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+.landing-stat-group {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.landing-stat-name {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 650;
+}
+.landing-stat-blurb {
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* Como funciona */
+.landing-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1.5rem 2.25rem;
+}
+.landing-step {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.landing-step-num {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+.landing-step h3 {
+  margin: 0.35rem 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 650;
+}
+.landing-step p {
+  margin: 0;
+  font-size: 0.93rem;
+  color: var(--muted);
+}
+
+/* Transparencia */
+.landing-trust {
+  scroll-margin-top: calc(var(--navbar-h) + 1.5rem);
+  margin-top: clamp(2.75rem, 6vw, 4.5rem);
+  padding: clamp(1.6rem, 4vw, 2.75rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 1.5rem 3rem;
+  border-radius: 16px;
+  background: linear-gradient(160deg, var(--sidebar-bg-alt), var(--sidebar-bg));
+  color: var(--sidebar-ink);
+}
+.landing-trust h2 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.4rem, 2.4vw, 1.75rem);
+}
+.landing-trust-text p {
+  margin: 0 0 1rem;
+  color: color-mix(in srgb, var(--sidebar-ink) 82%, transparent);
+}
+.landing-trust-text strong {
+  color: var(--sidebar-ink);
+}
+.landing-trust-link {
+  color: var(--accent);
+  font-weight: 600;
+}
+.landing-trust-link:hover {
+  color: #e0bb45;
+}
+.landing .landing-trust-link:focus-visible {
+  outline-color: var(--accent);
+}
+.landing-trust-claim {
+  margin: 0;
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--accent);
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  font-weight: 480;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+/* CTA final */
+.landing-final {
+  padding: clamp(3rem, 7vw, 5rem) 0 0.5rem;
+  text-align: center;
+}
+.landing-final h2 {
+  margin: 0 0 1.4rem;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+@media (max-width: 900px) {
+  .landing-pitch {
+    display: none;
+  }
+  .landing-trust {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Movil: la galeria pasa a filas (ver AccordionGallery.css); el logo va a la
+   izquierda y el nombre de la liga a su lado. */
+@media (max-width: 520px) {
+  .landing-hero {
+    padding-top: 2.5rem;
+  }
+  .landing-gallery .ag-panel {
+    min-height: 76px;
+  }
+  .landing-gallery-placeholder {
+    height: calc(4 * 76px + 3 * 10px);
+  }
+  .landing-gallery .ag-panel--contain .ag-panel__media img {
+    left: calc(var(--ag-bleed) + 1rem);
+    width: 3.5rem;
+    height: 66%;
+    transform: translateY(-50%);
+  }
+  .landing-gallery .ag-panel__label {
+    left: 5.6rem;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+  }
+  /* En filas hay sitio: el nombre se ve en todas (la galeria solo lo anima
+     en la abierta), mas apagado en las cerradas. */
+  .landing-gallery .ag-panel__text {
+    font-size: 0.92rem;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .landing-gallery .ag-panel:not(.ag-panel--active) .ag-panel__text {
+    color: var(--sidebar-muted);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-preview-list,
+  .landing-skeleton.is-visible .match-row-skeleton {
+    animation: none;
+  }
+  .landing-cta,
+  .landing-stat {
+    transition: none;
+  }
+}
+
+/* Picks muy probables (ficha de partido): una tarjeta por patron, con su
+   evidencia, el contraste con el rival y la fuerza. */
+.picks-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: 0.85rem;
+}
+.pick {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 0.95rem 1rem 1rem;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--faint);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.pick-alta {
+  border-top-color: var(--green);
+}
+.pick-media {
+  border-top-color: var(--amber);
+}
+.pick-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  min-width: 0;
+  font-weight: 600;
+}
+.pick-strength {
+  flex: none;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: help;
+}
+.pick-strength-alta {
+  background: var(--green-bg);
+  color: var(--green);
+}
+.pick-strength-media {
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+.pick-strength-baja {
+  background: var(--surface-alt);
+  color: var(--muted);
+}
+.pick-statement {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+.pick-perfect {
+  padding: 0.1rem 0.4rem;
+  border-radius: 5px;
+  background: var(--green-bg);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.pick-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.5rem;
+  margin: 0;
+  font-size: 0.9rem;
+}
+.pick-league {
+  margin: 0;
+}
+.pick-rival {
+  margin-top: 0.2rem;
+  padding: 0.55rem 0.7rem;
+  border-left: 3px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-alt);
+  font-size: 0.86rem;
+}
+.pick-rival-state {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.pick-rival-backed {
+  border-left-color: var(--green);
+}
+.pick-rival-backed .pick-rival-state {
+  color: var(--green);
+}
+.pick-rival-partial {
+  border-left-color: var(--amber);
+}
+.pick-rival-partial .pick-rival-state {
+  color: var(--amber);
+}
+.pick-rival-against {
+  border-left-color: var(--red);
+}
+.pick-rival-against .pick-rival-state {
+  color: var(--red);
+}
+.pick-rival-text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem 0.45rem;
+  margin: 0;
+}
+.pick-rival-text .team-name {
+  font-weight: 600;
+}
+.pick-ev-link {
+  align-self: flex-start;
+}
+.picks-method {
+  margin-top: 1rem;
+  font-size: 0.88rem;
+}
+.picks-method ul {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 72ch;
+  margin: 0.6rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+}
+.picks-method summary,
+.referee-details summary {
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 600;
+}
+.picks-method summary:focus-visible,
+.referee-details summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.picks-disclaimer {
+  margin: 0.9rem 0 0;
+}
+
+/* Arbitro: hechos con estos equipos primero; medias y lineas, plegadas. */
+.referee-summary {
+  margin: 0 0 0.6rem;
+}
+.referee-facts {
+  margin: 0 0 1rem;
+}
+.referee-facts h3 {
+  margin: 0.2rem 0 0.6rem;
+}
+.referee-fact-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.referee-fact {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.referee-fact-text {
+  margin: 0;
+  font-weight: 500;
+}
+.referee-fact-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.7rem;
+  margin: 0.15rem 0 0;
+}
+.referee-fact-meta:empty {
+  display: none;
+}
+.fact-small {
+  color: var(--amber);
+  font-weight: 500;
+}
+.referee-details {
+  margin-top: 0.4rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+.referee-details[open] summary {
+  margin-bottom: 0.9rem;
+}
+
+/* Picks muy probables: ¿se cumplieron? (ficha de un partido jugado y pagina
+   de historico). */
+/* Resultado de un pick ya jugado: franja a todo el ancho arriba de la
+   tarjeta, centrada y en color solido, para que no se confunda con las
+   pastillas de fuerza. */
+.pick-played {
+  border-top-width: 1px;
+  border-top-color: var(--border);
+}
+.pick-outcome {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  margin: -0.95rem -1rem 0.35rem;
+  padding: 0.75rem 1rem;
+  border-radius: 11px 11px 0 0;
+  color: #ffffff;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.pick-outcome-hit {
+  background: var(--green);
+}
+.pick-outcome-miss {
+  background: var(--red);
+}
+.pick-outcome-unknown {
+  background: var(--surface-alt);
+  color: var(--muted);
+}
+.pick-outcome-icon {
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  fill: rgba(255, 255, 255, 0.22);
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pick-outcome-icon circle {
+  stroke: none;
+}
+.pick-outcome-unknown .pick-outcome-icon {
+  fill: var(--border);
+}
+
+/* La "i" junto a la fuerza: acierto de la temporada por nivel. */
+.pick-head-strength {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.35rem;
+}
+.pick-info {
+  position: relative;
+  display: inline-flex;
+}
+.pick-info-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  border: 1.5px solid var(--faint);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-style: italic;
+  font-weight: 650;
+  line-height: 1;
+  cursor: pointer;
+}
+.pick-info-button:hover,
+.pick-info-button[aria-expanded="true"] {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.pick-info-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.pick-info-popover {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: -0.45rem;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: max-content;
+  max-width: min(17rem, 80vw);
+  padding: 0.7rem 0.85rem 0.75rem;
+  border-radius: 10px;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-ink);
+  box-shadow: var(--shadow-lg);
+  font-size: 0.84rem;
+  font-weight: 400;
+  text-align: left;
+}
+.pick-info-popover::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  right: 0.85rem;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  transform: rotate(45deg);
+}
+.pick-info-title {
+  color: var(--sidebar-muted);
+  font-size: 0.76rem;
+}
+.pick-info-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: 0.7rem;
+}
+.pick-info-row strong {
+  font-family: var(--font-mono);
+}
+.pick-info-n {
+  color: var(--sidebar-muted);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+}
+.pick-info-current > span:first-child {
+  color: var(--accent);
+  font-weight: 600;
+}
+.picks-played-summary {
+  margin: 0.6rem 0 0;
+}
+
+.picks-summary p {
+  max-width: 70ch;
+}
+.picks-summary-table {
+  max-width: 34rem;
+}
+.picks-summary-table .num {
+  text-align: right;
+  font-family: var(--font-mono);
+}
+.picks-summary-total td {
+  font-weight: 700;
+}
+
+.picks-matchday {
+  margin-top: 1.75rem;
+}
+.picks-matchday .matchday-nav h2 {
+  margin: 0;
+}
+.checked-matches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: 0.85rem;
+}
+.checked-match {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+  padding: 0.85rem 1rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.checked-match-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem 0.8rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+.checked-match-head:hover {
+  color: var(--primary);
+  text-decoration: none;
+}
+.checked-match-head .match-row-score {
+  color: var(--ink);
+}
+.checked-picks {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.checked-pick {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+.checked-hit {
+  background: var(--green-bg);
+}
+.checked-miss {
+  background: var(--red-bg);
+}
+.checked-unknown {
+  background: var(--surface-alt);
+}
+.checked-mark {
+  width: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+}
+.checked-hit .checked-mark {
+  color: var(--green);
+}
+.checked-miss .checked-mark {
+  color: var(--red);
+}
+.checked-text {
+  min-width: 0;
+}
+.checked-pick .pick-strength {
+  cursor: default;
+}
+@media (max-width: 520px) {
+  .checked-pick {
+    grid-template-columns: auto auto minmax(0, 1fr);
+  }
+  .checked-pick .pick-strength {
+    grid-column: 3;
+    justify-self: start;
+  }
+}
+
+/* Acierto del equipo junto a su nombre (ficha) y clasificacion por equipo
+   (historico). */
+.pick-team-record {
+  margin: -0.15rem 0 0;
+}
+.pick-team-record strong {
+  font-weight: 700;
+}
+/* Cada nivel ("media 87 % de 15") en una pieza: no se parte entre lineas. */
+.pick-team-record > span {
+  white-space: nowrap;
+}
+.team-ranking-table {
+  white-space: nowrap;
+}
+.team-ranking-table th.num,
+.team-ranking-table td.num {
+  text-align: right;
+}
+.team-ranking-table .rate-cell {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.25;
+}
+.team-ranking-table .rate-cell strong {
+  font-family: var(--font-mono);
+}
+.team-ranking-table .rate-n-short,
+.team-ranking-table .label-short {
+  display: none;
+}
+.team-ranking-table td.ev-negative {
+  color: var(--red);
+}
+.team-ranking-small td {
+  color: var(--faint);
+}
+.team-ranking-small .team-name-text {
+  color: var(--muted);
+}
+
+/* Movil: la clasificacion entera a la vista, sin desplazar la tabla. */
+@media (max-width: 520px) {
+  .team-ranking-table {
+    font-size: 0.8rem;
+  }
+  .team-ranking-table th,
+  .team-ranking-table td {
+    padding: 0.45rem 0.18rem;
+  }
+  .team-ranking-table th {
+    white-space: normal;
+  }
+  .team-ranking-table .team-name {
+    gap: 0.35rem;
+  }
+  .team-ranking-table .team-name-text {
+    max-width: 4.2rem;
+  }
+  .team-ranking-table .rate-n-long,
+  .team-ranking-table .label-long {
+    display: none;
+  }
+  .team-ranking-table .rate-n-short,
+  .team-ranking-table .label-short {
+    display: inline;
+  }
+  .team-ranking.detail-section {
+    padding-inline: 0.75rem;
+  }
+}
+
+/* Proxima jornada en Picks probables: picks pendientes, sin color de acierto. */
+.next-matchday .section-head h2 {
+  margin: 0;
+}
+.next-matchday-summary {
+  margin: 0.4rem 0 1rem;
+}
+.checked-pending {
+  background: var(--surface-alt);
+}
+.checked-pending .checked-mark {
+  color: var(--faint);
+}
+.picks-played-title {
+  margin-top: 2.4rem;
+}
+
+/* Otros partidos de la jornada (final de la ficha): fila deslizable de
+   tarjetas que encajan al soltar; en movil asoma la siguiente. */
+.matchday-carousel .section-head h2 {
+  margin: 0;
+}
+.carousel-buttons {
+  display: flex;
+  gap: 0.4rem;
+}
+.carousel-buttons button {
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.carousel-buttons button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.carousel-buttons button:not(:disabled):hover {
+  border-color: var(--primary);
+}
+.carousel-buttons button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+.carousel-track {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0.9rem 0 0;
+  padding: 0.2rem 0.1rem 0.8rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  list-style: none;
+}
+.carousel-track > li {
+  flex: 0 0 min(14rem, 74%);
+  scroll-snap-align: start;
+}
+.carousel-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--ink);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+.carousel-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+.carousel-card:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.carousel-date {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.carousel-team {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+  font-weight: 500;
+}
+.carousel-winner {
+  font-weight: 700;
+}
+.carousel-loser {
+  color: var(--muted);
+}
+.carousel-score {
+  flex: none;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.carousel-card .status-pill {
+  align-self: flex-start;
+  margin-top: 0.15rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .carousel-card {
+    transition: none;
+  }
+}
+
+/* Ficha de partido: liga y fecha centradas encima de la cabecera, y debajo
+   accesos directos a cada bloque. */
+.match-meta {
+  margin: 0 0 0.6rem;
+  text-align: center;
+}
+.match-sections {
+  margin: 0 0 1.25rem;
+}
+.match-sections ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.match-sections a {
+  display: inline-block;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 500;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.match-sections a:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  text-decoration: none;
+}
+.match-sections a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.match-sections .label-short {
+  display: none;
+}
+@media (max-width: 520px) {
+  .match-sections a {
+    padding: 0.38rem 0.75rem;
+  }
+  .match-sections .label-long {
+    display: none;
+  }
+  .match-sections .label-short {
+    display: inline;
+  }
+}
+/* Al saltar a un bloque, que no quede debajo de la barra superior fija. */
+.detail-section[id] {
+  scroll-margin-top: calc(var(--navbar-h) + 1rem);
+}
+
+/* Duelo de córners (bloque nuevo): probabilidades del modelo de córners y,
+   si lo hay, el pick muy probable. */
+.new-badge {
+  display: inline-block;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.corner-duel {
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-alt);
+}
+.corner-duel-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+.corner-duel-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.duel-bar {
+  display: flex;
+  height: 0.6rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border);
+}
+.duel-bar-home {
+  background: var(--primary);
+}
+.duel-bar-draw {
+  background: var(--faint);
+}
+.duel-bar-away {
+  background: var(--amber);
+}
+.duel-probs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+}
+.duel-probs div {
+  min-width: 0;
+}
+.duel-probs dt {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.duel-probs dd {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.duel-probs div:nth-child(2) {
+  text-align: center;
+}
+.duel-probs div:nth-child(3) {
+  text-align: right;
+}
+.duel-result {
+  margin: 0.4rem 0;
+  font-weight: 600;
+}
+.duel-picks {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+  padding: 0;
+  list-style: none;
+}
+.duel-pick {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.duel-pick-hit {
+  border-left-color: var(--green);
+}
+.duel-pick-miss {
+  border-left-color: var(--red);
+}
+.duel-pick-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.duel-pick-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.duel-pick-outcome {
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.duel-pick-text {
+  margin: 0.3rem 0 0.15rem;
+}
+.corner-duel-compact {
+  margin-top: 0.6rem;
+  padding: 0.5rem 0.65rem;
+}
+.corner-duel-compact p {
+  margin: 0;
+}
+
+/* Mercados: comparar dos equipos (o dos árbitros). */
+.market-compare {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+.market-compare-note {
+  margin: 0.25rem 0 0.75rem;
+}
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Picks probables: tabla de la temporada con color (verde si supera a la
+   liga, rojo si no). */
+.edge-up {
+  color: var(--green);
+}
+.edge-down {
+  color: var(--red);
+}
+.summary-hits {
+  color: var(--green);
+  font-weight: 600;
+}
+.summary-misses {
+  color: var(--red);
+  font-weight: 600;
+}
+.rate-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 9rem;
+}
+.rate-meter-track {
+  position: relative;
+  flex: 1;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--red-bg);
+}
+.rate-meter-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+}
+.rate-good {
+  background: var(--green);
+}
+.rate-bad {
+  background: var(--red);
+}
+.rate-meter-mark {
+  position: absolute;
+  top: -0.2rem;
+  bottom: -0.2rem;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--ink);
+}
+.edge-pill {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-alt);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.edge-pill-up {
+  background: var(--green-bg);
+  color: var(--green);
+}
+.edge-pill-down {
+  background: var(--red-bg);
+  color: var(--red);
+}
+
+.duel-played {
+  font-weight: 600;
+}
+
+/* Picks probables: resumen de la jornada. */
+.matchday-summary {
+  margin: 0.25rem 0 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--faint);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.matchday-summary-up {
+  border-left-color: var(--green);
+  background: linear-gradient(90deg, var(--green-bg), var(--surface) 60%);
+}
+.matchday-summary-down {
+  border-left-color: var(--red);
+  background: linear-gradient(90deg, var(--red-bg), var(--surface) 60%);
+}
+.matchday-summary-head {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+.matchday-summary-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  list-style: none;
+}
+.matchday-summary p.small {
+  margin: 0;
+}
+
+.matchday-summary .matchday-summary-duel {
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed var(--border);
+}
+
+/* Clasificación (/stats): grupos de columnas a elegir, equipo y cabecera fijos. */
+.column-groups {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0.75rem;
+}
+.group-chip {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.group-chip[aria-pressed="true"] {
+  border-color: var(--grp, var(--primary));
+  background: var(--grp, var(--primary));
+  color: #fff;
+}
+.column-presets {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-left: 0.5rem;
+}
+.grp-general {
+  --grp: #5b655c;
+}
+.grp-goles {
+  --grp: var(--primary);
+}
+.grp-descanso {
+  --grp: #3d7a8c;
+}
+.grp-corners {
+  --grp: var(--amber);
+}
+.grp-tarjetas {
+  --grp: var(--red);
+}
+.season-stats-table .group-head {
+  border-top: 4px solid var(--grp);
+  color: var(--grp);
+}
+.season-stats-table .group-start {
+  border-left: 2px solid var(--grp, var(--border));
+}
+.season-stats-scroll {
+  max-height: 78vh;
+  overflow: auto;
+}
+.season-stats-table thead th {
+  position: sticky;
+  z-index: 2;
+  background: var(--surface);
+}
+.season-stats-table thead tr.group-row th {
+  top: 0;
+  height: 2rem;
+}
+.season-stats-table thead tr:nth-child(2) th {
+  top: 2rem;
+}
+.season-stats-table .sticky-pos,
+.season-stats-table .sticky-team {
+  position: sticky;
+  z-index: 1;
+  background: var(--surface);
+}
+.season-stats-table .sticky-pos {
+  left: 0;
+  min-width: 2.6rem;
+  width: 2.6rem;
+}
+.season-stats-table .sticky-team {
+  left: 2.6rem;
+  box-shadow: 4px 0 6px -4px rgba(26, 36, 32, 0.25);
+}
+.season-stats-table thead .sticky-pos,
+.season-stats-table thead .sticky-team {
+  z-index: 3;
 }
