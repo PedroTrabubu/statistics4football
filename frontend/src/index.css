@@ -3948,6 +3948,191 @@ section[id] {
   }
 }
 
+/* Rachas (/rachas): pestañas de día, chips de mercado, tabla y, en móvil,
+   tarjetas. */
+.streak-days,
+.streak-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.8rem;
+}
+.streak-days .tab-button {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 4.4rem;
+  line-height: 1.2;
+}
+.streak-day-name {
+  font-weight: 600;
+}
+.streak-day-date {
+  font-size: 0.74rem;
+  opacity: 0.8;
+}
+.streak-days .tab-button:disabled,
+.streak-chips .group-chip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.chip-count {
+  margin-left: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+.streaks-table td {
+  vertical-align: top;
+}
+.streaks-table td:nth-child(2) {
+  min-width: 18rem;
+  font-family: var(--font-body);
+}
+.streaks-table td:nth-child(3),
+.streak-date {
+  font-family: var(--font-body);
+}
+.streak-date {
+  white-space: nowrap;
+}
+.streak-league {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+.streak-league .league-logo {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+.streak-entity {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+.streak-text {
+  margin: 0;
+  font-weight: 500;
+}
+.streak-context {
+  margin: 0.2rem 0 0;
+  max-width: 70ch;
+}
+.streak-next {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  color: inherit;
+  text-decoration: none;
+}
+.streak-next:hover .team-name-text {
+  text-decoration: underline;
+}
+.streak-venue {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.streak-odds {
+  white-space: nowrap;
+}
+.streak-odds-value {
+  font-weight: 600;
+  cursor: help;
+}
+.streak-odds .odds-input {
+  display: block;
+  width: 5.5rem;
+  margin-top: 0.35rem;
+}
+.streak-cards {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.streak-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.streak-card-head,
+.streak-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.4rem 0.8rem;
+}
+.streak-more {
+  margin-top: 0.8rem;
+}
+.streak-notes {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 78ch;
+  margin-top: 1.1rem;
+}
+.streak-notes p {
+  margin: 0;
+}
+.streak-study {
+  margin-top: 1.4rem;
+}
+.streak-study-verdict {
+  max-width: 78ch;
+  font-weight: 500;
+}
+.streak-study-table td {
+  vertical-align: top;
+}
+.streak-study-table td:not(:first-child) {
+  white-space: nowrap;
+}
+@media (max-width: 720px) {
+  .streak-days,
+  .streak-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.3rem;
+    scrollbar-width: thin;
+  }
+  .streak-days > *,
+  .streak-chips > * {
+    flex: 0 0 auto;
+  }
+}
+.streak-rarity {
+  max-width: 78ch;
+  margin: -0.6rem 0 1.2rem;
+}
+.streak-rarity p,
+.streak-rarity li {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.streak-rarity ul {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.4rem 0;
+  padding-left: 1.1rem;
+}
+.streak-chance {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: help;
+}
+
 /* Mercados en la Champions: el mismo mercado en la liga de cada equipo. */
 .market-domestic {
   margin-top: 0.8rem;

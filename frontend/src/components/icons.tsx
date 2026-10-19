@@ -25,6 +25,16 @@ export function IconMatches(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Rachas: una linea que sube sin cortarse. */
+export function IconStreak(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M3 17.5l5.5-5.5 3.5 3.5L20 7.5" />
+      <path d="M14.5 7.5H20V13" />
+    </svg>
+  );
+}
+
 export function IconStats(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base(props)}>

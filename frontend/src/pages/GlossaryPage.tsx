@@ -66,6 +66,27 @@ export function GlossaryPage() {
       </div>
 
       <div className="detail-section">
+        <h2>Rachas</h2>
+        <dl className="glossary-list">
+          <dt>Racha</dt>
+          <dd>
+            Partidos seguidos, desde el más reciente hacia atrás, en los que un equipo (o un árbitro) ha cumplido algo:
+            ganar, marcar, más de 8.5 córners... Describe lo que ha pasado, no lo que va a pasar.
+          </dd>
+
+          <dt>Rareza</dt>
+          <dd>
+            Lo difícil que sería ver esa racha por pura casualidad si el equipo fuera uno cualquiera de la liga: lo
+            habitual en la liga para ese suceso, elevado al número de partidos de la racha. Ganar 8 seguidos donde se gana
+            el 40 % de los partidos: 0,40<sup>8</sup> ≈ 1 de cada 1500, muy rara. Una racha de 9 de algo que pasa el 90 % de
+            las veces: 0,90<sup>9</sup> ≈ 1 de cada 3, nada rara. No es la probabilidad de que la racha siga: supone partidos
+            independientes y un equipo medio, y un equipo con un estilo marcado (que tira mucho, que hace muchas faltas)
+            puede tener rachas rarísimas sin que sean una sorpresa.
+          </dd>
+        </dl>
+      </div>
+
+      <div className="detail-section">
         <h2>Cómo leer una cuota</h2>
         <dl className="glossary-list">
           <dt>Probabilidad implícita</dt>

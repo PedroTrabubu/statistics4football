@@ -88,6 +88,22 @@ export interface MatchRefereeStats {
   away_matches: MatchResult[];
 }
 
+/** Cuota "Market Average" (media de las casas) de un partido por jugar. */
+export interface MarketOdds {
+  market: string;
+  selection: string;
+  line: number | null;
+  odds: number;
+}
+
+/** GET /leagues/{id}/upcoming: partido por jugar con su cuota media, si la
+ * hay, y de cuándo y de dónde es la toma (no es la cuota actual). */
+export interface UpcomingMatch extends Match {
+  odds: MarketOdds[];
+  odds_taken_at: string | null;
+  odds_source: string | null;
+}
+
 /** Partido jugado con las stats de cada equipo (GET /leagues/{id}/results). */
 export interface MatchResult extends Match {
   home_stats: TeamMatchStats | null;
