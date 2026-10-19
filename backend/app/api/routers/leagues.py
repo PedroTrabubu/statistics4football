@@ -2,8 +2,10 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from app.core.competitions import CHAMPIONS_LEAGUE
 from app.core.config import Settings, get_settings
 from app.db.models import League, Match, MatchStatus, Season
 from app.db.session import get_db
@@ -131,6 +133,55 @@ def list_league_results(
             Match.league_id == league_id,
             Season.name == season,
             Match.status == MatchStatus.HISTORICAL,
+        )
+        .options(
+            joinedload(Match.league),
+            joinedload(Match.season),
+            joinedload(Match.home_team),
+            joinedload(Match.away_team),
+            selectinload(Match.team_stats),
+        )
+        .order_by(Match.date.desc())
+        .all()
+    )
+    return [match_to_result_out(m) for m in matches]
+
+
+@router.get("/{league_id}/context-results", response_model=list[MatchResultOut])
+def list_league_context_results(
+    league_id: int,
+    season: str | None = None,
+    db: Session = Depends(get_db),
+) -> list[MatchResultOut]:
+    """Solo en la Champions: los partidos jugados de sus equipos en sus ligas
+    (las de la web y las de contexto) en esa temporada, mas recientes primero.
+    Para ver cada mercado de un equipo de Champions tambien en su liga. En el
+    resto de ligas, vacio."""
+    league = db.get(League, league_id)
+    if league is None or league.code != CHAMPIONS_LEAGUE:
+        return []
+    if season is None:
+        latest = latest_season_with_history(db, league_id)
+        if latest is None:
+            return []
+        season = latest.name
+
+    in_season = (
+        db.query(Match.home_team_id, Match.away_team_id)
+        .join(Season, Season.id == Match.season_id)
+        .filter(Match.league_id == league_id, Season.name == season)
+    )
+    team_ids = {team_id for pair in in_season for team_id in pair}
+    if not team_ids:
+        return []
+    matches = (
+        db.query(Match)
+        .join(Season, Season.id == Match.season_id)
+        .filter(
+            Match.league_id != league_id,
+            Match.status == MatchStatus.HISTORICAL,
+            Season.name == season,
+            or_(Match.home_team_id.in_(team_ids), Match.away_team_id.in_(team_ids)),
         )
         .options(
             joinedload(Match.league),

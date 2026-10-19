@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { getLeagueResults, getLeagueSeasons, getLeagues } from "../api/client";
+import { getLeagueContextResults, getLeagueResults, getLeagueSeasons, getLeagues } from "../api/client";
 import { LeagueSwitch } from "../components/LeagueSwitch";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
 import { TeamName } from "../components/TeamCrest";
@@ -20,7 +20,7 @@ import {
   type MatchGroup,
   type TeamMatchView,
 } from "../lib/markets";
-import { DEFAULT_LEAGUE_CODE, useSelectedLeagueCode } from "../lib/leagues";
+import { CHAMPIONS_LEAGUE_CODE, DEFAULT_LEAGUE_CODE, leagueName, useSelectedLeagueCode } from "../lib/leagues";
 import { matchesSearch } from "../lib/teamSearch";
 import { useApi } from "../lib/useApi";
 
@@ -124,6 +124,22 @@ function MarketView({
         ? getLeagueResults(leagueId, effectiveSeason)
         : Promise.resolve([]),
     [leagueId, effectiveSeason],
+  );
+
+  // Champions: cada equipo, tambien en su liga. Se pide la primera vez que
+  // se abre el bloque de un equipo.
+  const withDomestic = mode === "team" && leagueCode === CHAMPIONS_LEAGUE_CODE;
+  const [domesticWanted, setDomesticWanted] = useState(false);
+  const domesticApi = useApi(
+    () =>
+      withDomestic && domesticWanted && leagueId !== undefined && effectiveSeason !== undefined
+        ? getLeagueContextResults(leagueId, effectiveSeason)
+        : Promise.resolve(null),
+    [withDomestic, domesticWanted, leagueId, effectiveSeason],
+  );
+  const domesticByTeam = useMemo(
+    () => (domesticApi.data ? new Map(groupByTeam(domesticApi.data).map((g) => [g.teamId, g])) : null),
+    [domesticApi.data],
   );
 
   const navigate = useNavigate();
@@ -346,6 +362,16 @@ function MarketView({
               league={leagueCode}
               checked={picked.includes(group.key)}
               onToggle={() => toggle(group.key)}
+              domestic={
+                withDomestic
+                  ? {
+                      group: domesticByTeam?.get(group.teamId!) ?? null,
+                      loading: domesticWanted && (domesticApi.loading || !domesticByTeam) && !domesticApi.error,
+                      error: domesticApi.error,
+                      onOpen: () => setDomesticWanted(true),
+                    }
+                  : undefined
+              }
             />
           ))}
         </div>
@@ -374,6 +400,7 @@ function GroupCard({
   league,
   checked,
   onToggle,
+  domestic,
 }: {
   group: MatchGroup;
   overall: HitRate;
@@ -384,6 +411,7 @@ function GroupCard({
   league: string;
   checked: boolean;
   onToggle: () => void;
+  domestic?: DomesticState;
 }) {
   const all = take(group.all);
   const avg = market.average ? average(all, market.average.value) : null;
@@ -406,21 +434,90 @@ function GroupCard({
         <RateBar rate={overall} />
       </header>
 
-      {view === "split" ? (
-        <div className="market-team-split">
-          <MatchColumn title="Local" views={take(group.home)} market={market} option={option} teamId={group.teamId} />
-          <MatchColumn
-            title="Visitante"
-            views={take(group.away)}
-            market={market}
-            option={option}
-            teamId={group.teamId}
-          />
-        </div>
-      ) : (
-        <MatchList views={all} market={market} option={option} teamId={group.teamId} />
-      )}
+      <GroupMatches group={group} market={market} option={option} view={view} take={take} />
+
+      {domestic && <DomesticMatches state={domestic} market={market} option={option} view={view} take={take} />}
     </section>
+  );
+}
+
+/** Los partidos de una tarjeta: local y visitante, o todos juntos. */
+function GroupMatches({
+  group,
+  market,
+  option,
+  view,
+  take,
+}: {
+  group: MatchGroup;
+  market: MarketDef;
+  option: MarketOption;
+  view: ViewMode;
+  take: (views: TeamMatchView[]) => TeamMatchView[];
+}) {
+  if (view === "all") {
+    return <MatchList views={take(group.all)} market={market} option={option} teamId={group.teamId} />;
+  }
+  return (
+    <div className="market-team-split">
+      <MatchColumn title="Local" views={take(group.home)} market={market} option={option} teamId={group.teamId} />
+      <MatchColumn title="Visitante" views={take(group.away)} market={market} option={option} teamId={group.teamId} />
+    </div>
+  );
+}
+
+interface DomesticState {
+  /** Los partidos del equipo en su liga; null si no hay (o aun no se han pedido). */
+  group: MatchGroup | null;
+  loading: boolean;
+  error: string | null;
+  onOpen: () => void;
+}
+
+/** Champions: el mismo mercado en la liga del equipo, plegado al principio,
+ * con sus porcentajes y sus partidos como en la tarjeta. */
+function DomesticMatches({
+  state,
+  market,
+  option,
+  view,
+  take,
+}: {
+  state: DomesticState;
+  market: MarketDef;
+  option: MarketOption;
+  view: ViewMode;
+  take: (views: TeamMatchView[]) => TeamMatchView[];
+}) {
+  const { group } = state;
+  const league = group?.all[0]?.match.league_code;
+  const avg = group && market.average ? average(take(group.all), market.average.value) : null;
+  return (
+    <details className="market-domestic" onToggle={(e) => e.currentTarget.open && state.onOpen()}>
+      <summary>Ver en su liga{league ? `: ${leagueName(league)}` : ""}</summary>
+      {state.error ? (
+        <p className="small muted">No se pudieron cargar sus partidos de liga: {state.error}</p>
+      ) : state.loading ? (
+        <p className="small muted">Cargando sus partidos de liga...</p>
+      ) : !group ? (
+        <p className="small muted">No tenemos su liga en los datos, o aún no ha jugado partidos de liga esta temporada.</p>
+      ) : (
+        <>
+          <div className="market-domestic-total">
+            <div>
+              <h3>Total en {leagueName(league!)}</h3>
+              {avg !== null && market.average && (
+                <p className="small muted market-average">
+                  {avg.toFixed(1)} {market.average.label}
+                </p>
+              )}
+            </div>
+            <RateBar rate={hitRate(take(group.all), option)} />
+          </div>
+          <GroupMatches group={group} market={market} option={option} view={view} take={take} />
+        </>
+      )}
+    </details>
   );
 }
 
