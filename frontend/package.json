@@ -9,7 +9,8 @@
     "lint": "oxlint",
     "test": "vitest run",
     "preview": "vite preview",
-    "export:picks": "rolldown scripts/export-picks.ts --file node_modules/.cache/export-picks.mjs --platform node --format esm --log-level warn && node node_modules/.cache/export-picks.mjs"
+    "export:picks": "rolldown scripts/export-picks.ts --file node_modules/.cache/export-picks.mjs --platform node --format esm --log-level warn && node node_modules/.cache/export-picks.mjs",
+    "export:predictability": "rolldown scripts/export-predictability.ts --file node_modules/.cache/export-predictability.mjs --platform node --format esm --log-level warn && node node_modules/.cache/export-predictability.mjs"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",

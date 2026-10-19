@@ -4166,6 +4166,51 @@ section[id] {
   }
 }
 
+/* Indice de predecibilidad (docs/PREDECIBILIDAD_PROTOCOLO.md). */
+.predictability {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.6rem;
+}
+.predictability-line {
+  margin: 0.2rem 0 0.8rem;
+}
+.predictability-chip {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-alt);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: help;
+}
+.predictability-alta {
+  border-color: var(--green);
+  background: var(--green-bg);
+  color: var(--green);
+}
+.predictability-media {
+  border-color: var(--amber);
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+.predictability-none {
+  border-style: dashed;
+  font-weight: 500;
+}
+.predictability-table .num {
+  text-align: right;
+}
+.predictability-table td {
+  font-family: var(--font-body);
+}
+
 @media (max-width: 400px) {
   .season-stats-table .stats-team .team-crest {
     display: none;
