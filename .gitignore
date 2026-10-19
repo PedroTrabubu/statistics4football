@@ -39,3 +39,6 @@ Thumbs.db
 
 # Alembic
 backend/alembic/*.pyc
+
+# Datos reales y privados (historiales de apuestas, saldos): solo en local
+data/private/
