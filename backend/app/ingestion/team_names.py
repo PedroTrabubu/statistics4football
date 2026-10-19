@@ -242,6 +242,11 @@ TEAM_ALIASES: dict[str, str] = {
     "PSV": "PSV Eindhoven",
     # Pinnacle (Champions) -> ESPN, equipos de ligas que no cargamos
     "Viking": "Viking FK",
+    # API de UEFA (designaciones de la Champions) -> ESPN
+    "Bodø/Glimt": "Bodo/Glimt",
+    "LASK": "LASK Linz",
+    "Sabah": "Sabah FK",
+    "Slavia Praha": "Slavia Prague",
 }
 
 

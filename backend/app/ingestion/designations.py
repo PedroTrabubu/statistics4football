@@ -14,6 +14,9 @@ fuentes publican la designación en cuanto sale (comprobado el 2026-10-10):
   /officials de cada uno ("Referee").
 - Ligue 1: API oficial de ligue1.com: calendario por jornadas y ficha de cada
   partido (officials, tipo 1 = árbitro principal).
+- Champions League: API de match.uefa.com, la que usa uefa.com: árbitro
+  ("REFEREE") de cada partido, también de los ya jugados. ESPN, la otra
+  fuente de la Champions, a veces no lo da (jornada del 13-14/10/2026).
 - La API de laliga.com también trae la Premier y la Ligue 1: es la segunda
   fuente de esas dos ligas y sirve para contrastar. Si discrepan, manda la
   oficial y queda un aviso.
@@ -64,6 +67,10 @@ PREMIER_COMPETITION = 8
 LIGUE1_API = "https://ma-api.ligue1.fr"
 LIGUE1_CHAMPIONSHIP = 1
 LIGUE1_MAIN_REFEREE = 1
+UEFA_API = "https://match.uefa.com/v5"
+UEFA_CHAMPIONS_LEAGUE = 1
+UEFA_MAIN_REFEREE = "REFEREE"
+_UEFA_PAGE = 100
 
 # Fuentes de cada liga, de más a menos fiable.
 SOURCES_BY_LEAGUE = {
@@ -71,6 +78,7 @@ SOURCES_BY_LEAGUE = {
     "ESP-La Liga 2": ("laliga",),
     "ENG-Premier League": ("premierleague", "laliga"),
     "FRA-Ligue 1": ("ligue1", "laliga"),
+    "INT-Champions League": ("uefa",),
 }
 
 # Ventana de partidos que interesan: los próximos días y los últimos (un
@@ -88,7 +96,7 @@ _PARTICLES = {"de", "del", "la", "las", "los", "y", "i", "da", "do", "dos", "van
 
 @dataclass(frozen=True)
 class Designation:
-    source: str  # "laliga" | "premierleague" | "ligue1"
+    source: str  # "laliga" | "premierleague" | "ligue1" | "uefa"
     league_code: str
     kickoff: datetime  # UTC sin zona
     home_names: tuple[str, ...]
@@ -121,6 +129,19 @@ def laliga_person_name(person: dict) -> str | None:
     names = [(person.get(k) or "").strip() for k in ("name", "nickname")]
     full = max(names, key=len)
     return full or None
+
+
+def uefa_person_name(person: dict) -> str | None:
+    """Primer nombre de pila y apellidos de una persona de la API de UEFA:
+    "José María" + "Sánchez" -> "José Sánchez". Con el nombre compuesto entero
+    el emparejador tomaría "María" por apellido; UEFA da nombre y apellidos
+    por separado, y a veces un solo apellido."""
+    translations = person.get("translations") or {}
+    first = ((translations.get("firstName") or {}).get("EN") or "").split()
+    last = ((translations.get("lastName") or {}).get("EN") or "").strip()
+    if first and last:
+        return f"{first[0]} {last}"
+    return ((translations.get("name") or {}).get("EN") or "").strip() or None
 
 
 class _Http:
@@ -174,13 +195,16 @@ class LaLigaApi(_Http):
         sub = data.get("subscription", data)
         return (sub.get("current_gameweek") or {}).get("week")
 
-    def designations(self, league_code: str, year: int) -> list[Designation]:
+    def designations(self, league_code: str, year: int, weeks: Iterable[int] | None = None) -> list[Designation]:
+        """Las de esas jornadas; por defecto, la actual y la siguiente."""
         slug = LALIGA_SUBSCRIPTIONS[league_code].format(year=year)
-        week = self.current_week(slug)
-        if week is None:
-            return []
+        if weeks is None:
+            week = self.current_week(slug)
+            if week is None:
+                return []
+            weeks = (week, week + 1)
         out = []
-        for w in (week, week + 1):
+        for w in weeks:
             for m in self._api("/matches", subscriptionSlug=slug, week=w, limit=100).get("matches", []):
                 referee = next(
                     (
@@ -266,6 +290,55 @@ class Ligue1Api(_Http):
                     )
                 out.append(Designation("ligue1", "FRA-Ligue 1", _utc(m["date"]), teams[0], teams[1], tidy_name(referee)))
         return out
+
+
+class UefaApi(_Http):
+    def __init__(self) -> None:
+        super().__init__({"Origin": "https://www.uefa.com", "Referer": "https://www.uefa.com/"})
+
+    def designations(self, year: int, start: datetime, end: datetime) -> list[Designation]:
+        """Partidos de Champions entre esos días. `year`: el del inicio de la
+        temporada; UEFA la nombra por el del final (2027 para la 26/27)."""
+        out = []
+        offset = 0
+        while True:
+            page = self.get(
+                f"{UEFA_API}/matches",
+                {
+                    "competitionId": UEFA_CHAMPIONS_LEAGUE,
+                    "seasonYear": year + 1,
+                    "fromDate": f"{start:%Y-%m-%d}",
+                    "toDate": f"{end:%Y-%m-%d}",
+                    "order": "ASC",
+                    "limit": _UEFA_PAGE,
+                    "offset": offset,
+                },
+            ).json()
+            for m in page:
+                referee = next(
+                    (
+                        uefa_person_name(r.get("person") or {})
+                        for r in m.get("referees") or []
+                        if r.get("role") == UEFA_MAIN_REFEREE
+                    ),
+                    None,
+                )
+                kickoff = (m.get("kickOffTime") or {}).get("dateTime")
+                if not referee or not kickoff:
+                    continue
+                teams = []
+                for side in ("homeTeam", "awayTeam"):
+                    team = m.get(side) or {}
+                    translations = team.get("translations") or {}
+                    names = (
+                        team.get("internationalName"),
+                        *((translations.get(k) or {}).get("EN") for k in ("displayName", "displayOfficialName", "shortName")),
+                    )
+                    teams.append(tuple(dict.fromkeys(n for n in names if n)))
+                out.append(Designation("uefa", "INT-Champions League", _utc(kickoff), teams[0], teams[1], referee))
+            if len(page) < _UEFA_PAGE:
+                return out
+            offset += _UEFA_PAGE
 
 
 # --- cruce y aplicación ----------------------------------------------------------
@@ -391,7 +464,7 @@ def collect_designations(
             weeks_by_league[code].add(match.matchday)
     out: list[Designation] = []
     requests = 0
-    laliga, premier, ligue1 = LaLigaApi(), PremierLeagueApi(), Ligue1Api()
+    laliga, premier, ligue1, uefa = LaLigaApi(), PremierLeagueApi(), Ligue1Api(), UefaApi()
     try:
         for code in leagues:
             for source in SOURCES_BY_LEAGUE.get(code, ()):
@@ -402,12 +475,14 @@ def collect_designations(
                         out += premier.designations(season_year, weeks_by_league[code])
                     elif source == "ligue1":
                         out += ligue1.designations(season_year, start, end)
+                    elif source == "uefa":
+                        out += uefa.designations(season_year, start, end)
                 except Exception as exc:  # noqa: BLE001  (una fuente caída no para las demás)
                     errors.append(f"{source} {code}: {type(exc).__name__}: {exc}"[:300])
                     logger.warning("Designaciones %s %s: %s", source, code, exc)
     finally:
-        requests = laliga.requests + premier.requests + ligue1.requests
-        for client in (laliga, premier, ligue1):
+        requests = laliga.requests + premier.requests + ligue1.requests + uefa.requests
+        for client in (laliga, premier, ligue1, uefa):
             client.close()
     return [d for d in out if start <= d.kickoff <= end], requests
 
