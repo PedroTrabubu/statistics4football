@@ -3861,38 +3861,108 @@ section[id] {
 .season-stats-table .group-start {
   border-left: 2px solid var(--grp, var(--border));
 }
-.season-stats-scroll {
-  max-height: 78vh;
-  overflow: auto;
+/* Clasificación sin contenedor con scroll: cabe en el ancho (una vista cada vez,
+   cabeceras en dos líneas, columnas secundarias fuera en pantallas estrechas) y
+   la cabecera se queda fija bajo la barra superior. */
+.stats-views {
+  flex-wrap: wrap;
+  margin: 0 0 0.9rem;
+}
+.season-stats-table th,
+.season-stats-table td {
+  padding: 0.4rem 0.35rem;
+}
+.season-stats-table th {
+  white-space: normal;
+  line-height: 1.15;
+  vertical-align: bottom;
 }
 .season-stats-table thead th {
   position: sticky;
+  top: var(--navbar-h);
   z-index: 2;
   background: var(--surface);
 }
 .season-stats-table thead tr.group-row th {
-  top: 0;
   height: 2rem;
 }
-.season-stats-table thead tr:nth-child(2) th {
-  top: 2rem;
+.season-stats-table.with-group-row thead tr:nth-child(2) th {
+  top: calc(var(--navbar-h) + 2rem);
 }
-.season-stats-table .sticky-pos,
-.season-stats-table .sticky-team {
-  position: sticky;
-  z-index: 1;
-  background: var(--surface);
+.season-stats-table .stats-pos {
+  width: 2rem;
 }
-.season-stats-table .sticky-pos {
-  left: 0;
-  min-width: 2.6rem;
-  width: 2.6rem;
+.season-stats-table td.stats-team {
+  max-width: 11rem;
 }
-.season-stats-table .sticky-team {
-  left: 2.6rem;
-  box-shadow: 4px 0 6px -4px rgba(26, 36, 32, 0.25);
+.season-stats-table .stats-team .team-name {
+  max-width: 100%;
 }
-.season-stats-table thead .sticky-pos,
-.season-stats-table thead .sticky-team {
-  z-index: 3;
+.season-stats-table .stats-team .team-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 900px) {
+  .season-stats-table .hide-md,
+  .season-stats-table .group-row {
+    display: none;
+  }
+  .season-stats-table.with-group-row thead tr:nth-child(2) th {
+    top: var(--navbar-h);
+  }
+}
+.season-stats-table .label-short {
+  display: none;
+}
+@media (max-width: 640px) {
+  .season-stats-table .hide-sm,
+  .season-stats-table .label-long {
+    display: none;
+  }
+  .season-stats-table .label-short {
+    display: inline;
+  }
+  .season-stats-table th,
+  .season-stats-table td {
+    padding: 0.3rem 0.15rem;
+    font-size: 0.78rem;
+  }
+  .season-stats-table th {
+    font-size: 0.62rem;
+    letter-spacing: 0;
+  }
+  .season-stats-table .stats-pos {
+    width: 1.4rem;
+  }
+  .season-stats-table td.stats-team {
+    max-width: 5.2rem;
+  }
+  .season-stats-table .form-dots {
+    gap: 1px;
+  }
+  .season-stats-table .form-dot {
+    width: 0.7rem;
+    height: 0.7rem;
+    font-size: 0.45rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .season-stats-table .stats-team .team-crest {
+    display: none;
+  }
+  .season-stats-table td.stats-team {
+    max-width: 3.9rem;
+  }
+  .season-stats-table th,
+  .season-stats-table td {
+    padding-left: 0.1rem;
+    padding-right: 0.1rem;
+  }
+}
+@media (max-width: 340px) {
+  .season-stats-table .stats-form {
+    display: none;
+  }
 }
