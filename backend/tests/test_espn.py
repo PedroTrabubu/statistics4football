@@ -12,7 +12,7 @@ from app.ingestion import espn
 from app.ingestion.espn import EspnEvent, RefereeNames, _parse_event
 
 
-def _raw_event(event_id, home, away, when, *, slug="regular-season", time_valid=True, completed=False):
+def _raw_event(event_id, home, away, when, *, slug="regular-season", time_valid=True, completed=False, score=("0", "0")):
     return {
         "id": event_id,
         "date": when,
@@ -22,16 +22,16 @@ def _raw_event(event_id, home, away, when, *, slug="regular-season", time_valid=
             {
                 "timeValid": time_valid,
                 "competitors": [
-                    {"homeAway": "away", "team": {"displayName": away, "shortDisplayName": away}},
-                    {"homeAway": "home", "team": {"displayName": home, "shortDisplayName": home}},
+                    {"homeAway": "away", "team": {"displayName": away, "shortDisplayName": away}, "score": score[1]},
+                    {"homeAway": "home", "team": {"displayName": home, "shortDisplayName": home}, "score": score[0]},
                 ],
             }
         ],
     }
 
 
-def _event(event_id, home, away, when, *, time_known=True, completed=False):
-    return EspnEvent(event_id, when, time_known, (home,), (away,), completed)
+def _event(event_id, home, away, when, *, time_known=True, completed=False, score=(None, None)):
+    return EspnEvent(event_id, when, time_known, (home,), (away,), completed, home_score=score[0], away_score=score[1])
 
 
 def test_parse_event_uses_home_away_flags_and_tells_playoffs_apart():
@@ -41,6 +41,14 @@ def test_parse_event_uses_home_away_flags_and_tells_playoffs_apart():
     assert _parse_event(_raw_event("2", "Sevilla", "Granada", "2020-10-17T19:00Z", slug="2020-2021-laliga")).is_league_match
     playoff = _parse_event(_raw_event("3", "Espanyol", "Real Oviedo", "2024-06-16T19:00Z", slug="promotion-finals"))
     assert not playoff.is_league_match
+
+
+def test_parse_event_keeps_the_score_only_when_finished():
+    finished = _parse_event(_raw_event("1", "Leganés", "Córdoba", "2026-10-16T18:30Z", completed=True, score=("0", "1")))
+    assert (finished.home_score, finished.away_score, finished.has_score) == (0, 1, True)
+    # Por jugar, ESPN da "0" - "0": no es un marcador.
+    pending = _parse_event(_raw_event("2", "Celta Fortuna", "Tenerife", "2026-10-19T18:30Z"))
+    assert (pending.home_score, pending.away_score, pending.has_score) == (None, None, False)
 
 
 def test_provisional_kickoff_is_stored_as_unknown_time_on_its_madrid_day():
@@ -209,3 +217,37 @@ def test_sync_updates_a_provisional_date_when_espn_fixes_the_time(db, setup, mon
     )
     _run(db, monkeypatch, client)
     assert matches["huesca_eibar"].date == datetime(2026, 10, 10, 14)
+
+
+def test_sync_writes_the_provisional_hypermotion_score(db, setup, monkeypatch):
+    _, matches = setup
+    # Jugado hace 5 días, fuera de la ventana del calendario, y aún sin marcador.
+    matches["huesca_eibar"].date = datetime(2026, 10, 3, 16, 30)
+    # Ya con el marcador del CSV: no se toca.
+    matches["eibar_burgos"].home_goals, matches["eibar_burgos"].away_goals = 1, 0
+    # LaLiga tiene el marcador de football-data.org: tampoco.
+    matches["betis_sevilla"].status = MatchStatus.SCHEDULED
+    db.commit()
+    client = FakeClient(
+        days={
+            ("esp.2", date(2026, 10, 3)): [
+                _event("22", "Huesca", "Eibar", "2026-10-03T16:30Z", completed=True, score=(2, 3)),
+            ],
+            ("esp.2", date(2026, 10, 4)): [
+                _event("21", "Eibar", "Burgos", "2026-10-04T12:00Z", completed=True, score=(2, 0)),
+            ],
+            ("esp.1", date(2026, 10, 4)): [
+                _event("11", "Betis", "Sevilla", "2026-10-04T19:00Z", completed=True, score=(1, 1)),
+            ],
+        },
+        referees={},
+    )
+    run = _run(db, monkeypatch, client)
+
+    huesca_eibar = matches["huesca_eibar"]
+    assert (huesca_eibar.status, huesca_eibar.home_goals, huesca_eibar.away_goals) == (MatchStatus.HISTORICAL, 2, 3)
+    assert (huesca_eibar.home_ht_goals, huesca_eibar.away_ht_goals) == (None, None)
+    assert (matches["eibar_burgos"].home_goals, matches["eibar_burgos"].away_goals) == (1, 0)
+    assert matches["betis_sevilla"].status == MatchStatus.SCHEDULED
+    assert matches["betis_sevilla"].home_goals is None
+    assert "resultados=1" in run.notes

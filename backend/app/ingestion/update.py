@@ -8,7 +8,8 @@ scripts/ingest_fixtures.py (a mano) y el programador (scripts/scheduler.py).
    pero no esas estadísticas.
 3. xG de Understat.
 4. fixtures.csv de Football-Data.co.uk: la próxima jornada con sus cuotas.
-5. ESPN: árbitros de partidos jugados y calendario de LaLiga Hypermotion, y
+5. ESPN: árbitros de partidos jugados, calendario de LaLiga Hypermotion y
+   marcador provisional de sus recién jugados (football-data.org no la tiene),
    estadísticas provisionales de los recién jugados hasta que llegue el CSV, y
    corrección de errores claros del CSV (cero tarjetas que ESPN sí tiene, datos
    que faltan).
