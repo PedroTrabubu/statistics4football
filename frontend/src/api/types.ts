@@ -104,6 +104,50 @@ export interface UpcomingMatch extends Match {
   odds_source: string | null;
 }
 
+export type PredictabilityBand = "alta" | "media" | "baja";
+
+/** Un modelo lineal del indice de predecibilidad (variante A del protocolo). */
+export interface PredictabilityModel {
+  features: string[];
+  /** Media y desviacion del entrenamiento: estandarizan e imputan (dato que falta = media). */
+  mean: number[];
+  scale: number[];
+  coef: number[];
+  intercept: number;
+  /** Predicciones del modelo sobre su entrenamiento, ordenadas: dan el percentil. */
+  reference: number[];
+}
+
+/** Acierto de los picks de los partidos de una banda frente a la base de la liga. */
+export interface PredictabilityBandStats {
+  matches: number;
+  picks: number;
+  hit_rate: number;
+  base: number;
+  edge: number;
+  low: number;
+  high: number;
+  insufficient: boolean;
+}
+
+/** GET /picks/predictability (docs/PREDECIBILIDAD_PROTOCOLO.md). */
+export interface PredictabilityData {
+  available: boolean;
+  generated_at?: string;
+  uncalibrated_leagues?: string[];
+  min_band?: number;
+  model?: PredictabilityModel;
+  /** Indice fuera de muestra de cada partido jugado, por id. */
+  matches?: Record<string, { index: number; band: PredictabilityBand }>;
+  /** Temporada -> liga (o "all") -> banda. */
+  bands?: Record<string, Record<string, Record<PredictabilityBand, PredictabilityBandStats | null>>>;
+  /** Temporada -> separacion Alta - Baja [punto, inferior, superior]. */
+  summary?: Record<
+    string,
+    { separation: [number, number, number]; spearman: number; matches: Record<PredictabilityBand, number> }
+  >;
+}
+
 /** Partido jugado con las stats de cada equipo (GET /leagues/{id}/results). */
 export interface MatchResult extends Match {
   home_stats: TeamMatchStats | null;

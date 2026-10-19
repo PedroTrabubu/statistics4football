@@ -18,6 +18,7 @@ import type {
   Team,
   TeamSeasonStats,
   UpcomingMatch,
+  PredictabilityData,
 } from "./types";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -172,6 +173,11 @@ export function getPicks(league?: string): Promise<PicksUpcoming> {
 
 export function getPicksHistory(filters: { league?: string; kind?: string; limit?: number } = {}): Promise<PicksHistory> {
   return request("/picks/history", { ...filters });
+}
+
+/** Indice de predecibilidad precalculado (modelo, indice de cada partido y bandas). */
+export function getPredictability(): Promise<PredictabilityData> {
+  return request("/picks/predictability");
 }
 
 export { ApiError };

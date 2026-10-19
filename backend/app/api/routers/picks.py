@@ -1,7 +1,10 @@
+import json
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
+from app.core.config import PROJECT_ROOT
 from app.db.models import PickCombo, PickLeg, TeamMatchStats
 from app.db.session import get_db
 from app.picks.combos import TIERS
@@ -156,3 +159,22 @@ def picks_history(
 
     items = sorted((c for c, _ in resolved), key=lambda c: (c.window, -KIND_ORDER.index(c.kind)), reverse=True)
     return PicksHistoryOut(summary=summary, combos=items[:limit])
+
+
+# Indice de predecibilidad: lo precalcula backend/scripts/report_predictability.py
+# (protocolo: docs/PREDECIBILIDAD_PROTOCOLO.md). Se relee si el archivo cambia.
+PREDICTABILITY_PATH = PROJECT_ROOT / "data" / "model_cache" / "predictability.json"
+_predictability_cache: dict = {"mtime": None, "data": None}
+
+
+@router.get("/predictability")
+def get_predictability() -> dict:
+    """Modelo final, indice fuera de muestra de cada partido jugado y acierto por
+    banda y temporada. Sin calcular todavia: {"available": false}."""
+    if not PREDICTABILITY_PATH.exists():
+        return {"available": False}
+    mtime = PREDICTABILITY_PATH.stat().st_mtime
+    if _predictability_cache["mtime"] != mtime:
+        _predictability_cache["data"] = json.loads(PREDICTABILITY_PATH.read_text(encoding="utf-8"))
+        _predictability_cache["mtime"] = mtime
+    return {"available": True, **_predictability_cache["data"]}
