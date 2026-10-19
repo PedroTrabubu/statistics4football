@@ -189,6 +189,21 @@ def test_league_results_only_played_matches_of_one_season() -> None:
     assert {m["season"] for m in older} == {seasons[-1]}
 
 
+def test_league_context_results_only_for_champions() -> None:
+    db = SessionLocal()
+    try:
+        champions = db.query(League).filter_by(code="INT-Champions League").one()
+        laliga = db.query(League).filter_by(code="ESP-La Liga").one()
+    finally:
+        db.close()
+
+    assert client.get(f"/leagues/{laliga.id}/context-results").json() == []
+    matches = client.get(f"/leagues/{champions.id}/context-results").json()
+    # Partidos jugados de sus equipos en sus ligas, nunca de la propia Champions.
+    assert all(m["league_id"] != champions.id and m["status"] == "historical" for m in matches)
+    assert len({m["season"] for m in matches}) <= 1
+
+
 def test_team_season_stats_shape() -> None:
     db = SessionLocal()
     try:

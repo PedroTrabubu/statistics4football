@@ -3948,6 +3948,39 @@ section[id] {
   }
 }
 
+/* Mercados en la Champions: el mismo mercado en la liga de cada equipo. */
+.market-domestic {
+  margin-top: 0.8rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--border);
+}
+.market-domestic summary {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.market-domestic summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.market-domestic-total {
+  display: grid;
+  grid-template-columns: minmax(9rem, 14rem) 1fr;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.8rem 0 0.9rem;
+}
+.market-domestic-total h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+@media (max-width: 760px) {
+  .market-domestic-total {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
 @media (max-width: 400px) {
   .season-stats-table .stats-team .team-crest {
     display: none;

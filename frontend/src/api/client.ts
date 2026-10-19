@@ -70,6 +70,11 @@ export function getLeagueResults(leagueId: number, season?: string): Promise<Mat
   return request(`/leagues/${leagueId}/results`, { season });
 }
 
+/** Solo en la Champions: los partidos de sus equipos en sus ligas esa temporada. */
+export function getLeagueContextResults(leagueId: number, season?: string): Promise<MatchResult[]> {
+  return request(`/leagues/${leagueId}/context-results`, { season });
+}
+
 export function getLeagueSeasonStats(leagueId: number, season?: string): Promise<TeamSeasonStats[]> {
   return request(`/leagues/${leagueId}/season-stats`, { season });
 }
