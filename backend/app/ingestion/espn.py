@@ -11,10 +11,17 @@ Cubre dos huecos de las otras fuentes:
   temporada entera; las fechas lejanas son provisionales (`timeValid` falso)
   y se guardan a las 00:00 UTC, la convención de "hora por confirmar".
 
-Resultados, estadísticas y cuotas siguen viniendo de Football-Data.co.uk:
-aquí no se crea ningún partido jugado ni se toca un marcador, y no se cambia
-un árbitro que ya haya traído otra fuente. Solo cuentan los partidos de liga
-regular: los playoffs de ascenso repiten emparejamientos de la liga.
+- **Marcador provisional de LaLiga Hypermotion.** Sin football-data.org, el
+  resultado solo llegaría con el CSV de Football-Data.co.uk, que sale un par
+  de veces por semana. ESPN lo da al acabar el partido; el CSV lo sobrescribe
+  al llegar (con el descanso, que el marcador del día de ESPN no trae).
+  Comprobado el 2026-10-19: coincide con el CSV en los 21 partidos de las
+  jornadas 8 y 9.
+
+Estadísticas y cuotas siguen viniendo de Football-Data.co.uk: aquí no se crea
+ningún partido jugado ni se cambia un marcador ya puesto, ni un árbitro que ya
+haya traído otra fuente. Solo cuentan los partidos de liga regular: los
+playoffs de ascenso repiten emparejamientos de la liga.
 
 Lo que ya no cambia (días de temporadas cerradas, árbitros encontrados) se
 guarda en `data/espn_cache/`: el histórico son miles de peticiones, y así la
@@ -58,6 +65,9 @@ _SEASON_ANCHOR = "1015"
 # Un partido terminado de ESPN y el nuestro son el mismo si están a menos de
 # esto (aplazamientos aparte, la fecha coincide).
 _MAX_DATE_GAP = timedelta(days=3)
+# Hasta cuántos días atrás se busca el marcador de un partido que sigue sin él
+# (si el programador estuvo parado, por ejemplo).
+_RESULT_LOOK_BACK = timedelta(days=10)
 
 
 def espn_code(league_code: str) -> str | None:
@@ -86,6 +96,13 @@ class EspnEvent:
     away_names: tuple[str, ...]
     completed: bool
     stage: str = ""
+    # Solo en los terminados.
+    home_score: int | None = None
+    away_score: int | None = None
+
+    @property
+    def has_score(self) -> bool:
+        return self.completed and self.home_score is not None and self.away_score is not None
 
     @property
     def is_league_match(self) -> bool:
@@ -110,17 +127,27 @@ def _team_names(team: dict) -> tuple[str, ...]:
     return tuple(dict.fromkeys(n for n in names if n))
 
 
+def _score(competitor: dict) -> int | None:
+    try:
+        return int(float(competitor["score"]))
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
 def _parse_event(raw: dict) -> EspnEvent:
     competition = raw["competitions"][0]
-    teams = {c["homeAway"]: c["team"] for c in competition["competitors"]}
+    sides = {c["homeAway"]: c for c in competition["competitors"]}
+    completed = bool(raw["status"]["type"].get("completed"))
     return EspnEvent(
         id=str(raw["id"]),
         kickoff=raw["date"],
         time_known=bool(competition.get("timeValid", True)),
-        home_names=_team_names(teams["home"]),
-        away_names=_team_names(teams["away"]),
-        completed=bool(raw["status"]["type"].get("completed")),
+        home_names=_team_names(sides["home"]["team"]),
+        away_names=_team_names(sides["away"]["team"]),
+        completed=completed,
         stage=raw.get("season", {}).get("slug") or "",
+        home_score=_score(sides["home"]) if completed else None,
+        away_score=_score(sides["away"]) if completed else None,
     )
 
 
@@ -290,11 +317,12 @@ def sync_espn(
     referee_ahead: timedelta = timedelta(days=4),
 ) -> IngestionRun:
     """Árbitros que faltan en `seasons` y, en la temporada en curso de las ligas
-    sin football-data.org, su calendario.
+    sin football-data.org, su calendario y el marcador de los recién jugados.
 
     Solo se piden a ESPN los días que hacen falta: los de partidos sin árbitro
     (ya jugados, o por jugar en los próximos `referee_ahead`) y, para el
-    calendario, los que quedan de temporada."""
+    calendario, los que quedan de temporada y los de partidos ya pasados que
+    siguen sin marcador."""
     now = now or datetime.utcnow()
     run = IngestionRun(source="espn.sync", status=IngestionStatus.RUNNING)
     db.add(run)
@@ -341,6 +369,11 @@ def sync_espn(
                     if builds_calendar:
                         start_year = season_start_year(season_name)
                         days |= {d for d in client.season_days(code, start_year) if d >= now.date() - timedelta(days=3)}
+                        days |= {
+                            m.date.date()
+                            for m in matches
+                            if m.status == MatchStatus.SCHEDULED and now - _RESULT_LOOK_BACK <= m.date < now
+                        }
                     if not days:
                         continue
 
@@ -384,6 +417,12 @@ def sync_espn(
                                     match.date = event.stored_kickoff
                                     counts["fechas_cambiadas"] += 1
 
+                            if builds_calendar and match.status == MatchStatus.SCHEDULED and event.has_score:
+                                # Provisional: el CSV de Football-Data lo sobrescribe al llegar.
+                                match.home_goals, match.away_goals = event.home_score, event.away_score
+                                match.status = MatchStatus.HISTORICAL
+                                counts["resultados"] += 1
+
                             if needs_referee(match):
                                 name = client.referee(code, event.id, cacheable=event.completed and not is_current)
                                 if name:
@@ -400,7 +439,7 @@ def sync_espn(
 
         db.commit()
         run.status = IngestionStatus.SUCCESS
-        run.rows_ingested = counts["arbitros"] + counts["creados"]
+        run.rows_ingested = counts["arbitros"] + counts["creados"] + counts["resultados"]
         notes = " ".join(f"{k}={v}" for k, v in counts.items())
         if unresolved:
             notes += f" equipos_sin_resolver={sorted(unresolved)}"
