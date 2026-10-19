@@ -1,16 +1,23 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.competitions import CHAMPIONS_LEAGUE
 from app.core.config import Settings, get_settings
-from app.db.models import League, Match, MatchStatus, Season
+from app.db.models import IngestionRun, League, Match, MatchOdds, MatchStatus, Season
 from app.db.session import get_db
+from app.probability.engine import INDIVIDUAL_BOOKMAKERS, REFERENCE_BOOKMAKER, _sane_price
 from app.schemas.league import LeagueMatchdaysOut, LeagueOut, MatchdayOut
-from app.schemas.match import MatchResultOut, match_to_result_out
+from app.schemas.match import (
+    MarketOddsOut,
+    MatchResultOut,
+    UpcomingMatchOut,
+    match_to_out,
+    match_to_result_out,
+)
 from app.schemas.season_stats import TeamSeasonStatsOut
 from app.stats.season_stats import (
     compute_league_season_stats,
@@ -194,3 +201,80 @@ def list_league_context_results(
         .all()
     )
     return [match_to_result_out(m) for m in matches]
+
+
+# Mercados con cuota media para partidos por jugar (fixtures.csv y the-odds-api).
+UPCOMING_ODDS_MARKETS = ("1x2", "over_under_2.5")
+ODDS_API_RUN = "the_odds_api.prematch_odds"
+
+
+@router.get("/{league_id}/upcoming", response_model=list[UpcomingMatchOut])
+def list_league_upcoming(
+    league_id: int,
+    days: int = Query(7, ge=1, le=14),
+    db: Session = Depends(get_db),
+) -> list[UpcomingMatchOut]:
+    """Partidos por jugar de los próximos `days` días, los más cercanos
+    primero, con el árbitro si ya está designado y la "Market Average" de 1x2 y
+    más/menos de 2,5 goles (la misma referencia de la web, sin Market Max ni
+    casas concretas), con la fecha y la fuente de la toma."""
+    now = datetime.utcnow()
+    matches = (
+        db.query(Match)
+        .filter(
+            Match.league_id == league_id,
+            Match.status == MatchStatus.SCHEDULED,
+            Match.date >= now - timedelta(hours=3),
+            Match.date <= now + timedelta(days=days),
+        )
+        .options(
+            joinedload(Match.league),
+            joinedload(Match.season),
+            joinedload(Match.home_team),
+            joinedload(Match.away_team),
+        )
+        .order_by(Match.date.asc())
+        .all()
+    )
+    odds_api_runs = [
+        (run.started_at, run.finished_at or run.started_at)
+        for run in db.query(IngestionRun).filter(IngestionRun.source == ODDS_API_RUN)
+    ]
+
+    # Una sola consulta: la media y las casas individuales (para sanearla).
+    # Solo por partido: con mas filtros SQLite elige el indice de mercado y
+    # recorre todas las cuotas historicas (un segundo en vez de milisegundos).
+    wanted = {REFERENCE_BOOKMAKER, *INDIVIDUAL_BOOKMAKERS}
+    odds_by_match: dict[int, list[MatchOdds]] = defaultdict(list)
+    if matches:
+        for row in db.query(MatchOdds).filter(MatchOdds.match_id.in_([m.id for m in matches])):
+            if row.bookmaker in wanted and row.market in UPCOMING_ODDS_MARKETS:
+                odds_by_match[row.match_id].append(row)
+
+    out = []
+    for match in matches:
+        own = odds_by_match[match.id]
+        rows = [r for r in own if r.bookmaker == REFERENCE_BOOKMAKER]
+        item = UpcomingMatchOut(**match_to_out(match).model_dump())
+        if rows:
+            taken = max(r.snapshot_time for r in rows)
+            individual: dict[tuple[str, str], list[float]] = defaultdict(list)
+            for o in own:
+                if o.bookmaker != REFERENCE_BOOKMAKER:
+                    individual[(o.market, o.selection)].append(o.odds)
+            # El mismo saneado que el motor: un agregado disparado respecto a
+            # las casas individuales no se muestra tal cual.
+            item.odds = [
+                MarketOddsOut(
+                    market=r.market,
+                    selection=r.selection,
+                    line=r.line,
+                    odds=_sane_price(r.odds, individual[(r.market, r.selection)]),
+                )
+                for r in rows
+            ]
+            item.odds_taken_at = taken
+            from_odds_api = any(start <= taken <= end for start, end in odds_api_runs)
+            item.odds_source = "the-odds-api.com" if from_odds_api else "Football-Data.co.uk"
+        out.append(item)
+    return out

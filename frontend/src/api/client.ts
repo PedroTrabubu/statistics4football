@@ -17,6 +17,7 @@ import type {
   RiskLevel,
   Team,
   TeamSeasonStats,
+  UpcomingMatch,
 } from "./types";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -68,6 +69,11 @@ export function getLeagueSeasons(leagueId: number): Promise<string[]> {
  * recientes primero. Sin `season`, la mas reciente con partidos jugados. */
 export function getLeagueResults(leagueId: number, season?: string): Promise<MatchResult[]> {
   return request(`/leagues/${leagueId}/results`, { season });
+}
+
+/** Partidos por jugar de los próximos `days` días, con árbitro y cuota media. */
+export function getLeagueUpcoming(leagueId: number, days = 7): Promise<UpcomingMatch[]> {
+  return request(`/leagues/${leagueId}/upcoming`, { days });
 }
 
 /** Solo en la Champions: los partidos de sus equipos en sus ligas esa temporada. */

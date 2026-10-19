@@ -43,6 +43,26 @@ class MatchResultOut(MatchOut):
     away_stats: TeamMatchStatsOut | None
 
 
+class MarketOddsOut(BaseModel):
+    """Una cuota "Market Average" (media de las casas): 1x2 u over_under_2.5."""
+
+    market: str
+    selection: str
+    line: float | None
+    odds: float
+
+
+class UpcomingMatchOut(MatchOut):
+    """Partido por jugar con la cuota media del mercado que ya usa la web
+    ("Market Average"), si la hay, y de cuándo y de dónde es la toma. Para
+    /rachas: la cuota de que una racha siga en el próximo partido."""
+
+    odds: list[MarketOddsOut] = []
+    odds_taken_at: datetime | None = None
+    # "Football-Data.co.uk" (fixtures.csv) o "the-odds-api.com" (refresh_odds.py).
+    odds_source: str | None = None
+
+
 class MatchHistoryOut(BaseModel):
     """Partidos de la liga jugados antes de uno dado (su temporada y la
     anterior), mas recientes primero: el historial con el que el frontend

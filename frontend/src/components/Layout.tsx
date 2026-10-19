@@ -1,7 +1,17 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { MARKET_GROUPS, SIDEBAR_MARKETS, findMarket } from "../lib/markets";
-import { IconBook, IconCheck, IconMatches, IconMenu, IconStats, IconTarget, IconTicket, IconWallet } from "./icons";
+import {
+  IconBook,
+  IconCheck,
+  IconMatches,
+  IconMenu,
+  IconStats,
+  IconStreak,
+  IconTarget,
+  IconTicket,
+  IconWallet,
+} from "./icons";
 import { SiteFooter } from "./SiteFooter";
 
 const NAV_ITEMS = [
@@ -9,6 +19,7 @@ const NAV_ITEMS = [
   { to: "/stats", label: "Clasificación", end: false, icon: IconStats },
   { to: "/picks", label: "Picks", end: false, icon: IconTicket },
   { to: "/picks-probables", label: "Picks probables", end: false, icon: IconCheck },
+  { to: "/rachas", label: "Rachas", end: false, icon: IconStreak },
   { to: "/recommendations", label: "Recomendaciones", end: false, icon: IconTarget },
   { to: "/mis-apuestas", label: "Mis apuestas", end: false, icon: IconWallet },
   { to: "/glosario", label: "Glosario", end: false, icon: IconBook },

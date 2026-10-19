@@ -204,6 +204,25 @@ def test_league_context_results_only_for_champions() -> None:
     assert len({m["season"] for m in matches}) <= 1
 
 
+def test_league_upcoming_only_average_odds() -> None:
+    db = SessionLocal()
+    try:
+        league = db.query(League).filter_by(code="ESP-La Liga").one()
+    finally:
+        db.close()
+
+    response = client.get(f"/leagues/{league.id}/upcoming", params={"days": 14})
+    assert response.status_code == 200
+    matches = response.json()
+    assert all(m["status"] == "scheduled" for m in matches)
+    dates = [m["date"] for m in matches]
+    assert dates == sorted(dates)
+    for m in matches:
+        # Solo la media de 1X2 y más/menos de 2,5 goles, con fecha y fuente de la toma.
+        assert {o["market"] for o in m["odds"]} <= {"1x2", "over_under_2.5"}
+        assert (m["odds_taken_at"] is None) == (not m["odds"]) == (m["odds_source"] is None)
+
+
 def test_team_season_stats_shape() -> None:
     db = SessionLocal()
     try:

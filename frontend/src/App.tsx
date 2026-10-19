@@ -10,6 +10,7 @@ import { PicksHistoryPage } from "./pages/PicksHistoryPage";
 import { PicksPage } from "./pages/PicksPage";
 import { RecommendationsPage } from "./pages/RecommendationsPage";
 import { SeasonStatsPage } from "./pages/SeasonStatsPage";
+import { StreaksPage } from "./pages/StreaksPage";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="arbitros" element={<RefereePage />} />
         <Route path="picks" element={<PicksPage />} />
         <Route path="picks-probables" element={<PicksHistoryPage />} />
+        <Route path="rachas" element={<StreaksPage />} />
         <Route path="recommendations" element={<RecommendationsPage />} />
         <Route path="mis-apuestas" element={<MyBetsPage />} />
         <Route path="glosario" element={<GlossaryPage />} />
