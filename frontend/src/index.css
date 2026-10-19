@@ -4211,6 +4211,36 @@ section[id] {
   font-family: var(--font-body);
 }
 
+/* Pick del partido (docs/PICK_DEL_PARTIDO_PROTOCOLO.md). */
+.match-pick {
+  margin: 0 0 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.match-pick h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+}
+.match-pick p {
+  margin: 0.2rem 0;
+}
+.match-pick-text {
+  font-size: 1.02rem;
+}
+.match-pick-note {
+  margin-top: 0.5rem !important;
+}
+.match-pick-line {
+  margin: 0;
+  cursor: help;
+}
+.match-pick-label {
+  color: var(--muted);
+  font-weight: 600;
+}
 @media (max-width: 400px) {
   .season-stats-table .stats-team .team-crest {
     display: none;

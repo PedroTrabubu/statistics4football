@@ -19,6 +19,7 @@ import type {
   TeamSeasonStats,
   UpcomingMatch,
   PredictabilityData,
+  MatchPicksResponse,
 } from "./types";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -178,6 +179,11 @@ export function getPicksHistory(filters: { league?: string; kind?: string; limit
 /** Indice de predecibilidad precalculado (modelo, indice de cada partido y bandas). */
 export function getPredictability(): Promise<PredictabilityData> {
   return request("/picks/predictability");
+}
+
+/** Pick del partido de varios partidos (el de un jugado, el calculado antes de jugarse). */
+export function getMatchPicks(matchIds: number[]): Promise<MatchPicksResponse> {
+  return request("/picks/match-pick", { match_ids: matchIds.join(",") });
 }
 
 export { ApiError };
