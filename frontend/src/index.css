@@ -4211,6 +4211,100 @@ section[id] {
   font-family: var(--font-body);
 }
 
+/* Picks muy probables: vistas en pestañas y temporada, fijas bajo la barra
+   superior para cambiar de vista sin volver arriba. */
+.picks-toolbar {
+  position: sticky;
+  top: var(--navbar-h);
+  z-index: 15;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  margin: 0 -1.25rem 1.2rem;
+  padding: 0.6rem 1.25rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.picks-tabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.picks-tabs .tab-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.picks-tabs .tab-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.picks-season {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.picks-season select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+}
+.picks-tabs .label-short {
+  display: none;
+}
+@media (max-width: 640px) {
+  .picks-tabs {
+    width: 100%;
+  }
+  .picks-tabs .label-long {
+    display: none;
+  }
+  .picks-tabs .label-short {
+    display: inline;
+  }
+}
+
+/* Historico de picks: aciertos de cada partido y filtro de fuerza. */
+.checked-match-when {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+}
+.checked-match-hits {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.strength-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.8rem;
+}
+.strength-filter .group-chip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.strength-chip-alta {
+  --grp: var(--green);
+}
+.strength-chip-media {
+  --grp: var(--amber);
+}
+.strength-chip-baja {
+  --grp: var(--muted);
+}
+
 /* Pick del partido (docs/PICK_DEL_PARTIDO_PROTOCOLO.md). */
 .match-pick {
   margin: 0 0 1rem;

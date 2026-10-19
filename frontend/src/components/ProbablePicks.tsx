@@ -4,6 +4,8 @@ import type { Match, MatchHistory, MatchResult } from "../api/types";
 import { formatSeason } from "../lib/format";
 import { leagueName } from "../lib/leagues";
 import { cornerDuelForecast } from "../lib/cornerDuel";
+import { PredictabilityChip } from "./Predictability";
+import { MatchPickBlock } from "./MatchPick";
 import {
   cornerDuelPicks,
   evidenceText,
@@ -116,6 +118,12 @@ export function ProbablePicks({
           ? "Partido ya jugado: los picks que se mostraban antes, calculados solo con los partidos anteriores, y si se cumplieron."
           : `Lo que más se ha repetido en los partidos anteriores de cada equipo, y si el rival hace probable que se repita. Como mucho ${MAX_PICKS}, de más a menos fuerza.`}
       </p>
+      {history && (
+        <p className="predictability-line">
+          <PredictabilityChip match={match} picks={picks} history={history.matches} showNote />
+        </p>
+      )}
+      <MatchPickBlock match={match} />
       {played && picks.length > 0 && (
         <p className="picks-played-summary">
           Se cumplieron <strong>{hits}</strong> de {decided}.
