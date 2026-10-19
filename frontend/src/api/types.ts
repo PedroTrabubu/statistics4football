@@ -148,6 +148,38 @@ export interface PredictabilityData {
   >;
 }
 
+/** Pick del partido (docs/PICK_DEL_PARTIDO_PROTOCOLO.md). */
+export interface MatchPick {
+  text: string;
+  family: string;
+  side: string;
+  option: string;
+  /** Tipo (mercado y sentido) para el acierto historico. */
+  kind: string;
+  /** Probabilidad del modelo, encogida hacia la base. */
+  p: number;
+  /** Frecuencia del suceso en la liga. */
+  base: number;
+  n: number;
+  hit: boolean | null;
+}
+
+export interface MatchPickKind {
+  label: string;
+  n: number;
+  hit_rate: number;
+  base: number;
+  edge: number;
+  low: number;
+  high: number;
+}
+
+/** GET /picks/match-pick?match_ids=... */
+export interface MatchPicksResponse {
+  matches: Record<string, { status: "pick" | "none" | "uncalibrated"; pick?: MatchPick | null }>;
+  kinds: Record<string, MatchPickKind>;
+}
+
 /** Partido jugado con las stats de cada equipo (GET /leagues/{id}/results). */
 export interface MatchResult extends Match {
   home_stats: TeamMatchStats | null;
