@@ -1,4 +1,4 @@
-"""Designaciones arbitrales oficiales: lectura de las tres APIs (respuestas
+"""Designaciones arbitrales oficiales: lectura de las cuatro APIs (respuestas
 reales recortadas en tests/fixtures/designations), nombres en el formato de
 la base y reglas al aplicarlas."""
 
@@ -18,11 +18,13 @@ from app.ingestion.designations import (
     LaLigaApi,
     Ligue1Api,
     PremierLeagueApi,
+    UefaApi,
     apply_designations,
     collect_designations,
     laliga_person_name,
     tidy_name,
 )
+from app.ingestion.espn import RefereeNames
 from app.ingestion.referee_overrides import apply_referee_overrides
 
 FIXTURES = Path(__file__).parent / "fixtures" / "designations"
@@ -59,6 +61,9 @@ def fake_get(self, url, params=None):
         return FakeResponse(_load("premier_officials.json")[match_id])
     if "championship-calendar" in url:
         return FakeResponse(_load("ligue1_calendar.json"))
+    if url == f"{des.UEFA_API}/matches":
+        assert params["seasonYear"] == 2027  # UEFA nombra la temporada por su último año
+        return FakeResponse(_load("uefa_matches.json"))
     if "championship-match/" in url:
         return FakeResponse(_load("ligue1_matches.json")[url.rsplit("/", 1)[1]])
     raise AssertionError(f"URL inesperada: {url}")
@@ -120,6 +125,20 @@ def test_ligue1_api_reads_type_1_official_and_tidies_the_name():
     assert by_home["RC Lens"].referee == "Jérémy Stinat"
     # Una jornada fuera de la ventana no se pide.
     assert Ligue1Api().designations(2026, datetime(2027, 1, 1), datetime(2027, 1, 5)) == []
+
+
+
+def test_uefa_api_reads_the_main_referee_with_a_single_first_name():
+    found = UefaApi().designations(2026, datetime(2026, 10, 13), datetime(2026, 10, 21))
+    by_home = {d.home_names[0]: d for d in found}
+    assert by_home["Galatasaray"].referee == "Marco Guida"  # ya jugado: también
+    assert by_home["Galatasaray"].kickoff == datetime(2026, 10, 13, 19)
+    # "José María" + "Sánchez": sin el segundo nombre, que el emparejador tomaría por apellido.
+    assert by_home["Napoli"].referee == "José Sánchez"
+    assert RefereeNames({"J Sánchez Martínez", "J Martínez Munuera"}).canonical("José Sánchez") == "J Sánchez Martínez"
+    assert by_home["Napoli"].away_names[0] == "Bodø/Glimt"
+    assert "Sabah" not in by_home  # solo el cuarto árbitro: aún sin designar
+    assert all(d.source == "uefa" and d.league_code == "INT-Champions League" for d in found)
 
 
 # --- aplicarlas a la base --------------------------------------------------------

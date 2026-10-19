@@ -1,0 +1,193 @@
+[
+ {
+  "id": "2049576",
+  "status": "FINISHED",
+  "kickOffTime": {
+   "dateTime": "2026-10-13T19:00:00Z"
+  },
+  "homeTeam": {
+   "internationalName": "Galatasaray",
+   "translations": {
+    "displayName": {
+     "EN": "Galatasaray"
+    },
+    "displayOfficialName": {
+     "EN": "Galatasaray A.Ş."
+    },
+    "shortName": {
+     "EN": "Galatasaray"
+    }
+   }
+  },
+  "awayTeam": {
+   "internationalName": "Barcelona",
+   "translations": {
+    "displayName": {
+     "EN": "Barcelona"
+    },
+    "displayOfficialName": {
+     "EN": "FC Barcelona"
+    },
+    "shortName": {
+     "EN": "Barcelona"
+    }
+   }
+  },
+  "referees": [
+   {
+    "role": "REFEREE",
+    "person": {
+     "translations": {
+      "firstName": {
+       "EN": "Marco"
+      },
+      "lastName": {
+       "EN": "Guida"
+      },
+      "name": {
+       "EN": "Marco Guida"
+      }
+     }
+    }
+   },
+   {
+    "role": "FOURTH_OFFICIAL",
+    "person": {
+     "translations": {
+      "firstName": {
+       "EN": "Fabio"
+      },
+      "lastName": {
+       "EN": "Maresca"
+      },
+      "name": {
+       "EN": "Fabio Maresca"
+      }
+     }
+    }
+   }
+  ]
+ },
+ {
+  "id": "2049597",
+  "status": "UPCOMING",
+  "kickOffTime": {
+   "dateTime": "2026-10-20T16:45:00Z"
+  },
+  "homeTeam": {
+   "internationalName": "Sabah",
+   "translations": {
+    "displayName": {
+     "EN": "Sabah"
+    },
+    "displayOfficialName": {
+     "EN": "Sabah FC"
+    },
+    "shortName": {
+     "EN": "Sabah"
+    }
+   }
+  },
+  "awayTeam": {
+   "internationalName": "B. Dortmund",
+   "translations": {
+    "displayName": {
+     "EN": "B. Dortmund"
+    },
+    "displayOfficialName": {
+     "EN": "Borussia Dortmund"
+    },
+    "shortName": {
+     "EN": "Dortmund"
+    }
+   }
+  },
+  "referees": [
+   {
+    "role": "FOURTH_OFFICIAL",
+    "person": {
+     "translations": {
+      "firstName": {
+       "EN": "Victor"
+      },
+      "lastName": {
+       "EN": "Garcia Verdura"
+      },
+      "name": {
+       "EN": "Victor Garcia Verdura"
+      }
+     }
+    }
+   }
+  ]
+ },
+ {
+  "id": "2049594",
+  "status": "UPCOMING",
+  "kickOffTime": {
+   "dateTime": "2026-10-20T19:00:00Z"
+  },
+  "homeTeam": {
+   "internationalName": "Napoli",
+   "translations": {
+    "displayName": {
+     "EN": "Napoli"
+    },
+    "displayOfficialName": {
+     "EN": "SSC Napoli"
+    },
+    "shortName": {
+     "EN": "Napoli"
+    }
+   }
+  },
+  "awayTeam": {
+   "internationalName": "Bodø/Glimt",
+   "translations": {
+    "displayName": {
+     "EN": "Bodø/Glimt"
+    },
+    "displayOfficialName": {
+     "EN": "FK Bodø/Glimt"
+    },
+    "shortName": {
+     "EN": "Bodø/Glimt"
+    }
+   }
+  },
+  "referees": [
+   {
+    "role": "REFEREE",
+    "person": {
+     "translations": {
+      "firstName": {
+       "EN": "José María"
+      },
+      "lastName": {
+       "EN": "Sánchez"
+      },
+      "name": {
+       "EN": "José María Sánchez"
+      }
+     }
+    }
+   },
+   {
+    "role": "FOURTH_OFFICIAL",
+    "person": {
+     "translations": {
+      "firstName": {
+       "EN": "Juan"
+      },
+      "lastName": {
+       "EN": "Martínez Munuera"
+      },
+      "name": {
+       "EN": "Juan Martínez Munuera"
+      }
+     }
+    }
+   }
+  ]
+ }
+]
