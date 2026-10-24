@@ -285,6 +285,15 @@
       }
     },
     "compare": "Comparar",
+    "nextCompare": {
+      "button": "Compara partidos de la siguiente jornada",
+      "loading": "Buscando la siguiente jornada...",
+      "empty": "No hay partidos pendientes en esta liga.",
+      "error": "No se pudieron cargar los partidos de la jornada: {{error}}",
+      "hint": "Elige un partido para comparar a sus dos equipos.",
+      "card": "Comparar {{home}} y {{away}}",
+      "noData": "Sin partidos en esta temporada: {{team}}"
+    },
     "average": "{{value}} {{label}}",
     "home": "Local",
     "away": "Visitante",

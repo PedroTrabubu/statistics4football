@@ -1,8 +1,9 @@
-import { type CSSProperties, useEffect, useMemo, useState } from "react";
+import { type CSSProperties, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { getLeagueContextResults, getLeagueResults, getLeagueSeasons, getLeagues } from "../api/client";
 import { LeagueSwitch } from "../components/LeagueSwitch";
+import { NextMatchdayPanel, NextMatchdayToggle } from "../components/NextMatchdayCompare";
 import { PageHero } from "../components/PageHero";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
 import { TeamCrest, TeamName } from "../components/TeamCrest";
@@ -97,6 +98,21 @@ function MarketView({
   const [picked, setPicked] = useState<string[]>([]);
   const toggle = (key: string) =>
     setPicked((now) => (now.includes(key) ? now.filter((k) => k !== key) : [...now, key].slice(-2)));
+  // Siguiente jornada: un partido compara a sus dos equipos de un toque.
+  const [nextOpen, setNextOpen] = useState(false);
+  const nextPanelId = useId();
+  const compareNote = useRef<HTMLParagraphElement>(null);
+  const compareMatch = (keys: string[]) => {
+    setPicked(keys);
+    if (keys.length === 0) return;
+    // Si la comparación queda fuera de la pantalla, se baja hasta ella.
+    requestAnimationFrame(() => {
+      const note = compareNote.current;
+      if (!note || note.getBoundingClientRect().top < window.innerHeight * 0.7) return;
+      const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      note.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    });
+  };
 
   const { data: leagues } = useApi(() => getLeagues(), []);
 
@@ -318,7 +334,21 @@ function MarketView({
             </button>
           </div>
         )}
+        {mode === "team" && (
+          <NextMatchdayToggle open={nextOpen} panelId={nextPanelId} onToggle={() => setNextOpen((v) => !v)} />
+        )}
       </div>
+
+      {mode === "team" && nextOpen && (
+        <NextMatchdayPanel
+          id={nextPanelId}
+          leagueId={leagueId}
+          leagueCode={leagueCode}
+          available={new Set(rows.map((r) => r.group.key))}
+          picked={comparing}
+          onCompare={compareMatch}
+        />
+      )}
 
       {leagueRate && leagueRate.pct !== null && (
         <p className="small muted market-league-rate">
@@ -362,7 +392,7 @@ function MarketView({
       )}
 
       {comparing.length > 0 && (
-        <p className="small market-compare-note">
+        <p className="small market-compare-note" ref={compareNote}>
           {comparing.length === 2
             ? t("markets:page.comparing", {
                 first: rows.find((r) => r.group.key === comparing[0])!.group.name,
