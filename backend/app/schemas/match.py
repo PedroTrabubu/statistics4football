@@ -79,6 +79,16 @@ class MatchHistoryOut(BaseModel):
     context: list[MatchResultOut] = []
 
 
+class MatchRecentOut(BaseModel):
+    """Los partidos de la ficha uno a uno, mas recientes primero: los
+    enfrentamientos directos previos (todas las temporadas) y los ultimos de
+    cada equipo. Mismas competiciones que la forma reciente de /stats."""
+
+    h2h: list[MatchResultOut]
+    home: list[MatchResultOut]
+    away: list[MatchResultOut]
+
+
 class MatchRefereeStatsOut(BaseModel):
     referee: str | None
     referee_scope: str

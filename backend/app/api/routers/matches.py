@@ -10,10 +10,17 @@ from app.core.config import Settings, get_settings
 from app.db.models import Match, MatchStatus, Season
 from app.db.session import get_db
 from app.probability.engine import generate_predictions_for_match, get_cached_league_model
-from app.schemas.match import MatchHistoryOut, MatchOut, MatchRefereeStatsOut, match_to_out, match_to_result_out
+from app.schemas.match import (
+    MatchHistoryOut,
+    MatchOut,
+    MatchRecentOut,
+    MatchRefereeStatsOut,
+    match_to_out,
+    match_to_result_out,
+)
 from app.schemas.prediction import PredictionOut
 from app.schemas.stats import MatchFeaturesOut
-from app.stats.features import compute_match_features
+from app.stats.features import compute_match_features, excluded_leagues
 
 router = APIRouter(prefix="/matches", tags=["matches"])
 
@@ -168,6 +175,62 @@ def get_match_history(match_id: int, db: Session = Depends(get_db)) -> MatchHist
         matches=[match_to_result_out(m) for m in rows],
         played=played,
         context=[match_to_result_out(m) for m in context],
+    )
+
+
+# Enfrentamientos directos que se listan, de todas las temporadas.
+RECENT_H2H = 10
+# Ultimos partidos de cada equipo: el doble de los que se muestran, para que
+# al filtrar los del local en casa (o los del visitante fuera) sigan saliendo.
+RECENT_TEAM = 20
+
+
+@router.get("/{match_id}/recent", response_model=MatchRecentOut)
+def get_match_recent(match_id: int, db: Session = Depends(get_db)) -> MatchRecentOut:
+    """Enfrentamientos directos previos y ultimos partidos de cada equipo, uno
+    a uno. Point-in-time y con las competiciones de la forma reciente (en una
+    liga, sin la Champions; ver `excluded_leagues`), en cualquier temporada."""
+    match = _get_match_or_404(db, match_id)
+    skip = excluded_leagues(db, match)
+
+    def played_before() -> SAQuery:
+        return (
+            db.query(Match)
+            .filter(
+                Match.status == MatchStatus.HISTORICAL,
+                Match.date < match.date,
+                Match.league_id.notin_(skip),
+            )
+            .options(
+                joinedload(Match.league),
+                joinedload(Match.season),
+                joinedload(Match.home_team),
+                joinedload(Match.away_team),
+                selectinload(Match.team_stats),
+            )
+            .order_by(Match.date.desc())
+        )
+
+    def team_matches(team_id: int) -> list:
+        rows = (
+            played_before()
+            .filter(or_(Match.home_team_id == team_id, Match.away_team_id == team_id))
+            .limit(RECENT_TEAM)
+            .all()
+        )
+        return [match_to_result_out(m) for m in rows]
+
+    pair = (match.home_team_id, match.away_team_id)
+    h2h = (
+        played_before()
+        .filter(Match.home_team_id.in_(pair), Match.away_team_id.in_(pair))
+        .limit(RECENT_H2H)
+        .all()
+    )
+    return MatchRecentOut(
+        h2h=[match_to_result_out(m) for m in h2h],
+        home=team_matches(match.home_team_id),
+        away=team_matches(match.away_team_id),
     )
 
 

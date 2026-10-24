@@ -319,6 +319,44 @@ def test_match_history_404_for_unknown_match() -> None:
     assert client.get("/matches/999999999/history").status_code == 404
 
 
+def test_match_recent_is_point_in_time_and_only_both_teams() -> None:
+    db = SessionLocal()
+    try:
+        match = (
+            db.query(Match)
+            .filter(
+                Match.status == MatchStatus.HISTORICAL,
+                Match.league.has(League.code != "INT-Champions League"),
+            )
+            .order_by(Match.date.desc())
+            .first()
+        )
+        assert match is not None
+        match_id, match_date = match.id, match.date.isoformat()
+        home_id, away_id = match.home_team_id, match.away_team_id
+    finally:
+        db.close()
+
+    response = client.get(f"/matches/{match_id}/recent")
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body["home"]) > 0 and len(body["away"]) > 0
+    for key in ("h2h", "home", "away"):
+        assert all(m["date"] < match_date and m["id"] != match_id for m in body[key])
+        assert all(m["status"] == "historical" for m in body[key])
+        dates = [m["date"] for m in body[key]]
+        assert dates == sorted(dates, reverse=True)
+    assert all({m["home_team_id"], m["away_team_id"]} == {home_id, away_id} for m in body["h2h"])
+    assert all(home_id in (m["home_team_id"], m["away_team_id"]) for m in body["home"])
+    assert all(away_id in (m["home_team_id"], m["away_team_id"]) for m in body["away"])
+    # En una liga la Champions no cuenta, como en la forma reciente.
+    assert all(m["league_code"] != "INT-Champions League" for key in ("h2h", "home", "away") for m in body[key])
+
+
+def test_match_recent_404_for_unknown_match() -> None:
+    assert client.get("/matches/999999999/recent").status_code == 404
+
+
 def test_large_responses_are_gzipped() -> None:
     db = SessionLocal()
     try:
