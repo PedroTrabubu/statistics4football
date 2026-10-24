@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import type { League } from "../api/types";
+import { t } from "../i18n";
 
 /** LaLiga siempre primero y seleccionada por defecto. */
 export const DEFAULT_LEAGUE_CODE = "ESP-La Liga";
@@ -8,33 +9,40 @@ export const DEFAULT_LEAGUE_CODE = "ESP-La Liga";
  * mercado (ver backend/app/ingestion/champions.py). */
 export const CHAMPIONS_LEAGUE_CODE = "INT-Champions League";
 
-/** `short`: el nombre en los botones de liga en movil, donde no cabe el entero. */
-const DISPLAY: Record<string, { name: string; short: string; country: string }> = {
-  "ESP-La Liga": { name: "LaLiga", short: "LaLiga", country: "España" },
-  "ENG-Premier League": { name: "Premier League", short: "Premier", country: "Inglaterra" },
-  "ESP-La Liga 2": { name: "LaLiga Hypermotion", short: "Hypermotion", country: "España" },
-  "FRA-Ligue 1": { name: "Ligue 1", short: "Ligue 1", country: "Francia" },
-  "GER-Bundesliga": { name: "Bundesliga", short: "Bundesliga", country: "Alemania" },
-  "ITA-Serie A": { name: "Serie A", short: "Serie A", country: "Italia" },
-  "INT-Champions League": { name: "Champions League", short: "Champions", country: "Europa" },
+/** `short`: el nombre en los botones de liga en movil, donde no cabe el entero.
+ * Los nombres son propios y no se traducen, salvo los que tienen `key` (sus
+ * textos en common:league.<key>); el pais es una clave de common:country. */
+const DISPLAY: Record<string, { name: string; short: string; country: string; key?: string }> = {
+  "ESP-La Liga": { name: "LaLiga", short: "LaLiga", country: "spain" },
+  "ENG-Premier League": { name: "Premier League", short: "Premier", country: "england" },
+  "ESP-La Liga 2": { name: "LaLiga Hypermotion", short: "Hypermotion", country: "spain" },
+  "FRA-Ligue 1": { name: "Ligue 1", short: "Ligue 1", country: "france" },
+  "GER-Bundesliga": { name: "Bundesliga", short: "Bundesliga", country: "germany" },
+  "ITA-Serie A": { name: "Serie A", short: "Serie A", country: "italy" },
+  "INT-Champions League": { name: "Champions League", short: "Champions", country: "europe", key: "championsLeague" },
   // De contexto: solo aparecen en el historial de los equipos de Champions.
-  "POR-Primeira Liga": { name: "Primeira Liga", short: "Primeira", country: "Portugal" },
-  "NED-Eredivisie": { name: "Eredivisie", short: "Eredivisie", country: "Países Bajos" },
-  "BEL-Pro League": { name: "Pro League", short: "Pro League", country: "Bélgica" },
-  "TUR-Super Lig": { name: "Süper Lig", short: "Süper Lig", country: "Turquía" },
-  "GRE-Super League": { name: "Super League", short: "Super League", country: "Grecia" },
+  "POR-Primeira Liga": { name: "Primeira Liga", short: "Primeira", country: "portugal" },
+  "NED-Eredivisie": { name: "Eredivisie", short: "Eredivisie", country: "netherlands" },
+  "BEL-Pro League": { name: "Pro League", short: "Pro League", country: "belgium" },
+  "TUR-Super Lig": { name: "Süper Lig", short: "Süper Lig", country: "turkey" },
+  "GRE-Super League": { name: "Super League", short: "Super League", country: "greece" },
 };
 
 export function leagueName(code: string): string {
-  return DISPLAY[code]?.name ?? code;
+  const display = DISPLAY[code];
+  if (!display) return code;
+  return display.key ? t(`common:league.${display.key}.name`) : display.name;
 }
 
 export function leagueShortName(code: string): string {
-  return DISPLAY[code]?.short ?? leagueName(code);
+  const display = DISPLAY[code];
+  if (!display) return leagueName(code);
+  return display.key ? t(`common:league.${display.key}.short`) : display.short;
 }
 
 export function leagueCountry(code: string): string | null {
-  return DISPLAY[code]?.country ?? null;
+  const country = DISPLAY[code]?.country;
+  return country ? t(`common:country.${country}`) : null;
 }
 
 /** Orden de las ligas en toda la web. Una que no esté aquí va al final, por nombre. */
@@ -71,7 +79,7 @@ export function onlyValidated(
   return {
     leagues: validated,
     code: code === null || validated.some((l) => l.code === code) ? code : null,
-    pending: pending.length ? `Aún sin validar: ${pending.join(", ")}.` : null,
+    pending: pending.length ? t("common:league.pendingValidation", { leagues: pending.join(", ") }) : null,
   };
 }
 

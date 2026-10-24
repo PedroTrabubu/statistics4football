@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { getMatchRefereeStats } from "../api/client";
 import type { Match, MatchResult, RefereeScope } from "../api/types";
-import { formatSeason } from "../lib/format";
+import { t } from "../i18n";
+import { formatFixed, formatLine, formatSeason, withPercent } from "../lib/format";
 import {
   average,
   bookingPoints,
@@ -49,32 +51,35 @@ const eachOver = (a: Pick, b: Pick, line: number): Hit => (v) => {
   return x === null || y === null ? null : x > line && y > line;
 };
 
+/** `key`: su titulo, en matches:referee.section. Cada linea, "Más de X". */
 interface LineSection {
-  title: string;
-  lines: { label: string; hit: Hit }[];
+  key: string;
+  lines: { line: number; hit: Hit }[];
 }
 
 const SECTIONS: LineSection[] = [
   {
-    title: "Puntos de tarjeta del partido",
-    lines: [15, 25, 35, 45, 55, 65].map((line) => ({ label: `Más de ${line}`, hit: over(pointsTotal, line) })),
+    key: "pointsMatch",
+    lines: [15, 25, 35, 45, 55, 65].map((line) => ({ line, hit: over(pointsTotal, line) })),
   },
   {
-    title: "Puntos de tarjeta de cada equipo",
+    key: "pointsEach",
     lines: [5, 15, 25].map((line) => ({
-      label: `Más de ${line}`,
+      line,
       hit: eachOver(pointsFor, pointsAgainst, line),
     })),
   },
   {
-    title: "Tarjetas del partido",
-    lines: [1.5, 2.5, 3.5, 4.5, 5.5, 6.5].map((line) => ({ label: `Más de ${line}`, hit: over(cardsTotal, line) })),
+    key: "cardsMatch",
+    lines: [1.5, 2.5, 3.5, 4.5, 5.5, 6.5].map((line) => ({ line, hit: over(cardsTotal, line) })),
   },
   {
-    title: "Tarjetas de cada equipo",
-    lines: [0.5, 1.5, 2.5].map((line) => ({ label: `Más de ${line}`, hit: eachOver(cardsFor, cardsAgainst, line) })),
+    key: "cardsEach",
+    lines: [0.5, 1.5, 2.5].map((line) => ({ line, hit: eachOver(cardsFor, cardsAgainst, line) })),
   },
 ];
+
+const overLabel = (line: number) => t("markets:option.over", { line: formatLine(line) });
 
 interface Column {
   key: string;
@@ -97,6 +102,7 @@ function teamViews(matches: MatchResult[], teamId: number, onlyVenue: "home" | "
  * repetido) y, plegadas, las medias y los % de cada linea. `history`: la
  * liga, para descartar lo que pasa casi siempre. */
 export function RefereePanel({ match, history }: { match: Match; history?: MatchResult[] | null }) {
+  const { t } = useTranslation();
   // Todas las temporadas por defecto: en una sola, el arbitro rara vez ha
   // pitado 3 partidos a un mismo equipo y no habria hechos que contar.
   const [refereeScope, setRefereeScope] = useState<RefereeScope>("all");
@@ -112,36 +118,31 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
   );
 
   if (!match.referee) {
-    return (
-      <p className="muted">
-        Árbitro aún no designado. Suele anunciarse 2 o 3 días antes del partido; aparecerá aquí en cuanto se
-        sincronicen los partidos.
-      </p>
-    );
+    return <p className="muted">{t("matches:referee.notDesignated")}</p>;
   }
 
-  if (loading && !data) return <LoadingView label="Cargando estadísticas del árbitro..." />;
-  if (error) return <ErrorView message={`No se pudieron cargar las estadísticas del árbitro: ${error}`} />;
+  if (loading && !data) return <LoadingView label={t("matches:referee.loading")} />;
+  if (error) return <ErrorView message={t("matches:referee.error", { error })} />;
   if (!data) return null;
 
   const venue = teamScope === "venue";
   const columns: Column[] = [
     {
       key: "referee",
-      label: `Árbitro (${match.referee})`,
+      label: t("matches:referee.column.referee", { name: match.referee }),
       views: data.referee_matches.map((m) => viewFrom(m, "home")).filter((v): v is TeamMatchView => v !== null),
       isReferee: true,
     },
     {
       key: "home",
-      label: venue ? `${match.home_team} (local)` : match.home_team,
+      label: venue ? t("matches:referee.column.home", { team: match.home_team }) : match.home_team,
       team: match.home_team,
       views: teamViews(data.home_matches, match.home_team_id, venue ? "home" : null),
       isReferee: false,
     },
     {
       key: "away",
-      label: venue ? `${match.away_team} (visitante)` : match.away_team,
+      label: venue ? t("matches:referee.column.away", { team: match.away_team }) : match.away_team,
       team: match.away_team,
       views: teamViews(data.away_matches, match.away_team_id, venue ? "away" : null),
       isReferee: false,
@@ -149,12 +150,12 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
   ];
 
   const averageRows: { label: string; pick: Pick; teamOnly: boolean; sub: boolean }[] = [
-    { label: "Puntos de tarjeta", pick: pointsTotal, teamOnly: false, sub: false },
-    { label: "A favor", pick: pointsFor, teamOnly: true, sub: true },
-    { label: "En contra", pick: pointsAgainst, teamOnly: true, sub: true },
-    { label: "Tarjetas", pick: cardsTotal, teamOnly: false, sub: false },
-    { label: "A favor", pick: cardsFor, teamOnly: true, sub: true },
-    { label: "En contra", pick: cardsAgainst, teamOnly: true, sub: true },
+    { label: t("matches:referee.average.bookingPoints"), pick: pointsTotal, teamOnly: false, sub: false },
+    { label: t("matches:referee.average.for"), pick: pointsFor, teamOnly: true, sub: true },
+    { label: t("matches:referee.average.against"), pick: pointsAgainst, teamOnly: true, sub: true },
+    { label: t("matches:referee.average.cards"), pick: cardsTotal, teamOnly: false, sub: false },
+    { label: t("matches:referee.average.for"), pick: cardsFor, teamOnly: true, sub: true },
+    { label: t("matches:referee.average.against"), pick: cardsAgainst, teamOnly: true, sub: true },
   ];
 
   const seasonLabel = formatSeason(match.season);
@@ -163,40 +164,44 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
   return (
     <div className="referee-panel">
       <p className="referee-summary">
-        <strong>{refereeSample}</strong> partido{refereeSample === 1 ? "" : "s"} anterior{refereeSample === 1 ? "" : "es"} de{" "}
-        {match.referee} en {refereeScope === "season" ? `la temporada ${seasonLabel}` : "esta liga, todas las temporadas"}.
+        <Trans
+          i18nKey={refereeScope === "season" ? "matches:referee.summary.season" : "matches:referee.summary.all"}
+          count={refereeSample}
+          values={{ name: match.referee, season: seasonLabel }}
+          components={{ bold: <strong /> }}
+        />
       </p>
       <div className="filters">
-        <div className="tab-group" role="group" aria-label="Partidos del árbitro">
+        <div className="tab-group" role="group" aria-label={t("matches:referee.refereeScope")}>
           <button
             type="button"
             className={refereeScope === "season" ? "tab-button tab-button-active" : "tab-button"}
             onClick={() => setRefereeScope("season")}
           >
-            Árbitro: temporada {seasonLabel}
+            {t("matches:referee.scopeSeason", { season: seasonLabel })}
           </button>
           <button
             type="button"
             className={refereeScope === "all" ? "tab-button tab-button-active" : "tab-button"}
             onClick={() => setRefereeScope("all")}
           >
-            Árbitro: todas las temporadas
+            {t("matches:referee.scopeAll")}
           </button>
         </div>
-        <div className="tab-group" role="group" aria-label="Partidos de los equipos">
+        <div className="tab-group" role="group" aria-label={t("matches:referee.teamScope")}>
           <button
             type="button"
             className={teamScope === "all" ? "tab-button tab-button-active" : "tab-button"}
             onClick={() => setTeamScope("all")}
           >
-            Todos sus partidos
+            {t("matches:referee.teamAll")}
           </button>
           <button
             type="button"
             className={teamScope === "venue" ? "tab-button tab-button-active" : "tab-button"}
             onClick={() => setTeamScope("venue")}
           >
-            Local / Visitante
+            {t("matches:referee.teamVenue")}
           </button>
         </div>
       </div>
@@ -204,20 +209,23 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
       {refereeSample < LOW_SAMPLE && (
         <p className="small muted intro-note">
           {refereeSample === 0
-            ? `No hay partidos anteriores de ${match.referee} con datos en ${refereeScope === "season" ? `la temporada ${seasonLabel}` : "esta liga"}.`
-            : `Solo ${refereeSample} partido${refereeSample === 1 ? "" : "s"} anterior${refereeSample === 1 ? "" : "es"} de ${match.referee}: muestra pequeña, tómalo como orientativo.`}
-          {refereeScope === "season" && " Prueba con «todas las temporadas»."}
+            ? t(refereeScope === "season" ? "matches:referee.noneSeason" : "matches:referee.noneLeague", {
+                name: match.referee,
+                season: seasonLabel,
+              })
+            : t("matches:referee.few", { count: refereeSample, name: match.referee })}
+          {refereeScope === "season" && ` ${t("matches:referee.tryAllSeasons")}`}
         </p>
       )}
 
       <RefereeFacts facts={facts} league={match.league_code} venueOnly={venue} />
 
       <details className="referee-details">
-        <summary>Ver todas las medias y líneas del árbitro</summary>
+        <summary>{t("matches:referee.details")}</summary>
         <div className="referee-tables">
           <div className="table-scroll">
             <table className="predictions-table referee-table">
-              <caption>Medias por partido</caption>
+              <caption>{t("matches:referee.averagesCaption")}</caption>
               <thead>
                 <tr>
                   <th></th>
@@ -230,7 +238,7 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
               </thead>
               <tbody>
                 <tr>
-                  <td>Partidos</td>
+                  <td>{t("matches:referee.matches")}</td>
                   {columns.map((c) => (
                     <td key={c.key} className="num">
                       {c.views.length}
@@ -244,7 +252,7 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
                       const value = row.teamOnly && c.isReferee ? null : average(c.views, row.pick);
                       return (
                         <td key={c.key} className="num">
-                          {value === null ? "" : value.toFixed(1)}
+                          {value === null ? "" : formatFixed(value, 1)}
                         </td>
                       );
                     })}
@@ -256,7 +264,7 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
 
           <div className="table-scroll">
             <table className="predictions-table referee-table">
-              <caption>% de partidos que superan cada línea</caption>
+              <caption>{t("matches:referee.linesCaption")}</caption>
               <thead>
                 <tr>
                   <th></th>
@@ -269,12 +277,12 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
               </thead>
               <tbody>
                 {SECTIONS.map((section) => [
-                  <tr key={section.title} className="referee-section">
-                    <td colSpan={columns.length + 1}>{section.title}</td>
+                  <tr key={section.key} className="referee-section">
+                    <td colSpan={columns.length + 1}>{t(`matches:referee.section.${section.key}`)}</td>
                   </tr>,
                   ...section.lines.map((line) => (
-                    <tr key={`${section.title}-${line.label}`}>
-                      <td className="referee-line">{line.label}</td>
+                    <tr key={`${section.key}-${line.line}`}>
+                      <td className="referee-line">{overLabel(line.line)}</td>
                       {columns.map((c) => (
                         <td key={c.key}>
                           <LineCell views={c.views} hit={line.hit} />
@@ -288,11 +296,7 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
           </div>
         </div>
 
-        <p className="small muted">
-          Solo partidos anteriores a este. Los equipos, en la temporada {seasonLabel}. Puntos de tarjeta: amarilla =
-          10, roja = 25 (aproximado: la fuente no distingue una roja directa de una segunda amarilla). «Cada equipo» =
-          los dos equipos superan la línea. Racha = partidos seguidos, desde el más reciente, en los que se superó.
-        </p>
+        <p className="small muted">{t("matches:referee.footnote", { season: seasonLabel })}</p>
       </details>
     </div>
   );
@@ -300,14 +304,12 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
 
 /** Lo que ya ha pasado con este arbitro en los partidos de cada equipo. */
 function RefereeFacts({ facts, league, venueOnly }: { facts: RefereeFact[]; league: string; venueOnly: boolean }) {
+  const { t } = useTranslation();
   return (
     <div className="referee-facts">
-      <h3>Con estos equipos</h3>
+      <h3>{t("matches:referee.factsTitle")}</h3>
       {facts.length === 0 ? (
-        <p className="muted">
-          Este árbitro no tiene aún suficientes partidos con estos equipos para destacar patrones
-          {venueOnly ? " jugando en el mismo campo que hoy" : ""}.
-        </p>
+        <p className="muted">{t(venueOnly ? "matches:referee.factsNoneVenue" : "matches:referee.factsNone")}</p>
       ) : (
         <ul className="referee-fact-list">
           {facts.map((fact) => (
@@ -316,11 +318,14 @@ function RefereeFacts({ facts, league, venueOnly }: { facts: RefereeFact[]; leag
               <div>
                 <p className="referee-fact-text">{refereeFactText(fact)}</p>
                 <p className="small muted referee-fact-meta">
-                  {fact.smallSample && <span className="fact-small">Muestra pequeña: tómalo como orientativo.</span>}
+                  {fact.smallSample && <span className="fact-small">{t("matches:referee.smallSample")}</span>}
                   {fact.refereeAverage && (
                     <span>
-                      Media del árbitro en sus {fact.refereeAverage.matches} partidos: {fact.refereeAverage.value.toFixed(1)}{" "}
-                      {fact.refereeAverage.label}.
+                      {t("matches:referee.refereeAverage", {
+                        count: fact.refereeAverage.matches,
+                        value: formatFixed(fact.refereeAverage.value, 1),
+                        label: fact.refereeAverage.label,
+                      })}
                     </span>
                   )}
                 </p>
@@ -343,18 +348,19 @@ function ColumnLabel({ column, league }: { column: Column; league: string }) {
 }
 
 function LineCell({ views, hit }: { views: TeamMatchView[]; hit: Hit }) {
+  const { t } = useTranslation();
   const rate = hitRate(views, { hit });
   if (rate.pct === null) return <span className="muted">—</span>;
 
   const pct = Math.round(rate.pct * 100);
   const run = streak(views, hit);
   return (
-    <div className={rate.total < LOW_SAMPLE ? "line-cell rate-low" : "line-cell"} title={`${rate.hits} de ${rate.total} partidos`}>
+    <div className={rate.total < LOW_SAMPLE ? "line-cell rate-low" : "line-cell"} title={t("matches:referee.lineTitle", { hits: rate.hits, count: rate.total })}>
       <div className="line-bar">
         <div className="line-bar-fill" style={{ width: `${pct}%` }} />
-        <span className="line-bar-label">{pct}%</span>
+        <span className="line-bar-label">{withPercent(String(pct))}</span>
       </div>
-      {run >= MIN_STREAK && <span className="line-streak">racha de {run}</span>}
+      {run >= MIN_STREAK && <span className="line-streak">{t("matches:referee.streak", { n: run })}</span>}
     </div>
   );
 }

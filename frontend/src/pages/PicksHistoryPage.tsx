@@ -1,17 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { PageHero } from "../components/PageHero";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   getLeagueMatchdays,
   getLeagueResults,
   getLeagueSeasons,
+  getLeagueUpcoming,
   getLeagues,
   getMatches,
 } from "../api/client";
 import type { Match, MatchdayInfo, MatchResult } from "../api/types";
+import { DayTabs } from "../components/DayTabs";
+import { t } from "../i18n";
 import { LeagueSwitch } from "../components/LeagueSwitch";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
 import { MatchTeams, TeamCrest, TeamName } from "../components/TeamCrest";
-import { formatDateRange, formatDateTime, formatSeason } from "../lib/format";
+import { formatDateRange, formatDateTime, formatFixed, formatSeason, joinParts, parseApiDate, withPercent } from "../lib/format";
+import { DAYS_AHEAD, dayKey, upcomingDays } from "../lib/streaks";
 import {
   DEFAULT_LEAGUE_CODE,
   leagueName,
@@ -22,6 +28,8 @@ import {
 import {
   MIN_TEAM_PICKS,
   rankTeams,
+  strengthKey,
+  strengthLabel,
   summarizeByStrength,
   summarizeByTeam,
   summarizePicks,
@@ -49,37 +57,28 @@ import { MatchPickLine } from "../components/MatchPick";
 import { useMatchPicks } from "../lib/matchPick";
 import type { MatchPicksResponse } from "../api/types";
 
-const STRENGTH_LABEL: Record<Strength, string> = {
-  alta: "Fuerza alta",
-  media: "Fuerza media",
-  baja: "Fuerza baja",
-};
 const STRENGTHS: Strength[] = ["alta", "media", "baja"];
-const STRENGTH_SHORT: Record<Strength, string> = {
-  alta: "Alta",
-  media: "Media",
-  baja: "Baja",
-};
 const pct = (x: number | null) =>
-  x === null ? "—" : `${Math.round(x * 100)} %`;
+  x === null ? "—" : withPercent(String(Math.round(x * 100)));
 
 type View = "proxima" | "jornadas" | "resumen" | "equipos";
 
 /** ?temporada=todas: el resumen y la tabla por equipo de todas las temporadas. */
 const ALL_SEASONS = "todas";
 
-/** `short`: en movil, para que quepan las cuatro. */
-const VIEWS: { key: View; label: string; short: string }[] = [
-  { key: "proxima", label: "Próxima jornada", short: "Próxima" },
-  { key: "jornadas", label: "Jornadas jugadas", short: "Jugadas" },
-  { key: "resumen", label: "Resumen", short: "Resumen" },
-  { key: "equipos", label: "Tabla de aciertos", short: "Equipos" },
+/** Sus textos, en picks:probablePage.view.<clave> (label y, en movil, short). */
+const VIEWS: { key: View; text: string }[] = [
+  { key: "proxima", text: "next" },
+  { key: "jornadas", text: "played" },
+  { key: "resumen", text: "summary" },
+  { key: "equipos", text: "teams" },
 ];
 
 /** Picks muy probables de una liga: los de la proxima jornada (los mismos que
  * en la ficha de cada partido) y, de las jornadas jugadas, si se cumplieron.
  * Liga, temporada, vista y jornada van en la URL (?liga=&temporada=&vista=&jornada=). */
 export function PicksHistoryPage() {
+  const { t } = useTranslation();
   const { data: leagues } = useApi(() => getLeagues(), []);
   const [storedCode, setStoredCode] = useSelectedLeagueCode();
   const [params, setParams] = useSearchParams();
@@ -244,9 +243,32 @@ export function PicksHistoryPage() {
       : nextHistoryApi.data?.key === nextKey
         ? nextHistoryApi.data.history
         : null;
-  const nextList = nextMatches.data?.every((m) => m.league_id === league?.id)
+  const jornadaList = nextMatches.data?.every((m) => m.league_id === league?.id)
     ? nextMatches.data
     : null;
+  // Y los de los proximos dias, como en Rachas, aunque sean de la jornada
+  // siguiente: asi cada pestaña de dia tiene todos sus partidos. Solo los de la
+  // temporada de la jornada, que es la del historial cargado. Si fallan, la
+  // jornada sola.
+  const week = useApi(
+    () => (league ? getLeagueUpcoming(league.id, DAYS_AHEAD) : Promise.resolve(null)),
+    [league?.id],
+  );
+  const weekList = useMemo(
+    () =>
+      week.data?.every((m) => m.league_id === league?.id)
+        ? week.data.filter((m) => m.season === nextSeason)
+        : week.error
+          ? []
+          : null,
+    [week.data, week.error, league?.id, nextSeason],
+  );
+  const nextList = useMemo(() => {
+    if (!jornadaList || !weekList) return null;
+    const byId = new Map<number, Match>();
+    for (const m of [...jornadaList, ...weekList]) byId.set(m.id, m);
+    return [...byId.values()];
+  }, [jornadaList, weekList]);
   const upcoming = useMemo(
     () =>
       nextList && nextHistory ? upcomingPicks(nextList, nextHistory) : null,
@@ -265,6 +287,10 @@ export function PicksHistoryPage() {
   const strength = STRENGTHS.includes(fuerzaParam as Strength)
     ? (fuerzaParam as Strength)
     : null;
+  // ?dia=2026-10-24: uno de los proximos dias; cualquier otro, todos.
+  const days = useMemo(() => upcomingDays(), []);
+  const diaParam = params.get("dia");
+  const day = diaParam && days.includes(diaParam) ? diaParam : null;
 
   // Al cambiar de vista con la pagina bajada, se vuelve al principio del
   // contenido. La posicion sale de un marcador justo antes de la barra: la de
@@ -289,13 +315,7 @@ export function PicksHistoryPage() {
 
   return (
     <div>
-      <h1>Picks muy probables</h1>
-      <p className="page-lead">
-        Los de la próxima jornada, los mismos que salen en la ficha de cada
-        partido. Y, de cada partido ya jugado, los que se mostraban antes de
-        jugarse, calculados solo con los partidos anteriores, y si se
-        cumplieron.
-      </p>
+      <PageHero eyebrow={leagueName(leagueCode)} title={t("picks:probablePage.title")} lead={<p>{t("picks:probablePage.lead")}</p>} />
 
       <LeagueSwitch
         leagues={leagues}
@@ -305,7 +325,7 @@ export function PicksHistoryPage() {
 
       <div ref={anchor} />
       <div className="picks-toolbar">
-        <div className="tab-group picks-tabs" role="tablist" aria-label="Vista">
+        <div className="tab-group picks-tabs" role="tablist" aria-label={t("picks:probablePage.viewLabel")}>
           {VIEWS.map((v) => (
             <button
               key={v.key}
@@ -315,7 +335,7 @@ export function PicksHistoryPage() {
               disabled={v.key === "proxima" && noNext}
               title={
                 v.key === "proxima" && noNext
-                  ? "No hay partidos pendientes en esta liga"
+                  ? t("picks:probablePage.noPending")
                   : undefined
               }
               className={
@@ -323,14 +343,14 @@ export function PicksHistoryPage() {
               }
               onClick={() => changeView(v.key)}
             >
-              <span className="label-long">{v.label}</span>
-              <span className="label-short">{v.short}</span>
+              <span className="label-long">{t(`picks:probablePage.view.${v.text}.label`)}</span>
+              <span className="label-short">{t(`picks:probablePage.view.${v.text}.short`)}</span>
             </button>
           ))}
         </div>
         {history && seasons && season && (
           <label className="picks-season">
-            <span>Temporada</span>
+            <span>{t("picks:probablePage.season")}</span>
             <select
               value={allSeasons ? ALL_SEASONS : season}
               onChange={(e) =>
@@ -342,12 +362,11 @@ export function PicksHistoryPage() {
               }
             >
               {view !== "jornadas" && (
-                <option value={ALL_SEASONS}>Todas las temporadas</option>
+                <option value={ALL_SEASONS}>{t("picks:probablePage.allSeasons")}</option>
               )}
               {seasons.map((s, i) => (
                 <option key={s} value={s}>
-                  {formatSeason(s)}
-                  {i === 0 ? " (actual)" : ""}
+                  {i === 0 ? t("picks:probablePage.seasonCurrent", { season: formatSeason(s) }) : formatSeason(s)}
                 </option>
               ))}
             </select>
@@ -367,32 +386,32 @@ export function PicksHistoryPage() {
           history={nextHistory}
           strength={strength}
           onStrength={(level) => setParam({ fuerza: level })}
+          days={days}
+          day={day}
+          onDay={(d) => setParam({ dia: d })}
         />
       )}
       {view === "proxima" && nextInfo === null && (
-        <LoadingView label="Buscando la próxima jornada..." />
+        <LoadingView label={t("picks:probablePage.searchingNext")} />
       )}
 
       {history && !allSeasons && !previous && seasons && (
-        <p className="small muted">
-          Primera temporada con datos: los patrones solo pueden usar esta
-          temporada.
-        </p>
+        <p className="small muted">{t("picks:probablePage.firstSeason")}</p>
       )}
       {history && shownError && (
-        <ErrorView message={`No se pudo conectar con la API: ${shownError}`} />
+        <ErrorView message={t("common:error.api", { error: shownError })} />
       )}
       {history && !shownError && !shown.results && (
         <LoadingView
           label={
             shown.total
-              ? `Comprobando partidos${allSeasons ? " de todas las temporadas" : ""}: ${shown.done} de ${shown.total}...`
-              : "Cargando partidos..."
+              ? t(allSeasons ? "picks:probablePage.checkingAll" : "picks:probablePage.checking", { done: shown.done, total: shown.total })
+              : t("common:loading.matches")
           }
         />
       )}
       {history && shown.results && shown.results.length === 0 && (
-        <EmptyView message="Aún no hay partidos jugados en esta temporada." />
+        <EmptyView message={t("picks:probablePage.noPlayed")} />
       )}
       {history &&
         shown.results &&
@@ -416,8 +435,11 @@ export function PicksHistoryPage() {
                   results={shown.results}
                   title={
                     allSeasons
-                      ? `Todas las temporadas (${formatSeason(seasons![seasons!.length - 1])} a ${formatSeason(seasons![0])})`
-                      : `Temporada ${formatSeason(season)}`
+                      ? t("picks:probablePage.allSeasonsTitle", {
+                          from: formatSeason(seasons![seasons!.length - 1]),
+                          to: formatSeason(seasons![0]),
+                        })
+                      : t("picks:probablePage.seasonTitle", { season: formatSeason(season) })
                   }
                 />
                 <PredictabilityTable league={leagueCode} />
@@ -429,15 +451,13 @@ export function PicksHistoryPage() {
           </>
         )}
 
-      <p className="small muted picks-disclaimer">
-        Patrones históricos de alta frecuencia. No son predicciones garantizadas
-        ni recomendaciones de apuesta.
-      </p>
+      <p className="small muted picks-disclaimer">{t("picks:probable.disclaimer")}</p>
     </div>
   );
 }
 
-/** Los partidos pendientes de la proxima jornada con sus picks. */
+/** Los partidos pendientes de la proxima jornada (y de los proximos dias)
+ * con sus picks, todos o los de un dia. */
 function NextMatchday({
   matchday,
   info,
@@ -447,6 +467,9 @@ function NextMatchday({
   history,
   strength,
   onStrength,
+  days,
+  day,
+  onDay,
 }: {
   matchday: number;
   info: MatchdayInfo | null;
@@ -464,43 +487,95 @@ function NextMatchday({
   /** Solo los picks de esa fuerza (null: todos). */
   strength: Strength | null;
   onStrength: (strength: Strength | null) => void;
+  /** Pestañas de dia (upcomingDays) y la elegida (null: todos). */
+  days: string[];
+  day: string | null;
+  onDay: (day: string | null) => void;
 }) {
-  const picks = upcoming?.flatMap((u) => u.picks) ?? [];
+  const { t } = useTranslation();
+  const dayOf = (m: Match) => dayKey(parseApiDate(m.date));
+  const perDay = new Map<string, number>();
+  for (const u of upcoming ?? []) {
+    const key = dayOf(u.match);
+    perDay.set(key, (perDay.get(key) ?? 0) + 1);
+  }
+  const ofDay = (upcoming ?? []).filter(
+    (u) => day === null || dayOf(u.match) === day,
+  );
+  const picks = ofDay.flatMap((u) => u.picks);
   const counts = strengthCounts(picks);
-  const visible = (upcoming ?? []).filter(
+  const visible = ofDay.filter(
     (u) => strength === null || u.picks.some((p) => p.strength === strength),
   );
   const pickOfMatch = useMatchPicks(upcoming?.map((u) => u.match) ?? null);
-  const hidden = (upcoming?.length ?? 0) - visible.length;
+  const hidden = ofDay.length - visible.length;
   const playedAlready = info ? info.played : 0;
+
+  // Con los partidos de los proximos dias puede entrar la jornada siguiente.
+  const matchdays = [
+    ...new Set((upcoming ?? []).map((u) => u.match.matchday ?? matchday)),
+  ].sort((a, b) => a - b);
+  const dates = (upcoming ?? []).map((u) => u.match.date).sort();
+  const several = matchdays.length > 1;
+  const matchCount = (n: number) => t("picks:probablePage.matchCount", { count: n });
 
   return (
     <section className="detail-section next-matchday">
       <div className="section-head">
-        <h2>Próxima jornada: jornada {matchday}</h2>
-        {info && (
+        <h2>
+          {several
+            ? t("picks:probablePage.nextSeveral", {
+                list: matchdays.slice(0, -1).join(", "),
+                last: matchdays[matchdays.length - 1],
+              })
+            : t("picks:probablePage.nextOne", { n: matchday })}
+        </h2>
+        {several && dates.length > 0 ? (
           <span className="small muted">
-            {formatDateRange(info.start, info.end)}
+            {formatDateRange(dates[0], dates[dates.length - 1])}
           </span>
+        ) : (
+          info && (
+            <span className="small muted">
+              {formatDateRange(info.start, info.end)}
+            </span>
+          )
         )}
       </div>
-      <p className="small muted">
-        Calculados con todo lo jugado hasta hoy. Cuando se jueguen, aparecerán
-        abajo con su resultado.
-      </p>
+      <p className="small muted">{t("picks:probablePage.nextNote")}</p>
+
+      <DayTabs
+        days={days}
+        value={day}
+        onChange={onDay}
+        allDate={upcoming ? matchCount(upcoming.length) : "…"}
+        enabled={upcoming ? (key) => perDay.has(key) : null}
+        title={(key) => matchCount(perDay.get(key) ?? 0)}
+      />
 
       {error ? (
-        <ErrorView message={`No se pudo conectar con la API: ${error}`} />
+        <ErrorView message={t("common:error.api", { error })} />
       ) : upcoming === null ? (
-        <LoadingView label="Calculando los picks de la próxima jornada..." />
+        <LoadingView label={t("picks:probablePage.calculatingNext")} />
       ) : upcoming.length === 0 ? (
-        <EmptyView message="No hay partidos pendientes en esta liga." />
+        <EmptyView message={t("picks:probablePage.noPendingMatches")} />
+      ) : ofDay.length === 0 ? (
+        <EmptyView message={t("picks:probablePage.noMatchesDay")} />
       ) : (
         <>
           <p className="next-matchday-summary">
-            <strong>{upcoming.length}</strong> partidos pendientes,{" "}
-            <strong>{picks.length}</strong> picks: {counts.alta} de fuerza alta,{" "}
-            {counts.media} de fuerza media y {counts.baja} de fuerza baja.
+            <Trans
+              i18nKey={day !== null ? "picks:probablePage.nextSummaryDay" : "picks:probablePage.nextSummary"}
+              count={ofDay.length}
+              values={{
+                picks: picks.length,
+                picksWord: t("picks:probablePage.picksWord", { count: picks.length }),
+                high: counts.alta,
+                medium: counts.media,
+                low: counts.baja,
+              }}
+              components={{ bold: <strong /> }}
+            />
           </p>
           <StrengthFilter
             counts={counts}
@@ -509,9 +584,7 @@ function NextMatchday({
           />
           {strength !== null && hidden > 0 && (
             <p className="small muted">
-              {hidden}{" "}
-              {hidden === 1 ? "partido no tiene" : "partidos no tienen"} picks
-              de {STRENGTH_LABEL[strength].toLowerCase()}.
+              {t(`picks:probablePage.hiddenNext.${strengthKey(strength)}`, { count: hidden })}
             </p>
           )}
           <div className="checked-matches">
@@ -532,13 +605,7 @@ function NextMatchday({
         </>
       )}
       {playedAlready > 0 && upcoming !== null && (
-        <p className="small muted">
-          {playedAlready}{" "}
-          {playedAlready === 1
-            ? "partido de esta jornada ya jugado está"
-            : "partidos de esta jornada ya jugados están"}{" "}
-          abajo, con su resultado.
-        </p>
+        <p className="small muted">{t("picks:probablePage.playedBelow", { count: playedAlready })}</p>
       )}
     </section>
   );
@@ -562,9 +629,10 @@ function StrengthFilter({
   value: Strength | null;
   onChange: (strength: Strength | null) => void;
 }) {
+  const { t } = useTranslation();
   return (
-    <div className="strength-filter" role="group" aria-label="Fuerza">
-      <span className="small muted">Fuerza:</span>
+    <div className="strength-filter" role="group" aria-label={t("picks:probablePage.strengthLabel")}>
+      <span className="small muted">{t("picks:probablePage.strengthPrefix")}</span>
       {[null, ...STRENGTHS].map((level) => (
         <button
           key={level ?? "todas"}
@@ -574,7 +642,7 @@ function StrengthFilter({
           disabled={level !== null && counts[level] === 0}
           onClick={() => onChange(level)}
         >
-          {level === null ? "Todas" : STRENGTH_SHORT[level]}
+          {level === null ? t("picks:probablePage.strengthAll") : strengthLabel(level, true)}
           <span className="chip-count">
             {level === null
               ? counts.alta + counts.media + counts.baja
@@ -624,6 +692,7 @@ function EdgePill({
   rate: number | null;
   expected: number | null;
 }) {
+  const { t } = useTranslation();
   if (rate === null || expected === null)
     return <span className="muted">—</span>;
   const edge = Math.round((rate - expected) * 100);
@@ -631,9 +700,16 @@ function EdgePill({
     <span
       className={`edge-pill ${edge > 0 ? "edge-pill-up" : edge < 0 ? "edge-pill-down" : ""}`}
     >
-      {edge > 0 ? `+${edge}` : edge} pts
+      {t("picks:probablePage.points", { edge: edge > 0 ? `+${edge}` : edge })}
     </span>
   );
+}
+
+/** ": 3 puntos más.", ": 2 puntos menos." o ": lo mismo." tras "pasan el 60 %". */
+function edgeText(edge: number): string {
+  if (edge > 0) return t("picks:probablePage.edgeMore", { count: edge });
+  if (edge < 0) return t("picks:probablePage.edgeLess", { count: -edge });
+  return t("picks:probablePage.edgeSame");
 }
 
 function SeasonSummary({
@@ -643,12 +719,13 @@ function SeasonSummary({
   results: MatchPicksResult[];
   title: string;
 }) {
+  const { t } = useTranslation();
   const by = summarizeByStrength(results);
   const rows: [string, PicksSummary, string][] = [
-    [STRENGTH_LABEL.alta, by.alta, "alta"],
-    [STRENGTH_LABEL.media, by.media, "media"],
-    [STRENGTH_LABEL.baja, by.baja, "baja"],
-    ["Todos", by.total, "total"],
+    [strengthLabel("alta"), by.alta, "alta"],
+    [strengthLabel("media"), by.media, "media"],
+    [strengthLabel("baja"), by.baja, "baja"],
+    [t("picks:probablePage.allPicks"), by.total, "total"],
   ];
   const { rate, expected } = by.total;
   const edge =
@@ -660,21 +737,24 @@ function SeasonSummary({
     <section className="detail-section picks-summary">
       <h2>{title}</h2>
       <p>
-        De <strong>{by.total.total}</strong> picks en{" "}
-        <strong>{results.length}</strong> partidos se cumplieron{" "}
-        <strong>{by.total.hits}</strong> ({pct(rate)}). En la liga, esos mismos
-        sucesos pasan el {pct(expected)}
+        <Trans
+          i18nKey="picks:probablePage.summaryText"
+          values={{
+            total: by.total.total,
+            matches: results.length,
+            hits: by.total.hits,
+            pct: pct(rate),
+            expected: pct(expected),
+          }}
+          components={{ bold: <strong /> }}
+        />
         {edge !== null && (
           <span
             className={
               edge > 0 ? "edge-up" : edge < 0 ? "edge-down" : undefined
             }
           >
-            {edge > 0
-              ? `: ${edge} puntos más.`
-              : edge < 0
-                ? `: ${-edge} puntos menos.`
-                : ": lo mismo."}
+            {edgeText(edge)}
           </span>
         )}
       </p>
@@ -682,18 +762,15 @@ function SeasonSummary({
         <table className="predictions-table picks-summary-table">
           <thead>
             <tr>
-              <th>Nivel</th>
-              <th className="num">Picks</th>
-              <th className="num">Se cumplieron</th>
-              <th className="num">Fallaron</th>
-              <th>Acierto</th>
-              <th
-                className="num"
-                title="Frecuencia de esos mismos sucesos en la liga: lo esperable sin patrón"
-              >
-                En la liga
+              <th>{t("picks:probablePage.column.level")}</th>
+              <th className="num">{t("picks:probablePage.column.picks")}</th>
+              <th className="num">{t("picks:probablePage.column.hits")}</th>
+              <th className="num">{t("picks:probablePage.column.misses")}</th>
+              <th>{t("picks:probablePage.column.hitRate")}</th>
+              <th className="num" title={t("picks:probablePage.column.leagueTitle")}>
+                {t("picks:probablePage.column.league")}
               </th>
-              <th className="num">Ventaja</th>
+              <th className="num">{t("picks:probablePage.column.edge")}</th>
             </tr>
           </thead>
           <tbody>
@@ -717,7 +794,7 @@ function SeasonSummary({
                 <td
                   title={
                     s.low !== null
-                      ? `Intervalo 95 %: ${pct(s.low)}–${pct(s.high)}`
+                      ? t("picks:probablePage.interval", { low: pct(s.low), high: pct(s.high) })
                       : undefined
                   }
                 >
@@ -733,19 +810,17 @@ function SeasonSummary({
         </table>
       </div>
       {by.total.undecided > 0 && (
-        <p className="small muted">
-          {by.total.undecided} picks sin dato en el partido: no cuentan.
-        </p>
+        <p className="small muted">{t("picks:probablePage.undecided", { count: by.total.undecided })}</p>
       )}
     </section>
   );
 }
 
-/** `short`: la cabecera en movil, donde no cabe la larga. */
-const RANK_COLUMNS: { key: TeamRankKey; label: string; short: string }[] = [
-  { key: "alta", label: "Fuerza alta", short: "Alta" },
-  { key: "media", label: "Fuerza media", short: "Media" },
-  { key: "top", label: "Alta y media", short: "Total" },
+/** Sus textos, en picks:probablePage.rankColumn.<clave> (label y, en movil, short). */
+const RANK_COLUMNS: { key: TeamRankKey; text: string }[] = [
+  { key: "alta", text: "high" },
+  { key: "media", text: "medium" },
+  { key: "top", text: "top" },
 ];
 
 /** Clasificacion de equipos por acierto de sus picks (los de su historial). */
@@ -756,6 +831,7 @@ function TeamRanking({
   results: MatchPicksResult[];
   league: string;
 }) {
+  const { t } = useTranslation();
   const [sortKey, setSortKey] = useState<TeamRankKey>("top");
   const ranked = useMemo(
     () => rankTeams(summarizeByTeam(results), sortKey),
@@ -765,20 +841,15 @@ function TeamRanking({
 
   return (
     <section className="detail-section team-ranking">
-      <h2>Tabla de aciertos por equipo</h2>
-      <p className="small muted">
-        Acierto de los picks que salen del historial de cada equipo. Pulsa una
-        columna para ordenar por ella. Con menos de {MIN_TEAM_PICKS} picks en
-        esa columna, al final de la lista. «Ventaja»: puntos por encima o por
-        debajo de lo que pasa en la liga para esos mismos sucesos.
-      </p>
+      <h2>{t("picks:probablePage.ranking.title")}</h2>
+      <p className="small muted">{t("picks:probablePage.ranking.note", { n: MIN_TEAM_PICKS })}</p>
       <div className="table-scroll">
         <table className="predictions-table team-ranking-table">
           <thead>
             <tr>
               <th className="num">#</th>
-              <th>Equipo</th>
-              {RANK_COLUMNS.map(({ key, label, short }) => (
+              <th>{t("picks:probablePage.ranking.team")}</th>
+              {RANK_COLUMNS.map(({ key, text }) => (
                 <th
                   key={key}
                   className={
@@ -787,20 +858,17 @@ function TeamRanking({
                   aria-sort={sortKey === key ? "descending" : "none"}
                 >
                   <button type="button" onClick={() => setSortKey(key)}>
-                    <span className="label-long">{label}</span>
-                    <span className="label-short">{short}</span>
+                    <span className="label-long">{t(`picks:probablePage.rankColumn.${text}.label`)}</span>
+                    <span className="label-short">{t(`picks:probablePage.rankColumn.${text}.short`)}</span>
                     <span className="sort-arrow">
                       {sortKey === key ? "▼" : ""}
                     </span>
                   </button>
                 </th>
               ))}
-              <th
-                className="num"
-                title="Acierto en alta y media menos lo que pasa en la liga para esos sucesos"
-              >
-                <span className="label-long">Ventaja</span>
-                <span className="label-short">Vent.</span>
+              <th className="num" title={t("picks:probablePage.ranking.edgeTitle")}>
+                <span className="label-long">{t("picks:probablePage.ranking.edge")}</span>
+                <span className="label-short">{t("picks:probablePage.ranking.edgeShort")}</span>
               </th>
             </tr>
           </thead>
@@ -856,15 +924,16 @@ function TeamRanking({
 /** "84 %" y debajo "21 de 25"; al pasar por encima, el intervalo al 95 %
  * (con pocos picks, muy ancho). */
 function RateCell({ summary }: { summary: PicksSummary }) {
+  const { t } = useTranslation();
   if (summary.total === 0) return <span className="muted">—</span>;
   return (
     <span
       className="rate-cell"
-      title={`Intervalo 95 %: ${pct(summary.low)}–${pct(summary.high)}`}
+      title={t("picks:probablePage.interval", { low: pct(summary.low), high: pct(summary.high) })}
     >
       <strong>{pct(summary.rate)}</strong>
       <span className="small muted rate-n-long">
-        {summary.hits} de {summary.total}
+        {t("picks:probablePage.hitsOf", { hits: summary.hits, total: summary.total })}
       </span>
       <span className="small muted rate-n-short">
         {summary.hits}/{summary.total}
@@ -892,6 +961,7 @@ function MatchdayResults({
   strength: Strength | null;
   onStrength: (strength: Strength | null) => void;
 }) {
+  const { t } = useTranslation();
   const matchdays = useMemo(
     () =>
       [...new Set(results.map((r) => r.match.matchday ?? 0))].sort(
@@ -932,27 +1002,27 @@ function MatchdayResults({
   return (
     <section className="picks-matchday">
       <div className="filters matchday-nav">
-        <h2>Jornada {matchday}</h2>
+        <h2>{t("common:matchday", { n: matchday })}</h2>
         <div className="matchday-nav-group">
           <span className="small muted">
-            {summary.hits} de {summary.total} ({pct(summary.rate)})
+            {t("picks:probablePage.hitsOfPct", { hits: summary.hits, total: summary.total, pct: pct(summary.rate) })}
           </span>
           <button
             type="button"
             disabled={index <= 0}
             onClick={() => setChoice(matchdays[index - 1])}
-            aria-label="Jornada anterior"
+            aria-label={t("matches:browser.previous")}
           >
             ←
           </button>
           <select
-            aria-label="Jornada"
+            aria-label={t("matches:browser.matchday")}
             value={matchday}
             onChange={(e) => setChoice(Number(e.target.value))}
           >
             {matchdays.map((m) => (
               <option key={m} value={m}>
-                Jornada {m} · {range(m)}
+                {joinParts(t("common:matchday", { n: m }), range(m))}
               </option>
             ))}
           </select>
@@ -960,7 +1030,7 @@ function MatchdayResults({
             type="button"
             disabled={index >= matchdays.length - 1}
             onClick={() => setChoice(matchdays[index + 1])}
-            aria-label="Jornada siguiente"
+            aria-label={t("matches:browser.next")}
           >
             →
           </button>
@@ -973,8 +1043,7 @@ function MatchdayResults({
       />
       {strength !== null && hidden > 0 && (
         <p className="small muted">
-          {hidden} {hidden === 1 ? "partido no tiene" : "partidos no tienen"}{" "}
-          picks de {STRENGTH_LABEL[strength].toLowerCase()} en esta jornada.
+          {t(`picks:probablePage.hiddenMatchday.${strengthKey(strength)}`, { count: hidden })}
         </p>
       )}
       <MatchdaySummary
@@ -1015,6 +1084,7 @@ function MatchdaySummary({
   picks: PickResult[];
   rows: MatchPicksResult[];
 }) {
+  const { t } = useTranslation();
   const total = summarizePicks(picks);
   // Duelo de córners: el resultado más probable del modelo y los picks del duelo.
   const duels = rows.flatMap(({ match, duel }) => {
@@ -1054,11 +1124,11 @@ function MatchdaySummary({
   return (
     <div className={`matchday-summary${tone}`}>
       <p className="matchday-summary-head">
-        Jornada {matchday} en {leagueName(league)}: se cumplieron{" "}
-        <strong>
-          {total.hits} de {total.total}
-        </strong>{" "}
-        picks{" "}
+        <Trans
+          i18nKey="picks:probablePage.matchdayHead"
+          values={{ n: matchday, league: leagueName(league), hits: total.hits, total: total.total }}
+          components={{ bold: <strong /> }}
+        />{" "}
         <span
           className={`edge-pill ${edge !== null && edge >= 0 ? "edge-pill-up" : "edge-pill-down"}`}
         >
@@ -1069,9 +1139,9 @@ function MatchdaySummary({
         {levels.map(([level, sum]) => (
           <li key={level}>
             <span className={`pick-strength pick-strength-${level}`}>
-              {STRENGTH_LABEL[level]}
+              {strengthLabel(level)}
             </span>{" "}
-            {sum.hits} de {sum.total}{" "}
+            {t("picks:probablePage.hitsOf", { hits: sum.hits, total: sum.total })}{" "}
             <strong
               className={
                 sum.expected === null || (sum.rate ?? 0) >= sum.expected
@@ -1085,45 +1155,37 @@ function MatchdaySummary({
         ))}
       </ul>
       <p className="small">
-        En la liga, esos mismos sucesos pasan el {pct(total.expected)}
+        {t("picks:probablePage.leagueExpected", { pct: pct(total.expected) })}
         {edge !== null && (
           <span className={edge >= 0 ? "edge-up" : "edge-down"}>
-            {edge > 0
-              ? `: ${edge} puntos más.`
-              : edge < 0
-                ? `: ${-edge} puntos menos.`
-                : ": lo mismo."}
+            {edgeText(edge)}
           </span>
         )}
         {total.undecided > 0 &&
-          ` ${total.undecided} picks aún sin dato del partido: no cuentan.`}
+          ` ${t("picks:probablePage.undecidedPending", { count: total.undecided })}`}
       </p>
       {duels.length > 0 && (
         <p className="small matchday-summary-duel">
-          <strong>Duelo de córners:</strong> el resultado más probable acertó en{" "}
-          <strong
-            className={duelHits * 2 >= duels.length ? "edge-up" : "edge-down"}
-          >
-            {duelHits} de {duels.length}
-          </strong>{" "}
-          partidos ({pct(duelHits / duels.length)})
-          {duelPicks.total > 0 && (
-            <>
-              {" "}
-              · picks muy probables del duelo:{" "}
-              <strong
-                className={
-                  (duelPicks.rate ?? 0) >= (duelPicks.expected ?? 0)
-                    ? "edge-up"
-                    : "edge-down"
-                }
-              >
-                {duelPicks.hits} de {duelPicks.total}
-              </strong>{" "}
-              ({pct(duelPicks.rate)})
-            </>
-          )}
-          .
+          <Trans
+            i18nKey={duelPicks.total > 0 ? "picks:probablePage.duelSummaryPicks" : "picks:probablePage.duelSummary"}
+            values={{
+              hits: duelHits,
+              count: duels.length,
+              pct: pct(duelHits / duels.length),
+              pickHits: duelPicks.hits,
+              pickTotal: duelPicks.total,
+              pickPct: pct(duelPicks.rate),
+            }}
+            components={{
+              bold: <strong />,
+              score: <strong className={duelHits * 2 >= duels.length ? "edge-up" : "edge-down"} />,
+              picks: (
+                <strong
+                  className={(duelPicks.rate ?? 0) >= (duelPicks.expected ?? 0) ? "edge-up" : "edge-down"}
+                />
+              ),
+            }}
+          />
         </p>
       )}
     </div>
@@ -1161,6 +1223,7 @@ function MatchPicksCard({
   /** Picks del partido de la lista (una sola peticion para todas las tarjetas). */
   matchPicks?: MatchPicksResponse | null;
 }) {
+  const { t } = useTranslation();
   const played = match.status === "historical";
   const keep = (r: CardPick) =>
     strength === null || r.pick.strength === strength;
@@ -1193,7 +1256,13 @@ function MatchPicksCard({
           {played && decided.length > 0 && (
             <span
               className={`checked-match-hits ${hits >= expected ? "edge-up" : "edge-down"}`}
-              title={`Se cumplieron ${hits} de ${decided.length} picks; en la liga, esos sucesos pasan ${expected.toFixed(1)} de ${withBase.length}${decided.length < shown.length ? ` · ${shown.length - decided.length} sin dato` : ""}`}
+              title={t(decided.length < shown.length ? "picks:probablePage.cardTitleMissing" : "picks:probablePage.cardTitle", {
+                hits,
+                decided: decided.length,
+                expected: formatFixed(expected, 1),
+                base: withBase.length,
+                missing: shown.length - decided.length,
+              })}
             >
               {hits}/{decided.length}
             </span>
@@ -1207,14 +1276,13 @@ function MatchPicksCard({
       />
       {matchPicks && (
         <MatchPickLine
+          match={match}
           entry={matchPicks.matches[String(match.id)]}
           kinds={matchPicks.kinds}
         />
       )}
       {shown.length === 0 ? (
-        <p className="small muted">
-          Sin picks: no hay patrones con muestra suficiente.
-        </p>
+        <p className="small muted">{t("picks:probablePage.noPicks")}</p>
       ) : (
         <ul className="checked-picks">
           {shown.map((r) => (
@@ -1237,14 +1305,16 @@ function MatchPicksCard({
   );
 }
 
+/** Marca de cada resultado; su texto, en picks:probablePage.outcome.<clave>. */
 const OUTCOME = {
-  hit: { mark: "✓", label: "Se cumplió" },
-  miss: { mark: "✗", label: "No se cumplió" },
-  unknown: { mark: "–", label: "Sin dato" },
-  pending: { mark: "•", label: "Pendiente" },
+  hit: { mark: "✓" },
+  miss: { mark: "✗" },
+  unknown: { mark: "–" },
+  pending: { mark: "•" },
 };
 
 function CheckedPick({ result, league }: { result: CardPick; league: string }) {
+  const { t } = useTranslation();
   const { pick, hit } = result;
   const outcome =
     hit === undefined
@@ -1259,8 +1329,8 @@ function CheckedPick({ result, league }: { result: CardPick; league: string }) {
       <span
         className="checked-mark"
         role="img"
-        aria-label={OUTCOME[outcome].label}
-        title={OUTCOME[outcome].label}
+        aria-label={t(`picks:probablePage.outcome.${outcome}`)}
+        title={t(`picks:probablePage.outcome.${outcome}`)}
       >
         {OUTCOME[outcome].mark}
       </span>
@@ -1269,11 +1339,11 @@ function CheckedPick({ result, league }: { result: CardPick; league: string }) {
         {pick.text}
         <span className="small muted">
           {" "}
-          · {pick.team}, {pick.rate.hits} de {pick.rate.total}
+          {t("picks:probablePage.checkedEvidence", { team: pick.team, hits: pick.rate.hits, total: pick.rate.total })}
         </span>
       </span>
       <span className={`pick-strength pick-strength-${pick.strength}`}>
-        {STRENGTH_LABEL[pick.strength]}
+        {strengthLabel(pick.strength)}
       </span>
     </li>
   );

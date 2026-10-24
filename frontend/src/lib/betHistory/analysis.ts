@@ -1,5 +1,8 @@
 /** Análisis de un historial de apuestas: dinero, acierto frente a la cuota, y en qué se gana y se pierde. */
 
+import { currentLocale, t } from "../../i18n";
+import { formatFixed, withPercent } from "../format";
+import { groupLabel } from "./labels";
 import type { BetLeg, ParsedBet } from "./types";
 import { inferSport } from "./winamax";
 
@@ -388,9 +391,10 @@ export function monthLabel(key: string, style: "long" | "short" = "long"): strin
   if (/^\d{4}$/.test(key)) return key;
   const [y, m] = key.split("-").map(Number);
   const date = new Date(Date.UTC(y, m - 1, 15));
+  const locale = currentLocale();
   return style === "long"
-    ? date.toLocaleDateString("es-ES", { month: "long", year: "numeric", timeZone: "UTC" })
-    : date.toLocaleDateString("es-ES", { month: "short", year: "2-digit", timeZone: "UTC" });
+    ? date.toLocaleDateString(locale, { month: "long", year: "numeric", timeZone: "UTC" })
+    : date.toLocaleDateString(locale, { month: "short", year: "2-digit", timeZone: "UTC" });
 }
 
 export function hasPromotion(bet: ParsedBet): boolean {
@@ -407,25 +411,33 @@ export const INSIGHT_MIN_BETS = 20;
 export const PROMO_INSIGHT_MIN_BETS = 5;
 
 function eur(n: number): string {
-  const s = n.toLocaleString("es-ES", { style: "currency", currency: "EUR" });
+  const s = n.toLocaleString(currentLocale(), { style: "currency", currency: "EUR" });
   return n > 0 ? `+${s}` : s;
 }
 
 function roiText(g: GroupStats): string {
-  return g.roi === null ? "sin ROI" : `ROI ${g.roi > 0 ? "+" : ""}${(g.roi * 100).toFixed(0)}%`;
+  if (g.roi === null) return t("mybets:insight.noRoi");
+  return t("mybets:insight.roi", { value: withPercent(`${g.roi > 0 ? "+" : ""}${formatFixed(g.roi * 100, 0)}`) });
 }
 
-function bestAndWorst(groups: GroupStats[], label: string): string | null {
+/** `dimension`: "sport" o "market" (mybets:insight.bestWorst.<dimension>). */
+function bestAndWorst(groups: GroupStats[], dimension: "sport" | "market"): string | null {
   const eligible = groups.filter((g) => g.bets >= INSIGHT_MIN_BETS && !["Desconocido", "Otros"].includes(g.key));
   if (eligible.length < 2) return null;
   const sorted = [...eligible].sort((a, b) => b.profit - a.profit);
   const best = sorted[0];
   const worst = sorted[sorted.length - 1];
   if (best.profit === worst.profit) return null;
-  return (
-    `Por ${label}, te va mejor en ${best.key} (${eur(best.profit)}, ${roiText(best)}, ${best.bets} apuestas) ` +
-    `y peor en ${worst.key} (${eur(worst.profit)}, ${roiText(worst)}, ${worst.bets} apuestas).`
-  );
+  return t(`mybets:insight.bestWorst.${dimension}`, {
+    best: groupLabel(best.key),
+    bestProfit: eur(best.profit),
+    bestRoi: roiText(best),
+    bestBets: best.bets,
+    worst: groupLabel(worst.key),
+    worstProfit: eur(worst.profit),
+    worstRoi: roiText(worst),
+    worstBets: worst.bets,
+  });
 }
 
 /** Diferencia de ROI entre "con" y "sin" promoción a partir de la cual se menciona en el resumen. */
@@ -453,8 +465,14 @@ export function insights(settled: SettledBet[], max = 2): string[] {
     Math.abs(withPromo.roi - withoutPromo.roi) >= PROMO_GAP_ROI
   ) {
     out.push(
-      `Con promoción llevas ${eur(withPromo.profit)} (${roiText(withPromo)}) en ${withPromo.bets} apuestas; ` +
-        `sin promoción, ${eur(withoutPromo.profit)} (${roiText(withoutPromo)}) en ${withoutPromo.bets}.`,
+      t("mybets:insight.promoGap", {
+        withProfit: eur(withPromo.profit),
+        withRoi: roiText(withPromo),
+        withBets: withPromo.bets,
+        withoutProfit: eur(withoutPromo.profit),
+        withoutRoi: roiText(withoutPromo),
+        withoutBets: withoutPromo.bets,
+      }),
     );
   }
 
@@ -463,18 +481,25 @@ export function insights(settled: SettledBet[], max = 2): string[] {
     .sort((a, b) => b.profit - a.profit)[0];
   if (promo && (total.profit <= 0 || promo.profit > 0.5 * total.profit)) {
     const rest = stats("rest", settled.filter((r) => !(r.bet.promotions ?? []).includes(promo.key)));
+    const values = { promo: promo.key, profit: eur(promo.profit), bets: promo.bets, total: eur(total.profit) };
     const share =
       total.profit <= 0
-        ? `${promo.key} te deja ${eur(promo.profit)} en ${promo.bets} apuestas, aunque en total vas ${eur(total.profit)}.`
+        ? t("mybets:insight.promoShare.losing", values)
         : promo.profit > total.profit
-          ? `${promo.key} aporta ${eur(promo.profit)} en ${promo.bets} apuestas, más que todo tu beneficio (${eur(total.profit)}).`
-          : `Más de la mitad de tu beneficio viene de ${promo.key}: ${eur(promo.profit)} de ${eur(total.profit)}, en ${promo.bets} apuestas.`;
-    out.push(`${share} Sin ${promo.key}, tu resultado sería ${eur(rest.profit)} (${roiText(rest)}) en ${rest.bets} apuestas.`);
+          ? t("mybets:insight.promoShare.moreThanAll", values)
+          : t("mybets:insight.promoShare.overHalf", values);
+    const without = t("mybets:insight.withoutPromo", {
+      promo: promo.key,
+      profit: eur(rest.profit),
+      roi: roiText(rest),
+      count: rest.bets,
+    });
+    out.push(`${share} ${without}`);
   }
 
-  const sport = bestAndWorst(groupBy(settled, (r) => sportOf(r.bet)), "deporte");
+  const sport = bestAndWorst(groupBy(settled, (r) => sportOf(r.bet)), "sport");
   if (sport) out.push(sport);
-  const market = bestAndWorst(groupBy(settled, singleMarket), "mercado (apuestas simples)");
+  const market = bestAndWorst(groupBy(settled, singleMarket), "market");
   if (market) out.push(market);
   return out.slice(0, max);
 }

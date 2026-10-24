@@ -1,12 +1,16 @@
 import { useEffect } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import { getLeagues } from "../api/client";
 import { LeagueSwitch } from "../components/LeagueSwitch";
 import { MatchdayBrowser } from "../components/MatchdayBrowser";
-import { leagueParam, orderLeagues, parseLeagueParam, useSelectedLeagueCode } from "../lib/leagues";
+import { NextMatchesCard } from "../components/NextMatchesCard";
+import { PageHero } from "../components/PageHero";
+import { leagueName, leagueParam, orderLeagues, parseLeagueParam, useSelectedLeagueCode } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 
 export function MatchesPage() {
+  const { t } = useTranslation();
   const [storedCode, setStoredCode] = useSelectedLeagueCode();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: leagues } = useApi(() => getLeagues(), []);
@@ -47,12 +51,20 @@ export function MatchesPage() {
 
   return (
     <div>
-      <h1>Partidos</h1>
-      <p className="intro-note small muted">
-        Los porcentajes que ves aquí son <strong>frecuencia histórica</strong>, no una promesa de lo que va a pasar:
-        cuentan cuántas veces ocurrió algo antes, siempre junto al número de partidos usado. No es lo mismo que una
-        probabilidad garantizada. <Link to="/glosario">Más sobre cómo leerlos →</Link>
-      </p>
+      <PageHero
+        eyebrow={leagueCode === null ? t("common:league.all") : leagueName(leagueCode)}
+        title={t("nav:matches")}
+        accentWords={0}
+        lead={
+          <p>
+            <Trans
+              i18nKey="matches:page.intro"
+              components={{ bold: <strong />, link: <Link to="/glosario" /> }}
+            />
+          </p>
+        }
+        aside={league ? <NextMatchesCard league={league} /> : undefined}
+      />
 
       <LeagueSwitch leagues={leagues} value={leagueCode} onChange={changeLeague} allowAll />
 

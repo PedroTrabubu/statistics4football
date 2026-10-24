@@ -1,15 +1,41 @@
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import type { TeamSeasonStats } from "../api/types";
-import { formatPct } from "../lib/format";
+import { formatFixed, formatPct, formatSeason } from "../lib/format";
 import { TeamName } from "./TeamCrest";
 
-function Row({ label, home, away }: { label: string; home: string; away: string }) {
+/** Una cifra de temporada de los dos equipos: valor y barra de cada uno
+ * (local en negro, visitante en gris), sobre `max` (100 en porcentajes). */
+function Tile({
+  label,
+  home,
+  away,
+  values,
+  max,
+}: {
+  label: string;
+  home: string;
+  away: string;
+  values: [number | null | undefined, number | null | undefined];
+  max: number;
+}) {
+  const width = (v: number | null | undefined) => (v == null || max <= 0 ? 0 : Math.min(100, (v / max) * 100));
   return (
-    <tr>
-      <td className="stats-value">{home}</td>
-      <td className="stats-label">{label}</td>
-      <td className="stats-value">{away}</td>
-    </tr>
+    <div className="season-tile">
+      <span className="season-tile-label">{label}</span>
+      <span className="season-tile-row">
+        <span className="num">{home}</span>
+        <span className="season-tile-bar is-home" aria-hidden="true">
+          <span style={{ width: `${width(values[0])}%` }} />
+        </span>
+      </span>
+      <span className="season-tile-row">
+        <span className="num">{away}</span>
+        <span className="season-tile-bar is-away" aria-hidden="true">
+          <span style={{ width: `${width(values[1])}%` }} />
+        </span>
+      </span>
+    </div>
   );
 }
 
@@ -28,13 +54,9 @@ export function SeasonStatsSummary({
   leagueId: number;
   league?: string;
 }) {
+  const { t } = useTranslation();
   if (homeStats === null && awayStats === null) {
-    return (
-      <p className="muted">
-        Ninguno de los dos equipos tiene partidos jugados registrados todavía (temporada recién
-        empezada o equipo recién ascendido).
-      </p>
-    );
+    return <p className="muted">{t("matches:seasonSummary.noData")}</p>;
   }
 
   const season = homeStats?.season ?? awayStats?.season;
@@ -43,38 +65,37 @@ export function SeasonStatsSummary({
 
   return (
     <div>
-      <p className="muted small">Temporada {season} · datos reales de partidos ya jugados.</p>
-      <table className="stats-table">
-        <thead>
-          <tr>
-            <th>
-              <TeamName team={homeTeam} league={league} />
-            </th>
-            <th></th>
-            <th>
-              <TeamName team={awayTeam} league={league} />
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <Row
-            label="Partidos jugados"
-            home={home ? String(home.matches_played) : "—"}
-            away={away ? String(away.matches_played) : "—"}
-          />
-          <Row
-            label="Puntos por partido"
-            home={home?.points_per_game?.toFixed(2) ?? "—"}
-            away={away?.points_per_game?.toFixed(2) ?? "—"}
-          />
-          <Row label="Más de 1.5 goles" home={formatPct(home?.over_1_5_pct ?? null)} away={formatPct(away?.over_1_5_pct ?? null)} />
-          <Row label="Más de 2.5 goles" home={formatPct(home?.over_2_5_pct ?? null)} away={formatPct(away?.over_2_5_pct ?? null)} />
-          <Row label="Ambos anotan" home={formatPct(home?.btts_pct ?? null)} away={formatPct(away?.btts_pct ?? null)} />
-          <Row label="Portería a cero" home={formatPct(home?.clean_sheet_pct ?? null)} away={formatPct(away?.clean_sheet_pct ?? null)} />
-        </tbody>
-      </table>
+      <p className="muted small">{t("matches:seasonSummary.season", { season: season ? formatSeason(season) : "" })}</p>
+      <div className="season-legend">
+        <span className="season-legend-item is-home">
+          <TeamName team={homeTeam} league={league} />
+        </span>
+        <span className="season-legend-item is-away">
+          <TeamName team={awayTeam} league={league} />
+        </span>
+      </div>
+      <div className="season-tiles">
+        <Tile
+          label={t("matches:seasonSummary.played")}
+          home={home ? String(home.matches_played) : "—"}
+          away={away ? String(away.matches_played) : "—"}
+          values={[home?.matches_played, away?.matches_played]}
+          max={Math.max(home?.matches_played ?? 0, away?.matches_played ?? 0)}
+        />
+        <Tile
+          label={t("matches:seasonSummary.pointsPerGame")}
+          home={home?.points_per_game != null ? formatFixed(home.points_per_game, 2) : "—"}
+          away={away?.points_per_game != null ? formatFixed(away.points_per_game, 2) : "—"}
+          values={[home?.points_per_game, away?.points_per_game]}
+          max={3}
+        />
+        <Tile label={t("matches:seasonSummary.over15")} home={formatPct(home?.over_1_5_pct ?? null)} away={formatPct(away?.over_1_5_pct ?? null)} values={[home?.over_1_5_pct, away?.over_1_5_pct]} max={100} />
+        <Tile label={t("matches:seasonSummary.over25")} home={formatPct(home?.over_2_5_pct ?? null)} away={formatPct(away?.over_2_5_pct ?? null)} values={[home?.over_2_5_pct, away?.over_2_5_pct]} max={100} />
+        <Tile label={t("matches:seasonSummary.btts")} home={formatPct(home?.btts_pct ?? null)} away={formatPct(away?.btts_pct ?? null)} values={[home?.btts_pct, away?.btts_pct]} max={100} />
+        <Tile label={t("matches:seasonSummary.cleanSheet")} home={formatPct(home?.clean_sheet_pct ?? null)} away={formatPct(away?.clean_sheet_pct ?? null)} values={[home?.clean_sheet_pct, away?.clean_sheet_pct]} max={100} />
+      </div>
       <Link to={`/stats?league=${leagueId}`} className="small">
-        Ver tabla completa de la liga →
+        {t("matches:seasonSummary.fullTable")}
       </Link>
     </div>
   );

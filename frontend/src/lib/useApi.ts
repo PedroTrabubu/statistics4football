@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { t } from "../i18n";
 
 interface ApiState<T> {
   data: T | null;
@@ -20,7 +21,7 @@ export function useApi<T>(fetcher: () => Promise<T>, deps: unknown[]): ApiState<
       })
       .catch((err: unknown) => {
         if (!cancelled) {
-          const message = err instanceof Error ? err.message : "Error desconocido";
+          const message = err instanceof Error ? err.message : t("common:error.unknown");
           setState({ data: null, loading: false, error: message });
         }
       });

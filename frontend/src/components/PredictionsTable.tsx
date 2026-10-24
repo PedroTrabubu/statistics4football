@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Prediction } from "../api/types";
 import { EvValue } from "./EvValue";
 import { formatEv, formatOdds, formatPercent, marketLabel, selectionLabel } from "../lib/format";
@@ -18,13 +19,14 @@ export function PredictionsTable({
   /** false: la competición no tiene cuotas de mercado; sin EV de mercado ni «Valor». */
   marketOdds?: boolean;
 }) {
+  const { t } = useTranslation();
   // Cuota que el usuario introduce manualmente, por seleccion. Solo vive en
   // el navegador: nunca se envia ni se guarda (ver seccion "Cuotas y valor
   // estadistico" de la especificacion — guardar historico propio es V1).
   const [manualOdds, setManualOdds] = useState<Record<string, string>>({});
 
   if (predictions.length === 0) {
-    return <p className="muted">No hay estadísticas suficientes para generar predicciones de este partido.</p>;
+    return <p className="muted">{t("matches:predictions.empty")}</p>;
   }
 
   const byMarket = new Map<string, Prediction[]>();
@@ -49,15 +51,15 @@ export function PredictionsTable({
               <table className="predictions-table">
                 <thead>
                   <tr>
-                    <th>Selección</th>
-                    {hasMarketData && <th>Prob. mercado</th>}
-                    <th>Prob. modelo</th>
-                    <th>Cuota justa</th>
-                    {hasMarketData && <th>EV mercado</th>}
-                    <th>Muestra</th>
-                    <th>Riesgo</th>
-                    <th>Tu cuota</th>
-                    <th>Tu EV</th>
+                    <th>{t("matches:predictions.column.selection")}</th>
+                    {hasMarketData && <th>{t("matches:predictions.column.marketProb")}</th>}
+                    <th>{t("matches:predictions.column.modelProb")}</th>
+                    <th>{t("matches:predictions.column.fairOdds")}</th>
+                    {hasMarketData && <th>{t("matches:predictions.column.marketEv")}</th>}
+                    <th>{t("matches:predictions.column.sample")}</th>
+                    <th>{t("matches:predictions.column.risk")}</th>
+                    <th>{t("matches:predictions.column.yourOdds")}</th>
+                    <th>{t("matches:predictions.column.yourEv")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -73,10 +75,17 @@ export function PredictionsTable({
                       <tr key={p.selection} className={marketOdds && p.is_recommended ? "row-recommended" : undefined}>
                         <td>
                           {label}
-                          {marketOdds && p.is_recommended && <span className="value-tag">VALOR</span>}
+                          {marketOdds && p.is_recommended && <span className="value-tag">{t("matches:predictions.valueTag")}</span>}
                         </td>
                         {hasMarketData && <td>{formatPercent(p.prob_market_implied)}</td>}
-                        <td>{formatPercent(p.prob_model)}</td>
+                        <td>
+                          <span className="prob-cell">
+                            <span className="num">{formatPercent(p.prob_model)}</span>
+                            <span className="prob-bar" aria-hidden="true">
+                              <span style={{ width: `${Math.round(p.prob_model * 100)}%` }} />
+                            </span>
+                          </span>
+                        </td>
                         <td className="num">{formatOdds(fairOdds(p.prob_model))}</td>
                         {hasMarketData && (
                           <td>
@@ -94,10 +103,10 @@ export function PredictionsTable({
                             type="text"
                             inputMode="decimal"
                             className="odds-input"
-                            placeholder="ej. 1.80"
+                            placeholder={t("matches:predictions.oddsPlaceholder")}
                             value={raw}
                             onChange={(e) => setManualOdds((prev) => ({ ...prev, [key]: e.target.value }))}
-                            aria-label={`Tu cuota para ${label}`}
+                            aria-label={t("matches:predictions.oddsLabel", { selection: label })}
                           />
                         </td>
                         <td>
@@ -108,7 +117,7 @@ export function PredictionsTable({
                               <span className={yourEv !== null && yourEv >= 0 ? "ev-positive" : "ev-negative"}>
                                 {formatEv(yourEv)}
                               </span>
-                              <div className="small muted">implícita {formatPercent(yourImplied)}</div>
+                              <div className="small muted">{t("matches:predictions.implied", { value: formatPercent(yourImplied) })}</div>
                             </>
                           )}
                         </td>
@@ -121,10 +130,7 @@ export function PredictionsTable({
           </div>
         );
       })}
-      <p className="small muted odds-disclaimer">
-        "Cuota justa" y "Tu EV" son estimaciones a partir de la frecuencia histórica del modelo, no una garantía de
-        resultado. La cuota que introduces no se guarda ni se envía a ningún sitio.
-      </p>
+      <p className="small muted odds-disclaimer">{t("matches:predictions.disclaimer")}</p>
     </div>
   );
 }

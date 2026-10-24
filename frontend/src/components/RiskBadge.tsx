@@ -1,11 +1,7 @@
+import { useTranslation } from "react-i18next";
 import type { RiskLevel } from "../api/types";
 
-const LABELS: Record<RiskLevel, string> = {
-  low: "Riesgo bajo",
-  medium: "Riesgo medio",
-  high: "Riesgo alto",
-};
-
 export function RiskBadge({ level }: { level: RiskLevel }) {
-  return <span className={`badge badge-${level}`}>{LABELS[level]}</span>;
+  const { t } = useTranslation();
+  return <span className={`badge badge-${level}`}>{t(`common:risk.${level}`)}</span>;
 }

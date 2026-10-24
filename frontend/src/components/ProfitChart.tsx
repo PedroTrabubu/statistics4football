@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useTranslation } from "react-i18next";
+import { currentLocale } from "../i18n";
 import { niceTicks } from "../lib/chartTicks";
 
 export interface ProfitPoint {
@@ -10,12 +12,13 @@ const HEIGHT = 220;
 const PAD = { top: 16, right: 64, bottom: 28, left: 52 };
 
 function euro(n: number, signed = false): string {
-  const s = n.toLocaleString("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 2 });
+  const s = n.toLocaleString(currentLocale(), { style: "currency", currency: "EUR", maximumFractionDigits: 2 });
   return signed && n > 0 ? `+${s}` : s;
 }
 
 /** Beneficio acumulado apuesta a apuesta: una sola serie, con línea de cero y lectura al pasar el ratón. */
 export function ProfitChart({ points }: { points: ProfitPoint[] }) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(640);
   const [active, setActive] = useState<number | null>(null);
@@ -42,7 +45,7 @@ export function ProfitChart({ points }: { points: ProfitPoint[] }) {
   const y = (v: number) => PAD.top + (1 - (v - yMin) / (yMax - yMin || 1)) * plotH;
   const path = series.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.profit).toFixed(1)}`).join(" ");
   const last = series[series.length - 1];
-  const fmtDate = (d: Date) => d.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "2-digit" });
+  const fmtDate = (d: Date) => d.toLocaleDateString(currentLocale(), { day: "numeric", month: "short", year: "2-digit" });
 
   function onMove(e: PointerEvent<SVGRectElement>) {
     const box = e.currentTarget.getBoundingClientRect();
@@ -66,7 +69,7 @@ export function ProfitChart({ points }: { points: ProfitPoint[] }) {
         width={width}
         height={HEIGHT}
         role="img"
-        aria-label={`Beneficio acumulado: ${euro(last.profit, true)} tras ${points.length} apuestas`}
+        aria-label={t("mybets:chart.profitLabel", { profit: euro(last.profit, true), count: points.length })}
         tabIndex={0}
         onKeyDown={onKey}
         onFocus={() => setActive((v) => v ?? series.length - 1)}
@@ -110,9 +113,7 @@ export function ProfitChart({ points }: { points: ProfitPoint[] }) {
       {a && active !== null && (
         <div className="chart-tooltip" style={{ left: tipLeft }}>
           <strong>{euro(a.profit, true)}</strong>
-          <span>
-            Apuesta {active} de {points.length} · {fmtDate(a.date)}
-          </span>
+          <span>{t("mybets:chart.profitTooltip", { n: active, total: points.length, date: fmtDate(a.date) })}</span>
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MatchResult, TeamMatchStats, UpcomingMatch } from "../api/types";
-import { activeStreaks, matchesChip, selectStreaks, studyEvents, summarizeStudy } from "./streaks";
+import { activeStreaks, dayLabel, matchesChip, selectStreaks, studyEvents, summarizeStudy, upcomingDays } from "./streaks";
 
 // --- Liga de prueba ---------------------------------------------------------
 // Diez equipos de relleno con resultados y córners variados (la frecuencia de
@@ -90,7 +90,7 @@ const leader = rows.filter((r) => r.entityKey === `t${LEADER.id}`);
 
 describe("rachas activas", () => {
   it("una por equipo y mercado, con la línea más exigente que se cumple en toda la racha", () => {
-    const corners = selectStreaks(leader.filter((r) => matchesChip(r, "Córners"))).rows;
+    const corners = selectStreaks(leader.filter((r) => matchesChip(r, "corners"))).rows;
     const own = corners.filter((r) => r.type.market.slug === "corners-equipo");
     expect(own).toHaveLength(1);
     expect(own[0].type.option.key).toBe("over-8.5");
@@ -106,7 +106,7 @@ describe("rachas activas", () => {
     const wins = leader.find((r) => r.type.market.slug === "resultado" && r.type.option.key === "gana" && r.context === "all");
     expect(wins?.text).toBe("Líder ha ganado sus últimos 8 partidos de liga");
     expect(wins?.odds?.odds).toBe(1.5);
-    expect(leader.filter((r) => r.type.category === "Córners").every((r) => r.odds === null)).toBe(true);
+    expect(leader.filter((r) => r.type.category === "corners").every((r) => r.odds === null)).toBe(true);
   });
 
   it("como mucho tres por equipo y día, las más raras primero", () => {
@@ -127,5 +127,16 @@ describe("¿se prolongan?", () => {
     const events = studyEvents(played);
     expect(events.length).toBeGreaterThan(0);
     expect(summarizeStudy(events)).toEqual(summarizeStudy(events));
+  });
+});
+
+describe("pestañas de días", () => {
+  it("hoy, mañana y luego el día de la semana, con la fecha", () => {
+    const days = upcomingDays(new Date(2026, 9, 22, 23, 30));
+    expect(days[0]).toBe("2026-10-22");
+    expect(days).toHaveLength(7);
+    expect(dayLabel(days[0], 0)).toEqual({ name: "Hoy", date: "22 oct" });
+    expect(dayLabel(days[1], 1).name).toBe("Mañana");
+    expect(dayLabel(days[2], 2)).toEqual({ name: "Sáb", date: "24 oct" });
   });
 });

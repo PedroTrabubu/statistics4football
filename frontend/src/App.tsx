@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { GlossaryPage } from "./pages/GlossaryPage";
@@ -13,6 +14,9 @@ import { SeasonStatsPage } from "./pages/SeasonStatsPage";
 import { StreaksPage } from "./pages/StreaksPage";
 
 function App() {
+  // Al cambiar de idioma se vuelve a pintar toda la web: los textos de lib/
+  // (mercados, picks, rachas...) salen del idioma actual al leerlos.
+  useTranslation();
   return (
     <Routes>
       {/* La portada va sin el sidebar: es un escaparate, no la herramienta. */}

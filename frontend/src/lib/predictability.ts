@@ -5,6 +5,7 @@
  * El modelo lo entrena backend/scripts/report_predictability.py. */
 
 import type { Match, MatchResult, PredictabilityBand, PredictabilityModel } from "../api/types";
+import { t, translatedRecord } from "../i18n";
 import { CHAMPIONS_LEAGUE_CODE } from "./leagues";
 import type { TeamMatchView } from "./markets";
 import { teamViews, type PickResult, type ProbablePick } from "./patterns";
@@ -160,11 +161,16 @@ export function bandOf(index: number): Band {
   return index >= BAND_EDGES[1] ? "alta" : index >= BAND_EDGES[0] ? "media" : "baja";
 }
 
-export const BAND_LABEL: Record<Band, string> = { alta: "Alta", media: "Media", baja: "Baja" };
+export const BAND_LABEL: Record<Band, string> = translatedRecord({
+  alta: "picks:predictability.band.high",
+  media: "picks:predictability.band.medium",
+  baja: "picks:predictability.band.low",
+});
 
 /** Texto fijo del protocolo, junto al indice. */
-export const PREDICTABILITY_NOTE =
-  "Mide la fiabilidad de los patrones históricos, no la probabilidad de ganar una apuesta. El mercado ya descuenta lo predecible.";
+export function predictabilityNote(): string {
+  return t("picks:predictability.note");
+}
 
 export interface PredictabilityValue {
   index: number;

@@ -79,6 +79,15 @@ export interface MatchHistory {
   context?: MatchResult[];
 }
 
+/** GET /matches/{id}/recent: enfrentamientos directos previos (todas las
+ * temporadas) y ultimos partidos de cada equipo, mas recientes primero. Mismas
+ * competiciones que la forma reciente (en una liga, sin la Champions). */
+export interface MatchRecent {
+  h2h: MatchResult[];
+  home: MatchResult[];
+  away: MatchResult[];
+}
+
 /** GET /matches/{id}/referee-stats: partidos previos del arbitro y de cada equipo. */
 export interface MatchRefereeStats {
   referee: string | null;

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { League } from "../api/types";
 import { leagueCountry, leagueName, leagueShortName, orderLeagues } from "../lib/leagues";
 import { LeagueLogo } from "./LeagueLogo";
@@ -15,10 +16,11 @@ export function LeagueSwitch({
   onChange: (code: string | null) => void;
   allowAll?: boolean;
 }) {
+  const { t } = useTranslation();
   if (!leagues) return <div className="league-switch league-switch-loading" />;
 
   return (
-    <div className="league-switch" role="group" aria-label="Liga">
+    <div className="league-switch" role="group" aria-label={t("common:league.label")}>
       {orderLeagues(leagues).map((league) => (
         <button
           key={league.id}
@@ -44,7 +46,7 @@ export function LeagueSwitch({
           className={value === null ? "league-button league-button-all league-button-active" : "league-button league-button-all"}
           onClick={() => onChange(null)}
         >
-          <span className="league-button-name">{leagues.length === 2 ? "Ambas" : "Todas"}</span>
+          <span className="league-button-name">{leagues.length === 2 ? t("common:league.both") : t("common:league.all")}</span>
         </button>
       )}
     </div>

@@ -181,7 +181,7 @@ describe("findTeamPatterns", () => {
 
   it("solo muestra la línea más exigente que se cumple", () => {
     const found = scoring(patternsOf([...league(), ...visitorAway([2, 3, 2, 2, 4, 2])]));
-    expect(found.map((p) => p.text)).toEqual(["Marca más de 1.5 goles"]);
+    expect(found.map((p) => p.text)).toEqual(["Marca más de 1,5 goles"]);
   });
 
   it("usa el campo del partido: lo que hace en casa no cuenta para sus partidos fuera", () => {
@@ -253,7 +253,7 @@ describe("contraste con el rival", () => {
     const history = [...league(), ...cards];
     const prior = priorMatches(THIS_MATCH, history);
     const pattern = patternsOf(history).find((p) => p.family === "tarjetas-equipo")!;
-    expect(pattern.text).toBe("Recibe más de 3.5 tarjetas");
+    expect(pattern.text).toBe("Recibe más de 3,5 tarjetas");
     expect(checkRival(pattern, teamContexts(prior, LOCAL.id, "home", "2627"), LOCAL).state).toBe("none");
   });
 });
@@ -305,19 +305,19 @@ describe("textos", () => {
 
   it("'siempre' cuando se cumplió en todos, 'N de M' si no", () => {
     expect(refereeFactText(fact("tarjetas-equipo", cards, 4, 4, false))).toBe(
-      "Con este árbitro, Espanol siempre ha recibido más de 1.5 tarjetas (4 de 4 partidos).",
+      "Con este árbitro, Espanol siempre ha recibido más de 1,5 tarjetas (4 de 4 partidos).",
     );
     expect(refereeFactText(fact("tarjetas-equipo", cards, 4, 5, false))).toBe(
-      "Con este árbitro, Espanol ha recibido más de 1.5 tarjetas en 4 de 5 partidos.",
+      "Con este árbitro, Espanol ha recibido más de 1,5 tarjetas en 4 de 5 partidos.",
     );
   });
 
   it("sucesos del partido", () => {
     expect(refereeFactText(fact("tarjetas", total, 4, 4, true))).toBe(
-      "Con este árbitro, siempre ha habido menos de 4.5 tarjetas en los partidos de Espanol (4 de 4 partidos).",
+      "Con este árbitro, siempre ha habido menos de 4,5 tarjetas en los partidos de Espanol (4 de 4 partidos).",
     );
     expect(refereeFactText(fact("tarjetas", total, 4, 5, true))).toBe(
-      "Con este árbitro, ha habido menos de 4.5 tarjetas en 4 de 5 partidos de Espanol.",
+      "Con este árbitro, ha habido menos de 4,5 tarjetas en 4 de 5 partidos de Espanol.",
     );
   });
 

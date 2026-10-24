@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { PageHero } from "../components/PageHero";
 import { Link } from "react-router-dom";
 import { getLeagues, getPicks, getPicksHistory } from "../api/client";
 import type { PickCombo, PickKind, PickLeg } from "../api/types";
@@ -6,35 +8,47 @@ import { LeagueSwitch } from "../components/LeagueSwitch";
 import { OutcomeBadge } from "../components/OutcomeBadge";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
 import { MatchTeams } from "../components/TeamCrest";
-import { formatDateTime, formatMatchday, formatRoiPct, joinParts } from "../lib/format";
+import { currentLocale, t } from "../i18n";
+import {
+  formatDateTime,
+  formatFixed,
+  formatLocaleNumber,
+  formatMatchday,
+  formatRoiPct,
+  joinParts,
+  withPercent,
+} from "../lib/format";
 import { leagueName, onlyValidated, useSelectedLeagueCode } from "../lib/leagues";
 import { ODDS_KIND_TITLES, PICK_KIND_LABELS, TIER_KINDS, oneInN, pickLegLabel, pickLegUnit } from "../lib/picks";
 import { useApi } from "../lib/useApi";
 
 type Tab = "upcoming" | "history";
 
-const TIER_HINTS: Record<PickKind, string> = {
-  segura: "Cuota ~1.40 · 2 selecciones",
-  fiable: "Cuota ~1.50 · 2 selecciones · acierta ~2 de cada 3",
-  media: "Cuota ~1.90 · 2-3 selecciones",
-  alta: "Cuota 3 - 5 · hasta 4 selecciones",
-  bomba: "Cuota 8 o más · hasta 5 selecciones",
-  mismo_partido: "Dos o tres selecciones del mismo partido, probabilidad conjunta ≥ 70%",
+/** Lo que es cada nivel: picks:tierHint.<nivel>. */
+const TIER_HINT_KEYS: Record<PickKind, string> = {
+  segura: "safe",
+  fiable: "reliable",
+  media: "medium",
+  alta: "high",
+  bomba: "bomb",
+  mismo_partido: "sameMatch",
 };
+const tierHint = (kind: PickKind) => t(`picks:tierHint.${TIER_HINT_KEYS[kind]}`);
 
 function pct(prob: number): string {
-  return `${Math.round(prob * 100)}%`;
+  return withPercent(String(Math.round(prob * 100)));
 }
 
 function formatWindow(window: string): string {
   const start = new Date(`${window}T00:00:00`);
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
-  const fmt = (d: Date) => d.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+  const fmt = (d: Date) => d.toLocaleDateString(currentLocale(), { day: "numeric", month: "short" });
   return `${fmt(start)} – ${fmt(end)}`;
 }
 
 export function PicksPage() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("upcoming");
   const [selectedCode, setLeagueCode] = useSelectedLeagueCode();
   const { data: allLeagues } = useApi(() => getLeagues(), []);
@@ -42,12 +56,7 @@ export function PicksPage() {
 
   return (
     <div>
-      <h1>Picks</h1>
-      <p className="page-lead">
-        Combinadas para la próxima jornada construidas con estadística: cuotas pre-partido, córners y amarillas de
-        cada equipo en casa y fuera. Para cada nivel de cuota se elige la combinada con más probabilidad de acierto,
-        con pocas selecciones para no acumular el margen de la casa.
-      </p>
+      <PageHero eyebrow={leagueCode === null ? t("common:league.all") : leagueName(leagueCode)} title={t("nav:picks")} accentWords={0} lead={<p>{t("picks:page.lead")}</p>} />
 
       <LeagueSwitch leagues={leagues} value={leagueCode} onChange={setLeagueCode} allowAll />
       {pending && <p className="small muted">{pending}</p>}
@@ -57,13 +66,13 @@ export function PicksPage() {
           className={tab === "upcoming" ? "tab-button tab-button-active" : "tab-button"}
           onClick={() => setTab("upcoming")}
         >
-          Próxima jornada
+          {t("picks:page.tabUpcoming")}
         </button>
         <button
           className={tab === "history" ? "tab-button tab-button-active" : "tab-button"}
           onClick={() => setTab("history")}
         >
-          Histórico
+          {t("picks:page.tabHistory")}
         </button>
       </div>
 
@@ -73,28 +82,28 @@ export function PicksPage() {
 }
 
 function UpcomingPicks({ league }: { league: string | undefined }) {
+  const { t } = useTranslation();
   const { data, loading, error } = useApi(() => getPicks(league), [league]);
   const tiers = data?.combos.filter((c) => c.kind !== "mismo_partido") ?? [];
   const sameMatch = data?.combos.filter((c) => c.kind === "mismo_partido") ?? [];
 
   return (
     <>
-      {loading && <LoadingView label="Cargando picks..." />}
-      {error && <ErrorView message={`No se pudo conectar con la API: ${error}`} />}
-      {!loading && !error && data && data.combos.length === 0 && (
-        <EmptyView message="Todavía no hay picks para la próxima jornada. Se generan con scripts/refresh_picks.py (mejor después de refresh_odds.py, para tener las cuotas)." />
-      )}
+      {loading && <LoadingView label={t("picks:page.loading")} />}
+      {error && <ErrorView message={t("common:error.api", { error })} />}
+      {!loading && !error && data && data.combos.length === 0 && <EmptyView message={t("picks:page.empty")} />}
 
       {!loading && !error && data && data.combos.length > 0 && (
         <>
           <p className="small muted intro-note">
-            Jornada del <strong>{data.window && formatWindow(data.window)}</strong>. La probabilidad es la del modelo,
-            que en el backtest fuera de muestra acertó lo que prometía (ver Histórico). Las cuotas marcadas como{" "}
-            <em>estimadas</em> no son de ninguna casa: compáralas con la tuya. Si tu casa paga más, mejor para ti; si
-            paga menos, la combinada te sale peor de lo que parece.
+            <Trans
+              i18nKey="picks:page.upcomingNote"
+              values={{ window: data.window ? formatWindow(data.window) : "" }}
+              components={{ bold: <strong />, em: <em /> }}
+            />
           </p>
 
-          <h2 className="picks-heading">Combinadas por nivel</h2>
+          <h2 className="picks-heading">{t("picks:page.byLevel")}</h2>
           <div className="picks-grid">
             {TIER_KINDS.map((kind) => {
               const combo = tiers.find((c) => c.kind === kind);
@@ -103,7 +112,7 @@ function UpcomingPicks({ league }: { league: string | undefined }) {
               ) : (
                 <div key={kind} className="pick-card pick-card-empty">
                   <h3>{PICK_KIND_LABELS[kind]}</h3>
-                  <p className="small muted">No hay selecciones suficientes para este nivel en esta jornada.</p>
+                  <p className="small muted">{t("picks:page.levelEmpty")}</p>
                 </div>
               );
             })}
@@ -111,8 +120,8 @@ function UpcomingPicks({ league }: { league: string | undefined }) {
 
           {sameMatch.length > 0 && (
             <>
-              <h2 className="picks-heading">Una combinada muy probable por partido</h2>
-              <p className="small muted">{TIER_HINTS.mismo_partido}. Las selecciones del mismo partido no son independientes: la probabilidad ya lo tiene en cuenta.</p>
+              <h2 className="picks-heading">{t("picks:page.sameMatchTitle")}</h2>
+              <p className="small muted">{t("picks:page.sameMatchNote", { hint: tierHint("mismo_partido") })}</p>
               <div className="picks-grid picks-grid-small">
                 {sameMatch.map((combo) => (
                   <ComboCard key={combo.id} combo={combo} compact />
@@ -126,15 +135,19 @@ function UpcomingPicks({ league }: { league: string | undefined }) {
   );
 }
 
+const ODDS_KIND_KEYS: Record<string, string> = { real: "real", derivada: "derived", estimada: "estimated" };
+
 function OddsTag({ kind }: { kind: string }) {
+  const { t } = useTranslation();
   return (
     <span className={`odds-tag odds-tag-${kind}`} title={ODDS_KIND_TITLES[kind]}>
-      {kind}
+      {ODDS_KIND_KEYS[kind] ? t(`picks:oddsKindTag.${ODDS_KIND_KEYS[kind]}`) : kind}
     </span>
   );
 }
 
 function LegRow({ leg, showMatch, settled }: { leg: PickLeg; showMatch: boolean; settled: boolean }) {
+  const { t } = useTranslation();
   const unit = pickLegUnit(leg);
   return (
     <li className={settled ? `pick-leg pick-leg-${leg.outcome}` : "pick-leg"}>
@@ -147,15 +160,13 @@ function LegRow({ leg, showMatch, settled }: { leg: PickLeg; showMatch: boolean;
           </Link>
         )}
         {settled && leg.actual && (
-          <span className="small muted">
-            Real: {leg.actual} {unit}
-          </span>
+          <span className="small muted">{t("picks:combo.actual", { actual: leg.actual, unit })}</span>
         )}
       </div>
       <div className="pick-leg-numbers">
         <span className="pick-leg-prob">{pct(leg.prob)}</span>
         <span className="pick-leg-odds">
-          {leg.odds.toFixed(2)} <OddsTag kind={leg.odds_kind} />
+          {formatFixed(leg.odds, 2)} <OddsTag kind={leg.odds_kind} />
         </span>
       </div>
     </li>
@@ -163,6 +174,7 @@ function LegRow({ leg, showMatch, settled }: { leg: PickLeg; showMatch: boolean;
 }
 
 function ComboCard({ combo, compact = false }: { combo: PickCombo; compact?: boolean }) {
+  const { t } = useTranslation();
   const settled = combo.outcome !== "pending";
   const first = combo.legs[0];
   return (
@@ -177,17 +189,17 @@ function ComboCard({ combo, compact = false }: { combo: PickCombo; compact?: boo
             )}
           </h3>
           <p className="small muted">
-            {compact ? joinParts(leagueName(first.league_code), formatMatchday(first.matchday), formatDateTime(first.date)) : TIER_HINTS[combo.kind]}
+            {compact ? joinParts(leagueName(first.league_code), formatMatchday(first.matchday), formatDateTime(first.date)) : tierHint(combo.kind)}
           </p>
         </div>
         <div className="pick-card-odds">
-          <span className="pick-card-odds-value">{combo.odds.toFixed(2)}</span>
+          <span className="pick-card-odds-value">{formatFixed(combo.odds, 2)}</span>
           <OddsTag kind={combo.odds_kind} />
         </div>
       </header>
       <p className="pick-card-prob">
-        Probabilidad <strong>{pct(combo.prob)}</strong>
-        <span className="muted"> · acierta {oneInN(combo.prob)}</span>
+        <Trans i18nKey="picks:combo.probability" values={{ pct: pct(combo.prob) }} components={{ bold: <strong /> }} />
+        <span className="muted">{t("picks:combo.hits", { oneInN: oneInN(combo.prob) })}</span>
         {settled && (
           <>
             {" "}
@@ -205,37 +217,32 @@ function ComboCard({ combo, compact = false }: { combo: PickCombo; compact?: boo
 }
 
 function PicksHistoryView({ league }: { league: string | undefined }) {
+  const { t } = useTranslation();
   const [kind, setKind] = useState<PickKind | undefined>(undefined);
   const { data, loading, error } = useApi(() => getPicksHistory({ league, kind, limit: 40 }), [league, kind]);
 
   return (
     <>
-      {loading && <LoadingView label="Cargando histórico..." />}
-      {error && <ErrorView message={`No se pudo conectar con la API: ${error}`} />}
-      {!loading && !error && data && data.summary.length === 0 && (
-        <EmptyView message="Todavía no hay picks resueltos." />
-      )}
+      {loading && <LoadingView label={t("picks:history.loading")} />}
+      {error && <ErrorView message={t("common:error.api", { error })} />}
+      {!loading && !error && data && data.summary.length === 0 && <EmptyView message={t("picks:history.empty")} />}
 
       {!loading && !error && data && data.summary.length > 0 && (
         <>
           <p className="small muted intro-note">
-            Combinadas de 25/26 y 26/27 generadas con un modelo entrenado solo con temporadas anteriores, con reglas
-            fijadas antes de ver estos partidos, más las jornadas ya jugadas desde entonces. Se cuentan todas, también
-            las falladas. <strong>Compara el acierto con la probabilidad prometida</strong>: si se parecen, el modelo
-            es fiable. El ROI usa las cuotas mostradas, que en casi todas las combinadas son estimadas con un margen de
-            casa, así que es orientativo.
+            <Trans i18nKey="picks:history.note" components={{ bold: <strong /> }} />
           </p>
 
           <div className="table-scroll">
             <table className="predictions-table">
               <thead>
                 <tr>
-                  <th>Nivel</th>
-                  <th className="num">Combinadas</th>
-                  <th className="num">Acierto</th>
-                  <th className="num">Prometido</th>
-                  <th className="num">Cuota media</th>
-                  <th className="num">ROI (cuota mostrada)</th>
+                  <th>{t("picks:history.column.level")}</th>
+                  <th className="num">{t("picks:history.column.combos")}</th>
+                  <th className="num">{t("picks:history.column.hitRate")}</th>
+                  <th className="num">{t("picks:history.column.promised")}</th>
+                  <th className="num">{t("picks:history.column.avgOdds")}</th>
+                  <th className="num">{t("picks:history.column.roi")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -244,11 +251,11 @@ function PicksHistoryView({ league }: { league: string | undefined }) {
                     <td className="rec-match">{PICK_KIND_LABELS[s.kind]}</td>
                     <td className="num">{s.total}</td>
                     <td className="num">
-                      <strong>{s.hit_rate !== null ? `${s.hit_rate}%` : "—"}</strong>
+                      <strong>{s.hit_rate !== null ? withPercent(formatLocaleNumber(s.hit_rate)) : "—"}</strong>
                       <span className="muted small"> ({s.won}/{s.won + s.lost})</span>
                     </td>
-                    <td className="num">{s.predicted_hit_rate !== null ? `${s.predicted_hit_rate}%` : "—"}</td>
-                    <td className="num">{s.avg_odds?.toFixed(2) ?? "—"}</td>
+                    <td className="num">{s.predicted_hit_rate !== null ? withPercent(formatLocaleNumber(s.predicted_hit_rate)) : "—"}</td>
+                    <td className="num">{s.avg_odds != null ? formatFixed(s.avg_odds, 2) : "—"}</td>
                     <td className={`num ${s.roi_shown_odds !== null && s.roi_shown_odds >= 0 ? "ev-positive" : "ev-negative"}`}>
                       {formatRoiPct(s.roi_shown_odds)}
                     </td>
@@ -260,11 +267,11 @@ function PicksHistoryView({ league }: { league: string | undefined }) {
 
           <div className="filters">
             <select
-              aria-label="Nivel"
+              aria-label={t("picks:history.column.level")}
               value={kind ?? ""}
               onChange={(e) => setKind((e.target.value || undefined) as PickKind | undefined)}
             >
-              <option value="">Todos los niveles</option>
+              <option value="">{t("picks:history.allLevels")}</option>
               {(Object.keys(PICK_KIND_LABELS) as PickKind[]).map((k) => (
                 <option key={k} value={k}>
                   {PICK_KIND_LABELS[k]}
@@ -273,11 +280,11 @@ function PicksHistoryView({ league }: { league: string | undefined }) {
             </select>
           </div>
 
-          <h2 className="picks-heading">Últimas combinadas</h2>
+          <h2 className="picks-heading">{t("picks:history.latest")}</h2>
           <div className="picks-grid">
             {data.combos.map((combo) => (
               <div key={combo.id}>
-                <p className="small muted picks-window">Jornada {formatWindow(combo.window)}</p>
+                <p className="small muted picks-window">{t("picks:history.window", { window: formatWindow(combo.window) })}</p>
                 <ComboCard combo={combo} compact={combo.kind === "mismo_partido"} />
               </div>
             ))}

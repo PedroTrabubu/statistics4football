@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { getLeagueContextResults, getLeagueResults, getLeagueSeasons, getLeagues } from "../api/client";
 import { LeagueSwitch } from "../components/LeagueSwitch";
+import { PageHero } from "../components/PageHero";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
-import { TeamName } from "../components/TeamCrest";
-import { formatSeason, formatShortDate } from "../lib/format";
+import { TeamCrest, TeamName } from "../components/TeamCrest";
+import { formatFixed, formatSeason, formatShortDate, withPercent } from "../lib/format";
 import {
   MARKETS,
   average,
@@ -13,6 +15,7 @@ import {
   groupByReferee,
   groupByTeam,
   hitRate,
+  marketGroupLabel,
   type DetailValue,
   type HitRate,
   type MarketDef,
@@ -31,11 +34,8 @@ type SortMode = "pct" | "name";
 /** Por debajo de esto el porcentaje es poco fiable: se muestra atenuado. */
 const LOW_SAMPLE = 5;
 
-const LAST_N_OPTIONS: { value: number | null; label: string }[] = [
-  { value: null, label: "Toda la temporada" },
-  { value: 10, label: "Últimos 10" },
-  { value: 5, label: "Últimos 5" },
-];
+/** Partidos que se cuentan: toda la temporada o los últimos N. */
+const LAST_N_OPTIONS: (number | null)[] = [null, 10, 5];
 
 /** Mercados que tienen sentido por arbitro: los que dan lo mismo mirados
  * desde cualquiera de los dos equipos. */
@@ -45,10 +45,11 @@ const REFEREE_MARKETS = MARKETS.filter((m) => m.matchLevel);
  * partido" a "cada equipo" se mantiene la linea si existe en la variante). */
 const optionMemoryKey = (market: MarketDef) => market.family?.key ?? market.slug;
 
+/** Filas de botones; `label`: clave de su rotulo en markets:page. */
 const OPTION_ROWS: { row: MarketOption["row"]; label: string | null }[] = [
   { row: undefined, label: null },
-  { row: "over", label: "Más de" },
-  { row: "under", label: "Menos de" },
+  { row: "over", label: "over" },
+  { row: "under", label: "under" },
 ];
 const DEFAULT_REFEREE_MARKET = "tarjetas";
 
@@ -82,6 +83,7 @@ function MarketView({
   market: MarketDef;
   onMarketChange?: (slug: string) => void;
 }) {
+  const { t } = useTranslation();
   const [season, setSeason] = useState<string | undefined>(undefined);
   const [optionBySlug, setOptionBySlug] = useState<Record<string, string>>({});
   const [viewMode, setViewMode] = useState<ViewMode>("split");
@@ -174,20 +176,37 @@ function MarketView({
   const leagueViews = results && lastN === null ? groupByTeam(results).flatMap((t) => t.home) : null;
   const leagueRate = market.matchLevel && leagueViews ? hitRate(leagueViews, option) : null;
 
-  const seasonLabel = effectiveSeason ? formatSeason(effectiveSeason) : "esta temporada";
+  const seasonLabel = effectiveSeason ? formatSeason(effectiveSeason) : t("markets:page.thisSeason");
   // Partidos jugados sin arbitro en ninguna fuente: no cuentan para nadie.
   const withoutReferee = mode === "referee" && results ? results.filter((r) => !r.referee).length : 0;
   const hasMissing = rows.some((r) => r.overall.missing > 0);
-  const groupNoun = mode === "team" ? "equipo" : "árbitro";
+  const leagueAverage =
+    market.average && leagueViews ? average(leagueViews, market.average.value) : null;
 
   return (
     <div>
-      <h1>{mode === "team" ? market.title : "Árbitros"}</h1>
-      <p className="page-lead">
-        {mode === "team"
-          ? market.description
-          : "Cómo se comportan los partidos de cada árbitro: tarjetas, puntos de tarjeta, córners o goles. Solo mercados del partido completo, que no dependen de qué equipo sea local."}
-      </p>
+      <PageHero
+        eyebrow={[mode === "team" ? marketGroupLabel(market.group) : null, leagueName(leagueCode), seasonLabel]
+          .filter(Boolean)
+          .join(" · ")}
+        title={mode === "team" ? market.title : t("nav:referees")}
+        accentWords={mode === "team" ? 1 : 0}
+        lead={<p>{mode === "team" ? market.description : t("markets:page.refereesLead")}</p>}
+        aside={
+          <MarketHeroCard
+            loading={loading}
+            error={error}
+            rows={rows}
+            option={option}
+            league={leagueCode}
+            leagueRate={leagueRate}
+            seasonLabel={seasonLabel}
+            leagueAverage={
+              leagueAverage !== null ? { value: formatFixed(leagueAverage, 1), label: market.average?.label ?? "" } : null
+            }
+          />
+        }
+      />
 
       <LeagueSwitch leagues={leagues} value={leagueCode} onChange={(code) => code && setLeagueCode(code)} />
 
@@ -195,14 +214,14 @@ function MarketView({
         <input
           type="search"
           className="market-search"
-          aria-label={`Buscar ${groupNoun}`}
-          placeholder={`Buscar ${groupNoun}…`}
+          aria-label={t(`markets:page.search.${mode}`)}
+          placeholder={t(`markets:page.searchPlaceholder.${mode}`)}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
 
         {mode === "referee" && (
-          <select aria-label="Mercado" value={market.slug} onChange={(e) => onMarketChange?.(e.target.value)}>
+          <select aria-label={t("markets:page.market")} value={market.slug} onChange={(e) => onMarketChange?.(e.target.value)}>
             {REFEREE_MARKETS.map((m) => (
               <option key={m.slug} value={m.slug}>
                 {m.title}
@@ -212,7 +231,7 @@ function MarketView({
         )}
 
 
-        <select aria-label="Temporada" value={effectiveSeason ?? ""} onChange={(e) => setSeason(e.target.value)}>
+        <select aria-label={t("markets:page.season")} value={effectiveSeason ?? ""} onChange={(e) => setSeason(e.target.value)}>
           {seasons?.map((s) => (
             <option key={s} value={s}>
               {formatSeason(s)}
@@ -221,27 +240,27 @@ function MarketView({
         </select>
 
         <select
-          aria-label="Partidos"
+          aria-label={t("markets:page.matches")}
           value={lastN ?? ""}
           onChange={(e) => setLastN(e.target.value ? Number(e.target.value) : null)}
         >
-          {LAST_N_OPTIONS.map((o) => (
-            <option key={o.label} value={o.value ?? ""}>
-              {o.label}
+          {LAST_N_OPTIONS.map((n) => (
+            <option key={n ?? "season"} value={n ?? ""}>
+              {n === null ? t("markets:page.wholeSeason") : t("markets:page.lastN", { n })}
             </option>
           ))}
         </select>
 
-        <select aria-label="Ordenar" value={sort} onChange={(e) => setSort(e.target.value as SortMode)}>
-          <option value="pct">Ordenar por %</option>
-          <option value="name">Ordenar por nombre</option>
+        <select aria-label={t("markets:page.sort")} value={sort} onChange={(e) => setSort(e.target.value as SortMode)}>
+          <option value="pct">{t("markets:page.sortPct")}</option>
+          <option value="name">{t("markets:page.sortName")}</option>
         </select>
       </div>
 
       {mode === "team" && variants.length > 1 && (
         <div className="filters">
           <label className="market-variant">
-            <span className="small muted">Estadística</span>
+            <span className="small muted">{t("markets:page.statistic")}</span>
             <select value={market.slug} onChange={(e) => navigate(`/mercados/${e.target.value}`)}>
               {variants.map((m) => (
                 <option key={m.slug} value={m.slug}>
@@ -259,8 +278,12 @@ function MarketView({
           if (rowOptions.length === 0) return null;
           return (
             <div key={row ?? "options"} className="market-option-row">
-              {label && <span className="market-option-label">{label}</span>}
-              <div className="tab-group market-options" role="group" aria-label={label ?? "Opción"}>
+              {label && <span className="market-option-label">{t(`markets:page.row.${label}`)}</span>}
+              <div
+                className="tab-group market-options"
+                role="group"
+                aria-label={label ? t(`markets:page.row.${label}`) : t("markets:page.option")}
+              >
                 {rowOptions.map((o) => (
                   <button
                     key={o.key}
@@ -278,20 +301,20 @@ function MarketView({
 
       <div className="filters">
         {mode === "team" && (
-          <div className="tab-group" role="group" aria-label="Vista">
+          <div className="tab-group" role="group" aria-label={t("markets:page.view")}>
             <button
               type="button"
               className={viewMode === "split" ? "tab-button tab-button-active" : "tab-button"}
               onClick={() => setViewMode("split")}
             >
-              Local / Visitante
+              {t("markets:page.viewSplit")}
             </button>
             <button
               type="button"
               className={viewMode === "all" ? "tab-button tab-button-active" : "tab-button"}
               onClick={() => setViewMode("all")}
             >
-              Todos los partidos
+              {t("markets:page.viewAll")}
             </button>
           </div>
         )}
@@ -299,15 +322,18 @@ function MarketView({
 
       {leagueRate && leagueRate.pct !== null && (
         <p className="small muted market-league-rate">
-          Media de la liga en {seasonLabel}: <strong>{Math.round(leagueRate.pct * 100)}%</strong> de los partidos (
-          {leagueRate.hits} de {leagueRate.total})
-          {market.average && leagueViews && average(leagueViews, market.average.value) !== null && (
-            <>
-              {" "}
-              · {average(leagueViews, market.average.value)!.toFixed(1)} {market.average.label}
-            </>
-          )}
-          .
+          <Trans
+            i18nKey={leagueAverage !== null ? "markets:page.leagueRateAverage" : "markets:page.leagueRate"}
+            values={{
+              season: seasonLabel,
+              pct: withPercent(String(Math.round(leagueRate.pct * 100))),
+              hits: leagueRate.hits,
+              total: leagueRate.total,
+              average: leagueAverage !== null ? formatFixed(leagueAverage, 1) : "",
+              label: market.average?.label ?? "",
+            }}
+            components={{ bold: <strong /> }}
+          />
         </p>
       )}
 
@@ -315,35 +341,38 @@ function MarketView({
 
       {!loading && !error && rows.length > 0 && withoutReferee > 0 && (
         <p className="small muted intro-note">
-          {withoutReferee === 1 ? "1 partido" : `${withoutReferee} partidos`} de {seasonLabel} no{" "}
-          {withoutReferee === 1 ? "tiene" : "tienen"} árbitro en las fuentes de datos y no{" "}
-          {withoutReferee === 1 ? "cuenta" : "cuentan"} para ningún árbitro: sus cifras pueden estar incompletas.
+          {t("markets:page.withoutReferee", { count: withoutReferee, season: seasonLabel })}
         </p>
       )}
 
-      {loading && <LoadingView label="Cargando partidos..." />}
-      {error && <ErrorView message={`No se pudo conectar con la API: ${error}`} />}
+      {loading && <LoadingView label={t("common:loading.matches")} />}
+      {error && <ErrorView message={t("common:error.api", { error })} />}
       {!loading && !error && rows.length === 0 && (
         <EmptyView
           message={
             mode === "referee" && results && results.length > 0
-              ? `No hay datos de árbitro para esta liga en ${seasonLabel}. Fuera de la Premier League, los árbitros vienen de ESPN, que no los tiene antes de la 21/22.`
-              : "No hay partidos jugados para esta liga y temporada."
+              ? t("markets:page.noRefereeData", { season: seasonLabel })
+              : t("markets:page.noMatches")
           }
         />
       )}
 
       {!loading && !error && rows.length > 0 && visible.length === 0 && (
-        <EmptyView message={`Ningún ${groupNoun} de esta liga coincide con «${query.trim()}». Prueba en otra liga.`} />
+        <EmptyView message={t(`markets:page.noSearchMatch.${mode}`, { query: query.trim() })} />
       )}
 
       {comparing.length > 0 && (
         <p className="small market-compare-note">
           {comparing.length === 2
-            ? `Comparando ${comparing.map((k) => rows.find((r) => r.group.key === k)!.group.name).join(" y ")}.`
-            : `Marca otro ${groupNoun} para compararlo con ${rows.find((r) => r.group.key === comparing[0])!.group.name}.`}{" "}
+            ? t("markets:page.comparing", {
+                first: rows.find((r) => r.group.key === comparing[0])!.group.name,
+                second: rows.find((r) => r.group.key === comparing[1])!.group.name,
+              })
+            : t(`markets:page.pickAnother.${mode}`, {
+                name: rows.find((r) => r.group.key === comparing[0])!.group.name,
+              })}{" "}
           <button type="button" className="link-button" onClick={() => setPicked([])}>
-            Quitar
+            {t("markets:page.clear")}
           </button>
         </p>
       )}
@@ -379,13 +408,108 @@ function MarketView({
 
       {!loading && !error && visible.length > 0 && (
         <p className="muted small">
-          Verde: se cumplió «{option.label}». Rojo: no se cumplió.
-          {market.detail && ` La columna de la derecha es: ${market.detail.label.toLowerCase()} (local - visitante).`}
-          {hasMissing && " Gris: el partido no tiene ese dato y no cuenta en el porcentaje."} Con menos de{" "}
-          {LOW_SAMPLE} partidos el porcentaje de un {groupNoun} aparece atenuado: es poco fiable, tómalo como
-          orientativo.
+          {[
+            t("markets:page.legend.hit", { option: option.label }),
+            market.detail ? t("markets:page.legend.detail", { detail: market.detail.inlineLabel }) : null,
+            hasMissing ? t("markets:page.legend.missing") : null,
+            t(`markets:page.legend.lowSample.${mode}`, { n: LOW_SAMPLE }),
+          ]
+            .filter(Boolean)
+            .join(" ")}
         </p>
       )}
+    </div>
+  );
+}
+
+/** Tarjeta del hero de Mercados: la media de la liga en un anillo y los tres
+ * mejores (equipos o árbitros) con la opción elegida, que llevan a su
+ * tarjeta más abajo. Así el dato principal se ve sin bajar. */
+function MarketHeroCard({
+  loading,
+  error,
+  rows,
+  option,
+  league,
+  leagueRate,
+  seasonLabel,
+  leagueAverage,
+}: {
+  loading: boolean;
+  error: string | null;
+  rows: { group: MatchGroup; overall: HitRate }[];
+  option: MarketOption;
+  league: string;
+  leagueRate: HitRate | null;
+  seasonLabel: string;
+  leagueAverage: { value: string; label: string } | null;
+}) {
+  const { t } = useTranslation();
+  if (error) return null;
+  if (loading) {
+    return (
+      <div className="hero-card side-card" aria-hidden="true">
+        <span className="sk" style={{ width: "50%", height: 14 }} />
+        <span className="sk" style={{ height: 88, borderRadius: 14 }} />
+        <span className="sk" style={{ height: 44, borderRadius: 12 }} />
+        <span className="sk" style={{ height: 44, borderRadius: 12 }} />
+        <span className="sk" style={{ height: 44, borderRadius: 12 }} />
+      </div>
+    );
+  }
+  const top = rows
+    .filter((r) => r.overall.pct !== null && r.overall.total >= LOW_SAMPLE)
+    .sort((a, b) => (b.overall.pct ?? 0) - (a.overall.pct ?? 0) || b.overall.total - a.overall.total)
+    .slice(0, 3);
+  if (top.length === 0 && !leagueRate) return null;
+  const leaguePct = leagueRate?.pct != null ? Math.round(leagueRate.pct * 100) : null;
+
+  return (
+    <div className="hero-card side-card">
+      <span className="hero-card-kicker">
+        {t("markets:page.option")}: {option.label}
+      </span>
+      {leaguePct !== null && leagueRate && (
+        <div className="side-card-league">
+          <span className="market-ring side-card-ring" style={{ "--pct": leaguePct } as CSSProperties} aria-hidden="true">
+            <strong>{withPercent(String(leaguePct))}</strong>
+          </span>
+          <p className="small">
+            <Trans
+              i18nKey={leagueAverage !== null ? "markets:page.leagueRateAverage" : "markets:page.leagueRate"}
+              values={{
+                season: seasonLabel,
+                pct: withPercent(String(leaguePct)),
+                hits: leagueRate.hits,
+                total: leagueRate.total,
+                average: leagueAverage?.value ?? "",
+                label: leagueAverage?.label ?? "",
+              }}
+              components={{ bold: <strong /> }}
+            />
+          </p>
+        </div>
+      )}
+      {top.map(({ group, overall }) => {
+        const pct = Math.round((overall.pct ?? 0) * 100);
+        return (
+          <a key={group.key} href={`#grupo-${group.key}`} className="side-card-row side-card-top">
+            <span className="side-card-row-teams">
+              {group.teamId !== null && <TeamCrest team={group.name} league={league} />}
+              <span>{group.name}</span>
+            </span>
+            <span className="side-card-top-figures">
+              <span className="num side-card-row-date">
+                {overall.hits}/{overall.total}
+              </span>
+              <strong>{withPercent(String(pct))}</strong>
+            </span>
+            <span className="side-card-top-bar" aria-hidden="true">
+              <span style={{ width: `${pct}%` }} />
+            </span>
+          </a>
+        );
+      })}
     </div>
   );
 }
@@ -413,23 +537,36 @@ function GroupCard({
   onToggle: () => void;
   domestic?: DomesticState;
 }) {
+  const { t } = useTranslation();
   const all = take(group.all);
   const avg = market.average ? average(all, market.average.value) : null;
 
   return (
-    <section className="market-team">
+    <section className="market-team" id={`grupo-${group.key}`}>
       <header className="market-team-header">
-        <div>
-          {/* Por equipo, con su escudo; por arbitro, solo el nombre. */}
-          <h2>{group.teamId !== null ? <TeamName team={group.name} league={league} size="md" /> : group.name}</h2>
-          <label className="market-compare small">
-            <input type="checkbox" checked={checked} onChange={onToggle} /> Comparar
-          </label>
-          {avg !== null && market.average && (
-            <p className="small muted market-average">
-              {avg.toFixed(1)} {market.average.label}
-            </p>
-          )}
+        <div className="market-team-title">
+          {/* Anillo con el % de acierto alrededor del escudo (o vacio, por arbitro). */}
+          <span
+            className={overall.total < LOW_SAMPLE ? "market-ring is-low" : "market-ring"}
+            style={{ "--pct": Math.round((overall.pct ?? 0) * 100) } as CSSProperties}
+            aria-hidden="true"
+          >
+            {group.teamId !== null && <TeamCrest team={group.name} league={league} size="sm" />}
+          </span>
+          <div>
+            <h2>{group.name}</h2>
+            <div className="market-team-meta">
+              <FormStrip views={all} option={option} />
+              <label className="market-compare small">
+                <input type="checkbox" checked={checked} onChange={onToggle} /> {t("markets:page.compare")}
+              </label>
+            </div>
+            {avg !== null && market.average && (
+              <p className="small muted market-average">
+                {t("markets:page.average", { value: formatFixed(avg, 1), label: market.average.label })}
+              </p>
+            )}
+          </div>
         </div>
         <RateBar rate={overall} />
       </header>
@@ -438,6 +575,21 @@ function GroupCard({
 
       {domestic && <DomesticMatches state={domestic} market={market} option={option} view={view} take={take} />}
     </section>
+  );
+}
+
+/** Racha de la tarjeta: un cuadrito por partido, del mas antiguo al mas
+ * reciente (como mucho los ultimos 12), verde si se cumplio y rojo si no. */
+function FormStrip({ views, option }: { views: TeamMatchView[]; option: MarketOption }) {
+  const recent = views.slice(0, 12).reverse();
+  if (recent.length === 0) return null;
+  return (
+    <span className="market-form" aria-hidden="true">
+      {recent.map((v) => {
+        const hit = option.hit(v);
+        return <span key={v.match.id} className={hit === null ? "is-unknown" : hit ? "is-hit" : "is-miss"} />;
+      })}
+    </span>
   );
 }
 
@@ -455,13 +607,14 @@ function GroupMatches({
   view: ViewMode;
   take: (views: TeamMatchView[]) => TeamMatchView[];
 }) {
+  const { t } = useTranslation();
   if (view === "all") {
     return <MatchList views={take(group.all)} market={market} option={option} teamId={group.teamId} />;
   }
   return (
     <div className="market-team-split">
-      <MatchColumn title="Local" views={take(group.home)} market={market} option={option} teamId={group.teamId} />
-      <MatchColumn title="Visitante" views={take(group.away)} market={market} option={option} teamId={group.teamId} />
+      <MatchColumn title={t("markets:page.home")} views={take(group.home)} market={market} option={option} teamId={group.teamId} />
+      <MatchColumn title={t("markets:page.away")} views={take(group.away)} market={market} option={option} teamId={group.teamId} />
     </div>
   );
 }
@@ -489,26 +642,29 @@ function DomesticMatches({
   view: ViewMode;
   take: (views: TeamMatchView[]) => TeamMatchView[];
 }) {
+  const { t } = useTranslation();
   const { group } = state;
   const league = group?.all[0]?.match.league_code;
   const avg = group && market.average ? average(take(group.all), market.average.value) : null;
   return (
     <details className="market-domestic" onToggle={(e) => e.currentTarget.open && state.onOpen()}>
-      <summary>Ver en su liga{league ? `: ${leagueName(league)}` : ""}</summary>
+      <summary>
+        {league ? t("markets:page.domestic.titleLeague", { league: leagueName(league) }) : t("markets:page.domestic.title")}
+      </summary>
       {state.error ? (
-        <p className="small muted">No se pudieron cargar sus partidos de liga: {state.error}</p>
+        <p className="small muted">{t("markets:page.domestic.error", { error: state.error })}</p>
       ) : state.loading ? (
-        <p className="small muted">Cargando sus partidos de liga...</p>
+        <p className="small muted">{t("markets:page.domestic.loading")}</p>
       ) : !group ? (
-        <p className="small muted">No tenemos su liga en los datos, o aún no ha jugado partidos de liga esta temporada.</p>
+        <p className="small muted">{t("markets:page.domestic.none")}</p>
       ) : (
         <>
           <div className="market-domestic-total">
             <div>
-              <h3>Total en {leagueName(league!)}</h3>
+              <h3>{t("markets:page.domestic.total", { league: leagueName(league!) })}</h3>
               {avg !== null && market.average && (
                 <p className="small muted market-average">
-                  {avg.toFixed(1)} {market.average.label}
+                  {t("markets:page.average", { value: formatFixed(avg, 1), label: market.average.label })}
                 </p>
               )}
             </div>
@@ -546,21 +702,27 @@ function MatchColumn({
 }
 
 function RateBar({ rate }: { rate: HitRate }) {
+  const { t } = useTranslation();
   if (rate.pct === null) {
-    return <div className="rate-bar rate-bar-empty">{rate.missing > 0 ? "Sin datos" : "Sin partidos"}</div>;
+    return (
+      <div className="rate-bar rate-bar-empty">{rate.missing > 0 ? t("markets:page.noData") : t("markets:page.noMatchesShort")}</div>
+    );
   }
 
   const yes = Math.round(rate.pct * 100);
   const low = rate.total < LOW_SAMPLE;
-  const summary = `${rate.hits} de ${rate.total} partidos${rate.missing > 0 ? ` (${rate.missing} sin datos)` : ""}`;
+  const summary =
+    rate.missing > 0
+      ? t("markets:page.rateSummaryMissing", { hits: rate.hits, count: rate.total, missing: rate.missing })
+      : t("markets:page.rateSummary", { hits: rate.hits, count: rate.total });
   return (
     <div className={low ? "rate rate-low" : "rate"} title={summary}>
-      <div className="rate-bar" aria-label={`${yes}%: ${summary}`}>
+      <div className="rate-bar" aria-label={t("markets:page.rateLabel", { pct: withPercent(String(yes)), summary })}>
         <div className="rate-bar-yes" style={{ width: `${yes}%` }}>
-          {yes >= 15 && `${yes}%`}
+          {yes >= 15 && withPercent(String(yes))}
         </div>
         <div className="rate-bar-no" style={{ width: `${100 - yes}%` }}>
-          {100 - yes >= 15 && `${100 - yes}%`}
+          {100 - yes >= 15 && withPercent(String(100 - yes))}
         </div>
       </div>
       <span className="rate-count">
@@ -581,8 +743,9 @@ function MatchList({
   option: MarketOption;
   teamId: number | null;
 }) {
+  const { t } = useTranslation();
   if (views.length === 0) {
-    return <p className="small muted market-empty">Sin partidos.</p>;
+    return <p className="small muted market-empty">{t("markets:page.noMatchesList")}</p>;
   }
 
   return (
@@ -621,9 +784,10 @@ function MatchList({
 }
 
 function RedCards({ count }: { count?: number }) {
+  const { t } = useTranslation();
   if (!count) return null;
   return (
-    <span className="red-card" title={count === 1 ? "Expulsión" : `${count} expulsiones`}>
+    <span className="red-card" title={t("markets:page.redCards", { count })}>
       {count > 1 ? count : ""}
     </span>
   );

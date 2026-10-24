@@ -1,30 +1,42 @@
 import { useEffect } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
-import { getMatch, getMatchHistory, getMatchPredictions, getMatchStats, getTeamSeasonStatsOrNull } from "../api/client";
+import {
+  getMatch,
+  getMatchHistory,
+  getMatchPredictions,
+  getMatchRecent,
+  getMatchStats,
+  getTeamSeasonStatsOrNull,
+} from "../api/client";
 import { MatchdayCarousel } from "../components/MatchdayCarousel";
 import { PredictionsTable } from "../components/PredictionsTable";
 import { ProbablePicks } from "../components/ProbablePicks";
+import { HeadToHead, RecentMatches } from "../components/RecentMatches";
 import { RefereePanel } from "../components/RefereePanel";
 import { SeasonStatsSummary } from "../components/SeasonStatsSummary";
 import { SectionNav } from "../components/SectionNav";
 import { ErrorView, LoadingView } from "../components/StatusView";
 import { StatsPanel } from "../components/StatsPanel";
 import { TeamCrest } from "../components/TeamCrest";
-import { formatDateTime, formatMatchday, formatSeason, joinParts } from "../lib/format";
+import { formatDateTime, formatMatchday, formatSeason } from "../lib/format";
 import { CHAMPIONS_LEAGUE_CODE, leagueName, useSelectedLeagueCode } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 
-/** Accesos directos bajo la cabecera, a cada bloque de la ficha. `short`: en
- * movil, para que quepan en dos filas. */
+/** Accesos directos bajo la cabecera, a cada bloque de la ficha (sus textos,
+ * en matches:detail.section.<clave>). `short`: en movil, para que quepan en
+ * dos filas. */
 const SECTIONS = [
-  { id: "forma", label: "Forma reciente", short: "Forma" },
-  { id: "arbitro", label: "Árbitro", short: "Árbitro" },
-  { id: "picks", label: "Picks muy probables", short: "Picks" },
-  { id: "probabilidades", label: "Probabilidades y valor esperado", short: "Probabilidades y EV" },
-  { id: "otros-partidos", label: "Otros partidos", short: "Otros partidos" },
+  { id: "forma", key: "form" },
+  { id: "h2h", key: "h2h" },
+  { id: "arbitro", key: "referee" },
+  { id: "picks", key: "picks" },
+  { id: "probabilidades", key: "probabilities" },
+  { id: "otros-partidos", key: "otherMatches" },
 ];
 
 export function MatchDetailPage() {
+  const { t } = useTranslation();
   const { matchId } = useParams<{ matchId: string }>();
   const [, setLeagueCode] = useSelectedLeagueCode();
   const id = Number(matchId);
@@ -48,6 +60,8 @@ export function MatchDetailPage() {
   // Partidos de la liga anteriores a este: patrones de los equipos y lo
   // habitual en la liga (picks muy probables y hechos del arbitro).
   const history = useApi(() => getMatchHistory(id), [id]);
+  // Los partidos de la forma y los enfrentamientos directos, uno a uno.
+  const recent = useApi(() => getMatchRecent(id), [id]);
   const { data: seasonStats, loading: loadingSeasonStats } = useApi(
     () =>
       match
@@ -59,8 +73,8 @@ export function MatchDetailPage() {
     [match?.home_team_id, match?.away_team_id],
   );
 
-  if (loadingMatch) return <LoadingView label="Cargando partido..." />;
-  if (matchError || !match) return <ErrorView message={`No se pudo cargar el partido: ${matchError}`} />;
+  if (loadingMatch) return <LoadingView label={t("matches:detail.loading")} />;
+  if (matchError || !match) return <ErrorView message={t("matches:detail.error", { error: matchError })} />;
 
   const played = match.status === "historical";
   // Sin cuotas de mercado (la Champions: Football-Data.co.uk no la cubre), ni EV ni «Valor».
@@ -69,16 +83,22 @@ export function MatchDetailPage() {
   return (
     <div>
       <Link to="/partidos" className="back-link">
-        ← Volver a partidos
+        {t("matches:detail.back")}
       </Link>
 
-      <p className="muted match-meta">
-        {joinParts(
+      <p className="match-meta">
+        {[
           leagueName(match.league_code),
-          `Temporada ${formatSeason(match.season)}`,
+          t("matches:detail.season", { season: formatSeason(match.season) }),
           formatMatchday(match.matchday, match.league_code),
-          formatDateTime(match.date),
-        )}
+        ]
+          .filter(Boolean)
+          .map((part) => (
+            <span key={part} className="match-meta-chip">
+              {part}
+            </span>
+          ))}
+        <span className="match-meta-chip is-date">{formatDateTime(match.date)}</span>
       </p>
 
       {/* Los escudos son los protagonistas de la cabecera. */}
@@ -97,15 +117,20 @@ export function MatchDetailPage() {
       </h1>
 
       <SectionNav
-        label="Secciones del partido"
-        sections={SECTIONS.filter((s) => s.id !== "otros-partidos" || match.matchday !== null).map((s) =>
-          s.id === "probabilidades" && !marketOdds ? { ...s, label: "Probabilidades", short: "Probabilidades" } : s,
-        )}
+        label={t("matches:detail.sectionsLabel")}
+        sections={SECTIONS.filter((s) => s.id !== "otros-partidos" || match.matchday !== null).map((s) => {
+          const key = s.id === "probabilidades" && !marketOdds ? "probabilitiesOnly" : s.key;
+          return {
+            id: s.id,
+            label: t(`matches:detail.section.${key}.label`),
+            short: t(`matches:detail.section.${key}.short`),
+          };
+        })}
       />
 
       <section className="detail-section" id="forma">
-        {loadingStats && <LoadingView label="Calculando estadísticas..." />}
-        {statsError && <ErrorView message={`No se pudieron calcular las estadísticas: ${statsError}`} />}
+        {loadingStats && <LoadingView label={t("matches:detail.statsLoading")} />}
+        {statsError && <ErrorView message={t("matches:detail.statsError", { error: statsError })} />}
         {stats && (
           <StatsPanel
             features={stats}
@@ -114,11 +139,21 @@ export function MatchDetailPage() {
             league={match.league_code}
           />
         )}
+        {recent.loading && <LoadingView label={t("matches:detail.recentLoading")} />}
+        {recent.error && <ErrorView message={t("matches:detail.recentError", { error: recent.error })} />}
+        {recent.data && <RecentMatches match={match} recent={recent.data} />}
+      </section>
+
+      <section className="detail-section" id="h2h">
+        <h2>{t("matches:detail.h2hTitle")}</h2>
+        {recent.loading && <LoadingView label={t("matches:detail.h2hLoading")} />}
+        {recent.error && <ErrorView message={t("matches:detail.h2hError", { error: recent.error })} />}
+        {recent.data && <HeadToHead match={match} recent={recent.data} />}
       </section>
 
       <section className="detail-section">
-        <h2>Estadísticas de temporada</h2>
-        {loadingSeasonStats && <LoadingView label="Cargando estadísticas de temporada..." />}
+        <h2>{t("matches:detail.seasonTitle")}</h2>
+        {loadingSeasonStats && <LoadingView label={t("matches:detail.seasonLoading")} />}
         {seasonStats && (
           <SeasonStatsSummary
             homeStats={seasonStats[0]}
@@ -133,18 +168,22 @@ export function MatchDetailPage() {
 
       <section className="detail-section" id="arbitro">
         <h2>
-          Árbitro
-          {match.referee && (
-            <>
-              :{" "}
-              <Link
-                to={`/arbitros?arbitro=${encodeURIComponent(match.referee)}`}
-                onClick={() => setLeagueCode(match.league_code)}
-                title="Ver sus estadísticas en Árbitros"
-              >
-                {match.referee}
-              </Link>
-            </>
+          {match.referee ? (
+            <Trans
+              i18nKey="matches:detail.refereeNamed"
+              values={{ name: match.referee }}
+              components={{
+                link: (
+                  <Link
+                    to={`/arbitros?arbitro=${encodeURIComponent(match.referee)}`}
+                    onClick={() => setLeagueCode(match.league_code)}
+                    title={t("matches:detail.refereeLinkTitle")}
+                  />
+                ),
+              }}
+            />
+          ) : (
+            t("matches:detail.referee")
           )}
         </h2>
         <RefereePanel match={match} history={history.data?.matches} />
@@ -153,31 +192,24 @@ export function MatchDetailPage() {
       {/* Justo antes del modelo: primero lo que se ha repetido, despues lo que
           estima el modelo para 1X2, más/menos 2.5 y ambos marcan. */}
       <section className="detail-section" id="picks">
-        <h2>Picks muy probables</h2>
+        <h2>{t("matches:detail.picksTitle")}</h2>
         <ProbablePicks match={match} history={history.data} loading={history.loading} error={history.error} />
       </section>
 
       <section className="detail-section" id="probabilidades">
         {marketOdds ? (
           <>
-            <h2>Probabilidades y valor esperado (EV)</h2>
-            <p className="muted">
-              El EV nunca se muestra solo: siempre va acompañado de un nivel de confianza y de riesgo.
-            </p>
+            <h2>{t("matches:detail.probabilitiesTitle")}</h2>
+            <p className="muted">{t("matches:detail.probabilitiesNote")}</p>
           </>
         ) : (
           <>
-            <h2>Probabilidades</h2>
-            <p className="muted">
-              No hay cuotas de mercado para esta competición, así que no se calcula el valor esperado ni se marca
-              ningún «Valor». Con tu cuota, «Tu EV» sí se calcula.
-            </p>
+            <h2>{t("matches:detail.probabilitiesOnlyTitle")}</h2>
+            <p className="muted">{t("matches:detail.probabilitiesOnlyNote")}</p>
           </>
         )}
-        {loadingPredictions && <LoadingView label="Generando predicciones..." />}
-        {predictionsError && (
-          <ErrorView message={`No se pudieron generar las predicciones: ${predictionsError}`} />
-        )}
+        {loadingPredictions && <LoadingView label={t("matches:detail.predictionsLoading")} />}
+        {predictionsError && <ErrorView message={t("matches:detail.predictionsError", { error: predictionsError })} />}
         {predictions && (
           <PredictionsTable
             predictions={predictions}
