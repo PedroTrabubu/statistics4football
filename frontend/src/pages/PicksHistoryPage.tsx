@@ -41,6 +41,7 @@ import {
   type Strength,
   type TeamRankKey,
 } from "../lib/patterns";
+import { nextPendingMatchday } from "../lib/matchdays";
 import { useApi } from "../lib/useApi";
 import {
   usePlayedPicks,
@@ -182,21 +183,7 @@ export function PicksHistoryPage() {
     [league?.id],
   );
   const nextSeason = nextInfo?.season ?? null;
-  // La primera jornada, desde la actual, con partidos aún por jugarse. Una
-  // jornada cuyos pendientes ya tenían que haberse jugado (cancelados o
-  // aplazados sin nueva fecha) no cuenta: si no, se quedaría ahí.
-  const nextMatchday = useMemo(() => {
-    if (!nextInfo) return null;
-    const recent = Date.now() - 3 * 3_600_000;
-    const utc = (d: string) => Date.parse(d.endsWith("Z") ? d : `${d}Z`);
-    const pending = nextInfo.matchdays.find(
-      (m) =>
-        m.matchday >= (nextInfo.current ?? 0) &&
-        m.played < m.total &&
-        utc(m.end) >= recent,
-    );
-    return pending?.matchday ?? nextInfo.current ?? null;
-  }, [nextInfo]);
+  const nextMatchday = useMemo(() => (nextInfo ? nextPendingMatchday(nextInfo) : null), [nextInfo]);
   const nextKey = league && nextSeason ? `${league.id}|${nextSeason}` : null;
   const nextMatches = useApi(
     () =>

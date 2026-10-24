@@ -134,6 +134,18 @@ export function IconMoon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Comparar: dos flechas enfrentadas (un equipo frente al otro). */
+export function IconCompare(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 8h13" />
+      <path d="M13.5 4.5L17 8l-3.5 3.5" />
+      <path d="M20 16H7" />
+      <path d="M10.5 12.5L7 16l3.5 3.5" />
+    </svg>
+  );
+}
+
 /** Marca de opción elegida (menús). */
 export function IconTick(props: SVGProps<SVGSVGElement>) {
   return (

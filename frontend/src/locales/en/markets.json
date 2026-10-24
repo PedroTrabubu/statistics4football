@@ -284,6 +284,15 @@
       }
     },
     "compare": "Compare",
+    "nextCompare": {
+      "button": "Compare next matchday's matches",
+      "loading": "Looking for the next matchday...",
+      "empty": "No matches left to play in this league.",
+      "error": "Couldn't load the matchday's matches: {{error}}",
+      "hint": "Pick a match to compare its two teams.",
+      "card": "Compare {{home}} and {{away}}",
+      "noData": "No matches this season: {{team}}"
+    },
     "average": "{{value}} {{label}}",
     "home": "Home",
     "away": "Away",

@@ -285,6 +285,15 @@
       }
     },
     "compare": "Comparer",
+    "nextCompare": {
+      "button": "Comparer les matchs de la prochaine journée",
+      "loading": "Recherche de la prochaine journée...",
+      "empty": "Aucun match à venir dans ce championnat.",
+      "error": "Impossible de charger les matchs de la journée : {{error}}",
+      "hint": "Choisissez un match pour comparer ses deux équipes.",
+      "card": "Comparer {{home}} et {{away}}",
+      "noData": "Aucun match cette saison : {{team}}"
+    },
     "average": "{{value}} {{label}}",
     "home": "Domicile",
     "away": "Extérieur",
