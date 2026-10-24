@@ -1,0 +1,153 @@
+{
+  "title": "Clasificación y estadísticas",
+  "lead": "Datos reales de partidos jugados: % over/under, ambos anotan, porterías a cero, descanso, corners y tarjetas, en total, como local, como visitante o en los últimos 5 partidos. Pulsa en una cabecera para ordenar por esa columna (otra vez para invertir el orden).",
+  "viewsLabel": "Columnas de la tabla",
+  "view": {
+    "standings": "Clasificación",
+    "goals": "Goles y descanso",
+    "corners": "Córners y tarjetas"
+  },
+  "split": {
+    "overall": "Total",
+    "home": "Local",
+    "away": "Visitante",
+    "last5": "Últimos 5"
+  },
+  "minMatches": "Mín. partidos",
+  "minMatchesAll": "Todos",
+  "heatmap": "Mapa de calor",
+  "form": {
+    "column": "Racha",
+    "columnTitle": "Últimos 5 partidos de la temporada, del más antiguo al más reciente",
+    "label": "Últimos resultados: {{results}}",
+    "win": {
+      "letter": "G",
+      "title": "Ganó"
+    },
+    "draw": {
+      "letter": "E",
+      "title": "Empató"
+    },
+    "loss": {
+      "letter": "P",
+      "title": "Perdió"
+    }
+  },
+  "noCorners": "Todavía no hay datos de corners ni tarjetas para la temporada {{season}}: la fuente que alimenta los partidos en curso (football-data.org, plan gratuito) no los incluye, solo resultados. Solo están disponibles en temporadas ya cerradas. Prueba con una temporada anterior en el selector de arriba.",
+  "noCornersSelected": "Todavía no hay datos de corners ni tarjetas para la temporada seleccionada: la fuente que alimenta los partidos en curso (football-data.org, plan gratuito) no los incluye, solo resultados. Solo están disponibles en temporadas ya cerradas. Prueba con una temporada anterior en el selector de arriba.",
+  "loading": "Cargando estadísticas...",
+  "empty": "No hay estadísticas para esta liga/temporada.",
+  "emptyFiltered": "Ningún equipo tiene al menos {{n}} partidos en esta vista.",
+  "team": "Equipo",
+  "group": {
+    "general": "General",
+    "goals": "Goles",
+    "halfTime": "Descanso",
+    "corners": "Córners",
+    "cards": "Tarjetas"
+  },
+  "column": {
+    "played": {
+      "label": "PJ",
+      "title": "Partidos jugados"
+    },
+    "won": {
+      "label": "G",
+      "title": "Ganados"
+    },
+    "drawn": {
+      "label": "E",
+      "title": "Empatados"
+    },
+    "lost": {
+      "label": "P",
+      "title": "Perdidos"
+    },
+    "goalsFor": {
+      "label": "GF",
+      "title": "Goles a favor"
+    },
+    "goalsAgainst": {
+      "label": "GC",
+      "title": "Goles en contra"
+    },
+    "goalDifference": {
+      "label": "DG",
+      "title": "Diferencia de goles"
+    },
+    "points": {
+      "label": "Pts",
+      "title": "Puntos"
+    },
+    "pointsPerGame": {
+      "label": "Pts/PJ",
+      "title": "Puntos por partido"
+    },
+    "goalsForPerGame": {
+      "label": "GF/PJ",
+      "title": "Goles a favor por partido"
+    },
+    "goalsAgainstPerGame": {
+      "label": "GC/PJ",
+      "title": "Goles en contra por partido"
+    },
+    "over15": {
+      "label": "+1,5",
+      "title": "% de partidos con más de 1,5 goles"
+    },
+    "over25": {
+      "label": "+2,5",
+      "title": "% de partidos con más de 2,5 goles"
+    },
+    "over35": {
+      "label": "+3,5",
+      "title": "% de partidos con más de 3,5 goles"
+    },
+    "btts": {
+      "label": "Ambos anotan",
+      "title": "% de partidos en los que marcan los dos equipos",
+      "short": "Ambos"
+    },
+    "cleanSheet": {
+      "label": "Portería a 0",
+      "title": "% de partidos sin encajar",
+      "short": "P. a 0"
+    },
+    "failedToScore": {
+      "label": "No marca",
+      "title": "% de partidos sin marcar"
+    },
+    "htOver05": {
+      "label": "+0,5 1ª parte",
+      "title": "% de partidos con algún gol en la 1ª parte"
+    },
+    "htWin": {
+      "label": "Gana al descanso",
+      "title": "% de partidos que llega ganando al descanso"
+    },
+    "cornersFor": {
+      "label": "A favor",
+      "title": "Media de corners a favor por partido",
+      "short": "Córn. +"
+    },
+    "cornersAgainst": {
+      "label": "En contra",
+      "title": "Media de corners en contra por partido",
+      "short": "Córn. −"
+    },
+    "yellowFor": {
+      "label": "Amarillas",
+      "title": "Media de amarillas vistas por partido",
+      "short": "Amar."
+    },
+    "yellowAgainst": {
+      "label": "Del rival",
+      "title": "Media de amarillas del rival por partido",
+      "short": "Amar. rival"
+    }
+  },
+  "legend": "# = posición en la clasificación de la vista elegida · PJ = partidos jugados · G/E/P = ganados/empatados/perdidos · GF/GC/DG = goles a favor/en contra/diferencia · Racha: G/E/P de los últimos 5 partidos, el más reciente a la derecha. En pantallas estrechas se ocultan algunas columnas; en un ordenador se ven todas. Descanso, corners y tarjetas se calculan solo con los partidos que traen ese dato. Con menos de {{n}} partidos (en gris, sin mapa de calor) los porcentajes son poco fiables — tómalos como orientativos, no como un patrón asentado.",
+  "hidden_one": "Oculto {{count}} equipo con menos de {{n}} partidos.",
+  "hidden_many": "Ocultos {{count}} equipos con menos de {{n}} partidos.",
+  "hidden_other": "Ocultos {{count}} equipos con menos de {{n}} partidos."
+}

@@ -1,0 +1,78 @@
+{
+  "intro": "Ce que signifie chaque terme que vous verrez sur les pages de match, sans supposer que vous le savez déjà.",
+  "basics": {
+    "title": "Fréquence, probabilité et valeur, ce n'est pas la même chose",
+    "frequency": {
+      "term": "Fréquence historique",
+      "def": "Combien de fois quelque chose s'est produit sur un nombre précis de matchs passés. C'est un décompte, pas une prédiction : « plus de 2,5 buts lors de 13 des 20 derniers matchs » est une fréquence."
+    },
+    "modelProbability": {
+      "term": "Probabilité du modèle",
+      "def": "Une estimation, calculée avec un modèle statistique (Dixon-Coles) qui tient compte de la force offensive et défensive de chaque équipe, pas seulement d'un simple décompte. Cela reste une estimation, pas un fait."
+    },
+    "value": {
+      "term": "Valeur (EV)",
+      "def": "Compare cette probabilité estimée à une cote précise. Un EV positif décrit un avantage attendu sur le long terme selon les hypothèses du modèle — il ne garantit pas de gagner le prochain pari, et une série de pertes avec un EV positif est parfaitement normale."
+    }
+  },
+  "markets": {
+    "title": "Marchés",
+    "oneXTwo": {
+      "term": "1X2",
+      "def": "Marché sur le résultat final : 1 (victoire de l'équipe à domicile), X (match nul) ou 2 (victoire de l'équipe à l'extérieur)."
+    },
+    "btts": {
+      "term": "BTTS (les deux équipes marquent)",
+      "def": "Si les deux équipes marquent au moins un but dans le match, oui ou non."
+    },
+    "overUnder": {
+      "term": "Over/Under 2,5",
+      "def": "Si le match se termine avec plus de 2,5 buts au total (over) ou avec 2,5 ou moins (under)."
+    },
+    "asianHandicap": {
+      "term": "Handicap asiatique",
+      "def": "Marché 1X2 avec un avantage ou un désavantage de buts appliqué à l'avance à l'une des équipes, pour équilibrer les chances."
+    },
+    "halfTime": {
+      "term": "Résultat à la mi-temps",
+      "def": "Le score à la fin de la première période, pas le résultat final."
+    }
+  },
+  "streaks": {
+    "title": "Séries",
+    "streak": {
+      "term": "Série",
+      "def": "Matchs consécutifs, en remontant depuis le plus récent, où une équipe (ou un arbitre) a rempli une condition : gagner, marquer, plus de 8,5 corners... Cela décrit ce qui s'est passé, pas ce qui va se passer."
+    },
+    "rarity": {
+      "term": "Rareté",
+      "def": "La difficulté de voir cette série par pur hasard si l'équipe était une équipe quelconque du championnat : le taux habituel du championnat pour cet événement, élevé à la puissance du nombre de matchs de la série. Gagner 8 fois de suite là où 40 % des matchs sont gagnés : 0,40<sup>8</sup> ≈ 1 sur 1 500, très rare. Une série de 9 pour quelque chose qui arrive 90 % du temps : 0,90<sup>9</sup> ≈ 1 sur 3, pas rare du tout. Ce n'est pas la probabilité que la série continue : cela suppose des matchs indépendants et une équipe moyenne, et une équipe au style marqué (qui tire beaucoup, qui commet beaucoup de fautes) peut avoir des séries très rares sans que ce soit une surprise."
+    }
+  },
+  "odds": {
+    "title": "Comment lire une cote",
+    "implied": {
+      "term": "Probabilité implicite",
+      "def": "La probabilité qu'une cote « suppose » si on la prend au pied de la lettre : 1 ÷ cote. Une cote de 2,00 implique 50 %."
+    },
+    "fair": {
+      "term": "Cote juste",
+      "def": "La cote qui correspondrait exactement à la probabilité du modèle, sans marge de l'opérateur : 1 ÷ probabilité du modèle. Elle sert de référence pour comparer, pas de cote que vous trouverez forcément quelque part."
+    },
+    "yourEv": {
+      "term": "Votre EV",
+      "def": "Quand vous saisissez la cote que vous propose votre opérateur à côté de la probabilité du modèle, la valeur attendue de cette combinaison précise est calculée. Elle n'est jamais enregistrée ni envoyée nulle part."
+    }
+  },
+  "risk": {
+    "title": "Confiance et risque",
+    "confidence": {
+      "term": "Confiance",
+      "def": "Dépend du nombre de matchs sur lesquels repose l'estimation pour ces deux équipes précises (et, s'il y a des cotes de plusieurs bookmakers, de leur degré d'accord). Avec peu de matchs disponibles, la confiance est faible même si le pourcentage calculé paraît net."
+    },
+    "level": {
+      "term": "Risque faible / moyen / élevé",
+      "def": "Il augmente quand la confiance est faible ou quand la cote est très élevée (variance plus forte), même si l'EV ponctuel est positif. Ce n'est pas une note de qualité de la donnée : c'est un signal de la variabilité possible du résultat réel."
+    }
+  }
+}

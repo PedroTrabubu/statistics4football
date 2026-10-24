@@ -1,0 +1,270 @@
+{
+  "page": {
+    "intro": "Les pourcentages affichés ici sont une <bold>fréquence historique</bold>, pas une promesse de ce qui va arriver : ils comptent combien de fois quelque chose s'est produit, toujours avec le nombre de matchs utilisés. Ce n'est pas une probabilité garantie. <link>En savoir plus sur leur lecture →</link>"
+  },
+  "detail": {
+    "loading": "Chargement du match...",
+    "error": "Impossible de charger le match : {{error}}",
+    "back": "← Retour aux matchs",
+    "season": "Saison {{season}}",
+    "sectionsLabel": "Sections du match",
+    "section": {
+      "form": {
+        "label": "Forme récente",
+        "short": "Forme"
+      },
+      "h2h": {
+        "label": "Confrontations directes",
+        "short": "Face-à-face"
+      },
+      "referee": {
+        "label": "Arbitre",
+        "short": "Arbitre"
+      },
+      "picks": {
+        "label": "Sélections très probables",
+        "short": "Sélections"
+      },
+      "probabilities": {
+        "label": "Probabilités et valeur attendue",
+        "short": "Probas et EV"
+      },
+      "probabilitiesOnly": {
+        "label": "Probabilités",
+        "short": "Probabilités"
+      },
+      "otherMatches": {
+        "label": "Autres matchs",
+        "short": "Autres matchs"
+      }
+    },
+    "statsLoading": "Calcul des statistiques...",
+    "statsError": "Impossible de calculer les statistiques : {{error}}",
+    "recentLoading": "Chargement des derniers matchs...",
+    "recentError": "Impossible de charger les derniers matchs : {{error}}",
+    "h2hTitle": "Confrontations directes",
+    "h2hLoading": "Chargement des confrontations directes...",
+    "h2hError": "Impossible de charger les confrontations directes : {{error}}",
+    "seasonTitle": "Statistiques de la saison",
+    "seasonLoading": "Chargement des statistiques de la saison...",
+    "referee": "Arbitre",
+    "refereeNamed": "Arbitre : <link>{{name}}</link>",
+    "refereeLinkTitle": "Voir ses statistiques dans Arbitres",
+    "picksTitle": "Sélections très probables",
+    "probabilitiesTitle": "Probabilités et valeur attendue (EV)",
+    "probabilitiesNote": "L'EV n'est jamais affiché seul : il est toujours accompagné d'un niveau de confiance et de risque.",
+    "probabilitiesOnlyTitle": "Probabilités",
+    "probabilitiesOnlyNote": "Il n'y a pas de cotes du marché pour cette compétition : la valeur attendue n'est donc pas calculée et aucune sélection n'est marquée « Valeur ». Avec votre propre cote, « Votre EV » est bien calculé.",
+    "predictionsLoading": "Calcul des prédictions...",
+    "predictionsError": "Impossible de calculer les prédictions : {{error}}"
+  },
+  "recent": {
+    "title": "Derniers matchs",
+    "scopeAll": "Tous",
+    "scopeVenue": "Domicile / Extérieur",
+    "scopeLabel": "Matchs des équipes",
+    "legend": "Buts, corners et cartons : pour-contre. D : domicile · E : extérieur.",
+    "none": {
+      "all": "Aucun match enregistré avant celui-ci.",
+      "home": "Aucun match à domicile enregistré avant celui-ci.",
+      "away": "Aucun match à l'extérieur enregistré avant celui-ci."
+    },
+    "record": {
+      "all_one": "Dernier match : <num>{{win}}V {{draw}}N {{loss}}P</num>",
+      "all_many": "{{count}} derniers matchs : <num>{{win}}V {{draw}}N {{loss}}P</num>",
+      "all_other": "{{count}} derniers matchs : <num>{{win}}V {{draw}}N {{loss}}P</num>",
+      "home_one": "Dernier match à domicile : <num>{{win}}V {{draw}}N {{loss}}P</num>",
+      "home_many": "{{count}} derniers à domicile : <num>{{win}}V {{draw}}N {{loss}}P</num>",
+      "home_other": "{{count}} derniers à domicile : <num>{{win}}V {{draw}}N {{loss}}P</num>",
+      "away_one": "Dernier match à l'extérieur : <num>{{win}}V {{draw}}N {{loss}}P</num>",
+      "away_many": "{{count}} derniers à l'extérieur : <num>{{win}}V {{draw}}N {{loss}}P</num>",
+      "away_other": "{{count}} derniers à l'extérieur : <num>{{win}}V {{draw}}N {{loss}}P</num>"
+    },
+    "column": {
+      "result": "Résultat",
+      "date": "Date",
+      "rival": "Adversaire",
+      "goals": "Buts",
+      "corners": "Corners",
+      "cards": "Cart."
+    },
+    "venue": {
+      "home": {
+        "title": "Domicile",
+        "label": "À domicile contre",
+        "letter": "D"
+      },
+      "away": {
+        "title": "Extérieur",
+        "label": "À l'extérieur contre",
+        "letter": "E"
+      }
+    },
+    "seeMatch": "Voir le match"
+  },
+  "h2h": {
+    "none": "Aucune confrontation précédente enregistrée entre les deux équipes.",
+    "lead_one": "La seule confrontation avant celle-ci, toutes saisons confondues.",
+    "lead_many": "Les {{count}} dernières confrontations avant celle-ci, toutes saisons confondues.",
+    "lead_other": "Les {{count}} dernières confrontations avant celle-ci, toutes saisons confondues.",
+    "scopeVenue": "Chez {{team}}",
+    "scopeLabel": "Confrontations directes",
+    "noneAtHome": "Aucune confrontation précédente chez {{team}}.",
+    "tile": {
+      "wins": "Victoires {{team}}",
+      "draws": "Nuls",
+      "goalsPerMatch": "Buts par match",
+      "over25": "Plus de 2,5 buts",
+      "btts": "Les deux équipes marquent",
+      "cornersPerMatch": "Corners par match",
+      "cardsPerMatch": "Cartons par match"
+    },
+    "column": {
+      "home": "Domicile",
+      "away": "Extérieur"
+    },
+    "halfTime": "À la mi-temps",
+    "legend": "Corners et cartons : domicile-extérieur de chaque match. Entre parenthèses, à la mi-temps."
+  },
+  "predictions": {
+    "empty": "Pas assez de statistiques pour calculer des prédictions sur ce match.",
+    "column": {
+      "selection": "Sélection",
+      "marketProb": "Proba marché",
+      "modelProb": "Proba modèle",
+      "fairOdds": "Cote juste",
+      "marketEv": "EV marché",
+      "sample": "Échantillon",
+      "risk": "Risque",
+      "yourOdds": "Votre cote",
+      "yourEv": "Votre EV"
+    },
+    "valueTag": "VALEUR",
+    "oddsPlaceholder": "ex. 1,80",
+    "oddsLabel": "Votre cote pour {{selection}}",
+    "implied": "implicite {{value}}",
+    "disclaimer": "« Cote juste » et « Votre EV » sont des estimations fondées sur la fréquence historique du modèle, pas une garantie de résultat. La cote que vous saisissez n'est ni enregistrée ni envoyée nulle part."
+  },
+  "referee": {
+    "notDesignated": "Arbitre pas encore désigné. Il est généralement annoncé 2 ou 3 jours avant le match ; il apparaîtra ici dès que les matchs seront synchronisés.",
+    "loading": "Chargement des statistiques de l'arbitre...",
+    "error": "Impossible de charger les statistiques de l'arbitre : {{error}}",
+    "column": {
+      "referee": "Arbitre ({{name}})",
+      "home": "{{team}} (domicile)",
+      "away": "{{team}} (extérieur)"
+    },
+    "average": {
+      "bookingPoints": "Points de cartons",
+      "for": "Pour",
+      "against": "Contre",
+      "cards": "Cartons"
+    },
+    "summary": {
+      "season_one": "<bold>{{count}}</bold> match précédent de {{name}} sur la saison {{season}}.",
+      "season_many": "<bold>{{count}}</bold> matchs précédents de {{name}} sur la saison {{season}}.",
+      "season_other": "<bold>{{count}}</bold> matchs précédents de {{name}} sur la saison {{season}}.",
+      "all_one": "<bold>{{count}}</bold> match précédent de {{name}} dans ce championnat, toutes saisons confondues.",
+      "all_many": "<bold>{{count}}</bold> matchs précédents de {{name}} dans ce championnat, toutes saisons confondues.",
+      "all_other": "<bold>{{count}}</bold> matchs précédents de {{name}} dans ce championnat, toutes saisons confondues."
+    },
+    "refereeScope": "Matchs de l'arbitre",
+    "scopeSeason": "Arbitre : saison {{season}}",
+    "scopeAll": "Arbitre : toutes les saisons",
+    "teamScope": "Matchs des équipes",
+    "teamAll": "Tous les matchs",
+    "teamVenue": "Domicile / Extérieur",
+    "noneSeason": "Aucun match précédent de {{name}} avec des données sur la saison {{season}}.",
+    "noneLeague": "Aucun match précédent de {{name}} avec des données dans ce championnat.",
+    "few_one": "Seulement {{count}} match précédent de {{name}} : échantillon réduit, à prendre comme une simple indication.",
+    "few_many": "Seulement {{count}} matchs précédents de {{name}} : échantillon réduit, à prendre comme une simple indication.",
+    "few_other": "Seulement {{count}} matchs précédents de {{name}} : échantillon réduit, à prendre comme une simple indication.",
+    "tryAllSeasons": "Essayez « toutes les saisons ».",
+    "details": "Voir toutes les moyennes et lignes de l'arbitre",
+    "averagesCaption": "Moyennes par match",
+    "matches": "Matchs",
+    "linesCaption": "% de matchs au-dessus de chaque ligne",
+    "section": {
+      "pointsMatch": "Points de cartons du match",
+      "pointsEach": "Points de cartons de chaque équipe",
+      "cardsMatch": "Cartons du match",
+      "cardsEach": "Cartons de chaque équipe"
+    },
+    "footnote": "Uniquement les matchs antérieurs à celui-ci. Les équipes : saison {{season}}. Points de cartons : jaune = 10, rouge = 25 (approximatif : la source ne distingue pas un rouge direct d'un second jaune). « Chaque équipe » = les deux équipes dépassent la ligne. Série = matchs consécutifs, en partant du plus récent, où la ligne a été dépassée.",
+    "factsTitle": "Avec ces équipes",
+    "factsNone": "Cet arbitre n'a pas encore assez de matchs avec ces équipes pour dégager des tendances.",
+    "factsNoneVenue": "Cet arbitre n'a pas encore assez de matchs avec ces équipes, dans le même stade qu'aujourd'hui, pour dégager des tendances.",
+    "smallSample": "Échantillon réduit : à prendre comme une simple indication.",
+    "refereeAverage_one": "Moyenne de l'arbitre sur son seul match : {{value}} {{label}}.",
+    "refereeAverage_many": "Moyenne de l'arbitre sur ses {{count}} matchs : {{value}} {{label}}.",
+    "refereeAverage_other": "Moyenne de l'arbitre sur ses {{count}} matchs : {{value}} {{label}}.",
+    "lineTitle_one": "{{hits}} sur {{count}} match",
+    "lineTitle_many": "{{hits}} sur {{count}} matchs",
+    "lineTitle_other": "{{hits}} sur {{count}} matchs",
+    "streak": "série de {{n}}"
+  },
+  "statsPanel": {
+    "title_one": "Forme récente ({{count}} dernier match)",
+    "title_many": "Forme récente ({{count}} derniers matchs)",
+    "title_other": "Forme récente ({{count}} derniers matchs)",
+    "points": "Points",
+    "wdl": "V-N-P",
+    "goals": "Buts pour/contre",
+    "xgFor": "xG pour (moy.)",
+    "xgAgainst": "xG contre (moy.)",
+    "cornersFor": "Corners pour (moy.)",
+    "cornersAgainst": "Corners contre (moy.)",
+    "yellowCards": "Cartons jaunes (moy.)",
+    "redCards": "Cartons rouges (moy.)",
+    "elo": "Classement Elo",
+    "noDiscipline": "Pas encore de données de corners ni de cartons pour ces équipes sur la période analysée."
+  },
+  "seasonSummary": {
+    "noData": "Aucune des deux équipes n'a encore de match joué enregistré (saison qui vient de commencer ou équipe tout juste promue).",
+    "season": "Saison {{season}} · données réelles des matchs déjà joués.",
+    "played": "Matchs joués",
+    "pointsPerGame": "Points par match",
+    "over15": "Plus de 1,5 buts",
+    "over25": "Plus de 2,5 buts",
+    "btts": "Les deux équipes marquent",
+    "cleanSheet": "Clean sheet",
+    "fullTable": "Voir le classement complet →"
+  },
+  "browser": {
+    "season": "Saison",
+    "seasonOption": "Saison {{season}}",
+    "played": "{{played}}/{{total}} joués",
+    "previous": "Journée précédente",
+    "matchday": "Journée",
+    "next": "Journée suivante",
+    "estimated": "Journées déduites des dates : la source de ce championnat ne les fournit pas et, lors des saisons avec beaucoup de reports, certaines peuvent ne pas correspondre à la numérotation officielle.",
+    "empty": "Aucun match chargé pour cette saison."
+  },
+  "carousel": {
+    "title": "Autres matchs de la journée {{n}}",
+    "titleRound": "Autres matchs · {{round}}",
+    "previous": "Matchs précédents",
+    "next": "Matchs suivants",
+    "loading": "Chargement de la journée...",
+    "error": "Impossible de charger les matchs de la journée : {{error}}",
+    "empty": "Aucun autre match lors de cette journée.",
+    "cardPlayed": "{{home}} {{homeGoals}} - {{awayGoals}} {{away}}",
+    "cardScheduled": "{{home}} contre {{away}}"
+  },
+  "status": {
+    "played": "Joué",
+    "scheduled": "À venir"
+  },
+  "outcome": {
+    "letter": {
+      "win": "V",
+      "draw": "N",
+      "loss": "P"
+    },
+    "label": {
+      "win": "Victoire",
+      "draw": "Nul",
+      "loss": "Défaite"
+    }
+  }
+}

@@ -1,0 +1,515 @@
+{
+  "page": {
+    "lead": "Paste your Winamax or bet365 history and see where you win and where you lose money, year by year: by odds, bet type, sport, market, stake and habits.",
+    "empty": "You haven't imported any bets yet."
+  },
+  "import": {
+    "privacy": "<bold>Privacy:</bold> your history is analysed in your browser and stored only there. It isn't sent to any server. That's why it's worth <bold>downloading a backup</bold> now and then: if you clear your browser data or change computer, you can get it back with ‘Restore backup’.",
+    "placeholder": "Paste the HTML of your Winamax or bet365 history here (or the text of a backup)…",
+    "textareaLabel": "Betting history HTML",
+    "analyze": "Analyse",
+    "upload": "Upload .html file",
+    "download": "Download backup ({{n}})",
+    "restore": "Restore backup",
+    "clear": "Delete my data",
+    "close": "Close",
+    "confirmClear": "Delete all the imported bets and the real money noted in this browser?",
+    "noBets": "I couldn't find any bets in that HTML. Make sure you copy the list from ‘Mis apuestas → Finalizadas’ on Winamax or the sports betting history on bet365 (see the steps below).",
+    "backupUnreadable": "The backup couldn't be read.",
+    "cleared": "All the bets saved in this browser have been deleted.",
+    "nothingNewBackup_one": "The only bet in the backup was already saved. Nothing has changed.",
+    "nothingNewBackup_other": "The {{count}} bets in the backup were already saved. Nothing has changed.",
+    "nothingNewHtml_one": "The only bet in this HTML was already saved. Nothing has changed.",
+    "nothingNewHtml_other": "The {{count}} bets in this HTML were already saved. Nothing has changed.",
+    "doneBackup_one": "Backup restored: I've read {{count}} bet.",
+    "doneBackup_other": "Backup restored: I've read {{count}} bets.",
+    "doneHtml_one": "Import done: I've read {{count}} bet.",
+    "doneHtml_other": "Import done: I've read {{count}} bets.",
+    "chip": {
+      "added_one": "<bold>{{count}}</bold> new",
+      "added_other": "<bold>{{count}}</bold> new",
+      "updated_one": "<bold>{{count}}</bold> updated",
+      "updated_other": "<bold>{{count}}</bold> updated",
+      "unchanged_one": "<bold>{{count}}</bold> repeated, unchanged",
+      "unchanged_other": "<bold>{{count}}</bold> repeated, unchanged",
+      "warnings_one": "<bold>{{count}}</bold> with incomplete data",
+      "warnings_other": "<bold>{{count}}</bold> with incomplete data",
+      "failed_one": "<bold>{{count}}</bold> couldn't be read",
+      "failed_other": "<bold>{{count}}</bold> couldn't be read"
+    },
+    "whatChanged": "What changed in the updated ones:",
+    "andMore": "…and {{n}} more.",
+    "total_one": "You now have <bold>{{count}}</bold> saved bet. In the table below, the ones from this import are tagged ‘New’ or ‘Updated’.",
+    "total_other": "You now have <bold>{{count}}</bold> saved bets. In the table below, the ones from this import are tagged ‘New’ or ‘Updated’.",
+    "notSaved": "Note: this browser doesn't allow saving them, so they'll be lost when you close the page.",
+    "combo": "Accumulator",
+    "comboTitle": "{{type}}: {{participants}}"
+  },
+  "backup": {
+    "ready_one": "Backup of {{count}} bet ready: <file>{{file}}</file>",
+    "ready_other": "Backup of {{count}} bets ready: <file>{{file}}</file>",
+    "help": "If it hasn't downloaded (some viewers, like VS Code's built-in browser, don't allow downloads), copy it and save it yourself in a <file>.json</file> file. To restore it, upload it with ‘Restore backup’ or paste the text into the box above and press ‘Analyse’.",
+    "copied": "Copied ✓",
+    "copy": "Copy to clipboard",
+    "label": "Backup"
+  },
+  "backupError": {
+    "notJson": "The file isn't a valid backup: it's not JSON.",
+    "notBackup": "The file isn't a ‘My bets’ backup.",
+    "noBets": "The backup doesn't contain any bets."
+  },
+  "howTo": {
+    "winamax": {
+      "title": "How to get your Winamax history",
+      "step1": "On Winamax, go to <bold>Mis apuestas → Finalizadas</bold> and scroll to the bottom so that all the bets you want to analyse load.",
+      "step2": "<bold>Option A:</bold> press Ctrl+S, choose ‘Webpage, Complete’ and upload the .html file here.",
+      "step3": "<bold>Option B:</bold> right-click the list → ‘Inspect’, right-click the highlighted element → ‘Copy → Copy element’ (outerHTML), and paste it above.",
+      "step4": "You can import several times: repeated bets aren't duplicated."
+    },
+    "bet365": {
+      "title": "How to get your bet365 history",
+      "step1": "On bet365, open your account's <bold>Historial</bold>, choose <bold>Apuestas deportivas</bold> and the dates you want, and scroll to the bottom so that they all load.",
+      "step2": "Same as with Winamax: save the page with Ctrl+S (‘Webpage, Complete’) and upload it, or copy the list element with ‘Inspect → Copy element’ and paste it above.",
+      "step3": "bet365 doesn't say in the history whether a bet won or lost: it's worked out from what was paid out. If you were paid less than the odds paid (cash out or a void selection), it shows as ‘Cash out’. Bets placed with bet credits count as free bets.",
+      "step4": "Singles only include the selection (‘Real Madrid’), without the match or the market, so they don't go into ‘By market’ or ‘Matches’."
+    }
+  },
+  "filter": {
+    "year": "Year",
+    "yearOption": "Year {{year}}",
+    "allYears": "All years",
+    "book": "Bookmaker",
+    "allBooks": "All bookmakers",
+    "sport": "Sport",
+    "allSports": "All sports",
+    "clearMonth": "Clear the month filter",
+    "month": "Month: {{month}}",
+    "noSettled": "No settled bets with these filters."
+  },
+  "period": {
+    "in": "in {{period}}",
+    "allYears": "across all years"
+  },
+  "hero": {
+    "label": "Summary",
+    "netProfit": "Net profit {{period}}",
+    "split": "Bets from your own balance {{own}} · with free bets {{freebet}}",
+    "wins_one": "<bold>{{count}}</bold> won",
+    "wins_other": "<bold>{{count}}</bold> won",
+    "losses_one": "<bold>{{count}}</bold> lost",
+    "losses_other": "<bold>{{count}}</bold> lost",
+    "cashouts": "<bold>{{n}}</bold> cash out",
+    "barLabel": "{{wins}}, {{losses}}",
+    "barLabelCashout": "{{wins}}, {{losses}} and {{cashouts}}",
+    "settled_one": "{{count}} settled = {{wins}} + {{losses}}",
+    "settled_other": "{{count}} settled = {{wins}} + {{losses}}",
+    "settledCashout_one": "{{count}} settled = {{wins}} + {{losses}} + {{cashouts}} cash out (they count towards the money, not the hit rate)",
+    "settledCashout_other": "{{count}} settled = {{wins}} + {{losses}} + {{cashouts}} cash out (they count towards the money, not the hit rate)",
+    "roi": "ROI",
+    "staked": "Total staked",
+    "stakedHint": "The sum of all your stakes (excluding free bets); money you reinvest counts several times. It's not what you've deposited.",
+    "hitVsOdds": "Hit rate vs your odds",
+    "versus": "vs",
+    "below": "below what they imply",
+    "above": "above what they imply",
+    "notCounted": "Not counted: {{items}}.",
+    "voids_one": "{{count}} void",
+    "voids_other": "{{count}} void",
+    "pending": "{{n}} unsettled",
+    "winsText_one": "{{count}} won",
+    "winsText_other": "{{count}} won",
+    "lossesText_one": "{{count}} lost",
+    "lossesText_other": "{{count}} lost",
+    "cashoutsText": "{{count}} cash out"
+  },
+  "column": {
+    "month": "Month",
+    "year": "Year",
+    "bets": "Bets",
+    "hitRate": "Hit rate",
+    "staked": "Staked",
+    "profit": "Profit",
+    "withoutPromo": "Without promotion",
+    "withPromo": "With promotion",
+    "roi": "ROI",
+    "market": "Market",
+    "selections": "Selections",
+    "won": "Won",
+    "category": "Category",
+    "implied": "Implied by odds",
+    "difference": "Difference",
+    "date": "Date",
+    "book": "Bookmaker",
+    "type": "Type",
+    "sport": "Sport",
+    "odds": "Odds",
+    "stake": "Stake",
+    "result": "Result"
+  },
+  "year": {
+    "title": "Year by year",
+    "note": "By calendar year, from 1 January to 31 December: that's the period over which gambling winnings are declared for income tax in Spain. Each bet counts in the year you placed it; one from late December that was settled in January could go into the following year. Profit includes winnings from free bets. Click a year to see only that year."
+  },
+  "sections": {
+    "label": "My bets sections",
+    "year": "Year by year",
+    "yearShort": "By year",
+    "month": "Month by month",
+    "monthShort": "By month",
+    "evolution": "Over time",
+    "realMoney": "Real money",
+    "leaks": "Where you lose most",
+    "leaksShort": "Where you lose",
+    "categories": "Odds, stake, sport…",
+    "categoriesShort": "Categories",
+    "promotions": "Promotions",
+    "habits": "Habits",
+    "teams": "Teams and tennis players",
+    "teamsShort": "Teams",
+    "bets": "Imported bets",
+    "betsShort": "Bets"
+  },
+  "fewBets_one": "There's only {{count}} settled bet: with so few, the percentages change a lot with each bet. Treat them as a rough guide.",
+  "fewBets_other": "There are only {{count}} settled bets: with so few, the percentages change a lot with each bet. Treat them as a rough guide.",
+  "month": {
+    "title": "Month by month",
+    "titleYear": "Month by month · {{year}}",
+    "note": "By the date you placed the bet. Click a month (on the chart or in the table) to see only that month in the rest of the page; click it again, or ‘Month ✕’ at the top, to clear the filter.",
+    "lowSample": "With fewer than {{n}} bets (in grey) the month is unreliable."
+  },
+  "evolution": {
+    "title": "Profit over time",
+    "titleYear": "Profit over time · {{year}}"
+  },
+  "leaks": {
+    "title": "Where you lose most",
+    "item": "<bold>{{dimension}}: {{group}}</bold> — <loss>{{profit}}</loss> over {{bets}} bets.",
+    "itemRates": "<bold>{{dimension}}: {{group}}</bold> — <loss>{{profit}}</loss> over {{bets}} bets (you win {{hitRate}} and their odds implied {{implied}})."
+  },
+  "breakdown": {
+    "odds": {
+      "title": "By odds",
+      "note": "The key column is the difference: how far your hit rate is above or below what the odds imply."
+    },
+    "type": {
+      "title": "Singles and accumulators"
+    },
+    "promotion": {
+      "title": "By promotion",
+      "note": "Winamax Supercuotas and promotions (Bang to the Moon, missions...) and bet365 boosts (odds and winnings). A bet with two promotions counts in both."
+    },
+    "sport": {
+      "title": "By sport"
+    },
+    "market": {
+      "title": "By market (single bets)",
+      "note": "Single bets only: in an accumulator there's no way of knowing which market made it win or lose."
+    },
+    "stake": {
+      "title": "By stake — all bets",
+      "note": "By the stake of each bet (free bets don't count). Each band starts at its amount: a €5 bet goes in ‘€5 – €9.99’."
+    },
+    "stakeWithoutFixed": {
+      "title": "By stake — without fixed-stake promotions ({{promotions}})",
+      "note": "Fixed-stake promotions concentrate bets on a single amount; without them you can see more clearly how you choose how much to stake. Both readings are valid."
+    },
+    "weekday": {
+      "title": "By day of the week"
+    },
+    "hour": {
+      "title": "By time of the bet"
+    },
+    "note": "With fewer than {{n}} bets (in grey) the row is unreliable. ROI is the profit per €100 staked (free bets don't count as stake); profit does include winnings from free bets."
+  },
+  "promotions": {
+    "title": "Promotions",
+    "item": "<bold>{{wins}} of {{decided}}</bold> won ({{pct}}) · profit <money>{{profit}}</money>"
+  },
+  "builder": {
+    "title": "Selections within ‘Crea tu apuesta’",
+    "note": "Winamax gives the result of each selection, so here you can see which ones fail. bet365 doesn't: its ‘Crear apuesta’ bets aren't included here."
+  },
+  "list": {
+    "title": "Imported bets",
+    "note": "To check they've been read correctly. Most recent first.",
+    "onlyLast": "Show only the new and updated bets from the last import ({{n}})",
+    "added": "New",
+    "updated": "Updated",
+    "boostedBet365": "(boosted odds)",
+    "boostedWinamax": "(Supercuota)",
+    "freebet": "free bet",
+    "showAll": "Show all {{n}} bets"
+  },
+  "status": {
+    "won": "Won",
+    "lost": "Lost",
+    "void": "Void",
+    "cashout": "Cash out",
+    "pending": "Pending",
+    "unknown": "Unknown"
+  },
+  "update": {
+    "status": "{{before}} → {{after}}",
+    "statusText": {
+      "won": "Won",
+      "lost": "Lost",
+      "void": "Void",
+      "cashout": "Cash out",
+      "pending": "Pending",
+      "unknown": "No status"
+    },
+    "complete": "Now read in full",
+    "money": "Stake or winnings corrected",
+    "odds": "Odds corrected",
+    "other": "Data corrected"
+  },
+  "format": {
+    "roiPer100": "{{amount}} per €100 staked"
+  },
+  "insight": {
+    "noRoi": "no ROI",
+    "roi": "ROI {{value}}",
+    "bestWorst": {
+      "sport": "By sport, you do best in {{best}} ({{bestProfit}}, {{bestRoi}}, {{bestBets}} bets) and worst in {{worst}} ({{worstProfit}}, {{worstRoi}}, {{worstBets}} bets).",
+      "market": "By market (single bets), you do best in {{best}} ({{bestProfit}}, {{bestRoi}}, {{bestBets}} bets) and worst in {{worst}} ({{worstProfit}}, {{worstRoi}}, {{worstBets}} bets)."
+    },
+    "promoGap": "With promotions you're at {{withProfit}} ({{withRoi}}) over {{withBets}} bets; without promotions, {{withoutProfit}} ({{withoutRoi}}) over {{withoutBets}}.",
+    "promoShare": {
+      "losing": "{{promo}} leaves you at {{profit}} over {{bets}} bets, even though overall you're at {{total}}.",
+      "moreThanAll": "{{promo}} brings in {{profit}} over {{bets}} bets, more than your whole profit ({{total}}).",
+      "overHalf": "More than half your profit comes from {{promo}}: {{profit}} of {{total}}, over {{bets}} bets."
+    },
+    "withoutPromo_one": "Without {{promo}}, your result would be {{profit}} ({{roi}}) over {{count}} bet.",
+    "withoutPromo_other": "Without {{promo}}, your result would be {{profit}} ({{roi}}) over {{count}} bets."
+  },
+  "bucket": {
+    "odds": {
+      "0": "1.01 – 1.49",
+      "1": "1.50 – 1.99",
+      "2": "2.00 – 2.49",
+      "3": "2.50 – 2.99",
+      "4": "3.00 – 3.99",
+      "5": "4.00 – 4.99",
+      "6": "5.00 – 9.99",
+      "7": "10.00 – 19.99",
+      "8": "20.00 – 29.99",
+      "9": "30.00 – 39.99",
+      "10": "40.00 or more"
+    },
+    "stake": {
+      "0": "Less than €1",
+      "1": "€1 – €1.99",
+      "2": "€2 – €2.99",
+      "3": "€3 – €3.99",
+      "4": "€4 – €4.99",
+      "5": "€5 – €9.99",
+      "6": "€10 – €19.99",
+      "7": "€20 – €29.99",
+      "8": "€30 – €39.99",
+      "9": "€40 or more"
+    }
+  },
+  "betType": {
+    "0": "Single",
+    "1": "Double",
+    "2": "Treble",
+    "3": "4-fold",
+    "4": "5-fold or more",
+    "5": "Other"
+  },
+  "weekday": {
+    "0": "Monday",
+    "1": "Tuesday",
+    "2": "Wednesday",
+    "3": "Thursday",
+    "4": "Friday",
+    "5": "Saturday",
+    "6": "Sunday"
+  },
+  "dayPart": {
+    "0": "Early hours (0–6h)",
+    "1": "Morning (6–14h)",
+    "2": "Afternoon (14–20h)",
+    "3": "Evening (20–24h)"
+  },
+  "noPromotion": "No promotion",
+  "marketFamily": {
+    "betBuilder": "Crea tu apuesta",
+    "corners": "Corners",
+    "cards": "Cards",
+    "btts": "Both teams to score",
+    "doubleChance": "Double chance",
+    "handicap": "Handicap",
+    "scorers": "Goalscorers / player",
+    "halves": "By half",
+    "tennisGames": "Games (tennis)",
+    "tennisSets": "Sets (tennis)",
+    "goals": "Goals",
+    "result": "Result / winner",
+    "other": "Other"
+  },
+  "sport": {
+    "football": "Football",
+    "tennis": "Tennis",
+    "basketball": "Basketball",
+    "handball": "Handball",
+    "volleyball": "Volleyball",
+    "iceHockey": "Ice hockey",
+    "americanFootball": "American football",
+    "rugby": "Rugby",
+    "baseball": "Baseball",
+    "esports": "Esports",
+    "golf": "Golf",
+    "boxing": "Boxing",
+    "mma": "MMA",
+    "cycling": "Cycling",
+    "darts": "Darts",
+    "snooker": "Snooker",
+    "tableTennis": "Table tennis",
+    "motor": "Motorsport",
+    "unknown": "Unknown",
+    "several": "Multiple"
+  },
+  "dimension": {
+    "odds": "Odds",
+    "betType": "Bet type",
+    "sport": "Sport",
+    "market": "Market (singles)",
+    "stake": "Stake",
+    "weekday": "Day",
+    "hour": "Time",
+    "promotion": "Promotion"
+  },
+  "warning": {
+    "noSelections": "The selections weren't found.",
+    "partialCredits": "Partly paid with bet credits: it's counted as your own money.",
+    "noReturn": "The payout wasn't found.",
+    "lessThanOdds": "Paid out less than the odds paid (cash out or a void selection).",
+    "noOdds": "The odds weren't found.",
+    "noStatus": "The bet status wasn't found.",
+    "noStake": "The stake wasn't found."
+  },
+  "lowSample": {
+    "title": "Fewer than {{n}} bets: unreliable figure",
+    "label": "unreliable"
+  },
+  "split": {
+    "label": "With and without promotion",
+    "note": "They add up to the total: {{withBets}} + {{withoutBets}} = {{totalBets}} bets · {{withProfit}} + {{withoutProfit}} = {{totalProfit}}. Here a bet with two promotions counts only once; in the ‘By promotion’ table it counts in each."
+  },
+  "evidence": {
+    "bets_one": "<bold>{{count}}</bold> bet",
+    "bets_other": "<bold>{{count}}</bold> bets",
+    "wins_one": "<bold>{{count}}</bold> won out of {{decided}} ({{pct}})",
+    "wins_other": "<bold>{{count}}</bold> won out of {{decided}} ({{pct}})",
+    "profit": "profit <money>{{profit}}</money>",
+    "breakEven": "Average odds {{odds}}: to break even you need a hit rate of <bold>{{pct}}</bold>.",
+    "interval": "Based on your bets, your real hit rate is between <bold>{{low}}</bold> and <bold>{{high}}</bold> (95% confidence interval, Wilson).",
+    "supported": "Even the low end of the interval is above the hit rate needed: the sample supports that, so far, this promotion has been profitable for you.",
+    "notSupported": "The low end of the interval doesn't reach the hit rate needed: there isn't enough evidence yet to say whether it's profitable.",
+    "past": "It describes your past bets; it doesn't guarantee what will happen."
+  },
+  "habits": {
+    "title": "Habits",
+    "all": "All bets",
+    "withoutPromo": "Without promotion only",
+    "stakes": "After a loss you stake <bold>{{afterLoss}}</bold> on average; after a win, <bold>{{afterWin}}</bold>.",
+    "chasing": "You raise your stake after losing, the classic sign of chasing losses.",
+    "notChasing": "You don't raise your stake after losing.",
+    "cases": "({{loss}} and {{win}} cases)",
+    "fixedNote": "Fixed-stake promotions (like La Gran Supercuota, always €10) change the average stake, so both readings are valid: the first is what you've done, the second better reflects how you choose your stake.",
+    "normal": "With a hit rate of 30–35%, long losing runs are normal.",
+    "expected": "With your hit rate ({{pct}}) and {{n}} bets, pure chance alone could give you a longest run of about {{streak}} losses in a row.",
+    "worst_one": "Worst run: <bold>{{count}}</bold> loss in a row",
+    "worst_other": "Worst run: <bold>{{count}}</bold> losses in a row",
+    "best_one": "best: <bold>{{count}}</bold> win in a row.",
+    "best_other": "best: <bold>{{count}}</bold> wins in a row."
+  },
+  "teams": {
+    "title": "Teams and tennis players",
+    "note": "How often you win on each team's or tennis player's matches, with at least 3 settled bets. Only single-match bets count (singles and ‘crea tu apuesta’): in a multi-match accumulator there's no way of knowing which match made it lose. Look at what the odds implied too: winning a lot with favourites is no credit if the odds already said so.",
+    "teams": "Teams",
+    "players": "Tennis players",
+    "won": "{{wins}} of {{decided}} won",
+    "implied": "The odds implied {{pct}} <gap>({{gap}})</gap>",
+    "profit": "Profit <bold>{{profit}}</bold>",
+    "roi": " · ROI {{roi}}",
+    "showAll": "Show all {{n}}"
+  },
+  "realMoney": {
+    "title": "Real money",
+    "titleYear": "Real money · {{year}}",
+    "note": "What your account has really won or lost in each calendar year, taken from the bookmaker's statement (on bet365, the account summary with dates from 1 January to 31 December: opening balance, deposits, withdrawals and closing balance). It's compared with the profit of your imported bets for that year, across all sports. It's stored only in this browser, it's included in the backup and it's deleted with ‘Delete my data’.",
+    "field": {
+      "opening": "Balance on 1 January",
+      "deposited": "Deposits",
+      "withdrawn": "Withdrawals",
+      "closing": "Balance on 31 December (or current balance)"
+    },
+    "save": "Save",
+    "emptyNote": "Empty fields count as 0. To delete the year, empty them all and save.",
+    "yearResult": "Real result for {{year}} (closing balance − opening balance − deposits + withdrawals): <bold>{{result}}</bold>",
+    "yearCalculated_one": "Profit calculated from your {{count}} {{book}} bet in {{year}}: <bold>{{profit}}</bold>",
+    "yearCalculated_other": "Profit calculated from your {{count}} {{book}} bets in {{year}}: <bold>{{profit}}</bold>",
+    "openingMismatch": "The balance on 1 January ({{opening}}) doesn't match the closing balance you noted for {{year}} ({{closing}}).",
+    "match": "They match: your imported bets explain the year's real result.",
+    "difference": "There's a difference of <bold>{{diff}}</bold>. It's common for them not to match exactly; some possible causes:",
+    "cause": {
+      "missing": "Bets still to be imported: the ones imported for this year run from {{from}} to {{to}}.",
+      "pending_one": "{{count}} unsettled bet: its stake has already left the balance, but it doesn't count in the calculation yet.",
+      "pending_other": "{{count}} unsettled bets: their stakes have already left the balance, but they don't count in the calculation yet.",
+      "bonuses": "Bonuses and account adjustments move the balance without being bets. Winnings from free bets and bet credits ({{freebet}}) are included in the calculation.",
+      "december": "Bets from late December that were settled in January (or the other way round).",
+      "otherProducts": "Other products on the same account (casino, poker) also change the balance."
+    },
+    "yearTotal": "Total for {{year}}: <bold>{{total}}</bold>",
+    "yearTotalBooks": "Total for {{year}} ({{books}}): <bold>{{total}}</bold>",
+    "notEntered": "not entered",
+    "noBets": "no bets",
+    "calculated": "Calculated from your bets with those bookmakers in {{year}}: {{calc}}.",
+    "missingBooks": "{{books}} still to be entered: the total doesn't include their result yet.",
+    "chooseYear": "Choose a year above to enter its statement.",
+    "totalReal": "Real total",
+    "resultReal": "Real result",
+    "calculatedColumn": "Calculated from your bets",
+    "missingTag": "{{books}} missing",
+    "missingCell": "missing",
+    "sumYears": "Sum of the years entered",
+    "summary": {
+      "one": {
+        "won": "In the years entered, you've made <bold>{{amount}}</bold> in real money.",
+        "lost": "In the years entered, you've lost <bold>{{amount}}</bold> in real money."
+      },
+      "books": {
+        "won": "In the years entered, across {{books}}, you've made <bold>{{amount}}</bold> in real money.",
+        "lost": "In the years entered, across {{books}}, you've lost <bold>{{amount}}</bold> in real money."
+      }
+    },
+    "incomplete": "Note: at least one year is incomplete (a bookmaker's statement is missing).",
+    "whole": {
+      "title": "{{book}} · whole account, no year",
+      "text_one": "What you noted before splitting by year: deposited {{deposited}}, withdrawn {{withdrawn}}, balance {{closing}}. Real result <result>{{result}}</result>, vs <profit>{{profit}}</profit> calculated from your {{count}} {{book}} bet.",
+      "text_other": "What you noted before splitting by year: deposited {{deposited}}, withdrawn {{withdrawn}}, balance {{closing}}. Real result <result>{{result}}</result>, vs <profit>{{profit}}</profit> calculated from your {{count}} {{book}} bets.",
+      "note": "It can't be split between years: enter each year's statement above and, once you have them, delete this entry.",
+      "confirm": "Delete the real money for the whole {{book}} account?",
+      "delete": "Delete this entry"
+    }
+  },
+  "chart": {
+    "profitLabel_one": "Cumulative profit: {{profit}} after {{count}} bet",
+    "profitLabel_other": "Cumulative profit: {{profit}} after {{count}} bets",
+    "profitTooltip": "Bet {{n}} of {{total}} · {{date}}",
+    "withoutPromo": "Without promotion",
+    "withPromo": "With promotion",
+    "monthTotal": "Month total",
+    "monthlyLabel": "Profit by month, without and with promotion",
+    "monthBar_one": "{{month}}: total {{total}}; without promotion {{without}}; with promotion {{with}}; {{count}} bet",
+    "monthBar_other": "{{month}}: total {{total}}; without promotion {{without}}; with promotion {{with}}; {{count}} bets",
+    "tooltipMonth_one": "{{month}} · {{count}} bet",
+    "tooltipMonth_other": "{{month}} · {{count}} bets",
+    "tooltipTotal": "Month total: {{total}}",
+    "tooltipWithout": "Without promotion: {{value}}",
+    "tooltipWith": "With promotion: {{value}}",
+    "tooltipLow": "Unreliable: fewer than {{n}} bets"
+  }
+}

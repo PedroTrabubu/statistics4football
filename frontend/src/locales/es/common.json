@@ -1,0 +1,106 @@
+{
+  "yes": "Sí",
+  "no": "No",
+  "listAnd": " y ",
+  "range": "{{from}} a {{to}}",
+  "today": "Hoy",
+  "tomorrow": "Mañana",
+  "matchday": "Jornada {{n}}",
+  "timeToBeConfirmed": "hora por confirmar",
+  "loading": {
+    "default": "Cargando...",
+    "matches": "Cargando partidos..."
+  },
+  "error": {
+    "unknown": "Error desconocido",
+    "api": "No se pudo conectar con la API: {{error}}"
+  },
+  "theme": {
+    "button": "Tema: {{theme}}",
+    "menu": "Tema de la web",
+    "option": {
+      "system": "Sistema",
+      "light": "Claro",
+      "dark": "Oscuro"
+    }
+  },
+  "language": {
+    "button": "Idioma: {{language}}",
+    "menu": "Idioma de la web"
+  },
+  "sample": {
+    "low": "Muestra baja",
+    "moderate": "Muestra moderada",
+    "wide": "Muestra amplia"
+  },
+  "dayTabs": {
+    "label": "Día",
+    "all": "Todos",
+    "noMatches": "Sin partidos este día"
+  },
+  "evFlag": {
+    "label": "revisar",
+    "title": "Un EV tan alto casi siempre indica que el modelo discrepa mucho del mercado (muestra pequeña, equipo con poco histórico...), no una oportunidad segura. Revisa la muestra antes de fiarte de este número."
+  },
+  "outcome": {
+    "won": "Acertó",
+    "lost": "Falló",
+    "pending": "Pendiente"
+  },
+  "risk": {
+    "low": "Riesgo bajo",
+    "medium": "Riesgo medio",
+    "high": "Riesgo alto"
+  },
+  "league": {
+    "label": "Liga",
+    "both": "Ambas",
+    "all": "Todas",
+    "championsLeague": {
+      "name": "Champions League",
+      "short": "Champions"
+    },
+    "pendingValidation": "Aún sin validar: {{leagues}}."
+  },
+  "country": {
+    "spain": "España",
+    "england": "Inglaterra",
+    "france": "Francia",
+    "germany": "Alemania",
+    "italy": "Italia",
+    "europe": "Europa",
+    "portugal": "Portugal",
+    "netherlands": "Países Bajos",
+    "belgium": "Bélgica",
+    "turkey": "Turquía",
+    "greece": "Grecia"
+  },
+  "championsRound": {
+    "playoffFirstLeg": "Playoff · ida",
+    "playoffSecondLeg": "Playoff · vuelta",
+    "roundOf16FirstLeg": "Octavos · ida",
+    "roundOf16SecondLeg": "Octavos · vuelta",
+    "quarterFinalFirstLeg": "Cuartos · ida",
+    "quarterFinalSecondLeg": "Cuartos · vuelta",
+    "semiFinalFirstLeg": "Semifinales · ida",
+    "semiFinalSecondLeg": "Semifinales · vuelta",
+    "final": "Final"
+  },
+  "betMarket": {
+    "overUnder": "Over/Under {{line}}",
+    "asianHandicap": "Hándicap asiático",
+    "btts": "Ambos anotan",
+    "doubleChance": "Doble oportunidad",
+    "teamScores": "Marca equipo"
+  },
+  "betSelection": {
+    "draw": "Empate",
+    "overGoals": "Más de {{line}} goles",
+    "underGoals": "Menos de {{line}} goles",
+    "homeOrDraw": "{{home}} o empate",
+    "drawOrAway": "Empate o {{away}}",
+    "homeOrAway": "{{home}} o {{away}}",
+    "teamScores": "Marca {{team}}",
+    "handicap": "{{team}} (hándicap)"
+  }
+}

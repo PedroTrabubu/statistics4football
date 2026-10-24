@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "title": "Statistics 4 Bets · Des statistiques de football pour comprendre chaque match",
+    "description": "Buts, corners, cartons, tirs, fautes et arbitres par équipe et par compétition, avec la fréquence historique derrière chaque pourcentage. Ce n'est pas un bookmaker."
+  },
+  "brandHome": "Statistics 4 Bets, accueil",
+  "mainNav": "Principale",
+  "seeMatches": "Voir les matchs",
+  "hero": {
+    "eyebrow": "Analyse statistique du football",
+    "title": "Des statistiques de football pour comprendre chaque match",
+    "lead": "Buts, corners, cartons, tirs, fautes et arbitres par équipe et par compétition, avec la fréquence historique derrière chaque pourcentage.",
+    "howToRead": "Comment lire les statistiques"
+  },
+  "leagues": {
+    "title": "Choisissez une compétition",
+    "subtitle": "Cliquez sur une carte pour voir ses prochains matchs.",
+    "galleryLabel": "Compétitions"
+  },
+  "preview": {
+    "title": "Prochains matchs · {{league}}",
+    "noData": "Pas encore de données pour {{league}}.",
+    "noUpcoming": "Aucun prochain match de {{league}} chargé pour l'instant.",
+    "more": "Voir tous les matchs →"
+  },
+  "skeleton": {
+    "league": "Compétition",
+    "home": "Équipe à domicile",
+    "away": "Équipe à l'extérieur"
+  },
+  "stats": {
+    "title": "Ce que vous pouvez analyser",
+    "subtitle": "Chaque statistique a sa page, avec le pourcentage de chaque équipe et les matchs sur lesquels il repose.",
+    "blurb": {
+      "goals": "Plus ou moins de buts dans le match, pour l'équipe ou pour l'adversaire.",
+      "goalsByHalf": "Les buts de la première et de la seconde période, séparément.",
+      "result": "Combien de fois chaque équipe gagne, fait match nul ou perd.",
+      "htFt": "Le résultat à la mi-temps croisé avec le résultat final.",
+      "cleanSheet": "Les matchs où l'équipe n'a encaissé aucun but.",
+      "corners": "Corners du match, de chaque équipe et handicap.",
+      "cards": "Cartons jaunes et rouges du match et de chaque équipe.",
+      "bookingPoints": "Jaune, 10 points ; rouge, 25 : le total par match.",
+      "shots": "Tirs au total, cadrés ou non, du match et de chaque équipe.",
+      "shotsOnTarget": "Uniquement les tirs cadrés, du match et de chaque équipe.",
+      "fouls": "Fautes commises dans le match et par chaque équipe.",
+      "referees": "Cartons, points de cartons, corners et buts selon l'arbitre."
+    }
+  },
+  "steps": {
+    "title": "Comment ça marche",
+    "chooseMatch": {
+      "title": "Choisissez une compétition et un match",
+      "text": "Commencez par la journée de votre championnat et ouvrez le match qui vous intéresse."
+    },
+    "checkSample": {
+      "title": "Regardez la statistique et son échantillon",
+      "text": "Chaque pourcentage est accompagné du nombre de matchs sur lequel il repose : au total, à domicile et à l'extérieur."
+    },
+    "interpret": {
+      "title": "Interprétez-la avec prudence",
+      "text": "C'est ce qui s'est passé, pas ce qui va se passer. Sur peu de matchs, un pourcentage élevé ne dit pas grand-chose."
+    }
+  },
+  "trust": {
+    "title": "Comment lire les pourcentages",
+    "text": "Les pourcentages de Statistics 4 Bets sont une <bold>fréquence historique</bold>, pas une promesse de ce qui va arriver : ils comptent combien de fois quelque chose s'est produit et doivent se lire avec le nombre de matchs utilisés. Un pourcentage élevé sur peu de matchs en dit beaucoup moins que le même pourcentage sur beaucoup de matchs.",
+    "link": "En savoir plus sur leur lecture →"
+  },
+  "final": {
+    "title": "Commencez par la prochaine journée"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "matches": "Partidos",
+  "standings": "Clasificación",
+  "picks": "Picks",
+  "probablePicks": "Picks probables",
+  "streaks": "Rachas",
+  "recommendations": "Recomendaciones",
+  "myBets": "Mis apuestas",
+  "glossary": "Glosario",
+  "referees": "Árbitros",
+  "openMenu": "Abrir menú",
+  "closeMenu": "Cerrar menú",
+  "marketsGroup": "Mercados: {{group}}"
+}

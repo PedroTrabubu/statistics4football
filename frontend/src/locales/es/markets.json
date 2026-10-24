@@ -1,0 +1,313 @@
+{
+  "group": {
+    "goals": "Goles",
+    "result": "Resultado",
+    "stats": "Estadísticas"
+  },
+  "option": {
+    "over": "Más de {{line}}",
+    "under": "Menos de {{line}}"
+  },
+  "halfTime": "Descanso",
+  "halfTimeInline": "descanso",
+  "outcome": {
+    "win": "Gana",
+    "draw": "Empata",
+    "lose": "Pierde"
+  },
+  "variant": {
+    "match": {
+      "label": "Total del partido",
+      "description": "{{base}} Total del partido: suma de los dos equipos."
+    },
+    "team": {
+      "label": "Del equipo",
+      "description": "{{base}} Del equipo: solo los del equipo de cada tarjeta."
+    },
+    "rival": {
+      "label": "Del rival",
+      "description": "{{base}} Del rival: los del equipo contrario en cada partido."
+    },
+    "each": {
+      "label": "Cada equipo",
+      "description": "{{base}} Cada equipo: los dos equipos por encima de la línea (o, en «Menos de», los dos por debajo)."
+    },
+    "handicap": {
+      "label": "Hándicap",
+      "description": "{{base}} Hándicap: se suma la línea a los del equipo y se compara con los del rival. «-1,5» = el equipo saca al menos 2 más que el rival; «+1,5» = el equipo no queda 2 o más por debajo del rival."
+    }
+  },
+  "stat": {
+    "goals": {
+      "label": "Goles",
+      "description": "Goles marcados.",
+      "title": {
+        "match": "Goles del partido",
+        "team": "Goles del equipo",
+        "rival": "Goles del rival",
+        "each": "Goles: cada equipo"
+      },
+      "average": {
+        "match": "goles por partido",
+        "team": "goles a favor por partido",
+        "rival": "goles en contra por partido"
+      }
+    },
+    "corners": {
+      "label": "Córners",
+      "description": "Córners lanzados.",
+      "detail": "Córners",
+      "detailInline": "córners",
+      "title": {
+        "match": "Córners del partido",
+        "team": "Córners del equipo",
+        "rival": "Córners del rival",
+        "each": "Córners: cada equipo",
+        "handicap": "Hándicap de córners"
+      },
+      "average": {
+        "match": "córners por partido",
+        "team": "córners a favor por partido",
+        "rival": "córners en contra por partido",
+        "handicap": "córners de diferencia por partido"
+      }
+    },
+    "cards": {
+      "label": "Tarjetas",
+      "description": "Tarjetas recibidas (amarillas + rojas); el cuadrado rojo junto a la cifra indica una expulsión.",
+      "detail": "Tarjetas",
+      "detailInline": "tarjetas",
+      "title": {
+        "match": "Tarjetas del partido",
+        "team": "Tarjetas del equipo",
+        "rival": "Tarjetas del rival",
+        "each": "Tarjetas: cada equipo"
+      },
+      "average": {
+        "match": "tarjetas por partido",
+        "team": "tarjetas a favor por partido",
+        "rival": "tarjetas en contra por partido"
+      }
+    },
+    "bookingPoints": {
+      "label": "Puntos de tarjeta",
+      "description": "Puntos de tarjeta: amarilla = 10, roja = 25.",
+      "detail": "Puntos",
+      "detailInline": "puntos",
+      "note": "Aproximado: la fuente no distingue una roja directa de una segunda amarilla, así que cada roja cuenta 25 y no 35.",
+      "title": {
+        "match": "Puntos de tarjeta del partido",
+        "team": "Puntos de tarjeta del equipo",
+        "rival": "Puntos de tarjeta del rival",
+        "each": "Puntos de tarjeta: cada equipo"
+      },
+      "average": {
+        "match": "puntos por partido",
+        "team": "puntos a favor por partido",
+        "rival": "puntos en contra por partido"
+      }
+    },
+    "shots": {
+      "label": "Tiros",
+      "description": "Tiros totales, a puerta o no.",
+      "detail": "Tiros",
+      "detailInline": "tiros",
+      "title": {
+        "match": "Tiros del partido",
+        "team": "Tiros del equipo",
+        "rival": "Tiros del rival",
+        "each": "Tiros: cada equipo"
+      },
+      "average": {
+        "match": "tiros por partido",
+        "team": "tiros a favor por partido",
+        "rival": "tiros en contra por partido"
+      }
+    },
+    "shotsOnTarget": {
+      "label": "Tiros a puerta",
+      "description": "Tiros a puerta.",
+      "detail": "Tiros a puerta",
+      "detailInline": "tiros a puerta",
+      "title": {
+        "match": "Tiros a puerta del partido",
+        "team": "Tiros a puerta del equipo",
+        "rival": "Tiros a puerta del rival",
+        "each": "Tiros a puerta: cada equipo"
+      },
+      "average": {
+        "match": "tiros a puerta por partido",
+        "team": "tiros a puerta a favor por partido",
+        "rival": "tiros a puerta en contra por partido"
+      }
+    },
+    "fouls": {
+      "label": "Faltas",
+      "description": "Faltas cometidas.",
+      "detail": "Faltas",
+      "detailInline": "faltas",
+      "title": {
+        "match": "Faltas del partido",
+        "team": "Faltas del equipo",
+        "rival": "Faltas del rival",
+        "each": "Faltas: cada equipo"
+      },
+      "average": {
+        "match": "faltas por partido",
+        "team": "faltas a favor por partido",
+        "rival": "faltas en contra por partido"
+      }
+    }
+  },
+  "market": {
+    "btts": {
+      "label": "Ambos marcan",
+      "title": "Ambos equipos marcan",
+      "description": "Partidos en los que marcaron los dos equipos (o, con «No», en los que al menos uno se quedó sin marcar).",
+      "option": {
+        "yes": "Sí",
+        "no": "No"
+      }
+    },
+    "bttsResult": {
+      "label": "Ambos marcan y resultado",
+      "title": "Ambos marcan y resultado",
+      "description": "Partidos en los que marcaron los dos equipos y, además, el equipo ganó, empató o perdió.",
+      "option": {
+        "win": "Y gana",
+        "draw": "Y empata",
+        "lose": "Y pierde"
+      }
+    },
+    "goalsByHalf": {
+      "label": "Goles por parte",
+      "title": "Goles por parte",
+      "description": "Goles de la primera y la segunda parte por separado. La columna extra es el marcador al descanso.",
+      "option": {
+        "goalFirstHalf": "Gol en la 1ª parte",
+        "over15FirstHalf": "Más de 1,5 en la 1ª",
+        "goalSecondHalf": "Gol en la 2ª parte",
+        "over15SecondHalf": "Más de 1,5 en la 2ª",
+        "moreInSecondHalf": "Más goles en la 2ª",
+        "teamScoresBothHalves": "El equipo marca en ambas partes"
+      }
+    },
+    "result": {
+      "label": "Resultado",
+      "title": "Resultado",
+      "description": "Resultado final del partido desde el punto de vista del equipo.",
+      "option": {
+        "win": "Gana",
+        "draw": "Empata",
+        "lose": "Pierde",
+        "winOrDraw": "Gana o empata",
+        "noWin": "No gana"
+      }
+    },
+    "htFt": {
+      "label": "Descanso / Final",
+      "title": "Descanso / Final",
+      "description": "Resultado al descanso y al final del partido desde el punto de vista del equipo. «Empata / Gana» = empataba al descanso y acabó ganando.",
+      "optionLabel": "{{ht}} / {{ft}}"
+    },
+    "cleanSheet": {
+      "label": "Portería a cero",
+      "title": "Portería a cero",
+      "description": "Partidos en los que el equipo no encajó ningún gol (o, con «No», en los que encajó al menos uno).",
+      "option": {
+        "yes": "Sí",
+        "no": "No"
+      }
+    },
+    "cornerDuel": {
+      "label": "Duelo de córners",
+      "title": "Duelo de córners",
+      "description": "Si el equipo saca más córners que su rival en el partido.",
+      "option": {
+        "win": "Saca más córners",
+        "draw": "Los mismos córners",
+        "winOrDraw": "Al menos los mismos córners"
+      }
+    }
+  },
+  "page": {
+    "thisSeason": "esta temporada",
+    "refereesLead": "Cómo se comportan los partidos de cada árbitro: tarjetas, puntos de tarjeta, córners o goles. Solo mercados del partido completo, que no dependen de qué equipo sea local.",
+    "search": {
+      "team": "Buscar equipo",
+      "referee": "Buscar árbitro"
+    },
+    "searchPlaceholder": {
+      "team": "Buscar equipo…",
+      "referee": "Buscar árbitro…"
+    },
+    "market": "Mercado",
+    "season": "Temporada",
+    "matches": "Partidos",
+    "wholeSeason": "Toda la temporada",
+    "lastN": "Últimos {{n}}",
+    "sort": "Ordenar",
+    "sortPct": "Ordenar por %",
+    "sortName": "Ordenar por nombre",
+    "statistic": "Estadística",
+    "row": {
+      "over": "Más de",
+      "under": "Menos de"
+    },
+    "option": "Opción",
+    "view": "Vista",
+    "viewSplit": "Local / Visitante",
+    "viewAll": "Todos los partidos",
+    "leagueRate": "Media de la liga en {{season}}: <bold>{{pct}}</bold> de los partidos ({{hits}} de {{total}}).",
+    "leagueRateAverage": "Media de la liga en {{season}}: <bold>{{pct}}</bold> de los partidos ({{hits}} de {{total}}) · {{average}} {{label}}.",
+    "withoutReferee_one": "{{count}} partido de {{season}} no tiene árbitro en las fuentes de datos y no cuenta para ningún árbitro: sus cifras pueden estar incompletas.",
+    "withoutReferee_many": "{{count}} partidos de {{season}} no tienen árbitro en las fuentes de datos y no cuentan para ningún árbitro: sus cifras pueden estar incompletas.",
+    "withoutReferee_other": "{{count}} partidos de {{season}} no tienen árbitro en las fuentes de datos y no cuentan para ningún árbitro: sus cifras pueden estar incompletas.",
+    "noRefereeData": "No hay datos de árbitro para esta liga en {{season}}. Fuera de la Premier League, los árbitros vienen de ESPN, que no los tiene antes de la 21/22.",
+    "noMatches": "No hay partidos jugados para esta liga y temporada.",
+    "noSearchMatch": {
+      "team": "Ningún equipo de esta liga coincide con «{{query}}». Prueba en otra liga.",
+      "referee": "Ningún árbitro de esta liga coincide con «{{query}}». Prueba en otra liga."
+    },
+    "comparing": "Comparando {{first}} y {{second}}.",
+    "pickAnother": {
+      "team": "Marca otro equipo para compararlo con {{name}}.",
+      "referee": "Marca otro árbitro para compararlo con {{name}}."
+    },
+    "clear": "Quitar",
+    "legend": {
+      "hit": "Verde: se cumplió «{{option}}». Rojo: no se cumplió.",
+      "detail": "La columna de la derecha es: {{detail}} (local - visitante).",
+      "missing": "Gris: el partido no tiene ese dato y no cuenta en el porcentaje.",
+      "lowSample": {
+        "team": "Con menos de {{n}} partidos el porcentaje de un equipo aparece atenuado: es poco fiable, tómalo como orientativo.",
+        "referee": "Con menos de {{n}} partidos el porcentaje de un árbitro aparece atenuado: es poco fiable, tómalo como orientativo."
+      }
+    },
+    "compare": "Comparar",
+    "average": "{{value}} {{label}}",
+    "home": "Local",
+    "away": "Visitante",
+    "domestic": {
+      "title": "Ver en su liga",
+      "titleLeague": "Ver en su liga: {{league}}",
+      "error": "No se pudieron cargar sus partidos de liga: {{error}}",
+      "loading": "Cargando sus partidos de liga...",
+      "none": "No tenemos su liga en los datos, o aún no ha jugado partidos de liga esta temporada.",
+      "total": "Total en {{league}}"
+    },
+    "noData": "Sin datos",
+    "noMatchesShort": "Sin partidos",
+    "noMatchesList": "Sin partidos.",
+    "rateSummary_one": "{{hits}} de {{count}} partido",
+    "rateSummary_many": "{{hits}} de {{count}} partidos",
+    "rateSummary_other": "{{hits}} de {{count}} partidos",
+    "rateSummaryMissing_one": "{{hits}} de {{count}} partido ({{missing}} sin datos)",
+    "rateSummaryMissing_many": "{{hits}} de {{count}} partidos ({{missing}} sin datos)",
+    "rateSummaryMissing_other": "{{hits}} de {{count}} partidos ({{missing}} sin datos)",
+    "rateLabel": "{{pct}}: {{summary}}",
+    "redCards_one": "Expulsión",
+    "redCards_many": "{{count}} expulsiones",
+    "redCards_other": "{{count}} expulsiones"
+  }
+}

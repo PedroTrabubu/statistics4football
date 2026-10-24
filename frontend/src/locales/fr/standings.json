@@ -1,0 +1,153 @@
+{
+  "title": "Classement et statistiques",
+  "lead": "Données réelles des matchs joués : % over/under, les deux équipes marquent, clean sheets, mi-temps, corners et cartons, au total, à domicile, à l'extérieur ou sur les 5 derniers matchs. Cliquez sur un en-tête pour trier par cette colonne (une seconde fois pour inverser l'ordre).",
+  "viewsLabel": "Colonnes du tableau",
+  "view": {
+    "standings": "Classement",
+    "goals": "Buts et mi-temps",
+    "corners": "Corners et cartons"
+  },
+  "split": {
+    "overall": "Total",
+    "home": "Domicile",
+    "away": "Extérieur",
+    "last5": "5 derniers"
+  },
+  "minMatches": "Matchs min.",
+  "minMatchesAll": "Tous",
+  "heatmap": "Carte de chaleur",
+  "form": {
+    "column": "Forme",
+    "columnTitle": "5 derniers matchs de la saison, du plus ancien au plus récent",
+    "label": "Derniers résultats : {{results}}",
+    "win": {
+      "letter": "V",
+      "title": "Victoire"
+    },
+    "draw": {
+      "letter": "N",
+      "title": "Nul"
+    },
+    "loss": {
+      "letter": "P",
+      "title": "Défaite"
+    }
+  },
+  "noCorners": "Pas encore de données de corners ni de cartons pour la saison {{season}} : la source des matchs en cours (football-data.org, offre gratuite) ne les inclut pas, seulement les résultats. Elles ne sont disponibles que pour les saisons terminées. Essayez une saison précédente dans le sélecteur ci-dessus.",
+  "noCornersSelected": "Pas encore de données de corners ni de cartons pour la saison choisie : la source des matchs en cours (football-data.org, offre gratuite) ne les inclut pas, seulement les résultats. Elles ne sont disponibles que pour les saisons terminées. Essayez une saison précédente dans le sélecteur ci-dessus.",
+  "loading": "Chargement des statistiques...",
+  "empty": "Aucune statistique pour ce championnat ou cette saison.",
+  "emptyFiltered": "Aucune équipe n'a au moins {{n}} matchs dans cette vue.",
+  "team": "Équipe",
+  "group": {
+    "general": "Général",
+    "goals": "Buts",
+    "halfTime": "Mi-temps",
+    "corners": "Corners",
+    "cards": "Cartons"
+  },
+  "column": {
+    "played": {
+      "label": "J",
+      "title": "Matchs joués"
+    },
+    "won": {
+      "label": "V",
+      "title": "Victoires"
+    },
+    "drawn": {
+      "label": "N",
+      "title": "Nuls"
+    },
+    "lost": {
+      "label": "P",
+      "title": "Défaites"
+    },
+    "goalsFor": {
+      "label": "BP",
+      "title": "Buts pour"
+    },
+    "goalsAgainst": {
+      "label": "BC",
+      "title": "Buts contre"
+    },
+    "goalDifference": {
+      "label": "Diff",
+      "title": "Différence de buts"
+    },
+    "points": {
+      "label": "Pts",
+      "title": "Points"
+    },
+    "pointsPerGame": {
+      "label": "Pts/J",
+      "title": "Points par match"
+    },
+    "goalsForPerGame": {
+      "label": "BP/J",
+      "title": "Buts pour par match"
+    },
+    "goalsAgainstPerGame": {
+      "label": "BC/J",
+      "title": "Buts contre par match"
+    },
+    "over15": {
+      "label": "+1,5",
+      "title": "% de matchs avec plus de 1,5 buts"
+    },
+    "over25": {
+      "label": "+2,5",
+      "title": "% de matchs avec plus de 2,5 buts"
+    },
+    "over35": {
+      "label": "+3,5",
+      "title": "% de matchs avec plus de 3,5 buts"
+    },
+    "btts": {
+      "label": "Les deux marquent",
+      "title": "% de matchs où les deux équipes marquent",
+      "short": "BTTS"
+    },
+    "cleanSheet": {
+      "label": "Clean sheet",
+      "title": "% de matchs sans encaisser de but",
+      "short": "CS"
+    },
+    "failedToScore": {
+      "label": "Ne marque pas",
+      "title": "% de matchs sans marquer"
+    },
+    "htOver05": {
+      "label": "+0,5 1re pér.",
+      "title": "% de matchs avec au moins un but en 1re période"
+    },
+    "htWin": {
+      "label": "Mène à la pause",
+      "title": "% de matchs où l'équipe mène à la mi-temps"
+    },
+    "cornersFor": {
+      "label": "Pour",
+      "title": "Moyenne de corners obtenus par match",
+      "short": "Corn. +"
+    },
+    "cornersAgainst": {
+      "label": "Contre",
+      "title": "Moyenne de corners concédés par match",
+      "short": "Corn. −"
+    },
+    "yellowFor": {
+      "label": "Jaunes",
+      "title": "Moyenne de cartons jaunes reçus par match",
+      "short": "Jaun."
+    },
+    "yellowAgainst": {
+      "label": "Adversaire",
+      "title": "Moyenne de cartons jaunes de l'adversaire par match",
+      "short": "Jaun. adv."
+    }
+  },
+  "legend": "# = position au classement de la vue choisie · J = matchs joués · V/N/P = victoires/nuls/défaites · BP/BC/Diff = buts pour/contre/différence · Forme : V/N/P des 5 derniers matchs, le plus récent à droite. Sur les écrans étroits, certaines colonnes sont masquées ; sur un ordinateur, elles sont toutes visibles. Mi-temps, corners et cartons ne sont calculés qu'avec les matchs qui ont cette donnée. Avec moins de {{n}} matchs (en gris, sans carte de chaleur), les pourcentages sont peu fiables — à prendre comme une simple indication, pas comme une tendance établie.",
+  "hidden_one": "{{count}} équipe masquée (moins de {{n}} matchs).",
+  "hidden_many": "{{count}} équipes masquées (moins de {{n}} matchs).",
+  "hidden_other": "{{count}} équipes masquées (moins de {{n}} matchs)."
+}

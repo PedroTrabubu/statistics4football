@@ -1,0 +1,545 @@
+{
+  "page": {
+    "lead": "Pega tu historial de Winamax o de bet365 y mira en qué ganas y en qué pierdes dinero, año a año: por cuota, tipo de apuesta, deporte, mercado, importe y hábitos.",
+    "empty": "Todavía no has importado ninguna apuesta."
+  },
+  "import": {
+    "privacy": "<bold>Privacidad:</bold> el historial se analiza en tu navegador y se guarda solo en él. No se envía a ningún servidor. Por eso conviene <bold>descargar una copia</bold> de vez en cuando: si borras los datos del navegador o cambias de ordenador, con «Restaurar copia» las recuperas.",
+    "placeholder": "Pega aquí el HTML del historial de Winamax o de bet365 (o el texto de una copia de seguridad)…",
+    "textareaLabel": "HTML del historial de apuestas",
+    "analyze": "Analizar",
+    "upload": "Subir archivo .html",
+    "download": "Descargar copia ({{n}})",
+    "restore": "Restaurar copia",
+    "clear": "Borrar mis datos",
+    "close": "Cerrar",
+    "confirmClear": "¿Borrar todas las apuestas importadas y el dinero real apuntado en este navegador?",
+    "noBets": "No he encontrado apuestas en ese HTML. Asegúrate de copiar la lista de «Mis apuestas → Finalizadas» de Winamax o la del historial de apuestas deportivas de bet365 (ver los pasos de abajo).",
+    "backupUnreadable": "No se pudo leer la copia.",
+    "cleared": "Se han borrado todas las apuestas guardadas en este navegador.",
+    "nothingNewBackup_one": "La única apuesta de la copia ya estaba guardada. No ha cambiado nada.",
+    "nothingNewBackup_many": "Las {{count}} apuestas de la copia ya estaban guardadas. No ha cambiado nada.",
+    "nothingNewBackup_other": "Las {{count}} apuestas de la copia ya estaban guardadas. No ha cambiado nada.",
+    "nothingNewHtml_one": "La única apuesta de este HTML ya estaba guardada. No ha cambiado nada.",
+    "nothingNewHtml_many": "Las {{count}} apuestas de este HTML ya estaban guardadas. No ha cambiado nada.",
+    "nothingNewHtml_other": "Las {{count}} apuestas de este HTML ya estaban guardadas. No ha cambiado nada.",
+    "doneBackup_one": "Copia restaurada: he leído {{count}} apuesta.",
+    "doneBackup_many": "Copia restaurada: he leído {{count}} apuestas.",
+    "doneBackup_other": "Copia restaurada: he leído {{count}} apuestas.",
+    "doneHtml_one": "Importación hecha: he leído {{count}} apuesta.",
+    "doneHtml_many": "Importación hecha: he leído {{count}} apuestas.",
+    "doneHtml_other": "Importación hecha: he leído {{count}} apuestas.",
+    "chip": {
+      "added_one": "<bold>{{count}}</bold> nueva",
+      "added_many": "<bold>{{count}}</bold> nuevas",
+      "added_other": "<bold>{{count}}</bold> nuevas",
+      "updated_one": "<bold>{{count}}</bold> actualizada",
+      "updated_many": "<bold>{{count}}</bold> actualizadas",
+      "updated_other": "<bold>{{count}}</bold> actualizadas",
+      "unchanged_one": "<bold>{{count}}</bold> repetida sin cambios",
+      "unchanged_many": "<bold>{{count}}</bold> repetidas sin cambios",
+      "unchanged_other": "<bold>{{count}}</bold> repetidas sin cambios",
+      "warnings_one": "<bold>{{count}}</bold> con datos incompletos",
+      "warnings_many": "<bold>{{count}}</bold> con datos incompletos",
+      "warnings_other": "<bold>{{count}}</bold> con datos incompletos",
+      "failed_one": "<bold>{{count}}</bold> no se pudo leer",
+      "failed_many": "<bold>{{count}}</bold> no se pudieron leer",
+      "failed_other": "<bold>{{count}}</bold> no se pudieron leer"
+    },
+    "whatChanged": "Qué ha cambiado en las actualizadas:",
+    "andMore": "…y {{n}} más.",
+    "total_one": "Ahora tienes <bold>{{count}}</bold> apuesta guardada. En la tabla de abajo, las de esta importación llevan la etiqueta «Nueva» o «Actualizada».",
+    "total_many": "Ahora tienes <bold>{{count}}</bold> apuestas guardadas. En la tabla de abajo, las de esta importación llevan la etiqueta «Nueva» o «Actualizada».",
+    "total_other": "Ahora tienes <bold>{{count}}</bold> apuestas guardadas. En la tabla de abajo, las de esta importación llevan la etiqueta «Nueva» o «Actualizada».",
+    "notSaved": "Ojo: este navegador no permite guardarlas, se perderán al cerrar la página.",
+    "combo": "Combinada",
+    "comboTitle": "{{type}}: {{participants}}"
+  },
+  "backup": {
+    "ready_one": "Copia de {{count}} apuesta preparada: <file>{{file}}</file>",
+    "ready_many": "Copia de {{count}} apuestas preparada: <file>{{file}}</file>",
+    "ready_other": "Copia de {{count}} apuestas preparada: <file>{{file}}</file>",
+    "help": "Si no se ha descargado (algunos visores, como el navegador integrado de VS Code, no permiten descargas), cópiala y guárdala tú en un archivo <file>.json</file>. Para restaurarla, súbela con «Restaurar copia» o pega el texto en el cuadro de arriba y pulsa «Analizar».",
+    "copied": "Copiada ✓",
+    "copy": "Copiar al portapapeles",
+    "label": "Copia de seguridad"
+  },
+  "backupError": {
+    "notJson": "El archivo no es una copia válida: no es JSON.",
+    "notBackup": "El archivo no es una copia de «Mis apuestas».",
+    "noBets": "La copia no contiene apuestas."
+  },
+  "howTo": {
+    "winamax": {
+      "title": "Cómo sacar el historial de Winamax",
+      "step1": "En Winamax, entra en <bold>Mis apuestas → Finalizadas</bold> y baja hasta el final para que se carguen todas las que quieras analizar.",
+      "step2": "<bold>Opción A:</bold> pulsa Ctrl+S, elige «Página web completa» y sube aquí el archivo .html.",
+      "step3": "<bold>Opción B:</bold> clic derecho sobre la lista → «Inspeccionar», clic derecho sobre el elemento resaltado → «Copiar → Copiar elemento» (outerHTML), y pégalo arriba.",
+      "step4": "Puedes importar varias veces: las apuestas repetidas no se duplican."
+    },
+    "bet365": {
+      "title": "Cómo sacar el historial de bet365",
+      "step1": "En bet365, abre el <bold>Historial</bold> de tu cuenta, elige <bold>Apuestas deportivas</bold> y las fechas que quieras, y baja hasta el final para que se carguen todas.",
+      "step2": "Igual que con Winamax: guarda la página con Ctrl+S («Página web completa») y súbela, o copia el elemento de la lista con «Inspeccionar → Copiar elemento» y pégalo arriba.",
+      "step3": "bet365 no indica en el historial si una apuesta se ganó o se perdió: se deduce de lo cobrado. Si cobraste menos de lo que pagaba la cuota (cash out o una selección anulada), sale como «Cash out». Las apuestas con créditos de apuesta cuentan como freebets.",
+      "step4": "Las sencillas solo traen la selección («Real Madrid»), sin el partido ni el mercado, así que no entran en «Por mercado» ni en «Partidos»."
+    }
+  },
+  "filter": {
+    "year": "Año",
+    "yearOption": "Año {{year}}",
+    "allYears": "Todos los años",
+    "book": "Casa",
+    "allBooks": "Todas las casas",
+    "sport": "Deporte",
+    "allSports": "Todos los deportes",
+    "clearMonth": "Quitar el filtro de mes",
+    "month": "Mes: {{month}}",
+    "noSettled": "No hay apuestas resueltas con estos filtros."
+  },
+  "period": {
+    "in": "en {{period}}",
+    "allYears": "en todos los años"
+  },
+  "hero": {
+    "label": "Resumen",
+    "netProfit": "Beneficio neto {{period}}",
+    "split": "Apuestas con saldo {{own}} · con freebets {{freebet}}",
+    "wins_one": "<bold>{{count}}</bold> acertada",
+    "wins_many": "<bold>{{count}}</bold> acertadas",
+    "wins_other": "<bold>{{count}}</bold> acertadas",
+    "losses_one": "<bold>{{count}}</bold> fallada",
+    "losses_many": "<bold>{{count}}</bold> falladas",
+    "losses_other": "<bold>{{count}}</bold> falladas",
+    "cashouts": "<bold>{{n}}</bold> cash out",
+    "barLabel": "{{wins}}, {{losses}}",
+    "barLabelCashout": "{{wins}}, {{losses}} y {{cashouts}}",
+    "settled_one": "{{count}} resuelta = {{wins}} + {{losses}}",
+    "settled_many": "{{count}} resueltas = {{wins}} + {{losses}}",
+    "settled_other": "{{count}} resueltas = {{wins}} + {{losses}}",
+    "settledCashout_one": "{{count}} resuelta = {{wins}} + {{losses}} + {{cashouts}} cash out (cuentan en el dinero, no en el acierto)",
+    "settledCashout_many": "{{count}} resueltas = {{wins}} + {{losses}} + {{cashouts}} cash out (cuentan en el dinero, no en el acierto)",
+    "settledCashout_other": "{{count}} resueltas = {{wins}} + {{losses}} + {{cashouts}} cash out (cuentan en el dinero, no en el acierto)",
+    "roi": "ROI",
+    "staked": "Volumen apostado",
+    "stakedHint": "Suma de todos los importes apostados (sin freebets); el dinero reinvertido cuenta varias veces. No es lo que has ingresado.",
+    "hitVsOdds": "Acierto frente a tus cuotas",
+    "versus": "frente al",
+    "below": "por debajo de lo que implican",
+    "above": "por encima de lo que implican",
+    "notCounted": "No cuentan: {{items}}.",
+    "voids_one": "{{count}} anulada",
+    "voids_many": "{{count}} anuladas",
+    "voids_other": "{{count}} anuladas",
+    "pending": "{{n}} sin resolver",
+    "winsText_one": "{{count}} acertada",
+    "winsText_many": "{{count}} acertadas",
+    "winsText_other": "{{count}} acertadas",
+    "lossesText_one": "{{count}} fallada",
+    "lossesText_many": "{{count}} falladas",
+    "lossesText_other": "{{count}} falladas",
+    "cashoutsText": "{{count}} cash out"
+  },
+  "column": {
+    "month": "Mes",
+    "year": "Año",
+    "bets": "Apuestas",
+    "hitRate": "Acierto",
+    "staked": "Apostado",
+    "profit": "Beneficio",
+    "withoutPromo": "Sin promoción",
+    "withPromo": "Con promoción",
+    "roi": "ROI",
+    "market": "Mercado",
+    "selections": "Selecciones",
+    "won": "Acertadas",
+    "category": "Categoría",
+    "implied": "Implica la cuota",
+    "difference": "Diferencia",
+    "date": "Fecha",
+    "book": "Casa",
+    "type": "Tipo",
+    "sport": "Deporte",
+    "odds": "Cuota",
+    "stake": "Importe",
+    "result": "Resultado"
+  },
+  "year": {
+    "title": "Año a año",
+    "note": "Por año natural, del 1 de enero al 31 de diciembre: es el periodo con el que se declaran las ganancias del juego en la renta. Cada apuesta cuenta en el año en que la hiciste; una de finales de diciembre que se resolvió en enero podría ir al año siguiente. El beneficio incluye lo ganado con freebets. Pulsa un año para ver solo ese año."
+  },
+  "sections": {
+    "label": "Secciones de mis apuestas",
+    "year": "Año a año",
+    "yearShort": "Por año",
+    "month": "Mes a mes",
+    "monthShort": "Por mes",
+    "evolution": "Evolución",
+    "realMoney": "Dinero real",
+    "leaks": "Dónde pierdes más",
+    "leaksShort": "Dónde pierdes",
+    "categories": "Cuota, importe, deporte…",
+    "categoriesShort": "Categorías",
+    "promotions": "Promociones",
+    "habits": "Hábitos",
+    "teams": "Equipos y tenistas",
+    "teamsShort": "Equipos",
+    "bets": "Apuestas importadas",
+    "betsShort": "Apuestas"
+  },
+  "fewBets_one": "Solo hay {{count}} apuesta resuelta: con tan pocas, los porcentajes cambian mucho con cada apuesta. Tómalos como orientativos.",
+  "fewBets_many": "Solo hay {{count}} apuestas resueltas: con tan pocas, los porcentajes cambian mucho con cada apuesta. Tómalos como orientativos.",
+  "fewBets_other": "Solo hay {{count}} apuestas resueltas: con tan pocas, los porcentajes cambian mucho con cada apuesta. Tómalos como orientativos.",
+  "month": {
+    "title": "Mes a mes",
+    "titleYear": "Mes a mes · {{year}}",
+    "note": "Por la fecha en que hiciste la apuesta. Pulsa un mes (en el gráfico o en la tabla) para ver solo ese mes en el resto de la página; púlsalo otra vez, o «Mes ✕» arriba, para quitar el filtro.",
+    "lowSample": "Con menos de {{n}} apuestas (en gris) el mes es poco fiable."
+  },
+  "evolution": {
+    "title": "Evolución del beneficio",
+    "titleYear": "Evolución del beneficio · {{year}}"
+  },
+  "leaks": {
+    "title": "Dónde pierdes más",
+    "item": "<bold>{{dimension}}: {{group}}</bold> — <loss>{{profit}}</loss> en {{bets}} apuestas.",
+    "itemRates": "<bold>{{dimension}}: {{group}}</bold> — <loss>{{profit}}</loss> en {{bets}} apuestas (aciertas un {{hitRate}} y sus cuotas implicaban un {{implied}})."
+  },
+  "breakdown": {
+    "odds": {
+      "title": "Por cuota",
+      "note": "La columna clave es la diferencia: cuánto aciertas por encima o por debajo de lo que implica la cuota."
+    },
+    "type": {
+      "title": "Simples y combinadas"
+    },
+    "promotion": {
+      "title": "Por promoción",
+      "note": "Supercuotas y operaciones de Winamax (Bang to the Moon, misiones...) y aumentos de bet365 (de cuota y de ganancias). Una apuesta con dos promociones cuenta en las dos."
+    },
+    "sport": {
+      "title": "Por deporte"
+    },
+    "market": {
+      "title": "Por mercado (apuestas simples)",
+      "note": "Solo apuestas simples: en una combinada no se puede saber qué mercado la hizo ganar o perder."
+    },
+    "stake": {
+      "title": "Por importe — todas las apuestas",
+      "note": "Por el importe de cada apuesta (las freebets no cuentan). Cada tramo empieza en su importe: una apuesta de 5 € va en «5 – 9,99 €»."
+    },
+    "stakeWithoutFixed": {
+      "title": "Por importe — sin promociones de importe fijo ({{promotions}})",
+      "note": "Las promociones de importe fijo concentran apuestas en un mismo importe; sin ellas se ve mejor cómo eliges tú cuánto apostar. Las dos lecturas son válidas."
+    },
+    "weekday": {
+      "title": "Por día de la semana"
+    },
+    "hour": {
+      "title": "Por hora de la apuesta"
+    },
+    "note": "Con menos de {{n}} apuestas (en gris) la fila es poco fiable. El ROI es el beneficio por cada 100 € apostados (las freebets no cuentan como importe); el beneficio sí incluye lo ganado con freebets."
+  },
+  "promotions": {
+    "title": "Promociones",
+    "item": "<bold>{{wins}} de {{decided}}</bold> acertadas ({{pct}}) · beneficio <money>{{profit}}</money>"
+  },
+  "builder": {
+    "title": "Selecciones dentro de «Crea tu apuesta»",
+    "note": "Winamax da el resultado de cada selección, así que aquí sí se ve cuáles fallan. bet365 no lo da: sus «Crear apuesta» no entran aquí."
+  },
+  "list": {
+    "title": "Apuestas importadas",
+    "note": "Para comprobar que se han leído bien. Las más recientes primero.",
+    "onlyLast": "Ver solo las nuevas y actualizadas en la última importación ({{n}})",
+    "added": "Nueva",
+    "updated": "Actualizada",
+    "boostedBet365": "(cuota aumentada)",
+    "boostedWinamax": "(supercuota)",
+    "freebet": "freebet",
+    "showAll": "Ver las {{n}} apuestas"
+  },
+  "status": {
+    "won": "Ganada",
+    "lost": "Perdida",
+    "void": "Anulada",
+    "cashout": "Cash out",
+    "pending": "En curso",
+    "unknown": "Desconocido"
+  },
+  "update": {
+    "status": "{{before}} → {{after}}",
+    "statusText": {
+      "won": "Ganada",
+      "lost": "Perdida",
+      "void": "Anulada",
+      "cashout": "Cash out",
+      "pending": "En curso",
+      "unknown": "Sin estado"
+    },
+    "complete": "Ahora se lee completa",
+    "money": "Importe o ganancias corregidos",
+    "odds": "Cuota corregida",
+    "other": "Datos corregidos"
+  },
+  "format": {
+    "roiPer100": "{{amount}} por cada 100 € apostados"
+  },
+  "insight": {
+    "noRoi": "sin ROI",
+    "roi": "ROI {{value}}",
+    "bestWorst": {
+      "sport": "Por deporte, te va mejor en {{best}} ({{bestProfit}}, {{bestRoi}}, {{bestBets}} apuestas) y peor en {{worst}} ({{worstProfit}}, {{worstRoi}}, {{worstBets}} apuestas).",
+      "market": "Por mercado (apuestas simples), te va mejor en {{best}} ({{bestProfit}}, {{bestRoi}}, {{bestBets}} apuestas) y peor en {{worst}} ({{worstProfit}}, {{worstRoi}}, {{worstBets}} apuestas)."
+    },
+    "promoGap": "Con promoción llevas {{withProfit}} ({{withRoi}}) en {{withBets}} apuestas; sin promoción, {{withoutProfit}} ({{withoutRoi}}) en {{withoutBets}}.",
+    "promoShare": {
+      "losing": "{{promo}} te deja {{profit}} en {{bets}} apuestas, aunque en total vas {{total}}.",
+      "moreThanAll": "{{promo}} aporta {{profit}} en {{bets}} apuestas, más que todo tu beneficio ({{total}}).",
+      "overHalf": "Más de la mitad de tu beneficio viene de {{promo}}: {{profit}} de {{total}}, en {{bets}} apuestas."
+    },
+    "withoutPromo_one": "Sin {{promo}}, tu resultado sería {{profit}} ({{roi}}) en {{count}} apuesta.",
+    "withoutPromo_many": "Sin {{promo}}, tu resultado sería {{profit}} ({{roi}}) en {{count}} apuestas.",
+    "withoutPromo_other": "Sin {{promo}}, tu resultado sería {{profit}} ({{roi}}) en {{count}} apuestas."
+  },
+  "bucket": {
+    "odds": {
+      "0": "1,01 – 1,49",
+      "1": "1,50 – 1,99",
+      "2": "2,00 – 2,49",
+      "3": "2,50 – 2,99",
+      "4": "3,00 – 3,99",
+      "5": "4,00 – 4,99",
+      "6": "5,00 – 9,99",
+      "7": "10,00 – 19,99",
+      "8": "20,00 – 29,99",
+      "9": "30,00 – 39,99",
+      "10": "40,00 o más"
+    },
+    "stake": {
+      "0": "Menos de 1 €",
+      "1": "1 – 1,99 €",
+      "2": "2 – 2,99 €",
+      "3": "3 – 3,99 €",
+      "4": "4 – 4,99 €",
+      "5": "5 – 9,99 €",
+      "6": "10 – 19,99 €",
+      "7": "20 – 29,99 €",
+      "8": "30 – 39,99 €",
+      "9": "40 € o más"
+    }
+  },
+  "betType": {
+    "0": "Simple",
+    "1": "Combinada de 2",
+    "2": "Combinada de 3",
+    "3": "Combinada de 4",
+    "4": "Combinada de 5 o más",
+    "5": "Otro"
+  },
+  "weekday": {
+    "0": "Lunes",
+    "1": "Martes",
+    "2": "Miércoles",
+    "3": "Jueves",
+    "4": "Viernes",
+    "5": "Sábado",
+    "6": "Domingo"
+  },
+  "dayPart": {
+    "0": "Madrugada (0–6 h)",
+    "1": "Mañana (6–14 h)",
+    "2": "Tarde (14–20 h)",
+    "3": "Noche (20–24 h)"
+  },
+  "noPromotion": "Sin promoción",
+  "marketFamily": {
+    "betBuilder": "Crea tu apuesta",
+    "corners": "Córners",
+    "cards": "Tarjetas",
+    "btts": "Ambos marcan",
+    "doubleChance": "Doble oportunidad",
+    "handicap": "Hándicap",
+    "scorers": "Goleadores / jugador",
+    "halves": "Por mitades",
+    "tennisGames": "Juegos (tenis)",
+    "tennisSets": "Sets (tenis)",
+    "goals": "Goles",
+    "result": "Resultado / ganador",
+    "other": "Otros"
+  },
+  "sport": {
+    "football": "Fútbol",
+    "tennis": "Tenis",
+    "basketball": "Baloncesto",
+    "handball": "Balonmano",
+    "volleyball": "Voleibol",
+    "iceHockey": "Hockey hielo",
+    "americanFootball": "Fútbol americano",
+    "rugby": "Rugby",
+    "baseball": "Béisbol",
+    "esports": "eSports",
+    "golf": "Golf",
+    "boxing": "Boxeo",
+    "mma": "MMA",
+    "cycling": "Ciclismo",
+    "darts": "Dardos",
+    "snooker": "Snooker",
+    "tableTennis": "Tenis de mesa",
+    "motor": "Motor",
+    "unknown": "Desconocido",
+    "several": "Varios"
+  },
+  "dimension": {
+    "odds": "Cuota",
+    "betType": "Tipo de apuesta",
+    "sport": "Deporte",
+    "market": "Mercado (simples)",
+    "stake": "Importe",
+    "weekday": "Día",
+    "hour": "Hora",
+    "promotion": "Promoción"
+  },
+  "warning": {
+    "noSelections": "No se encontraron las selecciones.",
+    "partialCredits": "Pagada en parte con créditos de apuesta: se cuenta como dinero propio.",
+    "noReturn": "No se encontró lo cobrado.",
+    "lessThanOdds": "Cobró menos de lo que pagaba la cuota (cash out o alguna selección anulada).",
+    "noOdds": "No se encontró la cuota.",
+    "noStatus": "No se encontró el estado de la apuesta.",
+    "noStake": "No se encontró el importe."
+  },
+  "lowSample": {
+    "title": "Menos de {{n}} apuestas: cifra poco fiable",
+    "label": "poco fiable"
+  },
+  "split": {
+    "label": "Con y sin promoción",
+    "note": "Suman el total: {{withBets}} + {{withoutBets}} = {{totalBets}} apuestas · {{withProfit}} + {{withoutProfit}} = {{totalProfit}}. Aquí una apuesta con dos promociones cuenta una sola vez; en la tabla «Por promoción» cuenta en cada una."
+  },
+  "evidence": {
+    "bets_one": "<bold>{{count}}</bold> apuesta",
+    "bets_many": "<bold>{{count}}</bold> apuestas",
+    "bets_other": "<bold>{{count}}</bold> apuestas",
+    "wins_one": "<bold>{{count}}</bold> acertada de {{decided}} ({{pct}})",
+    "wins_many": "<bold>{{count}}</bold> acertadas de {{decided}} ({{pct}})",
+    "wins_other": "<bold>{{count}}</bold> acertadas de {{decided}} ({{pct}})",
+    "profit": "beneficio <money>{{profit}}</money>",
+    "breakEven": "Cuota media {{odds}}: para no ganar ni perder hace falta acertar el <bold>{{pct}}</bold>.",
+    "interval": "Con tus apuestas, tu acierto real está entre el <bold>{{low}}</bold> y el <bold>{{high}}</bold> (intervalo de confianza del 95 %, Wilson).",
+    "supported": "Incluso el extremo bajo del intervalo supera el acierto necesario: la muestra apoya que, hasta ahora, esta promoción te ha sido rentable.",
+    "notSupported": "El extremo bajo del intervalo no llega al acierto necesario: todavía no hay evidencia suficiente para decir si es rentable.",
+    "past": "Describe tus apuestas pasadas; no garantiza lo que pasará."
+  },
+  "habits": {
+    "title": "Hábitos",
+    "all": "Todas las apuestas",
+    "withoutPromo": "Solo sin promoción",
+    "stakes": "Tras perder apuestas de media <bold>{{afterLoss}}</bold>; tras ganar, <bold>{{afterWin}}</bold>.",
+    "chasing": "Subes el importe tras perder, la señal clásica de intentar recuperar lo perdido.",
+    "notChasing": "No subes el importe tras perder.",
+    "cases": "({{loss}} y {{win}} casos)",
+    "fixedNote": "Las promociones de importe fijo (como La Gran Supercuota, siempre 10 €) cambian la media de importes, así que las dos lecturas son válidas: la primera es lo que has hecho, la segunda refleja mejor cómo eliges tú el importe.",
+    "normal": "Con un acierto del 30–35 %, las rachas largas de apuestas perdidas son normales.",
+    "expected": "Con tu acierto ({{pct}}) y {{n}} apuestas, por puro azar cabe esperar una racha máxima de unas {{streak}} perdidas seguidas.",
+    "worst_one": "Peor racha: <bold>{{count}}</bold> perdida seguida",
+    "worst_many": "Peor racha: <bold>{{count}}</bold> perdidas seguidas",
+    "worst_other": "Peor racha: <bold>{{count}}</bold> perdidas seguidas",
+    "best_one": "mejor: <bold>{{count}}</bold> ganada seguida.",
+    "best_many": "mejor: <bold>{{count}}</bold> ganadas seguidas.",
+    "best_other": "mejor: <bold>{{count}}</bold> ganadas seguidas."
+  },
+  "teams": {
+    "title": "Equipos y tenistas",
+    "note": "Cuánto aciertas en los partidos de cada equipo o tenista, con al menos 3 apuestas resueltas. Solo cuentan las apuestas de un solo partido (simples y «crea tu apuesta»): en una combinada de varios partidos no se sabe cuál la hizo fallar. Fíjate también en lo que implicaba la cuota: acertar mucho con favoritos no es mérito si las cuotas ya lo daban.",
+    "teams": "Equipos",
+    "players": "Tenistas",
+    "won": "{{wins}} de {{decided}} acertadas",
+    "implied": "La cuota implicaba {{pct}} <gap>({{gap}})</gap>",
+    "profit": "Beneficio <bold>{{profit}}</bold>",
+    "roi": " · ROI {{roi}}",
+    "showAll": "Ver los {{n}}"
+  },
+  "realMoney": {
+    "title": "Dinero real",
+    "titleYear": "Dinero real · {{year}}",
+    "note": "Lo que de verdad ha ganado o perdido tu cuenta en cada año natural, sacado del extracto de la casa (en bet365, el resumen de la cuenta con las fechas del 1 de enero al 31 de diciembre: saldo inicial, ingresos, retiradas y saldo final). Se compara con el beneficio de tus apuestas importadas de ese año, de todos los deportes. Se guarda solo en este navegador, entra en la copia de seguridad y se borra con «Borrar mis datos».",
+    "field": {
+      "opening": "Saldo al 1 de enero",
+      "deposited": "Ingresos",
+      "withdrawn": "Retiradas",
+      "closing": "Saldo al 31 de diciembre (o el actual)"
+    },
+    "save": "Guardar",
+    "emptyNote": "Los campos vacíos cuentan como 0. Para borrar el año, vacíalos todos y guarda.",
+    "yearResult": "Resultado real de {{year}} (saldo final − saldo inicial − ingresos + retiradas): <bold>{{result}}</bold>",
+    "yearCalculated_one": "Beneficio calculado con tu {{count}} apuesta de {{book}} de {{year}}: <bold>{{profit}}</bold>",
+    "yearCalculated_many": "Beneficio calculado con tus {{count}} apuestas de {{book}} de {{year}}: <bold>{{profit}}</bold>",
+    "yearCalculated_other": "Beneficio calculado con tus {{count}} apuestas de {{book}} de {{year}}: <bold>{{profit}}</bold>",
+    "openingMismatch": "El saldo al 1 de enero ({{opening}}) no coincide con el saldo final que apuntaste para {{year}} ({{closing}}).",
+    "match": "Coinciden: tus apuestas importadas explican el resultado real del año.",
+    "difference": "Hay una diferencia de <bold>{{diff}}</bold>. Es habitual que no coincidan del todo; algunas causas posibles:",
+    "cause": {
+      "missing": "Apuestas que faltan por importar: las importadas de este año van del {{from}} al {{to}}.",
+      "pending_one": "{{count}} apuesta sin resolver: su importe ya ha salido del saldo, pero aún no cuenta en el cálculo.",
+      "pending_many": "{{count}} apuestas sin resolver: su importe ya ha salido del saldo, pero aún no cuentan en el cálculo.",
+      "pending_other": "{{count}} apuestas sin resolver: su importe ya ha salido del saldo, pero aún no cuentan en el cálculo.",
+      "bonuses": "Bonificaciones y ajustes de cuenta mueven el saldo sin ser apuestas. Lo ganado con freebets y créditos de apuesta ({{freebet}}) sí está en el cálculo.",
+      "december": "Apuestas de finales de diciembre que se resolvieron en enero (o al revés).",
+      "otherProducts": "Otros productos de la misma cuenta (casino, póker) también cambian el saldo."
+    },
+    "yearTotal": "Total de {{year}}: <bold>{{total}}</bold>",
+    "yearTotalBooks": "Total de {{year}} ({{books}}): <bold>{{total}}</bold>",
+    "notEntered": "sin apuntar",
+    "noBets": "sin apuestas",
+    "calculated": "Calculado con tus apuestas de esas casas en {{year}}: {{calc}}.",
+    "missingBooks": "Falta apuntar {{books}}: el total aún no incluye su resultado.",
+    "chooseYear": "Elige un año arriba para apuntar su extracto.",
+    "totalReal": "Total real",
+    "resultReal": "Resultado real",
+    "calculatedColumn": "Calculado con tus apuestas",
+    "missingTag": "falta {{books}}",
+    "missingCell": "falta",
+    "sumYears": "Suma de los años apuntados",
+    "summary": {
+      "one": {
+        "won": "En los años apuntados, tu dinero real ha ganado <bold>{{amount}}</bold>.",
+        "lost": "En los años apuntados, tu dinero real ha perdido <bold>{{amount}}</bold>."
+      },
+      "books": {
+        "won": "En los años apuntados, entre {{books}}, tu dinero real ha ganado <bold>{{amount}}</bold>.",
+        "lost": "En los años apuntados, entre {{books}}, tu dinero real ha perdido <bold>{{amount}}</bold>."
+      }
+    },
+    "incomplete": "Ojo: algún año está incompleto (le falta el extracto de una casa).",
+    "whole": {
+      "title": "{{book}} · toda la cuenta, sin año",
+      "text_one": "Lo que apuntaste antes de separar por años: ingresado {{deposited}}, retirado {{withdrawn}}, saldo {{closing}}. Resultado real <result>{{result}}</result>, frente a <profit>{{profit}}</profit> calculado con tu {{count}} apuesta de {{book}}.",
+      "text_many": "Lo que apuntaste antes de separar por años: ingresado {{deposited}}, retirado {{withdrawn}}, saldo {{closing}}. Resultado real <result>{{result}}</result>, frente a <profit>{{profit}}</profit> calculado con tus {{count}} apuestas de {{book}}.",
+      "text_other": "Lo que apuntaste antes de separar por años: ingresado {{deposited}}, retirado {{withdrawn}}, saldo {{closing}}. Resultado real <result>{{result}}</result>, frente a <profit>{{profit}}</profit> calculado con tus {{count}} apuestas de {{book}}.",
+      "note": "No se puede repartir entre años: apunta el extracto de cada año arriba y, cuando lo tengas, borra este dato.",
+      "confirm": "¿Borrar el dinero real de toda la cuenta de {{book}}?",
+      "delete": "Borrar este dato"
+    }
+  },
+  "chart": {
+    "profitLabel_one": "Beneficio acumulado: {{profit}} tras {{count}} apuesta",
+    "profitLabel_many": "Beneficio acumulado: {{profit}} tras {{count}} apuestas",
+    "profitLabel_other": "Beneficio acumulado: {{profit}} tras {{count}} apuestas",
+    "profitTooltip": "Apuesta {{n}} de {{total}} · {{date}}",
+    "withoutPromo": "Sin promoción",
+    "withPromo": "Con promoción",
+    "monthTotal": "Total del mes",
+    "monthlyLabel": "Beneficio por mes, sin y con promoción",
+    "monthBar_one": "{{month}}: total {{total}}; sin promoción {{without}}; con promoción {{with}}; {{count}} apuesta",
+    "monthBar_many": "{{month}}: total {{total}}; sin promoción {{without}}; con promoción {{with}}; {{count}} apuestas",
+    "monthBar_other": "{{month}}: total {{total}}; sin promoción {{without}}; con promoción {{with}}; {{count}} apuestas",
+    "tooltipMonth_one": "{{month}} · {{count}} apuesta",
+    "tooltipMonth_many": "{{month}} · {{count}} apuestas",
+    "tooltipMonth_other": "{{month}} · {{count}} apuestas",
+    "tooltipTotal": "Total del mes: {{total}}",
+    "tooltipWithout": "Sin promoción: {{value}}",
+    "tooltipWith": "Con promoción: {{value}}",
+    "tooltipLow": "Poco fiable: menos de {{n}} apuestas"
+  }
+}

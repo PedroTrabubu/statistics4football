@@ -1,0 +1,270 @@
+{
+  "page": {
+    "intro": "Los porcentajes que ves aquí son <bold>frecuencia histórica</bold>, no una promesa de lo que va a pasar: cuentan cuántas veces ocurrió algo antes, siempre junto al número de partidos usado. No es lo mismo que una probabilidad garantizada. <link>Más sobre cómo leerlos →</link>"
+  },
+  "detail": {
+    "loading": "Cargando partido...",
+    "error": "No se pudo cargar el partido: {{error}}",
+    "back": "← Volver a partidos",
+    "season": "Temporada {{season}}",
+    "sectionsLabel": "Secciones del partido",
+    "section": {
+      "form": {
+        "label": "Forma reciente",
+        "short": "Forma"
+      },
+      "h2h": {
+        "label": "Enfrentamientos directos",
+        "short": "H2H"
+      },
+      "referee": {
+        "label": "Árbitro",
+        "short": "Árbitro"
+      },
+      "picks": {
+        "label": "Picks muy probables",
+        "short": "Picks"
+      },
+      "probabilities": {
+        "label": "Probabilidades y valor esperado",
+        "short": "Probabilidades y EV"
+      },
+      "probabilitiesOnly": {
+        "label": "Probabilidades",
+        "short": "Probabilidades"
+      },
+      "otherMatches": {
+        "label": "Otros partidos",
+        "short": "Otros partidos"
+      }
+    },
+    "statsLoading": "Calculando estadísticas...",
+    "statsError": "No se pudieron calcular las estadísticas: {{error}}",
+    "recentLoading": "Cargando últimos partidos...",
+    "recentError": "No se pudieron cargar los últimos partidos: {{error}}",
+    "h2hTitle": "Enfrentamientos directos",
+    "h2hLoading": "Cargando enfrentamientos directos...",
+    "h2hError": "No se pudieron cargar los enfrentamientos directos: {{error}}",
+    "seasonTitle": "Estadísticas de temporada",
+    "seasonLoading": "Cargando estadísticas de temporada...",
+    "referee": "Árbitro",
+    "refereeNamed": "Árbitro: <link>{{name}}</link>",
+    "refereeLinkTitle": "Ver sus estadísticas en Árbitros",
+    "picksTitle": "Picks muy probables",
+    "probabilitiesTitle": "Probabilidades y valor esperado (EV)",
+    "probabilitiesNote": "El EV nunca se muestra solo: siempre va acompañado de un nivel de confianza y de riesgo.",
+    "probabilitiesOnlyTitle": "Probabilidades",
+    "probabilitiesOnlyNote": "No hay cuotas de mercado para esta competición, así que no se calcula el valor esperado ni se marca ningún «Valor». Con tu cuota, «Tu EV» sí se calcula.",
+    "predictionsLoading": "Generando predicciones...",
+    "predictionsError": "No se pudieron generar las predicciones: {{error}}"
+  },
+  "recent": {
+    "title": "Últimos partidos",
+    "scopeAll": "Todos",
+    "scopeVenue": "Local en casa, visitante fuera",
+    "scopeLabel": "Partidos de los equipos",
+    "legend": "Goles, corners y tarjetas: a favor-en contra. C: en casa · F: fuera.",
+    "none": {
+      "all": "Sin partidos registrados antes de este.",
+      "home": "Sin partidos en casa registrados antes de este.",
+      "away": "Sin partidos fuera registrados antes de este."
+    },
+    "record": {
+      "all_one": "Último partido: <num>{{win}}V {{draw}}E {{loss}}D</num>",
+      "all_many": "Últimos {{count}}: <num>{{win}}V {{draw}}E {{loss}}D</num>",
+      "all_other": "Últimos {{count}}: <num>{{win}}V {{draw}}E {{loss}}D</num>",
+      "home_one": "Último partido en casa: <num>{{win}}V {{draw}}E {{loss}}D</num>",
+      "home_many": "Últimos {{count}} en casa: <num>{{win}}V {{draw}}E {{loss}}D</num>",
+      "home_other": "Últimos {{count}} en casa: <num>{{win}}V {{draw}}E {{loss}}D</num>",
+      "away_one": "Último partido fuera: <num>{{win}}V {{draw}}E {{loss}}D</num>",
+      "away_many": "Últimos {{count}} fuera: <num>{{win}}V {{draw}}E {{loss}}D</num>",
+      "away_other": "Últimos {{count}} fuera: <num>{{win}}V {{draw}}E {{loss}}D</num>"
+    },
+    "column": {
+      "result": "Resultado",
+      "date": "Fecha",
+      "rival": "Rival",
+      "goals": "Goles",
+      "corners": "Corners",
+      "cards": "Tarj."
+    },
+    "venue": {
+      "home": {
+        "title": "En casa",
+        "label": "En casa contra",
+        "letter": "C"
+      },
+      "away": {
+        "title": "Fuera",
+        "label": "Fuera contra",
+        "letter": "F"
+      }
+    },
+    "seeMatch": "Ver el partido"
+  },
+  "h2h": {
+    "none": "Sin enfrentamientos previos registrados entre los dos equipos.",
+    "lead_one": "El único enfrentamiento anterior a este, de todas las temporadas.",
+    "lead_many": "Los últimos {{count}} enfrentamientos anteriores a este, de todas las temporadas.",
+    "lead_other": "Los últimos {{count}} enfrentamientos anteriores a este, de todas las temporadas.",
+    "scopeVenue": "En casa de {{team}}",
+    "scopeLabel": "Enfrentamientos directos",
+    "noneAtHome": "Ningún enfrentamiento previo en casa de {{team}}.",
+    "tile": {
+      "wins": "Gana {{team}}",
+      "draws": "Empates",
+      "goalsPerMatch": "Goles por partido",
+      "over25": "Más de 2,5 goles",
+      "btts": "Ambos marcan",
+      "cornersPerMatch": "Corners por partido",
+      "cardsPerMatch": "Tarjetas por partido"
+    },
+    "column": {
+      "home": "Local",
+      "away": "Visitante"
+    },
+    "halfTime": "Al descanso",
+    "legend": "Corners y tarjetas: local-visitante de cada partido. Entre paréntesis, al descanso."
+  },
+  "predictions": {
+    "empty": "No hay estadísticas suficientes para generar predicciones de este partido.",
+    "column": {
+      "selection": "Selección",
+      "marketProb": "Prob. mercado",
+      "modelProb": "Prob. modelo",
+      "fairOdds": "Cuota justa",
+      "marketEv": "EV mercado",
+      "sample": "Muestra",
+      "risk": "Riesgo",
+      "yourOdds": "Tu cuota",
+      "yourEv": "Tu EV"
+    },
+    "valueTag": "VALOR",
+    "oddsPlaceholder": "ej. 1,80",
+    "oddsLabel": "Tu cuota para {{selection}}",
+    "implied": "implícita {{value}}",
+    "disclaimer": "\"Cuota justa\" y \"Tu EV\" son estimaciones a partir de la frecuencia histórica del modelo, no una garantía de resultado. La cuota que introduces no se guarda ni se envía a ningún sitio."
+  },
+  "referee": {
+    "notDesignated": "Árbitro aún no designado. Suele anunciarse 2 o 3 días antes del partido; aparecerá aquí en cuanto se sincronicen los partidos.",
+    "loading": "Cargando estadísticas del árbitro...",
+    "error": "No se pudieron cargar las estadísticas del árbitro: {{error}}",
+    "column": {
+      "referee": "Árbitro ({{name}})",
+      "home": "{{team}} (local)",
+      "away": "{{team}} (visitante)"
+    },
+    "average": {
+      "bookingPoints": "Puntos de tarjeta",
+      "for": "A favor",
+      "against": "En contra",
+      "cards": "Tarjetas"
+    },
+    "summary": {
+      "season_one": "<bold>{{count}}</bold> partido anterior de {{name}} en la temporada {{season}}.",
+      "season_many": "<bold>{{count}}</bold> partidos anteriores de {{name}} en la temporada {{season}}.",
+      "season_other": "<bold>{{count}}</bold> partidos anteriores de {{name}} en la temporada {{season}}.",
+      "all_one": "<bold>{{count}}</bold> partido anterior de {{name}} en esta liga, todas las temporadas.",
+      "all_many": "<bold>{{count}}</bold> partidos anteriores de {{name}} en esta liga, todas las temporadas.",
+      "all_other": "<bold>{{count}}</bold> partidos anteriores de {{name}} en esta liga, todas las temporadas."
+    },
+    "refereeScope": "Partidos del árbitro",
+    "scopeSeason": "Árbitro: temporada {{season}}",
+    "scopeAll": "Árbitro: todas las temporadas",
+    "teamScope": "Partidos de los equipos",
+    "teamAll": "Todos sus partidos",
+    "teamVenue": "Local / Visitante",
+    "noneSeason": "No hay partidos anteriores de {{name}} con datos en la temporada {{season}}.",
+    "noneLeague": "No hay partidos anteriores de {{name}} con datos en esta liga.",
+    "few_one": "Solo {{count}} partido anterior de {{name}}: muestra pequeña, tómalo como orientativo.",
+    "few_many": "Solo {{count}} partidos anteriores de {{name}}: muestra pequeña, tómalo como orientativo.",
+    "few_other": "Solo {{count}} partidos anteriores de {{name}}: muestra pequeña, tómalo como orientativo.",
+    "tryAllSeasons": "Prueba con «todas las temporadas».",
+    "details": "Ver todas las medias y líneas del árbitro",
+    "averagesCaption": "Medias por partido",
+    "matches": "Partidos",
+    "linesCaption": "% de partidos que superan cada línea",
+    "section": {
+      "pointsMatch": "Puntos de tarjeta del partido",
+      "pointsEach": "Puntos de tarjeta de cada equipo",
+      "cardsMatch": "Tarjetas del partido",
+      "cardsEach": "Tarjetas de cada equipo"
+    },
+    "footnote": "Solo partidos anteriores a este. Los equipos, en la temporada {{season}}. Puntos de tarjeta: amarilla = 10, roja = 25 (aproximado: la fuente no distingue una roja directa de una segunda amarilla). «Cada equipo» = los dos equipos superan la línea. Racha = partidos seguidos, desde el más reciente, en los que se superó.",
+    "factsTitle": "Con estos equipos",
+    "factsNone": "Este árbitro no tiene aún suficientes partidos con estos equipos para destacar patrones.",
+    "factsNoneVenue": "Este árbitro no tiene aún suficientes partidos con estos equipos para destacar patrones jugando en el mismo campo que hoy.",
+    "smallSample": "Muestra pequeña: tómalo como orientativo.",
+    "refereeAverage_one": "Media del árbitro en su único partido: {{value}} {{label}}.",
+    "refereeAverage_many": "Media del árbitro en sus {{count}} partidos: {{value}} {{label}}.",
+    "refereeAverage_other": "Media del árbitro en sus {{count}} partidos: {{value}} {{label}}.",
+    "lineTitle_one": "{{hits}} de {{count}} partido",
+    "lineTitle_many": "{{hits}} de {{count}} partidos",
+    "lineTitle_other": "{{hits}} de {{count}} partidos",
+    "streak": "racha de {{n}}"
+  },
+  "statsPanel": {
+    "title_one": "Forma reciente (último partido)",
+    "title_many": "Forma reciente (últimos {{count}} partidos)",
+    "title_other": "Forma reciente (últimos {{count}} partidos)",
+    "points": "Puntos",
+    "wdl": "V-E-D",
+    "goals": "Goles a favor/en contra",
+    "xgFor": "xG a favor (media)",
+    "xgAgainst": "xG en contra (media)",
+    "cornersFor": "Corners a favor (media)",
+    "cornersAgainst": "Corners en contra (media)",
+    "yellowCards": "Tarjetas amarillas (media)",
+    "redCards": "Tarjetas rojas (media)",
+    "elo": "Rating Elo",
+    "noDiscipline": "Sin datos de corners/tarjetas todavía para estos equipos en el rango analizado."
+  },
+  "seasonSummary": {
+    "noData": "Ninguno de los dos equipos tiene partidos jugados registrados todavía (temporada recién empezada o equipo recién ascendido).",
+    "season": "Temporada {{season}} · datos reales de partidos ya jugados.",
+    "played": "Partidos jugados",
+    "pointsPerGame": "Puntos por partido",
+    "over15": "Más de 1,5 goles",
+    "over25": "Más de 2,5 goles",
+    "btts": "Ambos anotan",
+    "cleanSheet": "Portería a cero",
+    "fullTable": "Ver tabla completa de la liga →"
+  },
+  "browser": {
+    "season": "Temporada",
+    "seasonOption": "Temporada {{season}}",
+    "played": "{{played}}/{{total}} jugados",
+    "previous": "Jornada anterior",
+    "matchday": "Jornada",
+    "next": "Jornada siguiente",
+    "estimated": "Jornadas deducidas de las fechas: la fuente de esta liga no las da, y en temporadas con muchos aplazados alguna puede no coincidir con la oficial.",
+    "empty": "No hay partidos cargados para esta temporada."
+  },
+  "carousel": {
+    "title": "Otros partidos de la jornada {{n}}",
+    "titleRound": "Otros partidos · {{round}}",
+    "previous": "Partidos anteriores",
+    "next": "Partidos siguientes",
+    "loading": "Cargando la jornada...",
+    "error": "No se pudieron cargar los partidos de la jornada: {{error}}",
+    "empty": "No hay más partidos en esta jornada.",
+    "cardPlayed": "{{home}} {{homeGoals}} - {{awayGoals}} {{away}}",
+    "cardScheduled": "{{home}} contra {{away}}"
+  },
+  "status": {
+    "played": "Jugado",
+    "scheduled": "Programado"
+  },
+  "outcome": {
+    "letter": {
+      "win": "V",
+      "draw": "E",
+      "loss": "D"
+    },
+    "label": {
+      "win": "Victoria",
+      "draw": "Empate",
+      "loss": "Derrota"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "title": "Statistics 4 Bets · Football statistics to understand every match",
+    "description": "Goals, corners, cards, shots, fouls and referees by team and league, with the historical frequency behind every percentage. Not a bookmaker."
+  },
+  "brandHome": "Statistics 4 Bets, home",
+  "mainNav": "Main",
+  "seeMatches": "View matches",
+  "hero": {
+    "eyebrow": "Statistical football analysis",
+    "title": "Football statistics to understand every match",
+    "lead": "Goals, corners, cards, shots, fouls and referees by team and league, with the historical frequency behind every percentage.",
+    "howToRead": "How to read the statistics"
+  },
+  "leagues": {
+    "title": "Choose a league",
+    "subtitle": "Select a card to see its upcoming matches.",
+    "galleryLabel": "Leagues"
+  },
+  "preview": {
+    "title": "Upcoming matches · {{league}}",
+    "noData": "No data for {{league}} yet.",
+    "noUpcoming": "No upcoming {{league}} matches loaded yet.",
+    "more": "View all matches →"
+  },
+  "skeleton": {
+    "league": "League",
+    "home": "Home team",
+    "away": "Away team"
+  },
+  "stats": {
+    "title": "What you can analyse",
+    "subtitle": "Each statistic has its own page, with every team's percentage and the matches behind it.",
+    "blurb": {
+      "goals": "Over and under goals for the match, the team or the opponent.",
+      "goalsByHalf": "First-half and second-half goals, separately.",
+      "result": "How often each team wins, draws or loses.",
+      "htFt": "The half-time result crossed with the full-time result.",
+      "cleanSheet": "Matches in which the team didn't concede.",
+      "corners": "Match and team corners, plus handicap.",
+      "cards": "Yellows and reds for the match and for each team.",
+      "bookingPoints": "Yellow 10 points, red 25: the total per match.",
+      "shots": "Total shots, on target or not, for the match and for each team.",
+      "shotsOnTarget": "Shots on target only, for the match and for each team.",
+      "fouls": "Fouls committed in the match and by each team.",
+      "referees": "Cards, booking points, corners and goals by referee."
+    }
+  },
+  "steps": {
+    "title": "How it works",
+    "chooseMatch": {
+      "title": "Choose a league and a match",
+      "text": "Start with your league's matchday and open the match you want to look at."
+    },
+    "checkSample": {
+      "title": "Look at the statistic and its sample",
+      "text": "Every percentage comes with the number of matches it's based on: overall, at home and away."
+    },
+    "interpret": {
+      "title": "Read it with care",
+      "text": "It's what happened before, not what will happen. With few matches, a high percentage tells you little."
+    }
+  },
+  "trust": {
+    "title": "How to read the percentages",
+    "text": "The percentages on Statistics 4 Bets are <bold>historical frequency</bold>, not a promise of what will happen: they count how often something happened before and should be read alongside the number of matches used. A high percentage from a few matches says much less than the same percentage from many.",
+    "link": "More on how to read them →"
+  },
+  "final": {
+    "title": "Start with the next matchday"
+  }
+}

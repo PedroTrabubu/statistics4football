@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "title": "Statistics 4 Bets · Estadísticas de fútbol para entender cada partido",
+    "description": "Goles, córners, tarjetas, tiros, faltas y árbitros por equipo y liga, con la frecuencia histórica detrás de cada porcentaje. No es una casa de apuestas."
+  },
+  "brandHome": "Statistics 4 Bets, portada",
+  "mainNav": "Principal",
+  "seeMatches": "Ver partidos",
+  "hero": {
+    "eyebrow": "Análisis estadístico de fútbol",
+    "title": "Estadísticas de fútbol para entender cada partido",
+    "lead": "Goles, córners, tarjetas, tiros, faltas y árbitros por equipo y liga, con la frecuencia histórica detrás de cada porcentaje.",
+    "howToRead": "Cómo leer las estadísticas"
+  },
+  "leagues": {
+    "title": "Elige una liga",
+    "subtitle": "Pulsa una tarjeta para ver sus próximos partidos.",
+    "galleryLabel": "Ligas"
+  },
+  "preview": {
+    "title": "Próximos partidos · {{league}}",
+    "noData": "Todavía no hay datos de {{league}}.",
+    "noUpcoming": "No hay próximos partidos de {{league}} cargados todavía.",
+    "more": "Ver todos los partidos →"
+  },
+  "skeleton": {
+    "league": "Liga",
+    "home": "Equipo local",
+    "away": "Equipo visitante"
+  },
+  "stats": {
+    "title": "Qué puedes analizar",
+    "subtitle": "Cada estadística tiene su página, con el porcentaje de cada equipo y los partidos en que se basa.",
+    "blurb": {
+      "goals": "Más y menos goles del partido, del equipo o del rival.",
+      "goalsByHalf": "Goles de la primera y de la segunda parte por separado.",
+      "result": "Cuántas veces gana, empata o pierde cada equipo.",
+      "htFt": "El resultado al descanso cruzado con el final.",
+      "cleanSheet": "Partidos en los que el equipo no encajó ningún gol.",
+      "corners": "Córners del partido, de cada equipo y hándicap.",
+      "cards": "Amarillas y rojas del partido y de cada equipo.",
+      "bookingPoints": "Amarilla, 10 puntos; roja, 25: el total por partido.",
+      "shots": "Tiros totales, a puerta o no, del partido y de cada equipo.",
+      "shotsOnTarget": "Solo los tiros a puerta, del partido y de cada equipo.",
+      "fouls": "Faltas cometidas en el partido y por cada equipo.",
+      "referees": "Tarjetas, puntos de tarjeta, córners y goles según el árbitro."
+    }
+  },
+  "steps": {
+    "title": "Cómo funciona",
+    "chooseMatch": {
+      "title": "Elige liga y partido",
+      "text": "Empieza por la jornada de tu liga y abre el partido que quieras mirar."
+    },
+    "checkSample": {
+      "title": "Mira la estadística y su muestra",
+      "text": "Cada porcentaje va junto al número de partidos en que se basa, en total, como local y como visitante."
+    },
+    "interpret": {
+      "title": "Interprétala con cuidado",
+      "text": "Es lo que pasó antes, no lo que va a pasar. Con pocos partidos, un porcentaje alto dice poco."
+    }
+  },
+  "trust": {
+    "title": "Cómo leer los porcentajes",
+    "text": "Los porcentajes de Statistics 4 Bets son <bold>frecuencia histórica</bold>, no una promesa de lo que va a pasar: cuentan cuántas veces ocurrió algo antes y deben leerse junto al número de partidos usado. Un porcentaje alto sobre pocos partidos dice mucho menos que el mismo porcentaje sobre muchos.",
+    "link": "Más sobre cómo leerlos →"
+  },
+  "final": {
+    "title": "Empieza por la próxima jornada"
+  }
+}
