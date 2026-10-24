@@ -1,0 +1,254 @@
+{
+  "chip": {
+    "referees": "Árbitros",
+    "badRun": "Mala racha",
+    "all": "Todas",
+    "popular": "Populares"
+  },
+  "page": {
+    "lead": "Rachas activas de los equipos que juegan en los próximos días: partidos seguidos, desde el más reciente, en los que se ha cumplido un mercado. Ordenadas por rareza: lo poco probable que sería una racha así por pura casualidad.",
+    "allDays_one": "{{count}} día",
+    "allDays_many": "{{count}} días",
+    "allDays_other": "{{count}} días",
+    "count_one": "{{count}} racha",
+    "count_many": "{{count}} rachas",
+    "count_other": "{{count}} rachas",
+    "marketLabel": "Mercado",
+    "popularTitle": "Las categorías con más rachas: {{categories}}",
+    "contextLabel": "Contexto",
+    "context": {
+      "any": "Cualquier contexto",
+      "all": "Todos los partidos",
+      "home": "En casa",
+      "away": "Fuera de casa"
+    },
+    "sortLabel": "Orden",
+    "sort": {
+      "rarity": "Más raras primero",
+      "length": "Más largas primero"
+    },
+    "totalFallback_one": "{{count}} racha (con {{min}} partidos o más: con {{normal}} salían muy pocas)",
+    "totalFallback_many": "{{count}} rachas (con {{min}} partidos o más: con {{normal}} salían muy pocas)",
+    "totalFallback_other": "{{count}} rachas (con {{min}} partidos o más: con {{normal}} salían muy pocas)",
+    "loading": "Calculando las rachas...",
+    "empty": "No hay rachas poco probables por azar con estos filtros. Prueba con otro día, mercado o liga.",
+    "column": {
+      "league": "Liga",
+      "streak": "Racha",
+      "nextMatch": "Próximo partido",
+      "odds": "Cuota",
+      "date": "Fecha"
+    },
+    "more": "Ver más ({{n}})"
+  },
+  "chance": {
+    "lessThan": "menos de 1 de cada {{n}}",
+    "oneIn": "1 de cada {{n}}"
+  },
+  "odds": {
+    "taken": "Cuota media de varias casas (\"Market Average\", {{source}}), tomada el {{date}}. No es la cuota actual.",
+    "unknownSource": "fuente desconocida",
+    "note": "{{league}}: {{source}}, tomada el {{date}}",
+    "none": "Sin cuota media de mercado para este suceso: no se deriva ni se estima.",
+    "yours": "Tu cuota",
+    "yoursFor": "Tu cuota para: {{text}}",
+    "requires": "exige {{pct}}"
+  },
+  "notes": {
+    "describe": "<bold>Las rachas describen lo que ha ocurrido; por sí solas no predecirán el siguiente partido.</bold> Hay cientos de combinaciones de equipo, mercado y línea, así que algunas rachas largas aparecen por casualidad.",
+    "oddsWith": "Cuota: la media de varias casas (\"Market Average\"), la misma referencia que usa el resto de la web, solo en Resultado (gana, empata, pierde) y en más/menos de 2,5 goles del partido. En el resto de mercados, \"—\": no se deriva ni se estima. Es la cuota de la última toma, no la actual: {{notes}}.",
+    "oddsNone": "Cuota: la media de varias casas (\"Market Average\"), la misma referencia que usa el resto de la web, solo en Resultado (gana, empata, pierde) y en más/menos de 2,5 goles del partido. En el resto de mercados, \"—\": no se deriva ni se estima. Es la cuota de la última toma, no la actual; ahora mismo no hay ninguna para estos partidos.",
+    "which": "Solo salen las de {{min}} partidos o más ({{fallback}} si salen muy pocas) que por casualidad saldrían como mucho 1 de cada {{chance}}, una por equipo y mercado (la de la línea más exigente) y como mucho {{perEntity}} por equipo y día. Cuentan los partidos de la misma competición, de esta temporada y la anterior. Las de árbitro, solo con el árbitro ya designado.",
+    "cards": "Tarjetas y puntos de tarjeta salen de nuestros datos: tarjetas = amarillas + rojas; puntos = amarilla 10, roja 25 (aproximado). Una estadística que una liga no tiene no sale, y un partido sin el dato no corta la racha."
+  },
+  "rarity": {
+    "title": "¿Qué es la rareza?",
+    "what": "La rareza mide lo difícil que sería ver una racha así <bold>por pura casualidad</bold>, si el equipo fuera uno cualquiera de la liga. Se calcula con lo habitual en la liga para ese suceso, multiplicado por sí mismo tantas veces como partidos tiene la racha. Es la cifra «Por casualidad» de cada fila: «1 de cada 1500» quiere decir que, por pura suerte, solo 1 equipo de cada 1500 tendría una racha así.",
+    "example1": "Ganar 8 seguidos cuando en la liga se gana el 40 % de los partidos: 0,40<sup>8</sup> ≈ 1 de cada 1500. Muy rara.",
+    "example2": "9 seguidos de algo que pasa el 90 % de las veces: 0,90<sup>9</sup> ≈ 1 de cada 3. Es lo normal, así que no sale en la tabla.",
+    "example3": "6 seguidos de algo que pasa la mitad de las veces: 0,50<sup>6</sup> ≈ 1 de cada 64. Es más corta que la anterior, pero mucho más rara: por eso va antes.",
+    "order": "Por eso «Más raras primero» no ordena por longitud: así no suben arriba las rachas largas de cosas que pasan casi siempre.",
+    "notSay": "<bold>Lo que no dice:</bold> no es la probabilidad de que la racha siga. Supone que el equipo es uno medio y que cada partido es independiente, y no siempre es así: un equipo que tira mucho lo hace casi siempre, y su racha puede salir rarísima sin ser ninguna sorpresa. Si quieres saber si las rachas siguen, mira «¿Se prolongan las rachas?» al final de la página. <link>Más en el glosario →</link>"
+  },
+  "row": {
+    "normal": {
+      "all": "Lo normal en {{league}}: {{pct}} de los partidos",
+      "home": "Lo normal en {{league}}: {{pct}} de los partidos en casa",
+      "away": "Lo normal en {{league}}: {{pct}} de los partidos fuera de casa"
+    },
+    "chanceTitle": "{{pct}} multiplicado por sí mismo {{n}} veces. Supone que cada partido es independiente del anterior.",
+    "chance": "Por casualidad: {{chance}}",
+    "since": "Desde el {{date}}",
+    "skipped_one": "{{count}} partido sin dato no cuenta",
+    "skipped_many": "{{count}} partidos sin dato no cuentan",
+    "skipped_other": "{{count}} partidos sin dato no cuentan",
+    "odds": "La cuota {{odds}} pide acertar al menos el {{pct}} para no perder",
+    "referee": "Árbitro: {{name}}",
+    "home": "Local",
+    "away": "Visitante"
+  },
+  "study": {
+    "title": "¿Se prolongan las rachas?",
+    "method": "Con los partidos de {{seasons}} ({{leagues}}): antes de cada partido, las rachas que habría mostrado esta tabla (de {{min}} partidos o más, calculadas solo con los partidos anteriores) y si siguieron en ese partido, frente a lo habitual en la liga hasta entonces para ese mismo suceso. Entre paréntesis, la diferencia con su intervalo del 95 % (remuestreando partidos, {{samples}} muestras, semilla fija). Sin dato: menos de {{minEvents}} rachas.",
+    "loading": "Calculando... {{pct}}",
+    "empty": "No hay suficientes partidos para medirlo.",
+    "verdictNone": "No hay una diferencia clara: con estos datos, las rachas siguieron más o menos como lo habitual en la liga.",
+    "verdictAbove": "En {{above}} de {{cells}} casillas la racha siguió claramente más que lo habitual en la liga; en el resto no hay una diferencia clara. Que siga más que la media de la liga no es inercia: sobre todo dice que ese equipo no es uno medio en ese mercado.",
+    "verdictAboveBelow": "En {{above}} de {{cells}} casillas la racha siguió claramente más que lo habitual en la liga y en {{below}}, menos; en el resto no hay una diferencia clara. Que siga más que la media de la liga no es inercia: sobre todo dice que ese equipo no es uno medio en ese mercado.",
+    "market": "Mercado",
+    "bucket": "{{n}} partidos",
+    "versus": "vs {{expected}}",
+    "diff": "{{diff}} pp ({{low}} a {{high}})",
+    "diffUnclear": "{{diff}} pp ({{low}} a {{high}}) · sin diferencia clara"
+  },
+  "amount": {
+    "goals": {
+      "over": "más de {{line}} goles",
+      "under": "menos de {{line}} goles"
+    },
+    "corners": {
+      "over": "más de {{line}} córners",
+      "under": "menos de {{line}} córners"
+    },
+    "cards": {
+      "over": "más de {{line}} tarjetas",
+      "under": "menos de {{line}} tarjetas"
+    },
+    "bookingPoints": {
+      "over": "más de {{line}} puntos de tarjeta",
+      "under": "menos de {{line}} puntos de tarjeta"
+    },
+    "shots": {
+      "over": "más de {{line}} tiros",
+      "under": "menos de {{line}} tiros"
+    },
+    "shotsOnTarget": {
+      "over": "más de {{line}} tiros a puerta",
+      "under": "menos de {{line}} tiros a puerta"
+    },
+    "fouls": {
+      "over": "más de {{line}} faltas",
+      "under": "menos de {{line}} faltas"
+    }
+  },
+  "last": {
+    "team": {
+      "league": "los últimos {{n}} partidos de liga de {{name}}",
+      "champions": "los últimos {{n}} partidos de Champions de {{name}}",
+      "home": "los últimos {{n}} partidos en casa de {{name}}",
+      "away": "los últimos {{n}} partidos fuera de casa de {{name}}"
+    },
+    "referee": {
+      "league": "los últimos {{n}} partidos de liga del árbitro {{name}}",
+      "champions": "los últimos {{n}} partidos de Champions del árbitro {{name}}"
+    }
+  },
+  "own": {
+    "league": "sus últimos {{n}} partidos de liga",
+    "champions": "sus últimos {{n}} partidos de Champions",
+    "home": "sus últimos {{n}} partidos en casa",
+    "away": "sus últimos {{n}} partidos fuera de casa"
+  },
+  "lastPlain": {
+    "league": "los últimos {{n}} partidos de liga",
+    "champions": "los últimos {{n}} partidos de Champions",
+    "home": "los últimos {{n}} partidos en casa",
+    "away": "los últimos {{n}} partidos fuera de casa"
+  },
+  "text": {
+    "btts": {
+      "yes": "Han marcado los dos equipos en cada uno de {{last}}",
+      "no": "Al menos un equipo se ha quedado sin marcar en cada uno de {{last}}"
+    },
+    "goalsByHalf": {
+      "goalFirstHalf": "Ha habido gol en la primera parte en cada uno de {{last}}",
+      "over15FirstHalf": "Ha habido más de 1,5 goles en la primera parte en cada uno de {{last}}",
+      "goalSecondHalf": "Ha habido gol en la segunda parte en cada uno de {{last}}",
+      "over15SecondHalf": "Ha habido más de 1,5 goles en la segunda parte en cada uno de {{last}}",
+      "moreInSecondHalf": "Se han marcado más goles en la segunda parte que en la primera en cada uno de {{last}}"
+    },
+    "refereeCards": "El árbitro {{name}} ha sacado {{amount}} en cada uno de {{own}}",
+    "match": "En cada uno de {{last}} ha habido {{amount}} entre los dos equipos",
+    "each": {
+      "goals": "En cada uno de {{last}}, los dos equipos han marcado {{amount}}",
+      "corners": "En cada uno de {{last}}, los dos equipos han sacado {{amount}}",
+      "cards": "En cada uno de {{last}}, los dos equipos han recibido {{amount}}",
+      "bookingPoints": "En cada uno de {{last}}, los dos equipos han sumado {{amount}}",
+      "shots": "En cada uno de {{last}}, los dos equipos han hecho {{amount}}",
+      "shotsOnTarget": "En cada uno de {{last}}, los dos equipos han hecho {{amount}}",
+      "fouls": "En cada uno de {{last}}, los dos equipos han cometido {{amount}}"
+    },
+    "refereeOther": "En cada uno de {{last}} se ha cumplido «{{market}}: {{option}}»",
+    "bttsResult": {
+      "win": "{{name}} ha ganado {{own}} y en todos han marcado los dos equipos",
+      "draw": "{{name}} ha empatado {{own}} y en todos han marcado los dos equipos",
+      "lose": "{{name}} ha perdido {{own}} y en todos han marcado los dos equipos"
+    },
+    "scoresBothHalves": "{{name}} ha marcado en las dos partes en cada uno de {{own}}",
+    "result": {
+      "win": "{{name}} ha ganado {{own}}",
+      "draw": "{{name}} ha empatado {{own}}",
+      "lose": "{{name}} ha perdido {{own}}",
+      "winOrDraw": "{{name}} no ha perdido en {{own}}",
+      "noWin": "{{name}} no ha ganado en {{own}}"
+    },
+    "htFt": {
+      "win": {
+        "win": "{{name}} ha ido ganando al descanso y ha ganado al final en {{own}}",
+        "draw": "{{name}} ha ido ganando al descanso y ha empatado al final en {{own}}",
+        "lose": "{{name}} ha ido ganando al descanso y ha perdido al final en {{own}}"
+      },
+      "draw": {
+        "win": "{{name}} ha ido empatando al descanso y ha ganado al final en {{own}}",
+        "draw": "{{name}} ha ido empatando al descanso y ha empatado al final en {{own}}",
+        "lose": "{{name}} ha ido empatando al descanso y ha perdido al final en {{own}}"
+      },
+      "lose": {
+        "win": "{{name}} ha ido perdiendo al descanso y ha ganado al final en {{own}}",
+        "draw": "{{name}} ha ido perdiendo al descanso y ha empatado al final en {{own}}",
+        "lose": "{{name}} ha ido perdiendo al descanso y ha perdido al final en {{own}}"
+      }
+    },
+    "cleanSheet": {
+      "yes": "{{name}} ha dejado la portería a cero en {{own}}",
+      "no": "{{name}} ha encajado gol en {{own}}"
+    },
+    "teamScored": {
+      "over": "{{name}} ha marcado en {{own}}",
+      "under": "{{name}} no ha marcado en {{own}}"
+    },
+    "team": {
+      "goals": "{{name}} ha marcado {{amount}} en cada uno de {{own}}",
+      "corners": "{{name}} ha sacado {{amount}} en cada uno de {{own}}",
+      "cards": "{{name}} ha recibido {{amount}} en cada uno de {{own}}",
+      "bookingPoints": "{{name}} ha sumado {{amount}} en cada uno de {{own}}",
+      "shots": "{{name}} ha hecho {{amount}} en cada uno de {{own}}",
+      "shotsOnTarget": "{{name}} ha hecho {{amount}} en cada uno de {{own}}",
+      "fouls": "{{name}} ha cometido {{amount}} en cada uno de {{own}}"
+    },
+    "teamConceded": {
+      "over": "{{name}} ha encajado gol en {{own}}",
+      "under": "{{name}} no ha encajado gol en {{own}}"
+    },
+    "rival": {
+      "goals": "{{name}} ha encajado {{amount}} en cada uno de {{own}}",
+      "corners": "{{name}} ha concedido {{amount}} en cada uno de {{own}}",
+      "cards": "Los rivales de {{name}} han recibido {{amount}} en cada uno de {{lastPlain}}",
+      "bookingPoints": "Los rivales de {{name}} han sumado {{amount}} en cada uno de {{lastPlain}}",
+      "shots": "{{name}} ha concedido {{amount}} en cada uno de {{own}}",
+      "shotsOnTarget": "{{name}} ha concedido {{amount}} en cada uno de {{own}}",
+      "fouls": "Los rivales de {{name}} han cometido {{amount}} en cada uno de {{lastPlain}}"
+    },
+    "handicap": {
+      "corners": {
+        "more": "{{name}} ha sacado más córners que su rival en cada uno de {{own}}",
+        "atLeastMore": "{{name}} ha sacado al menos {{count}} córners más que su rival en cada uno de {{own}}",
+        "asMany": "{{name}} ha sacado al menos tantos córners como su rival en cada uno de {{own}}",
+        "atMostFewer_one": "{{name}} ha sacado como mucho {{count}} córner menos que su rival en cada uno de {{own}}",
+        "atMostFewer_many": "{{name}} ha sacado como mucho {{count}} córners menos que su rival en cada uno de {{own}}",
+        "atMostFewer_other": "{{name}} ha sacado como mucho {{count}} córners menos que su rival en cada uno de {{own}}"
+      }
+    },
+    "fallback": "{{name}} ha cumplido «{{market}}: {{option}}» en {{own}}"
+  }
+}

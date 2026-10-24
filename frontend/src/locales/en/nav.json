@@ -1,0 +1,14 @@
+{
+  "matches": "Matches",
+  "standings": "Standings",
+  "picks": "Picks",
+  "probablePicks": "Likely picks",
+  "streaks": "Streaks",
+  "recommendations": "Recommendations",
+  "myBets": "My bets",
+  "glossary": "Glossary",
+  "referees": "Referees",
+  "openMenu": "Open menu",
+  "closeMenu": "Close menu",
+  "marketsGroup": "Markets: {{group}}"
+}

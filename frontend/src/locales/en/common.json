@@ -1,0 +1,106 @@
+{
+  "yes": "Yes",
+  "no": "No",
+  "listAnd": " and ",
+  "range": "{{from}} to {{to}}",
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "matchday": "Matchday {{n}}",
+  "timeToBeConfirmed": "time TBC",
+  "loading": {
+    "default": "Loading...",
+    "matches": "Loading matches..."
+  },
+  "error": {
+    "unknown": "Unknown error",
+    "api": "Couldn't connect to the API: {{error}}"
+  },
+  "theme": {
+    "button": "Theme: {{theme}}",
+    "menu": "Site theme",
+    "option": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    }
+  },
+  "language": {
+    "button": "Language: {{language}}",
+    "menu": "Site language"
+  },
+  "sample": {
+    "low": "Small sample",
+    "moderate": "Moderate sample",
+    "wide": "Large sample"
+  },
+  "dayTabs": {
+    "label": "Day",
+    "all": "All",
+    "noMatches": "No matches on this day"
+  },
+  "evFlag": {
+    "label": "check",
+    "title": "An EV this high almost always means the model disagrees sharply with the market (small sample, a team with little history...), not a sure-fire opportunity. Check the sample before trusting this figure."
+  },
+  "outcome": {
+    "won": "Won",
+    "lost": "Lost",
+    "pending": "Pending"
+  },
+  "risk": {
+    "low": "Low risk",
+    "medium": "Medium risk",
+    "high": "High risk"
+  },
+  "league": {
+    "label": "League",
+    "both": "Both",
+    "all": "All",
+    "championsLeague": {
+      "name": "Champions League",
+      "short": "Champions"
+    },
+    "pendingValidation": "Not yet validated: {{leagues}}."
+  },
+  "country": {
+    "spain": "Spain",
+    "england": "England",
+    "france": "France",
+    "germany": "Germany",
+    "italy": "Italy",
+    "europe": "Europe",
+    "portugal": "Portugal",
+    "netherlands": "Netherlands",
+    "belgium": "Belgium",
+    "turkey": "Turkey",
+    "greece": "Greece"
+  },
+  "championsRound": {
+    "playoffFirstLeg": "Play-offs · 1st leg",
+    "playoffSecondLeg": "Play-offs · 2nd leg",
+    "roundOf16FirstLeg": "Round of 16 · 1st leg",
+    "roundOf16SecondLeg": "Round of 16 · 2nd leg",
+    "quarterFinalFirstLeg": "Quarter-finals · 1st leg",
+    "quarterFinalSecondLeg": "Quarter-finals · 2nd leg",
+    "semiFinalFirstLeg": "Semi-finals · 1st leg",
+    "semiFinalSecondLeg": "Semi-finals · 2nd leg",
+    "final": "Final"
+  },
+  "betMarket": {
+    "overUnder": "Over/Under {{line}}",
+    "asianHandicap": "Asian handicap",
+    "btts": "Both teams to score",
+    "doubleChance": "Double chance",
+    "teamScores": "Team to score"
+  },
+  "betSelection": {
+    "draw": "Draw",
+    "overGoals": "Over {{line}} goals",
+    "underGoals": "Under {{line}} goals",
+    "homeOrDraw": "{{home}} or draw",
+    "drawOrAway": "Draw or {{away}}",
+    "homeOrAway": "{{home}} or {{away}}",
+    "teamScores": "{{team}} to score",
+    "handicap": "{{team}} (handicap)"
+  }
+}

@@ -1,0 +1,249 @@
+{
+  "chip": {
+    "referees": "Referees",
+    "badRun": "Bad run",
+    "all": "All",
+    "popular": "Popular"
+  },
+  "page": {
+    "lead": "Active streaks for the teams playing in the coming days: consecutive matches, counting back from the most recent, in which a market has come in. Sorted by rarity: how unlikely a streak like that would be by pure chance.",
+    "allDays_one": "{{count}} day",
+    "allDays_other": "{{count}} days",
+    "count_one": "{{count}} streak",
+    "count_other": "{{count}} streaks",
+    "marketLabel": "Market",
+    "popularTitle": "The categories with the most streaks: {{categories}}",
+    "contextLabel": "Context",
+    "context": {
+      "any": "Any context",
+      "all": "All matches",
+      "home": "At home",
+      "away": "Away"
+    },
+    "sortLabel": "Sort",
+    "sort": {
+      "rarity": "Rarest first",
+      "length": "Longest first"
+    },
+    "totalFallback_one": "{{count}} streak (with {{min}} matches or more: with {{normal}} there were very few)",
+    "totalFallback_other": "{{count}} streaks (with {{min}} matches or more: with {{normal}} there were very few)",
+    "loading": "Calculating the streaks...",
+    "empty": "No streaks that are unlikely by chance with these filters. Try another day, market or league.",
+    "column": {
+      "league": "League",
+      "streak": "Streak",
+      "nextMatch": "Next match",
+      "odds": "Odds",
+      "date": "Date"
+    },
+    "more": "See more ({{n}})"
+  },
+  "chance": {
+    "lessThan": "less than 1 in {{n}}",
+    "oneIn": "1 in {{n}}"
+  },
+  "odds": {
+    "taken": "Average odds across several bookmakers (‘Market Average’, {{source}}), taken on {{date}}. Not the current odds.",
+    "unknownSource": "unknown source",
+    "note": "{{league}}: {{source}}, taken on {{date}}",
+    "none": "No market average odds for this event: they're not derived or estimated.",
+    "yours": "Your odds",
+    "yoursFor": "Your odds for: {{text}}",
+    "requires": "needs {{pct}}"
+  },
+  "notes": {
+    "describe": "<bold>Streaks describe what has happened; on their own they won't predict the next match.</bold> There are hundreds of combinations of team, market and line, so some long streaks appear by chance.",
+    "oddsWith": "Odds: the average across several bookmakers (‘Market Average’), the same reference used across the rest of the site, only for Result (win, draw, lose) and over/under 2.5 match goals. In the other markets, ‘—’: they're not derived or estimated. They're the odds from the latest snapshot, not the current ones: {{notes}}.",
+    "oddsNone": "Odds: the average across several bookmakers (‘Market Average’), the same reference used across the rest of the site, only for Result (win, draw, lose) and over/under 2.5 match goals. In the other markets, ‘—’: they're not derived or estimated. They're the odds from the latest snapshot, not the current ones; right now there are none for these matches.",
+    "which": "Only streaks of {{min}} matches or more are shown ({{fallback}} if very few appear) that would happen by chance at most 1 in {{chance}} times, one per team and market (the one with the most demanding line) and at most {{perEntity}} per team and day. Matches from the same competition count, from this season and the previous one. Referee streaks only once the referee has been appointed.",
+    "cards": "Cards and booking points come from our data: cards = yellows + reds; points = yellow 10, red 25 (approximate). A statistic a league doesn't have isn't shown, and a match without the data doesn't break the streak."
+  },
+  "rarity": {
+    "title": "What is rarity?",
+    "what": "Rarity measures how hard it would be to see a streak like that <bold>by pure chance</bold>, if the team were just any side in the league. It's calculated from the league's usual rate for that event, multiplied by itself as many times as there are matches in the streak. It's the ‘By chance’ figure on each row: ‘1 in 1,500’ means that, by pure luck, only 1 team in 1,500 would have a streak like that.",
+    "example1": "Winning 8 in a row when 40% of matches in the league are won: 0.40<sup>8</sup> ≈ 1 in 1,500. Very rare.",
+    "example2": "9 in a row of something that happens 90% of the time: 0.90<sup>9</sup> ≈ 1 in 3. That's normal, so it doesn't appear in the table.",
+    "example3": "6 in a row of something that happens half the time: 0.50<sup>6</sup> ≈ 1 in 64. It's shorter than the previous one but much rarer: that's why it comes first.",
+    "order": "That's why ‘Rarest first’ doesn't sort by length: that way, long streaks of things that almost always happen don't rise to the top.",
+    "notSay": "<bold>What it doesn't say:</bold> it isn't the probability of the streak continuing. It assumes the team is an average one and that each match is independent, which isn't always the case: a team that shoots a lot almost always does, and its streak can come out extremely rare without being any surprise. If you want to know whether streaks continue, see ‘Do streaks continue?’ at the bottom of the page. <link>More in the glossary →</link>"
+  },
+  "row": {
+    "normal": {
+      "all": "Usual in {{league}}: {{pct}} of matches",
+      "home": "Usual in {{league}}: {{pct}} of home matches",
+      "away": "Usual in {{league}}: {{pct}} of away matches"
+    },
+    "chanceTitle": "{{pct}} multiplied by itself {{n}} times. It assumes each match is independent of the previous one.",
+    "chance": "By chance: {{chance}}",
+    "since": "Since {{date}}",
+    "skipped_one": "{{count}} match without data doesn't count",
+    "skipped_other": "{{count}} matches without data don't count",
+    "odds": "Odds of {{odds}} need a hit rate of at least {{pct}} to break even",
+    "referee": "Referee: {{name}}",
+    "home": "Home",
+    "away": "Away"
+  },
+  "study": {
+    "title": "Do streaks continue?",
+    "method": "Using matches from {{seasons}} ({{leagues}}): before each match, the streaks this table would have shown ({{min}} matches or more, calculated using earlier matches only) and whether they continued in that match, compared with the league's usual rate up to then for that same event. In brackets, the difference with its 95% interval (resampling matches, {{samples}} samples, fixed seed). No data: fewer than {{minEvents}} streaks.",
+    "loading": "Calculating... {{pct}}",
+    "empty": "Not enough matches to measure it.",
+    "verdictNone": "No clear difference: with this data, streaks continued at roughly the league's usual rate.",
+    "verdictAbove": "In {{above}} of {{cells}} cells the streak clearly continued more often than the league's usual rate; in the rest there's no clear difference. Continuing more often than the league average isn't momentum: above all, it says that team isn't an average one in that market.",
+    "verdictAboveBelow": "In {{above}} of {{cells}} cells the streak clearly continued more often than the league's usual rate and in {{below}}, less often; in the rest there's no clear difference. Continuing more often than the league average isn't momentum: above all, it says that team isn't an average one in that market.",
+    "market": "Market",
+    "bucket": "{{n}} matches",
+    "versus": "vs {{expected}}",
+    "diff": "{{diff}} pp ({{low}} to {{high}})",
+    "diffUnclear": "{{diff}} pp ({{low}} to {{high}}) · no clear difference"
+  },
+  "amount": {
+    "goals": {
+      "over": "more than {{line}} goals",
+      "under": "fewer than {{line}} goals"
+    },
+    "corners": {
+      "over": "more than {{line}} corners",
+      "under": "fewer than {{line}} corners"
+    },
+    "cards": {
+      "over": "more than {{line}} cards",
+      "under": "fewer than {{line}} cards"
+    },
+    "bookingPoints": {
+      "over": "more than {{line}} booking points",
+      "under": "fewer than {{line}} booking points"
+    },
+    "shots": {
+      "over": "more than {{line}} shots",
+      "under": "fewer than {{line}} shots"
+    },
+    "shotsOnTarget": {
+      "over": "more than {{line}} shots on target",
+      "under": "fewer than {{line}} shots on target"
+    },
+    "fouls": {
+      "over": "more than {{line}} fouls",
+      "under": "fewer than {{line}} fouls"
+    }
+  },
+  "last": {
+    "team": {
+      "league": "{{name}}'s last {{n}} league matches",
+      "champions": "{{name}}'s last {{n}} Champions League matches",
+      "home": "{{name}}'s last {{n}} home matches",
+      "away": "{{name}}'s last {{n}} away matches"
+    },
+    "referee": {
+      "league": "referee {{name}}'s last {{n}} league matches",
+      "champions": "referee {{name}}'s last {{n}} Champions League matches"
+    }
+  },
+  "own": {
+    "league": "their last {{n}} league matches",
+    "champions": "their last {{n}} Champions League matches",
+    "home": "their last {{n}} home matches",
+    "away": "their last {{n}} away matches"
+  },
+  "lastPlain": {
+    "league": "the last {{n}} league matches",
+    "champions": "the last {{n}} Champions League matches",
+    "home": "the last {{n}} home matches",
+    "away": "the last {{n}} away matches"
+  },
+  "text": {
+    "btts": {
+      "yes": "Both teams have scored in each of {{last}}",
+      "no": "At least one team has failed to score in each of {{last}}"
+    },
+    "goalsByHalf": {
+      "goalFirstHalf": "There's been a first-half goal in each of {{last}}",
+      "over15FirstHalf": "There have been more than 1.5 first-half goals in each of {{last}}",
+      "goalSecondHalf": "There's been a second-half goal in each of {{last}}",
+      "over15SecondHalf": "There have been more than 1.5 second-half goals in each of {{last}}",
+      "moreInSecondHalf": "More goals have been scored in the second half than in the first in each of {{last}}"
+    },
+    "refereeCards": "Referee {{name}} has shown {{amount}} in each of {{own}}",
+    "match": "In each of {{last}}, there have been {{amount}} between the two teams",
+    "each": {
+      "goals": "In each of {{last}}, both teams have scored {{amount}}",
+      "corners": "In each of {{last}}, both teams have taken {{amount}}",
+      "cards": "In each of {{last}}, both teams have picked up {{amount}}",
+      "bookingPoints": "In each of {{last}}, both teams have racked up {{amount}}",
+      "shots": "In each of {{last}}, both teams have taken {{amount}}",
+      "shotsOnTarget": "In each of {{last}}, both teams have had {{amount}}",
+      "fouls": "In each of {{last}}, both teams have committed {{amount}}"
+    },
+    "refereeOther": "In each of {{last}}, ‘{{market}}: {{option}}’ has been met",
+    "bttsResult": {
+      "win": "{{name}} have won {{own}} and both teams have scored in all of them",
+      "draw": "{{name}} have drawn {{own}} and both teams have scored in all of them",
+      "lose": "{{name}} have lost {{own}} and both teams have scored in all of them"
+    },
+    "scoresBothHalves": "{{name}} have scored in both halves in each of {{own}}",
+    "result": {
+      "win": "{{name}} have won {{own}}",
+      "draw": "{{name}} have drawn {{own}}",
+      "lose": "{{name}} have lost {{own}}",
+      "winOrDraw": "{{name}} haven't lost in {{own}}",
+      "noWin": "{{name}} haven't won in {{own}}"
+    },
+    "htFt": {
+      "win": {
+        "win": "{{name}} have led at half-time and won in {{own}}",
+        "draw": "{{name}} have led at half-time and drawn in {{own}}",
+        "lose": "{{name}} have led at half-time and lost in {{own}}"
+      },
+      "draw": {
+        "win": "{{name}} have been level at half-time and won in {{own}}",
+        "draw": "{{name}} have been level at half-time and drawn in {{own}}",
+        "lose": "{{name}} have been level at half-time and lost in {{own}}"
+      },
+      "lose": {
+        "win": "{{name}} have been behind at half-time and won in {{own}}",
+        "draw": "{{name}} have been behind at half-time and drawn in {{own}}",
+        "lose": "{{name}} have been behind at half-time and lost in {{own}}"
+      }
+    },
+    "cleanSheet": {
+      "yes": "{{name}} have kept a clean sheet in {{own}}",
+      "no": "{{name}} have conceded in {{own}}"
+    },
+    "teamScored": {
+      "over": "{{name}} have scored in {{own}}",
+      "under": "{{name}} have failed to score in {{own}}"
+    },
+    "team": {
+      "goals": "{{name}} have scored {{amount}} in each of {{own}}",
+      "corners": "{{name}} have taken {{amount}} in each of {{own}}",
+      "cards": "{{name}} have picked up {{amount}} in each of {{own}}",
+      "bookingPoints": "{{name}} have racked up {{amount}} in each of {{own}}",
+      "shots": "{{name}} have taken {{amount}} in each of {{own}}",
+      "shotsOnTarget": "{{name}} have had {{amount}} in each of {{own}}",
+      "fouls": "{{name}} have committed {{amount}} in each of {{own}}"
+    },
+    "teamConceded": {
+      "over": "{{name}} have conceded in {{own}}",
+      "under": "{{name}} haven't conceded in {{own}}"
+    },
+    "rival": {
+      "goals": "{{name}} have conceded {{amount}} in each of {{own}}",
+      "corners": "{{name}} have conceded {{amount}} in each of {{own}}",
+      "cards": "{{name}}'s opponents have picked up {{amount}} in each of {{lastPlain}}",
+      "bookingPoints": "{{name}}'s opponents have racked up {{amount}} in each of {{lastPlain}}",
+      "shots": "{{name}} have conceded {{amount}} in each of {{own}}",
+      "shotsOnTarget": "{{name}} have conceded {{amount}} in each of {{own}}",
+      "fouls": "{{name}}'s opponents have committed {{amount}} in each of {{lastPlain}}"
+    },
+    "handicap": {
+      "corners": {
+        "more": "{{name}} have taken more corners than their opponent in each of {{own}}",
+        "atLeastMore": "{{name}} have taken at least {{count}} more corners than their opponent in each of {{own}}",
+        "asMany": "{{name}} have taken at least as many corners as their opponent in each of {{own}}",
+        "atMostFewer_one": "{{name}} have taken at most {{count}} fewer corner than their opponent in each of {{own}}",
+        "atMostFewer_other": "{{name}} have taken at most {{count}} fewer corners than their opponent in each of {{own}}"
+      }
+    },
+    "fallback": "{{name}} have met ‘{{market}}: {{option}}’ in {{own}}"
+  }
+}

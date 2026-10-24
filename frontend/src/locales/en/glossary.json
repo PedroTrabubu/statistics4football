@@ -1,0 +1,78 @@
+{
+  "intro": "What each term you'll see on the match pages means, without assuming you already know.",
+  "basics": {
+    "title": "Frequency, probability and value are not the same thing",
+    "frequency": {
+      "term": "Historical frequency",
+      "def": "How many times something has happened over a specific number of past matches. It's a count, not a prediction: ‘over 2.5 happened in 13 of the last 20 matches’ is frequency."
+    },
+    "modelProbability": {
+      "term": "Model probability",
+      "def": "An estimate, calculated with a statistical model (Dixon-Coles) that takes into account each team's attacking and defensive strength, not just a simple count. It's still an estimate, not a fact."
+    },
+    "value": {
+      "term": "Value (EV)",
+      "def": "Compares that estimated probability with specific odds. A positive EV describes an expected long-term edge under the model's assumptions — it doesn't guarantee winning the next bet, and a losing run with positive EV is perfectly normal."
+    }
+  },
+  "markets": {
+    "title": "Markets",
+    "oneXTwo": {
+      "term": "1X2",
+      "def": "Market on the full-time result: 1 (home win), X (draw) or 2 (away win)."
+    },
+    "btts": {
+      "term": "BTTS (both teams to score)",
+      "def": "Whether both teams score at least one goal in the match, yes or no."
+    },
+    "overUnder": {
+      "term": "Over/Under 2.5",
+      "def": "Whether the match ends with more than 2.5 goals in total (over) or with 2.5 or fewer (under)."
+    },
+    "asianHandicap": {
+      "term": "Asian handicap",
+      "def": "A 1X2 market with a goal advantage or disadvantage applied beforehand to one of the teams, to even out the chances."
+    },
+    "halfTime": {
+      "term": "Half-time result",
+      "def": "The score at the end of the first half, not the final result."
+    }
+  },
+  "streaks": {
+    "title": "Streaks",
+    "streak": {
+      "term": "Streak",
+      "def": "Consecutive matches, counting back from the most recent, in which a team (or a referee) has met a condition: winning, scoring, over 8.5 corners... It describes what has happened, not what will happen."
+    },
+    "rarity": {
+      "term": "Rarity",
+      "def": "How hard it would be to see that streak by pure chance if the team were just any side in the league: the league's usual rate for that event, raised to the power of the streak's length. Winning 8 in a row where 40% of matches are won: 0.40<sup>8</sup> ≈ 1 in 1,500, very rare. A streak of 9 of something that happens 90% of the time: 0.90<sup>9</sup> ≈ 1 in 3, not rare at all. It isn't the probability of the streak continuing: it assumes independent matches and an average team, and a team with a distinctive style (shooting a lot, committing lots of fouls) can have extremely rare streaks without them being a surprise."
+    }
+  },
+  "odds": {
+    "title": "How to read odds",
+    "implied": {
+      "term": "Implied probability",
+      "def": "The probability that odds ‘assume’ if you take them at face value: 1 ÷ odds. Odds of 2.00 imply 50%."
+    },
+    "fair": {
+      "term": "Fair odds",
+      "def": "The odds that would correspond exactly to the model's probability, with no bookmaker margin: 1 ÷ model probability. They're a reference for comparison, not odds you'll necessarily find anywhere."
+    },
+    "yourEv": {
+      "term": "Your EV",
+      "def": "When you enter the odds your bookmaker offers alongside the model's probability, the expected value of that specific combination is calculated. They're never saved or sent anywhere."
+    }
+  },
+  "risk": {
+    "title": "Confidence and risk",
+    "confidence": {
+      "term": "Confidence",
+      "def": "Depends on how many matches support the estimate for those two specific teams (and, if there are odds from several bookmakers, on how closely they agree). With few matches available, confidence is low even if the calculated percentage looks convincing."
+    },
+    "level": {
+      "term": "Low / medium / high risk",
+      "def": "It rises when confidence is low or when the odds are very high (greater variance), even if the point EV is positive. It's not a quality score for the data; it signals how much the actual result can vary."
+    }
+  }
+}

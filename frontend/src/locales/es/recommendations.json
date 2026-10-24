@@ -1,0 +1,56 @@
+{
+  "lead": "Esto es una herramienta de análisis, no una promesa de ganancia. Compara siempre el acierto con lo que ya esperaba el mercado: acertar mucho en apuestas que el mercado ya daba como muy probables no es mérito del modelo.",
+  "strategy": {
+    "highProbability": "Alta probabilidad",
+    "value": "Valor (EV)"
+  },
+  "intro": {
+    "highProbability": "<bold>Alta probabilidad:</bold> como máximo una selección por partido, cuando el modelo le da al menos un 62 % y al menos 3 puntos más que el mercado. Combina las cuotas pre-partido, Dixon-Coles y los patrones de cada equipo. En 25/26 y 26/27 acertó un 74,8 % cuando el mercado esperaba un 68,5 %, pero en las tres temporadas anteriores (22/23–24/25) acertó un 68,7 %, exactamente lo que esperaba el mercado. Acierta mucho porque elige selecciones probables, no porque sepa más que las casas.",
+    "value": "<bold>Valor (EV):</bold> selecciones donde Dixon-Coles da más probabilidad que la cuota. Aciertan menos a menudo (incluye visitantes y empates) y se juzgan por el ROI, no por el acierto."
+  },
+  "tabUpcoming": "Próximas",
+  "tabHistory": "Histórico",
+  "loading": "Cargando recomendaciones...",
+  "emptyHighProbability": "No hay selecciones de alta probabilidad para los próximos partidos. El modelo necesita las cuotas pre-partido (scripts/refresh_odds.py y luego refresh_predictions.py), y en muchos partidos ninguna selección supera los dos umbrales: es lo esperado, no un error.",
+  "emptyValue": "Todavía no hay recomendaciones de valor para partidos por jugar: calcular el EV requiere una cuota real de mercado. Carga las cuotas pre-partido (scripts/refresh_odds.py) y vuelve a generar las predicciones. Mientras tanto, usa 'Tu cuota' en la ficha de cada partido para comparar tu propia cuota contra el modelo.",
+  "anyRisk": "Cualquier riesgo",
+  "minEv": "EV mínimo",
+  "column": {
+    "match": "Partido",
+    "market": "Mercado",
+    "selection": "Selección",
+    "modelProb": "Prob. modelo",
+    "marketProb": "Prob. mercado",
+    "edge": "Ventaja",
+    "ev": "EV",
+    "evTitle": "Solo en 1X2 y Over/Under 2,5, que tienen cuota real en los datos",
+    "sample": "Muestra",
+    "risk": "Riesgo",
+    "result": "Resultado",
+    "hit": "¿Acertó?",
+    "pnl": "PnL"
+  },
+  "history": {
+    "loading": "Cargando histórico...",
+    "empty": "Todavía no hay recomendaciones resueltas sobre partidos ya jugados para este filtro.",
+    "tile": {
+      "hitRate": "Acierto",
+      "marketExpected": "El mercado esperaba",
+      "margin": "Margen sobre mercado",
+      "roi": "ROI ({{n}} con cuota)",
+      "pnl": "PnL (stake=1)",
+      "wonLost": "Acertadas / falladas"
+    },
+    "note": {
+      "highProbability": "Selecciones del modelo de alta probabilidad sobre 25/26 y 26/27, calculadas con un modelo entrenado solo con temporadas anteriores y con los umbrales fijados antes de ver estos partidos. <bold>El margen sobre el mercado es la métrica de mérito</bold>, no el acierto: elegir siempre lo que el mercado da como más probable también acierta mucho, y pierde dinero. El ROI solo cuenta 1X2 y Over/Under 2,5, los únicos mercados con cuota real en los datos. Nunca se excluyen los fallos de esta lista ni de estos cálculos.",
+      "value": "Selecciones que el modelo marcó como valor (EV positivo) en partidos ya jugados. <bold>El ROI es la métrica que importa, no el acierto aislado</bold>: una selección de probabilidad baja (ej. visitante al 15 %) se espera que falle la mayoría de las veces aunque tenga EV positivo real. Nunca se excluyen los fallos de esta lista ni de estos cálculos."
+    },
+    "column": {
+      "selections": "Selecciones",
+      "hitRate": "Acierto",
+      "marketExpected": "Mercado esperaba",
+      "withOdds": "Con cuota",
+      "roi": "ROI"
+    }
+  }
+}

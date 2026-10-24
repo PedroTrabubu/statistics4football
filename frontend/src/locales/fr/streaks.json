@@ -1,0 +1,254 @@
+{
+  "chip": {
+    "referees": "Arbitres",
+    "badRun": "Mauvaise série",
+    "all": "Toutes",
+    "popular": "Populaires"
+  },
+  "page": {
+    "lead": "Séries en cours des équipes qui jouent dans les prochains jours : matchs consécutifs, en remontant depuis le plus récent, où un marché s'est vérifié. Triées par rareté : à quel point une telle série serait improbable par pur hasard.",
+    "allDays_one": "{{count}} jour",
+    "allDays_many": "{{count}} jours",
+    "allDays_other": "{{count}} jours",
+    "count_one": "{{count}} série",
+    "count_many": "{{count}} séries",
+    "count_other": "{{count}} séries",
+    "marketLabel": "Marché",
+    "popularTitle": "Les catégories avec le plus de séries : {{categories}}",
+    "contextLabel": "Contexte",
+    "context": {
+      "any": "Tout contexte",
+      "all": "Tous les matchs",
+      "home": "À domicile",
+      "away": "À l'extérieur"
+    },
+    "sortLabel": "Tri",
+    "sort": {
+      "rarity": "Les plus rares d'abord",
+      "length": "Les plus longues d'abord"
+    },
+    "totalFallback_one": "{{count}} série (de {{min}} matchs ou plus : avec {{normal}}, il y en avait très peu)",
+    "totalFallback_many": "{{count}} séries (de {{min}} matchs ou plus : avec {{normal}}, il y en avait très peu)",
+    "totalFallback_other": "{{count}} séries (de {{min}} matchs ou plus : avec {{normal}}, il y en avait très peu)",
+    "loading": "Calcul des séries...",
+    "empty": "Aucune série improbable par hasard avec ces filtres. Essayez un autre jour, marché ou championnat.",
+    "column": {
+      "league": "Championnat",
+      "streak": "Série",
+      "nextMatch": "Prochain match",
+      "odds": "Cote",
+      "date": "Date"
+    },
+    "more": "Voir plus ({{n}})"
+  },
+  "chance": {
+    "lessThan": "moins de 1 sur {{n}}",
+    "oneIn": "1 sur {{n}}"
+  },
+  "odds": {
+    "taken": "Cote moyenne de plusieurs bookmakers (« Market Average », {{source}}), relevée le {{date}}. Ce n'est pas la cote actuelle.",
+    "unknownSource": "source inconnue",
+    "note": "{{league}} : {{source}}, relevée le {{date}}",
+    "none": "Pas de cote moyenne du marché pour cet événement : elle n'est ni dérivée ni estimée.",
+    "yours": "Votre cote",
+    "yoursFor": "Votre cote pour : {{text}}",
+    "requires": "exige {{pct}}"
+  },
+  "notes": {
+    "describe": "<bold>Les séries décrivent ce qui s'est passé ; à elles seules, elles ne prédisent pas le prochain match.</bold> Il existe des centaines de combinaisons d'équipe, de marché et de ligne, donc certaines longues séries apparaissent par hasard.",
+    "oddsWith": "Cote : la moyenne de plusieurs bookmakers (« Market Average »), la même référence que dans le reste du site, uniquement pour Résultat (victoire, nul, défaite) et plus/moins de 2,5 buts dans le match. Pour les autres marchés, « — » : elle n'est ni dérivée ni estimée. C'est la cote du dernier relevé, pas la cote actuelle : {{notes}}.",
+    "oddsNone": "Cote : la moyenne de plusieurs bookmakers (« Market Average »), la même référence que dans le reste du site, uniquement pour Résultat (victoire, nul, défaite) et plus/moins de 2,5 buts dans le match. Pour les autres marchés, « — » : elle n'est ni dérivée ni estimée. C'est la cote du dernier relevé, pas la cote actuelle ; pour l'instant, il n'y en a aucune pour ces matchs.",
+    "which": "Seules apparaissent les séries de {{min}} matchs ou plus ({{fallback}} s'il y en a très peu) qui, par hasard, n'arriveraient qu'au plus 1 fois sur {{chance}}, une par équipe et par marché (celle de la ligne la plus exigeante) et au plus {{perEntity}} par équipe et par jour. On compte les matchs de la même compétition, de cette saison et de la précédente. Celles des arbitres, uniquement une fois l'arbitre désigné.",
+    "cards": "Les cartons et les points de cartons viennent de nos données : cartons = jaunes + rouges ; points = jaune 10, rouge 25 (approximatif). Une statistique qu'un championnat n'a pas n'apparaît pas, et un match sans la donnée n'interrompt pas la série."
+  },
+  "rarity": {
+    "title": "Qu'est-ce que la rareté ?",
+    "what": "La rareté mesure la difficulté de voir une telle série <bold>par pur hasard</bold>, si l'équipe était une équipe quelconque du championnat. On la calcule avec le taux habituel du championnat pour cet événement, multiplié par lui-même autant de fois que la série compte de matchs. C'est le chiffre « Par hasard » de chaque ligne : « 1 sur 1 500 » signifie que, par pure chance, seule 1 équipe sur 1 500 aurait une telle série.",
+    "example1": "Gagner 8 fois de suite quand 40 % des matchs du championnat sont gagnés : 0,40<sup>8</sup> ≈ 1 sur 1 500. Très rare.",
+    "example2": "9 fois de suite quelque chose qui arrive 90 % du temps : 0,90<sup>9</sup> ≈ 1 sur 3. C'est normal, donc elle n'apparaît pas dans le tableau.",
+    "example3": "6 fois de suite quelque chose qui arrive une fois sur deux : 0,50<sup>6</sup> ≈ 1 sur 64. Elle est plus courte que la précédente, mais beaucoup plus rare : c'est pourquoi elle passe devant.",
+    "order": "C'est pourquoi « Les plus rares d'abord » ne trie pas par longueur : ainsi, les longues séries de choses qui arrivent presque toujours ne remontent pas en haut.",
+    "notSay": "<bold>Ce qu'elle ne dit pas :</bold> ce n'est pas la probabilité que la série continue. Elle suppose que l'équipe est moyenne et que chaque match est indépendant, ce qui n'est pas toujours le cas : une équipe qui tire beaucoup le fait presque toujours, et sa série peut paraître très rare sans être une surprise. Pour savoir si les séries se prolongent, consultez « Les séries se prolongent-elles ? » en bas de la page. <link>Plus d'infos dans le glossaire →</link>"
+  },
+  "row": {
+    "normal": {
+      "all": "Habituel en {{league}} : {{pct}} des matchs",
+      "home": "Habituel en {{league}} : {{pct}} des matchs à domicile",
+      "away": "Habituel en {{league}} : {{pct}} des matchs à l'extérieur"
+    },
+    "chanceTitle": "{{pct}} multiplié par lui-même {{n}} fois. Suppose que chaque match est indépendant du précédent.",
+    "chance": "Par hasard : {{chance}}",
+    "since": "Depuis le {{date}}",
+    "skipped_one": "{{count}} match sans donnée ne compte pas",
+    "skipped_many": "{{count}} matchs sans donnée ne comptent pas",
+    "skipped_other": "{{count}} matchs sans donnée ne comptent pas",
+    "odds": "La cote {{odds}} exige une réussite d'au moins {{pct}} pour ne pas perdre",
+    "referee": "Arbitre : {{name}}",
+    "home": "Domicile",
+    "away": "Extérieur"
+  },
+  "study": {
+    "title": "Les séries se prolongent-elles ?",
+    "method": "Avec les matchs de {{seasons}} ({{leagues}}) : avant chaque match, les séries que ce tableau aurait affichées ({{min}} matchs ou plus, calculées uniquement avec les matchs précédents) et si elles ont continué lors de ce match, comparées au taux habituel du championnat jusque-là pour ce même événement. Entre parenthèses, l'écart avec son intervalle à 95 % (rééchantillonnage des matchs, {{samples}} échantillons, graine fixe). Pas de donnée : moins de {{minEvents}} séries.",
+    "loading": "Calcul... {{pct}}",
+    "empty": "Pas assez de matchs pour le mesurer.",
+    "verdictNone": "Pas d'écart net : avec ces données, les séries ont continué à peu près au rythme habituel du championnat.",
+    "verdictAbove": "Dans {{above}} cases sur {{cells}}, la série a nettement plus souvent continué que le taux habituel du championnat ; dans les autres, pas d'écart net. Continuer plus souvent que la moyenne du championnat n'est pas de l'inertie : cela dit surtout que cette équipe n'est pas une équipe moyenne sur ce marché.",
+    "verdictAboveBelow": "Dans {{above}} cases sur {{cells}}, la série a nettement plus souvent continué que le taux habituel du championnat, et dans {{below}}, moins souvent ; dans les autres, pas d'écart net. Continuer plus souvent que la moyenne du championnat n'est pas de l'inertie : cela dit surtout que cette équipe n'est pas une équipe moyenne sur ce marché.",
+    "market": "Marché",
+    "bucket": "{{n}} matchs",
+    "versus": "contre {{expected}}",
+    "diff": "{{diff}} pts ({{low}} à {{high}})",
+    "diffUnclear": "{{diff}} pts ({{low}} à {{high}}) · pas d'écart net"
+  },
+  "amount": {
+    "goals": {
+      "over": "plus de {{line}} buts",
+      "under": "moins de {{line}} buts"
+    },
+    "corners": {
+      "over": "plus de {{line}} corners",
+      "under": "moins de {{line}} corners"
+    },
+    "cards": {
+      "over": "plus de {{line}} cartons",
+      "under": "moins de {{line}} cartons"
+    },
+    "bookingPoints": {
+      "over": "plus de {{line}} points de cartons",
+      "under": "moins de {{line}} points de cartons"
+    },
+    "shots": {
+      "over": "plus de {{line}} tirs",
+      "under": "moins de {{line}} tirs"
+    },
+    "shotsOnTarget": {
+      "over": "plus de {{line}} tirs cadrés",
+      "under": "moins de {{line}} tirs cadrés"
+    },
+    "fouls": {
+      "over": "plus de {{line}} fautes",
+      "under": "moins de {{line}} fautes"
+    }
+  },
+  "last": {
+    "team": {
+      "league": "{{n}} derniers matchs de championnat de {{name}}",
+      "champions": "{{n}} derniers matchs de Ligue des champions de {{name}}",
+      "home": "{{n}} derniers matchs à domicile de {{name}}",
+      "away": "{{n}} derniers matchs à l'extérieur de {{name}}"
+    },
+    "referee": {
+      "league": "{{n}} derniers matchs de championnat de l'arbitre {{name}}",
+      "champions": "{{n}} derniers matchs de Ligue des champions de l'arbitre {{name}}"
+    }
+  },
+  "own": {
+    "league": "ses {{n}} derniers matchs de championnat",
+    "champions": "ses {{n}} derniers matchs de Ligue des champions",
+    "home": "ses {{n}} derniers matchs à domicile",
+    "away": "ses {{n}} derniers matchs à l'extérieur"
+  },
+  "lastPlain": {
+    "league": "{{n}} derniers matchs de championnat",
+    "champions": "{{n}} derniers matchs de Ligue des champions",
+    "home": "{{n}} derniers matchs à domicile",
+    "away": "{{n}} derniers matchs à l'extérieur"
+  },
+  "text": {
+    "btts": {
+      "yes": "Les deux équipes ont marqué lors de chacun des {{last}}",
+      "no": "Au moins une équipe n'a pas marqué lors de chacun des {{last}}"
+    },
+    "goalsByHalf": {
+      "goalFirstHalf": "Il y a eu un but en première période lors de chacun des {{last}}",
+      "over15FirstHalf": "Il y a eu plus de 1,5 buts en première période lors de chacun des {{last}}",
+      "goalSecondHalf": "Il y a eu un but en seconde période lors de chacun des {{last}}",
+      "over15SecondHalf": "Il y a eu plus de 1,5 buts en seconde période lors de chacun des {{last}}",
+      "moreInSecondHalf": "Il y a eu plus de buts en seconde période qu'en première lors de chacun des {{last}}"
+    },
+    "refereeCards": "L'arbitre {{name}} a distribué {{amount}} lors de chacun de {{own}}",
+    "match": "Lors de chacun des {{last}}, il y a eu {{amount}} au total pour les deux équipes",
+    "each": {
+      "goals": "Lors de chacun des {{last}}, les deux équipes ont marqué {{amount}}",
+      "corners": "Lors de chacun des {{last}}, les deux équipes ont obtenu {{amount}}",
+      "cards": "Lors de chacun des {{last}}, les deux équipes ont reçu {{amount}}",
+      "bookingPoints": "Lors de chacun des {{last}}, les deux équipes ont cumulé {{amount}}",
+      "shots": "Lors de chacun des {{last}}, les deux équipes ont tenté {{amount}}",
+      "shotsOnTarget": "Lors de chacun des {{last}}, les deux équipes ont tenté {{amount}}",
+      "fouls": "Lors de chacun des {{last}}, les deux équipes ont commis {{amount}}"
+    },
+    "refereeOther": "Lors de chacun des {{last}}, « {{market}} : {{option}} » s'est vérifié",
+    "bttsResult": {
+      "win": "{{name}} a gagné {{own}} et les deux équipes ont marqué à chaque fois",
+      "draw": "{{name}} a fait match nul lors de {{own}} et les deux équipes ont marqué à chaque fois",
+      "lose": "{{name}} a perdu {{own}} et les deux équipes ont marqué à chaque fois"
+    },
+    "scoresBothHalves": "{{name}} a marqué dans les deux périodes lors de chacun de {{own}}",
+    "result": {
+      "win": "{{name}} a gagné {{own}}",
+      "draw": "{{name}} a fait match nul lors de {{own}}",
+      "lose": "{{name}} a perdu {{own}}",
+      "winOrDraw": "{{name}} n'a pas perdu lors de {{own}}",
+      "noWin": "{{name}} n'a pas gagné lors de {{own}}"
+    },
+    "htFt": {
+      "win": {
+        "win": "{{name}} menait à la mi-temps et a gagné lors de {{own}}",
+        "draw": "{{name}} menait à la mi-temps et a fait match nul lors de {{own}}",
+        "lose": "{{name}} menait à la mi-temps et a perdu lors de {{own}}"
+      },
+      "draw": {
+        "win": "{{name}} était à égalité à la mi-temps et a gagné lors de {{own}}",
+        "draw": "{{name}} était à égalité à la mi-temps et a fait match nul lors de {{own}}",
+        "lose": "{{name}} était à égalité à la mi-temps et a perdu lors de {{own}}"
+      },
+      "lose": {
+        "win": "{{name}} était mené à la mi-temps et a gagné lors de {{own}}",
+        "draw": "{{name}} était mené à la mi-temps et a fait match nul lors de {{own}}",
+        "lose": "{{name}} était mené à la mi-temps et a perdu lors de {{own}}"
+      }
+    },
+    "cleanSheet": {
+      "yes": "{{name}} n'a pas encaissé de but lors de {{own}}",
+      "no": "{{name}} a encaissé au moins un but lors de {{own}}"
+    },
+    "teamScored": {
+      "over": "{{name}} a marqué lors de {{own}}",
+      "under": "{{name}} n'a pas marqué lors de {{own}}"
+    },
+    "team": {
+      "goals": "{{name}} a marqué {{amount}} lors de chacun de {{own}}",
+      "corners": "{{name}} a obtenu {{amount}} lors de chacun de {{own}}",
+      "cards": "{{name}} a reçu {{amount}} lors de chacun de {{own}}",
+      "bookingPoints": "{{name}} a cumulé {{amount}} lors de chacun de {{own}}",
+      "shots": "{{name}} a tenté {{amount}} lors de chacun de {{own}}",
+      "shotsOnTarget": "{{name}} a tenté {{amount}} lors de chacun de {{own}}",
+      "fouls": "{{name}} a commis {{amount}} lors de chacun de {{own}}"
+    },
+    "teamConceded": {
+      "over": "{{name}} a encaissé au moins un but lors de {{own}}",
+      "under": "{{name}} n'a pas encaissé de but lors de {{own}}"
+    },
+    "rival": {
+      "goals": "{{name}} a encaissé {{amount}} lors de chacun de {{own}}",
+      "corners": "{{name}} a concédé {{amount}} lors de chacun de {{own}}",
+      "cards": "Les adversaires de {{name}} ont reçu {{amount}} lors de chacun des {{lastPlain}}",
+      "bookingPoints": "Les adversaires de {{name}} ont cumulé {{amount}} lors de chacun des {{lastPlain}}",
+      "shots": "{{name}} a concédé {{amount}} lors de chacun de {{own}}",
+      "shotsOnTarget": "{{name}} a concédé {{amount}} lors de chacun de {{own}}",
+      "fouls": "Les adversaires de {{name}} ont commis {{amount}} lors de chacun des {{lastPlain}}"
+    },
+    "handicap": {
+      "corners": {
+        "more": "{{name}} a obtenu plus de corners que son adversaire lors de chacun de {{own}}",
+        "atLeastMore": "{{name}} a obtenu au moins {{count}} corners de plus que son adversaire lors de chacun de {{own}}",
+        "asMany": "{{name}} a obtenu au moins autant de corners que son adversaire lors de chacun de {{own}}",
+        "atMostFewer_one": "{{name}} a obtenu au plus {{count}} corner de moins que son adversaire lors de chacun de {{own}}",
+        "atMostFewer_many": "{{name}} a obtenu au plus {{count}} corners de moins que son adversaire lors de chacun de {{own}}",
+        "atMostFewer_other": "{{name}} a obtenu au plus {{count}} corners de moins que son adversaire lors de chacun de {{own}}"
+      }
+    },
+    "fallback": "{{name}} a rempli « {{market}} : {{option}} » lors de {{own}}"
+  }
+}

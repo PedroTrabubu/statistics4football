@@ -1,0 +1,545 @@
+{
+  "page": {
+    "lead": "Collez votre historique Winamax ou bet365 et voyez où vous gagnez et où vous perdez de l'argent, année par année : par cote, type de pari, sport, marché, mise et habitudes.",
+    "empty": "Vous n'avez encore importé aucun pari."
+  },
+  "import": {
+    "privacy": "<bold>Confidentialité :</bold> l'historique est analysé dans votre navigateur et n'est enregistré que là. Il n'est envoyé à aucun serveur. C'est pourquoi il vaut mieux <bold>télécharger une sauvegarde</bold> de temps en temps : si vous effacez les données du navigateur ou changez d'ordinateur, vous les récupérez avec « Restaurer la sauvegarde ».",
+    "placeholder": "Collez ici le HTML de votre historique Winamax ou bet365 (ou le texte d'une sauvegarde)…",
+    "textareaLabel": "HTML de l'historique de paris",
+    "analyze": "Analyser",
+    "upload": "Importer un fichier .html",
+    "download": "Télécharger la sauvegarde ({{n}})",
+    "restore": "Restaurer la sauvegarde",
+    "clear": "Effacer mes données",
+    "close": "Fermer",
+    "confirmClear": "Effacer tous les paris importés et l'argent réel noté dans ce navigateur ?",
+    "noBets": "Je n'ai trouvé aucun pari dans ce HTML. Vérifiez que vous copiez la liste « Mis apuestas → Finalizadas » de Winamax ou celle de l'historique des paris sportifs de bet365 (voir les étapes ci-dessous).",
+    "backupUnreadable": "Impossible de lire la sauvegarde.",
+    "cleared": "Tous les paris enregistrés dans ce navigateur ont été effacés.",
+    "nothingNewBackup_one": "Le seul pari de la sauvegarde était déjà enregistré. Rien n'a changé.",
+    "nothingNewBackup_many": "Les {{count}} paris de la sauvegarde étaient déjà enregistrés. Rien n'a changé.",
+    "nothingNewBackup_other": "Les {{count}} paris de la sauvegarde étaient déjà enregistrés. Rien n'a changé.",
+    "nothingNewHtml_one": "Le seul pari de ce HTML était déjà enregistré. Rien n'a changé.",
+    "nothingNewHtml_many": "Les {{count}} paris de ce HTML étaient déjà enregistrés. Rien n'a changé.",
+    "nothingNewHtml_other": "Les {{count}} paris de ce HTML étaient déjà enregistrés. Rien n'a changé.",
+    "doneBackup_one": "Sauvegarde restaurée : j'ai lu {{count}} pari.",
+    "doneBackup_many": "Sauvegarde restaurée : j'ai lu {{count}} paris.",
+    "doneBackup_other": "Sauvegarde restaurée : j'ai lu {{count}} paris.",
+    "doneHtml_one": "Importation terminée : j'ai lu {{count}} pari.",
+    "doneHtml_many": "Importation terminée : j'ai lu {{count}} paris.",
+    "doneHtml_other": "Importation terminée : j'ai lu {{count}} paris.",
+    "chip": {
+      "added_one": "<bold>{{count}}</bold> nouveau",
+      "added_many": "<bold>{{count}}</bold> nouveaux",
+      "added_other": "<bold>{{count}}</bold> nouveaux",
+      "updated_one": "<bold>{{count}}</bold> mis à jour",
+      "updated_many": "<bold>{{count}}</bold> mis à jour",
+      "updated_other": "<bold>{{count}}</bold> mis à jour",
+      "unchanged_one": "<bold>{{count}}</bold> en double, sans changement",
+      "unchanged_many": "<bold>{{count}}</bold> en double, sans changement",
+      "unchanged_other": "<bold>{{count}}</bold> en double, sans changement",
+      "warnings_one": "<bold>{{count}}</bold> avec des données incomplètes",
+      "warnings_many": "<bold>{{count}}</bold> avec des données incomplètes",
+      "warnings_other": "<bold>{{count}}</bold> avec des données incomplètes",
+      "failed_one": "<bold>{{count}}</bold> illisible",
+      "failed_many": "<bold>{{count}}</bold> illisibles",
+      "failed_other": "<bold>{{count}}</bold> illisibles"
+    },
+    "whatChanged": "Ce qui a changé dans les paris mis à jour :",
+    "andMore": "…et {{n}} de plus.",
+    "total_one": "Vous avez maintenant <bold>{{count}}</bold> pari enregistré. Dans le tableau ci-dessous, ceux de cette importation portent l'étiquette « Nouveau » ou « Mis à jour ».",
+    "total_many": "Vous avez maintenant <bold>{{count}}</bold> paris enregistrés. Dans le tableau ci-dessous, ceux de cette importation portent l'étiquette « Nouveau » ou « Mis à jour ».",
+    "total_other": "Vous avez maintenant <bold>{{count}}</bold> paris enregistrés. Dans le tableau ci-dessous, ceux de cette importation portent l'étiquette « Nouveau » ou « Mis à jour ».",
+    "notSaved": "Attention : ce navigateur ne permet pas de les enregistrer, ils seront perdus à la fermeture de la page.",
+    "combo": "Combiné",
+    "comboTitle": "{{type}} : {{participants}}"
+  },
+  "backup": {
+    "ready_one": "Sauvegarde de {{count}} pari prête : <file>{{file}}</file>",
+    "ready_many": "Sauvegarde de {{count}} paris prête : <file>{{file}}</file>",
+    "ready_other": "Sauvegarde de {{count}} paris prête : <file>{{file}}</file>",
+    "help": "Si elle ne s'est pas téléchargée (certains visualiseurs, comme le navigateur intégré de VS Code, ne permettent pas les téléchargements), copiez-la et enregistrez-la vous-même dans un fichier <file>.json</file>. Pour la restaurer, importez-la avec « Restaurer la sauvegarde » ou collez le texte dans la zone ci-dessus et cliquez sur « Analyser ».",
+    "copied": "Copiée ✓",
+    "copy": "Copier dans le presse-papiers",
+    "label": "Sauvegarde"
+  },
+  "backupError": {
+    "notJson": "Le fichier n'est pas une sauvegarde valide : ce n'est pas du JSON.",
+    "notBackup": "Le fichier n'est pas une sauvegarde de « Mes paris ».",
+    "noBets": "La sauvegarde ne contient aucun pari."
+  },
+  "howTo": {
+    "winamax": {
+      "title": "Comment récupérer votre historique Winamax",
+      "step1": "Sur Winamax, allez dans <bold>Mis apuestas → Finalizadas</bold> et descendez jusqu'en bas pour charger tous les paris que vous voulez analyser.",
+      "step2": "<bold>Option A :</bold> appuyez sur Ctrl+S, choisissez « Page Web complète » et importez ici le fichier .html.",
+      "step3": "<bold>Option B :</bold> clic droit sur la liste → « Inspecter », clic droit sur l'élément en surbrillance → « Copier → Copier l'élément » (outerHTML), puis collez-le ci-dessus.",
+      "step4": "Vous pouvez importer plusieurs fois : les paris en double ne sont pas dupliqués."
+    },
+    "bet365": {
+      "title": "Comment récupérer votre historique bet365",
+      "step1": "Sur bet365, ouvrez l'<bold>Historial</bold> de votre compte, choisissez <bold>Apuestas deportivas</bold> et les dates voulues, puis descendez jusqu'en bas pour tout charger.",
+      "step2": "Comme pour Winamax : enregistrez la page avec Ctrl+S (« Page Web complète ») et importez-la, ou copiez l'élément de la liste avec « Inspecter → Copier l'élément » et collez-le ci-dessus.",
+      "step3": "bet365 n'indique pas dans l'historique si un pari a été gagné ou perdu : on le déduit du montant encaissé. Si vous avez encaissé moins que ce que payait la cote (cash out ou sélection annulée), il apparaît comme « Cash out ». Les paris placés avec des crédits de paris comptent comme des freebets.",
+      "step4": "Les paris simples n'indiquent que la sélection (« Real Madrid »), sans le match ni le marché : ils n'entrent donc ni dans « Par marché » ni dans « Matchs »."
+    }
+  },
+  "filter": {
+    "year": "Année",
+    "yearOption": "Année {{year}}",
+    "allYears": "Toutes les années",
+    "book": "Bookmaker",
+    "allBooks": "Tous les bookmakers",
+    "sport": "Sport",
+    "allSports": "Tous les sports",
+    "clearMonth": "Retirer le filtre de mois",
+    "month": "Mois : {{month}}",
+    "noSettled": "Aucun pari réglé avec ces filtres."
+  },
+  "period": {
+    "in": "en {{period}}",
+    "allYears": "sur toutes les années"
+  },
+  "hero": {
+    "label": "Résumé",
+    "netProfit": "Bénéfice net {{period}}",
+    "split": "Paris avec votre solde {{own}} · avec freebets {{freebet}}",
+    "wins_one": "<bold>{{count}}</bold> gagné",
+    "wins_many": "<bold>{{count}}</bold> gagnés",
+    "wins_other": "<bold>{{count}}</bold> gagnés",
+    "losses_one": "<bold>{{count}}</bold> perdu",
+    "losses_many": "<bold>{{count}}</bold> perdus",
+    "losses_other": "<bold>{{count}}</bold> perdus",
+    "cashouts": "<bold>{{n}}</bold> cash out",
+    "barLabel": "{{wins}}, {{losses}}",
+    "barLabelCashout": "{{wins}}, {{losses}} et {{cashouts}}",
+    "settled_one": "{{count}} réglé = {{wins}} + {{losses}}",
+    "settled_many": "{{count}} réglés = {{wins}} + {{losses}}",
+    "settled_other": "{{count}} réglés = {{wins}} + {{losses}}",
+    "settledCashout_one": "{{count}} réglé = {{wins}} + {{losses}} + {{cashouts}} cash out (ils comptent dans l'argent, pas dans la réussite)",
+    "settledCashout_many": "{{count}} réglés = {{wins}} + {{losses}} + {{cashouts}} cash out (ils comptent dans l'argent, pas dans la réussite)",
+    "settledCashout_other": "{{count}} réglés = {{wins}} + {{losses}} + {{cashouts}} cash out (ils comptent dans l'argent, pas dans la réussite)",
+    "roi": "ROI",
+    "staked": "Volume misé",
+    "stakedHint": "Somme de toutes les mises (hors freebets) ; l'argent réinvesti compte plusieurs fois. Ce n'est pas ce que vous avez déposé.",
+    "hitVsOdds": "Réussite face à vos cotes",
+    "versus": "contre",
+    "below": "en dessous de ce qu'elles impliquent",
+    "above": "au-dessus de ce qu'elles impliquent",
+    "notCounted": "Non comptés : {{items}}.",
+    "voids_one": "{{count}} annulé",
+    "voids_many": "{{count}} annulés",
+    "voids_other": "{{count}} annulés",
+    "pending": "{{n}} en attente",
+    "winsText_one": "{{count}} gagné",
+    "winsText_many": "{{count}} gagnés",
+    "winsText_other": "{{count}} gagnés",
+    "lossesText_one": "{{count}} perdu",
+    "lossesText_many": "{{count}} perdus",
+    "lossesText_other": "{{count}} perdus",
+    "cashoutsText": "{{count}} cash out"
+  },
+  "column": {
+    "month": "Mois",
+    "year": "Année",
+    "bets": "Paris",
+    "hitRate": "Réussite",
+    "staked": "Misé",
+    "profit": "Bénéfice",
+    "withoutPromo": "Sans promotion",
+    "withPromo": "Avec promotion",
+    "roi": "ROI",
+    "market": "Marché",
+    "selections": "Sélections",
+    "won": "Gagnées",
+    "category": "Catégorie",
+    "implied": "Implicite de la cote",
+    "difference": "Écart",
+    "date": "Date",
+    "book": "Bookmaker",
+    "type": "Type",
+    "sport": "Sport",
+    "odds": "Cote",
+    "stake": "Mise",
+    "result": "Résultat"
+  },
+  "year": {
+    "title": "Année par année",
+    "note": "Par année civile, du 1er janvier au 31 décembre : c'est la période sur laquelle les gains de jeu sont déclarés à l'impôt sur le revenu en Espagne. Chaque pari compte dans l'année où vous l'avez placé ; un pari de fin décembre réglé en janvier pourrait aller à l'année suivante. Le bénéfice inclut les gains obtenus avec des freebets. Cliquez sur une année pour ne voir qu'elle."
+  },
+  "sections": {
+    "label": "Sections de mes paris",
+    "year": "Année par année",
+    "yearShort": "Par année",
+    "month": "Mois par mois",
+    "monthShort": "Par mois",
+    "evolution": "Évolution",
+    "realMoney": "Argent réel",
+    "leaks": "Où vous perdez le plus",
+    "leaksShort": "Où vous perdez",
+    "categories": "Cote, mise, sport…",
+    "categoriesShort": "Catégories",
+    "promotions": "Promotions",
+    "habits": "Habitudes",
+    "teams": "Équipes et joueurs de tennis",
+    "teamsShort": "Équipes",
+    "bets": "Paris importés",
+    "betsShort": "Paris"
+  },
+  "fewBets_one": "Il n'y a que {{count}} pari réglé : avec si peu, les pourcentages varient beaucoup à chaque pari. Prenez-les comme une simple indication.",
+  "fewBets_many": "Il n'y a que {{count}} paris réglés : avec si peu, les pourcentages varient beaucoup à chaque pari. Prenez-les comme une simple indication.",
+  "fewBets_other": "Il n'y a que {{count}} paris réglés : avec si peu, les pourcentages varient beaucoup à chaque pari. Prenez-les comme une simple indication.",
+  "month": {
+    "title": "Mois par mois",
+    "titleYear": "Mois par mois · {{year}}",
+    "note": "Selon la date à laquelle vous avez placé le pari. Cliquez sur un mois (sur le graphique ou dans le tableau) pour ne voir que ce mois dans le reste de la page ; cliquez à nouveau, ou sur « Mois ✕ » en haut, pour retirer le filtre.",
+    "lowSample": "Avec moins de {{n}} paris (en gris), le mois est peu fiable."
+  },
+  "evolution": {
+    "title": "Évolution du bénéfice",
+    "titleYear": "Évolution du bénéfice · {{year}}"
+  },
+  "leaks": {
+    "title": "Où vous perdez le plus",
+    "item": "<bold>{{dimension}} : {{group}}</bold> — <loss>{{profit}}</loss> sur {{bets}} paris.",
+    "itemRates": "<bold>{{dimension}} : {{group}}</bold> — <loss>{{profit}}</loss> sur {{bets}} paris (vous en gagnez {{hitRate}} et leurs cotes impliquaient {{implied}})."
+  },
+  "breakdown": {
+    "odds": {
+      "title": "Par cote",
+      "note": "La colonne clé est l'écart : à quel point votre réussite est au-dessus ou en dessous de ce qu'implique la cote."
+    },
+    "type": {
+      "title": "Simples et combinés"
+    },
+    "promotion": {
+      "title": "Par promotion",
+      "note": "Supercuotas et opérations Winamax (Bang to the Moon, missions...) et boosts bet365 (de cote et de gains). Un pari avec deux promotions compte dans les deux."
+    },
+    "sport": {
+      "title": "Par sport"
+    },
+    "market": {
+      "title": "Par marché (paris simples)",
+      "note": "Paris simples uniquement : dans un combiné, impossible de savoir quel marché l'a fait gagner ou perdre."
+    },
+    "stake": {
+      "title": "Par mise — tous les paris",
+      "note": "Selon la mise de chaque pari (les freebets ne comptent pas). Chaque tranche commence à son montant : un pari de 5 € va dans « 5 – 9,99 € »."
+    },
+    "stakeWithoutFixed": {
+      "title": "Par mise — sans les promotions à mise fixe ({{promotions}})",
+      "note": "Les promotions à mise fixe concentrent les paris sur un même montant ; sans elles, on voit mieux comment vous choisissez combien miser. Les deux lectures sont valables."
+    },
+    "weekday": {
+      "title": "Par jour de la semaine"
+    },
+    "hour": {
+      "title": "Par heure du pari"
+    },
+    "note": "Avec moins de {{n}} paris (en gris), la ligne est peu fiable. Le ROI est le bénéfice pour 100 € misés (les freebets ne comptent pas comme mise) ; le bénéfice inclut bien les gains obtenus avec des freebets."
+  },
+  "promotions": {
+    "title": "Promotions",
+    "item": "<bold>{{wins}} sur {{decided}}</bold> gagnés ({{pct}}) · bénéfice <money>{{profit}}</money>"
+  },
+  "builder": {
+    "title": "Sélections dans « Crea tu apuesta »",
+    "note": "Winamax donne le résultat de chaque sélection : ici, on voit donc lesquelles échouent. bet365 ne le donne pas : ses « Crear apuesta » n'entrent pas ici."
+  },
+  "list": {
+    "title": "Paris importés",
+    "note": "Pour vérifier qu'ils ont été bien lus. Les plus récents d'abord.",
+    "onlyLast": "Voir uniquement les nouveaux et les mis à jour de la dernière importation ({{n}})",
+    "added": "Nouveau",
+    "updated": "Mis à jour",
+    "boostedBet365": "(cote boostée)",
+    "boostedWinamax": "(supercuota)",
+    "freebet": "freebet",
+    "showAll": "Voir les {{n}} paris"
+  },
+  "status": {
+    "won": "Gagné",
+    "lost": "Perdu",
+    "void": "Annulé",
+    "cashout": "Cash out",
+    "pending": "En cours",
+    "unknown": "Inconnu"
+  },
+  "update": {
+    "status": "{{before}} → {{after}}",
+    "statusText": {
+      "won": "Gagné",
+      "lost": "Perdu",
+      "void": "Annulé",
+      "cashout": "Cash out",
+      "pending": "En cours",
+      "unknown": "Sans statut"
+    },
+    "complete": "Désormais lu en entier",
+    "money": "Mise ou gains corrigés",
+    "odds": "Cote corrigée",
+    "other": "Données corrigées"
+  },
+  "format": {
+    "roiPer100": "{{amount}} pour 100 € misés"
+  },
+  "insight": {
+    "noRoi": "sans ROI",
+    "roi": "ROI {{value}}",
+    "bestWorst": {
+      "sport": "Par sport, vous réussissez le mieux en {{best}} ({{bestProfit}}, {{bestRoi}}, {{bestBets}} paris) et le moins bien en {{worst}} ({{worstProfit}}, {{worstRoi}}, {{worstBets}} paris).",
+      "market": "Par marché (paris simples), vous réussissez le mieux en {{best}} ({{bestProfit}}, {{bestRoi}}, {{bestBets}} paris) et le moins bien en {{worst}} ({{worstProfit}}, {{worstRoi}}, {{worstBets}} paris)."
+    },
+    "promoGap": "Avec promotion, vous en êtes à {{withProfit}} ({{withRoi}}) sur {{withBets}} paris ; sans promotion, à {{withoutProfit}} ({{withoutRoi}}) sur {{withoutBets}}.",
+    "promoShare": {
+      "losing": "{{promo}} vous laisse à {{profit}} sur {{bets}} paris, alors qu'au total vous êtes à {{total}}.",
+      "moreThanAll": "{{promo}} rapporte {{profit}} sur {{bets}} paris, plus que tout votre bénéfice ({{total}}).",
+      "overHalf": "Plus de la moitié de votre bénéfice vient de {{promo}} : {{profit}} sur {{total}}, en {{bets}} paris."
+    },
+    "withoutPromo_one": "Sans {{promo}}, votre résultat serait de {{profit}} ({{roi}}) sur {{count}} pari.",
+    "withoutPromo_many": "Sans {{promo}}, votre résultat serait de {{profit}} ({{roi}}) sur {{count}} paris.",
+    "withoutPromo_other": "Sans {{promo}}, votre résultat serait de {{profit}} ({{roi}}) sur {{count}} paris."
+  },
+  "bucket": {
+    "odds": {
+      "0": "1,01 – 1,49",
+      "1": "1,50 – 1,99",
+      "2": "2,00 – 2,49",
+      "3": "2,50 – 2,99",
+      "4": "3,00 – 3,99",
+      "5": "4,00 – 4,99",
+      "6": "5,00 – 9,99",
+      "7": "10,00 – 19,99",
+      "8": "20,00 – 29,99",
+      "9": "30,00 – 39,99",
+      "10": "40,00 ou plus"
+    },
+    "stake": {
+      "0": "Moins de 1 €",
+      "1": "1 – 1,99 €",
+      "2": "2 – 2,99 €",
+      "3": "3 – 3,99 €",
+      "4": "4 – 4,99 €",
+      "5": "5 – 9,99 €",
+      "6": "10 – 19,99 €",
+      "7": "20 – 29,99 €",
+      "8": "30 – 39,99 €",
+      "9": "40 € ou plus"
+    }
+  },
+  "betType": {
+    "0": "Simple",
+    "1": "Combiné de 2",
+    "2": "Combiné de 3",
+    "3": "Combiné de 4",
+    "4": "Combiné de 5 ou plus",
+    "5": "Autre"
+  },
+  "weekday": {
+    "0": "Lundi",
+    "1": "Mardi",
+    "2": "Mercredi",
+    "3": "Jeudi",
+    "4": "Vendredi",
+    "5": "Samedi",
+    "6": "Dimanche"
+  },
+  "dayPart": {
+    "0": "Nuit (0–6 h)",
+    "1": "Matin (6–14 h)",
+    "2": "Après-midi (14–20 h)",
+    "3": "Soir (20–24 h)"
+  },
+  "noPromotion": "Sans promotion",
+  "marketFamily": {
+    "betBuilder": "Crea tu apuesta",
+    "corners": "Corners",
+    "cards": "Cartons",
+    "btts": "Les deux équipes marquent",
+    "doubleChance": "Double chance",
+    "handicap": "Handicap",
+    "scorers": "Buteurs / joueur",
+    "halves": "Par période",
+    "tennisGames": "Jeux (tennis)",
+    "tennisSets": "Sets (tennis)",
+    "goals": "Buts",
+    "result": "Résultat / vainqueur",
+    "other": "Autres"
+  },
+  "sport": {
+    "football": "Football",
+    "tennis": "Tennis",
+    "basketball": "Basket-ball",
+    "handball": "Handball",
+    "volleyball": "Volley-ball",
+    "iceHockey": "Hockey sur glace",
+    "americanFootball": "Football américain",
+    "rugby": "Rugby",
+    "baseball": "Baseball",
+    "esports": "E-sport",
+    "golf": "Golf",
+    "boxing": "Boxe",
+    "mma": "MMA",
+    "cycling": "Cyclisme",
+    "darts": "Fléchettes",
+    "snooker": "Snooker",
+    "tableTennis": "Tennis de table",
+    "motor": "Sports mécaniques",
+    "unknown": "Inconnu",
+    "several": "Plusieurs"
+  },
+  "dimension": {
+    "odds": "Cote",
+    "betType": "Type de pari",
+    "sport": "Sport",
+    "market": "Marché (simples)",
+    "stake": "Mise",
+    "weekday": "Jour",
+    "hour": "Heure",
+    "promotion": "Promotion"
+  },
+  "warning": {
+    "noSelections": "Sélections introuvables.",
+    "partialCredits": "Payé en partie avec des crédits de paris : compté comme votre propre argent.",
+    "noReturn": "Montant encaissé introuvable.",
+    "lessThanOdds": "Encaissé moins que ce que payait la cote (cash out ou sélection annulée).",
+    "noOdds": "Cote introuvable.",
+    "noStatus": "Statut du pari introuvable.",
+    "noStake": "Mise introuvable."
+  },
+  "lowSample": {
+    "title": "Moins de {{n}} paris : chiffre peu fiable",
+    "label": "peu fiable"
+  },
+  "split": {
+    "label": "Avec et sans promotion",
+    "note": "Ils s'additionnent pour donner le total : {{withBets}} + {{withoutBets}} = {{totalBets}} paris · {{withProfit}} + {{withoutProfit}} = {{totalProfit}}. Ici, un pari avec deux promotions ne compte qu'une fois ; dans le tableau « Par promotion », il compte dans chacune."
+  },
+  "evidence": {
+    "bets_one": "<bold>{{count}}</bold> pari",
+    "bets_many": "<bold>{{count}}</bold> paris",
+    "bets_other": "<bold>{{count}}</bold> paris",
+    "wins_one": "<bold>{{count}}</bold> gagné sur {{decided}} ({{pct}})",
+    "wins_many": "<bold>{{count}}</bold> gagnés sur {{decided}} ({{pct}})",
+    "wins_other": "<bold>{{count}}</bold> gagnés sur {{decided}} ({{pct}})",
+    "profit": "bénéfice <money>{{profit}}</money>",
+    "breakEven": "Cote moyenne {{odds}} : pour ne ni gagner ni perdre, il faut une réussite de <bold>{{pct}}</bold>.",
+    "interval": "D'après vos paris, votre réussite réelle se situe entre <bold>{{low}}</bold> et <bold>{{high}}</bold> (intervalle de confiance à 95 %, Wilson).",
+    "supported": "Même la borne basse de l'intervalle dépasse la réussite nécessaire : l'échantillon indique que, jusqu'ici, cette promotion vous a été rentable.",
+    "notSupported": "La borne basse de l'intervalle n'atteint pas la réussite nécessaire : il n'y a pas encore assez d'éléments pour dire si elle est rentable.",
+    "past": "Cela décrit vos paris passés ; cela ne garantit pas ce qui va se passer."
+  },
+  "habits": {
+    "title": "Habitudes",
+    "all": "Tous les paris",
+    "withoutPromo": "Uniquement sans promotion",
+    "stakes": "Après une perte, vous misez en moyenne <bold>{{afterLoss}}</bold> ; après un gain, <bold>{{afterWin}}</bold>.",
+    "chasing": "Vous augmentez la mise après une perte, le signe classique d'une tentative de vous refaire.",
+    "notChasing": "Vous n'augmentez pas la mise après une perte.",
+    "cases": "({{loss}} et {{win}} cas)",
+    "fixedNote": "Les promotions à mise fixe (comme La Gran Supercuota, toujours 10 €) modifient la mise moyenne, donc les deux lectures sont valables : la première montre ce que vous avez fait, la seconde reflète mieux comment vous choisissez votre mise.",
+    "normal": "Avec une réussite de 30–35 %, les longues séries de paris perdus sont normales.",
+    "expected": "Avec votre réussite ({{pct}}) et {{n}} paris, le pur hasard peut produire une série maximale d'environ {{streak}} paris perdus d'affilée.",
+    "worst_one": "Pire série : <bold>{{count}}</bold> pari perdu d'affilée",
+    "worst_many": "Pire série : <bold>{{count}}</bold> paris perdus d'affilée",
+    "worst_other": "Pire série : <bold>{{count}}</bold> paris perdus d'affilée",
+    "best_one": "meilleure : <bold>{{count}}</bold> pari gagné d'affilée.",
+    "best_many": "meilleure : <bold>{{count}}</bold> paris gagnés d'affilée.",
+    "best_other": "meilleure : <bold>{{count}}</bold> paris gagnés d'affilée."
+  },
+  "teams": {
+    "title": "Équipes et joueurs de tennis",
+    "note": "Votre réussite sur les matchs de chaque équipe ou joueur de tennis, avec au moins 3 paris réglés. Seuls comptent les paris sur un seul match (simples et « crea tu apuesta ») : dans un combiné de plusieurs matchs, impossible de savoir lequel l'a fait perdre. Regardez aussi ce qu'impliquait la cote : gagner souvent avec des favoris n'est pas un mérite si les cotes le prévoyaient déjà.",
+    "teams": "Équipes",
+    "players": "Joueurs de tennis",
+    "won": "{{wins}} sur {{decided}} gagnés",
+    "implied": "La cote impliquait {{pct}} <gap>({{gap}})</gap>",
+    "profit": "Bénéfice <bold>{{profit}}</bold>",
+    "roi": " · ROI {{roi}}",
+    "showAll": "Voir les {{n}}"
+  },
+  "realMoney": {
+    "title": "Argent réel",
+    "titleYear": "Argent réel · {{year}}",
+    "note": "Ce que votre compte a vraiment gagné ou perdu chaque année civile, d'après le relevé du bookmaker (sur bet365, le récapitulatif du compte avec les dates du 1er janvier au 31 décembre : solde initial, dépôts, retraits et solde final). On le compare au bénéfice de vos paris importés de cette année, tous sports confondus. Ces données ne sont enregistrées que dans ce navigateur, elles sont incluses dans la sauvegarde et sont effacées avec « Effacer mes données ».",
+    "field": {
+      "opening": "Solde au 1er janvier",
+      "deposited": "Dépôts",
+      "withdrawn": "Retraits",
+      "closing": "Solde au 31 décembre (ou solde actuel)"
+    },
+    "save": "Enregistrer",
+    "emptyNote": "Les champs vides comptent comme 0. Pour effacer l'année, videz-les tous et enregistrez.",
+    "yearResult": "Résultat réel de {{year}} (solde final − solde initial − dépôts + retraits) : <bold>{{result}}</bold>",
+    "yearCalculated_one": "Bénéfice calculé avec votre {{count}} pari {{book}} de {{year}} : <bold>{{profit}}</bold>",
+    "yearCalculated_many": "Bénéfice calculé avec vos {{count}} paris {{book}} de {{year}} : <bold>{{profit}}</bold>",
+    "yearCalculated_other": "Bénéfice calculé avec vos {{count}} paris {{book}} de {{year}} : <bold>{{profit}}</bold>",
+    "openingMismatch": "Le solde au 1er janvier ({{opening}}) ne correspond pas au solde final que vous avez noté pour {{year}} ({{closing}}).",
+    "match": "Ils correspondent : vos paris importés expliquent le résultat réel de l'année.",
+    "difference": "Il y a un écart de <bold>{{diff}}</bold>. Il est courant qu'ils ne correspondent pas tout à fait ; quelques causes possibles :",
+    "cause": {
+      "missing": "Des paris restent à importer : ceux importés pour cette année vont du {{from}} au {{to}}.",
+      "pending_one": "{{count}} pari non réglé : sa mise est déjà sortie du solde, mais il ne compte pas encore dans le calcul.",
+      "pending_many": "{{count}} paris non réglés : leurs mises sont déjà sorties du solde, mais ils ne comptent pas encore dans le calcul.",
+      "pending_other": "{{count}} paris non réglés : leurs mises sont déjà sorties du solde, mais ils ne comptent pas encore dans le calcul.",
+      "bonuses": "Les bonus et ajustements de compte modifient le solde sans être des paris. Les gains obtenus avec des freebets et des crédits de paris ({{freebet}}) sont bien inclus dans le calcul.",
+      "december": "Des paris de fin décembre réglés en janvier (ou l'inverse).",
+      "otherProducts": "D'autres produits du même compte (casino, poker) modifient aussi le solde."
+    },
+    "yearTotal": "Total de {{year}} : <bold>{{total}}</bold>",
+    "yearTotalBooks": "Total de {{year}} ({{books}}) : <bold>{{total}}</bold>",
+    "notEntered": "non renseigné",
+    "noBets": "aucun pari",
+    "calculated": "Calculé avec vos paris chez ces bookmakers en {{year}} : {{calc}}.",
+    "missingBooks": "Il reste à renseigner {{books}} : le total n'inclut pas encore son résultat.",
+    "chooseYear": "Choisissez une année ci-dessus pour renseigner son relevé.",
+    "totalReal": "Total réel",
+    "resultReal": "Résultat réel",
+    "calculatedColumn": "Calculé avec vos paris",
+    "missingTag": "manque {{books}}",
+    "missingCell": "manquant",
+    "sumYears": "Somme des années renseignées",
+    "summary": {
+      "one": {
+        "won": "Sur les années renseignées, vous avez gagné <bold>{{amount}}</bold> en argent réel.",
+        "lost": "Sur les années renseignées, vous avez perdu <bold>{{amount}}</bold> en argent réel."
+      },
+      "books": {
+        "won": "Sur les années renseignées, entre {{books}}, vous avez gagné <bold>{{amount}}</bold> en argent réel.",
+        "lost": "Sur les années renseignées, entre {{books}}, vous avez perdu <bold>{{amount}}</bold> en argent réel."
+      }
+    },
+    "incomplete": "Attention : au moins une année est incomplète (il manque le relevé d'un bookmaker).",
+    "whole": {
+      "title": "{{book}} · tout le compte, sans année",
+      "text_one": "Ce que vous aviez noté avant de séparer par année : déposé {{deposited}}, retiré {{withdrawn}}, solde {{closing}}. Résultat réel <result>{{result}}</result>, contre <profit>{{profit}}</profit> calculé avec votre {{count}} pari {{book}}.",
+      "text_many": "Ce que vous aviez noté avant de séparer par année : déposé {{deposited}}, retiré {{withdrawn}}, solde {{closing}}. Résultat réel <result>{{result}}</result>, contre <profit>{{profit}}</profit> calculé avec vos {{count}} paris {{book}}.",
+      "text_other": "Ce que vous aviez noté avant de séparer par année : déposé {{deposited}}, retiré {{withdrawn}}, solde {{closing}}. Résultat réel <result>{{result}}</result>, contre <profit>{{profit}}</profit> calculé avec vos {{count}} paris {{book}}.",
+      "note": "Impossible de le répartir entre les années : renseignez le relevé de chaque année ci-dessus et, une fois fait, effacez cette donnée.",
+      "confirm": "Effacer l'argent réel de tout le compte {{book}} ?",
+      "delete": "Effacer cette donnée"
+    }
+  },
+  "chart": {
+    "profitLabel_one": "Bénéfice cumulé : {{profit}} après {{count}} pari",
+    "profitLabel_many": "Bénéfice cumulé : {{profit}} après {{count}} paris",
+    "profitLabel_other": "Bénéfice cumulé : {{profit}} après {{count}} paris",
+    "profitTooltip": "Pari {{n}} sur {{total}} · {{date}}",
+    "withoutPromo": "Sans promotion",
+    "withPromo": "Avec promotion",
+    "monthTotal": "Total du mois",
+    "monthlyLabel": "Bénéfice par mois, sans et avec promotion",
+    "monthBar_one": "{{month}} : total {{total}} ; sans promotion {{without}} ; avec promotion {{with}} ; {{count}} pari",
+    "monthBar_many": "{{month}} : total {{total}} ; sans promotion {{without}} ; avec promotion {{with}} ; {{count}} paris",
+    "monthBar_other": "{{month}} : total {{total}} ; sans promotion {{without}} ; avec promotion {{with}} ; {{count}} paris",
+    "tooltipMonth_one": "{{month}} · {{count}} pari",
+    "tooltipMonth_many": "{{month}} · {{count}} paris",
+    "tooltipMonth_other": "{{month}} · {{count}} paris",
+    "tooltipTotal": "Total du mois : {{total}}",
+    "tooltipWithout": "Sans promotion : {{value}}",
+    "tooltipWith": "Avec promotion : {{value}}",
+    "tooltipLow": "Peu fiable : moins de {{n}} paris"
+  }
+}

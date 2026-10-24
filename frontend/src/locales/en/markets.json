@@ -1,0 +1,309 @@
+{
+  "group": {
+    "goals": "Goals",
+    "result": "Result",
+    "stats": "Statistics"
+  },
+  "option": {
+    "over": "Over {{line}}",
+    "under": "Under {{line}}"
+  },
+  "halfTime": "Half-time",
+  "halfTimeInline": "half-time",
+  "outcome": {
+    "win": "Win",
+    "draw": "Draw",
+    "lose": "Lose"
+  },
+  "variant": {
+    "match": {
+      "label": "Match total",
+      "description": "{{base}} Match total: both teams added together."
+    },
+    "team": {
+      "label": "Team",
+      "description": "{{base}} Team: only those of the team shown on each card."
+    },
+    "rival": {
+      "label": "Opponent",
+      "description": "{{base}} Opponent: those of the other team in each match."
+    },
+    "each": {
+      "label": "Each team",
+      "description": "{{base}} Each team: both teams over the line (or, with ‘Under’, both under it)."
+    },
+    "handicap": {
+      "label": "Handicap",
+      "description": "{{base}} Handicap: the line is added to the team's total and compared with the opponent's. ‘-1.5’ = the team gets at least 2 more than the opponent; ‘+1.5’ = the team doesn't end up 2 or more behind the opponent."
+    }
+  },
+  "stat": {
+    "goals": {
+      "label": "Goals",
+      "description": "Goals scored.",
+      "title": {
+        "match": "Match goals",
+        "team": "Team goals",
+        "rival": "Opponent goals",
+        "each": "Goals: each team"
+      },
+      "average": {
+        "match": "goals per match",
+        "team": "goals scored per match",
+        "rival": "goals conceded per match"
+      }
+    },
+    "corners": {
+      "label": "Corners",
+      "description": "Corners taken.",
+      "detail": "Corners",
+      "detailInline": "corners",
+      "title": {
+        "match": "Match corners",
+        "team": "Team corners",
+        "rival": "Opponent corners",
+        "each": "Corners: each team",
+        "handicap": "Corner handicap"
+      },
+      "average": {
+        "match": "corners per match",
+        "team": "corners won per match",
+        "rival": "corners conceded per match",
+        "handicap": "corner difference per match"
+      }
+    },
+    "cards": {
+      "label": "Cards",
+      "description": "Cards received (yellow + red); the red square next to the figure indicates a sending-off.",
+      "detail": "Cards",
+      "detailInline": "cards",
+      "title": {
+        "match": "Match cards",
+        "team": "Team cards",
+        "rival": "Opponent cards",
+        "each": "Cards: each team"
+      },
+      "average": {
+        "match": "cards per match",
+        "team": "team cards per match",
+        "rival": "opponent cards per match"
+      }
+    },
+    "bookingPoints": {
+      "label": "Booking points",
+      "description": "Booking points: yellow = 10, red = 25.",
+      "detail": "Points",
+      "detailInline": "points",
+      "note": "Approximate: the source doesn't distinguish a straight red from a second yellow, so every red counts as 25, not 35.",
+      "title": {
+        "match": "Match booking points",
+        "team": "Team booking points",
+        "rival": "Opponent booking points",
+        "each": "Booking points: each team"
+      },
+      "average": {
+        "match": "points per match",
+        "team": "team points per match",
+        "rival": "opponent points per match"
+      }
+    },
+    "shots": {
+      "label": "Shots",
+      "description": "Total shots, on target or not.",
+      "detail": "Shots",
+      "detailInline": "shots",
+      "title": {
+        "match": "Match shots",
+        "team": "Team shots",
+        "rival": "Opponent shots",
+        "each": "Shots: each team"
+      },
+      "average": {
+        "match": "shots per match",
+        "team": "team shots per match",
+        "rival": "opponent shots per match"
+      }
+    },
+    "shotsOnTarget": {
+      "label": "Shots on target",
+      "description": "Shots on target.",
+      "detail": "Shots on target",
+      "detailInline": "shots on target",
+      "title": {
+        "match": "Match shots on target",
+        "team": "Team shots on target",
+        "rival": "Opponent shots on target",
+        "each": "Shots on target: each team"
+      },
+      "average": {
+        "match": "shots on target per match",
+        "team": "team shots on target per match",
+        "rival": "opponent shots on target per match"
+      }
+    },
+    "fouls": {
+      "label": "Fouls",
+      "description": "Fouls committed.",
+      "detail": "Fouls",
+      "detailInline": "fouls",
+      "title": {
+        "match": "Match fouls",
+        "team": "Team fouls",
+        "rival": "Opponent fouls",
+        "each": "Fouls: each team"
+      },
+      "average": {
+        "match": "fouls per match",
+        "team": "fouls committed per match",
+        "rival": "opponent fouls per match"
+      }
+    }
+  },
+  "market": {
+    "btts": {
+      "label": "Both teams to score",
+      "title": "Both teams to score",
+      "description": "Matches in which both teams scored (or, with ‘No’, in which at least one failed to score).",
+      "option": {
+        "yes": "Yes",
+        "no": "No"
+      }
+    },
+    "bttsResult": {
+      "label": "Both score and result",
+      "title": "Both teams to score and result",
+      "description": "Matches in which both teams scored and, on top of that, the team won, drew or lost.",
+      "option": {
+        "win": "And wins",
+        "draw": "And draws",
+        "lose": "And loses"
+      }
+    },
+    "goalsByHalf": {
+      "label": "Goals by half",
+      "title": "Goals by half",
+      "description": "First-half and second-half goals, separately. The extra column is the half-time score.",
+      "option": {
+        "goalFirstHalf": "Goal in the 1st half",
+        "over15FirstHalf": "Over 1.5 in the 1st",
+        "goalSecondHalf": "Goal in the 2nd half",
+        "over15SecondHalf": "Over 1.5 in the 2nd",
+        "moreInSecondHalf": "More goals in the 2nd",
+        "teamScoresBothHalves": "Team scores in both halves"
+      }
+    },
+    "result": {
+      "label": "Result",
+      "title": "Result",
+      "description": "Full-time result of the match from the team's point of view.",
+      "option": {
+        "win": "Wins",
+        "draw": "Draws",
+        "lose": "Loses",
+        "winOrDraw": "Wins or draws",
+        "noWin": "Doesn't win"
+      }
+    },
+    "htFt": {
+      "label": "Half-time / Full-time",
+      "title": "Half-time / Full-time",
+      "description": "Result at half-time and at full-time from the team's point of view. ‘Draw / Win’ = level at half-time and went on to win.",
+      "optionLabel": "{{ht}} / {{ft}}"
+    },
+    "cleanSheet": {
+      "label": "Clean sheet",
+      "title": "Clean sheet",
+      "description": "Matches in which the team didn't concede a goal (or, with ‘No’, in which they conceded at least one).",
+      "option": {
+        "yes": "Yes",
+        "no": "No"
+      }
+    },
+    "cornerDuel": {
+      "label": "Corner count",
+      "title": "Corner count",
+      "description": "Whether the team takes more corners than their opponent in the match.",
+      "option": {
+        "win": "More corners",
+        "draw": "Same number of corners",
+        "winOrDraw": "At least as many corners"
+      }
+    }
+  },
+  "page": {
+    "thisSeason": "this season",
+    "refereesLead": "How each referee's matches play out: cards, booking points, corners or goals. Full-match markets only, which don't depend on which team is at home.",
+    "search": {
+      "team": "Search team",
+      "referee": "Search referee"
+    },
+    "searchPlaceholder": {
+      "team": "Search team…",
+      "referee": "Search referee…"
+    },
+    "market": "Market",
+    "season": "Season",
+    "matches": "Matches",
+    "wholeSeason": "Whole season",
+    "lastN": "Last {{n}}",
+    "sort": "Sort",
+    "sortPct": "Sort by %",
+    "sortName": "Sort by name",
+    "statistic": "Statistic",
+    "row": {
+      "over": "Over",
+      "under": "Under"
+    },
+    "option": "Option",
+    "view": "View",
+    "viewSplit": "Home / Away",
+    "viewAll": "All matches",
+    "leagueRate": "League average in {{season}}: <bold>{{pct}}</bold> of matches ({{hits}} of {{total}}).",
+    "leagueRateAverage": "League average in {{season}}: <bold>{{pct}}</bold> of matches ({{hits}} of {{total}}) · {{average}} {{label}}.",
+    "withoutReferee_one": "{{count}} match in {{season}} has no referee in the data sources and doesn't count for any referee: referees' figures may be incomplete.",
+    "withoutReferee_other": "{{count}} matches in {{season}} have no referee in the data sources and don't count for any referee: referees' figures may be incomplete.",
+    "noRefereeData": "No referee data for this league in {{season}}. Outside the Premier League, referees come from ESPN, which doesn't have them before 21/22.",
+    "noMatches": "No matches played for this league and season.",
+    "noSearchMatch": {
+      "team": "No team in this league matches ‘{{query}}’. Try another league.",
+      "referee": "No referee in this league matches ‘{{query}}’. Try another league."
+    },
+    "comparing": "Comparing {{first}} and {{second}}.",
+    "pickAnother": {
+      "team": "Select another team to compare it with {{name}}.",
+      "referee": "Select another referee to compare them with {{name}}."
+    },
+    "clear": "Remove",
+    "legend": {
+      "hit": "Green: ‘{{option}}’ happened. Red: it didn't.",
+      "detail": "The right-hand column shows: {{detail}} (home - away).",
+      "missing": "Grey: the match has no data for this and doesn't count towards the percentage.",
+      "lowSample": {
+        "team": "With fewer than {{n}} matches, a team's percentage is shown faded: it's unreliable, so treat it as a rough guide.",
+        "referee": "With fewer than {{n}} matches, a referee's percentage is shown faded: it's unreliable, so treat it as a rough guide."
+      }
+    },
+    "compare": "Compare",
+    "average": "{{value}} {{label}}",
+    "home": "Home",
+    "away": "Away",
+    "domestic": {
+      "title": "See in their league",
+      "titleLeague": "See in their league: {{league}}",
+      "error": "Couldn't load their league matches: {{error}}",
+      "loading": "Loading their league matches...",
+      "none": "We don't have their league in our data, or they haven't played any league matches this season yet.",
+      "total": "Total in {{league}}"
+    },
+    "noData": "No data",
+    "noMatchesShort": "No matches",
+    "noMatchesList": "No matches.",
+    "rateSummary_one": "{{hits}} of {{count}} match",
+    "rateSummary_other": "{{hits}} of {{count}} matches",
+    "rateSummaryMissing_one": "{{hits}} of {{count}} match ({{missing}} without data)",
+    "rateSummaryMissing_other": "{{hits}} of {{count}} matches ({{missing}} without data)",
+    "rateLabel": "{{pct}}: {{summary}}",
+    "redCards_one": "Red card",
+    "redCards_other": "{{count}} red cards"
+  }
+}

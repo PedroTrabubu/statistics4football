@@ -1,0 +1,152 @@
+{
+  "title": "Standings and statistics",
+  "lead": "Real data from matches played: % over/under, both teams to score, clean sheets, half-time, corners and cards, overall, at home, away or over the last 5 matches. Click a column header to sort by that column (click again to reverse the order).",
+  "viewsLabel": "Table columns",
+  "view": {
+    "standings": "Standings",
+    "goals": "Goals and half-time",
+    "corners": "Corners and cards"
+  },
+  "split": {
+    "overall": "Overall",
+    "home": "Home",
+    "away": "Away",
+    "last5": "Last 5"
+  },
+  "minMatches": "Min. matches",
+  "minMatchesAll": "All",
+  "heatmap": "Heat map",
+  "form": {
+    "column": "Form",
+    "columnTitle": "Last 5 matches of the season, from oldest to most recent",
+    "label": "Latest results: {{results}}",
+    "win": {
+      "letter": "W",
+      "title": "Won"
+    },
+    "draw": {
+      "letter": "D",
+      "title": "Drew"
+    },
+    "loss": {
+      "letter": "L",
+      "title": "Lost"
+    }
+  },
+  "noCorners": "No corner or card data yet for the {{season}} season: the source for ongoing matches (football-data.org, free plan) doesn't include them, only results. They're only available for completed seasons. Try a previous season in the selector above.",
+  "noCornersSelected": "No corner or card data yet for the selected season: the source for ongoing matches (football-data.org, free plan) doesn't include them, only results. They're only available for completed seasons. Try a previous season in the selector above.",
+  "loading": "Loading statistics...",
+  "empty": "No statistics for this league/season.",
+  "emptyFiltered": "No team has at least {{n}} matches in this view.",
+  "team": "Team",
+  "group": {
+    "general": "General",
+    "goals": "Goals",
+    "halfTime": "Half-time",
+    "corners": "Corners",
+    "cards": "Cards"
+  },
+  "column": {
+    "played": {
+      "label": "P",
+      "title": "Played"
+    },
+    "won": {
+      "label": "W",
+      "title": "Won"
+    },
+    "drawn": {
+      "label": "D",
+      "title": "Drawn"
+    },
+    "lost": {
+      "label": "L",
+      "title": "Lost"
+    },
+    "goalsFor": {
+      "label": "GF",
+      "title": "Goals for"
+    },
+    "goalsAgainst": {
+      "label": "GA",
+      "title": "Goals against"
+    },
+    "goalDifference": {
+      "label": "GD",
+      "title": "Goal difference"
+    },
+    "points": {
+      "label": "Pts",
+      "title": "Points"
+    },
+    "pointsPerGame": {
+      "label": "Pts/P",
+      "title": "Points per match"
+    },
+    "goalsForPerGame": {
+      "label": "GF/P",
+      "title": "Goals for per match"
+    },
+    "goalsAgainstPerGame": {
+      "label": "GA/P",
+      "title": "Goals against per match"
+    },
+    "over15": {
+      "label": "+1.5",
+      "title": "% of matches with over 1.5 goals"
+    },
+    "over25": {
+      "label": "+2.5",
+      "title": "% of matches with over 2.5 goals"
+    },
+    "over35": {
+      "label": "+3.5",
+      "title": "% of matches with over 3.5 goals"
+    },
+    "btts": {
+      "label": "Both score",
+      "title": "% of matches in which both teams score",
+      "short": "BTTS"
+    },
+    "cleanSheet": {
+      "label": "Clean sheet",
+      "title": "% of matches without conceding",
+      "short": "CS"
+    },
+    "failedToScore": {
+      "label": "Failed to score",
+      "title": "% of matches without scoring"
+    },
+    "htOver05": {
+      "label": "+0.5 1st half",
+      "title": "% of matches with a goal in the 1st half"
+    },
+    "htWin": {
+      "label": "Leading at HT",
+      "title": "% of matches leading at half-time"
+    },
+    "cornersFor": {
+      "label": "For",
+      "title": "Average corners won per match",
+      "short": "Corn. +"
+    },
+    "cornersAgainst": {
+      "label": "Against",
+      "title": "Average corners conceded per match",
+      "short": "Corn. −"
+    },
+    "yellowFor": {
+      "label": "Yellows",
+      "title": "Average yellow cards received per match",
+      "short": "Yel."
+    },
+    "yellowAgainst": {
+      "label": "Opponent",
+      "title": "Average opponent yellow cards per match",
+      "short": "Opp. yel."
+    }
+  },
+  "legend": "# = position in the standings for the chosen view · P = played · W/D/L = won/drawn/lost · GF/GA/GD = goals for/against/difference · Form: W/D/L over the last 5 matches, most recent on the right. On narrow screens some columns are hidden; on a computer you'll see them all. Half-time, corners and cards are calculated only from matches that include that data. With fewer than {{n}} matches (in grey, without heat map) the percentages are unreliable — treat them as a rough guide, not as an established pattern.",
+  "hidden_one": "{{count}} team with fewer than {{n}} matches hidden.",
+  "hidden_other": "{{count}} teams with fewer than {{n}} matches hidden."
+}

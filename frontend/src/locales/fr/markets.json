@@ -1,0 +1,313 @@
+{
+  "group": {
+    "goals": "Buts",
+    "result": "Résultat",
+    "stats": "Statistiques"
+  },
+  "option": {
+    "over": "Plus de {{line}}",
+    "under": "Moins de {{line}}"
+  },
+  "halfTime": "Mi-temps",
+  "halfTimeInline": "mi-temps",
+  "outcome": {
+    "win": "Victoire",
+    "draw": "Nul",
+    "lose": "Défaite"
+  },
+  "variant": {
+    "match": {
+      "label": "Total du match",
+      "description": "{{base}} Total du match : somme des deux équipes."
+    },
+    "team": {
+      "label": "De l'équipe",
+      "description": "{{base}} De l'équipe : on ne compte que l'équipe de chaque carte."
+    },
+    "rival": {
+      "label": "De l'adversaire",
+      "description": "{{base}} De l'adversaire : on compte l'équipe adverse de chaque match."
+    },
+    "each": {
+      "label": "Chaque équipe",
+      "description": "{{base}} Chaque équipe : les deux équipes au-dessus de la ligne (ou, avec « Moins de », les deux en dessous)."
+    },
+    "handicap": {
+      "label": "Handicap",
+      "description": "{{base}} Handicap : on ajoute la ligne au total de l'équipe et on le compare à celui de l'adversaire. « -1,5 » = l'équipe en obtient au moins 2 de plus que l'adversaire ; « +1,5 » = l'équipe ne finit pas avec 2 ou plus de retard sur l'adversaire."
+    }
+  },
+  "stat": {
+    "goals": {
+      "label": "Buts",
+      "description": "Buts marqués.",
+      "title": {
+        "match": "Buts du match",
+        "team": "Buts de l'équipe",
+        "rival": "Buts de l'adversaire",
+        "each": "Buts : chaque équipe"
+      },
+      "average": {
+        "match": "buts par match",
+        "team": "buts marqués par match",
+        "rival": "buts encaissés par match"
+      }
+    },
+    "corners": {
+      "label": "Corners",
+      "description": "Corners obtenus.",
+      "detail": "Corners",
+      "detailInline": "corners",
+      "title": {
+        "match": "Corners du match",
+        "team": "Corners de l'équipe",
+        "rival": "Corners de l'adversaire",
+        "each": "Corners : chaque équipe",
+        "handicap": "Handicap corners"
+      },
+      "average": {
+        "match": "corners par match",
+        "team": "corners obtenus par match",
+        "rival": "corners concédés par match",
+        "handicap": "corners d'écart par match"
+      }
+    },
+    "cards": {
+      "label": "Cartons",
+      "description": "Cartons reçus (jaunes + rouges) ; le carré rouge à côté du chiffre indique une expulsion.",
+      "detail": "Cartons",
+      "detailInline": "cartons",
+      "title": {
+        "match": "Cartons du match",
+        "team": "Cartons de l'équipe",
+        "rival": "Cartons de l'adversaire",
+        "each": "Cartons : chaque équipe"
+      },
+      "average": {
+        "match": "cartons par match",
+        "team": "cartons de l'équipe par match",
+        "rival": "cartons de l'adversaire par match"
+      }
+    },
+    "bookingPoints": {
+      "label": "Points de cartons",
+      "description": "Points de cartons : jaune = 10, rouge = 25.",
+      "detail": "Points",
+      "detailInline": "points",
+      "note": "Approximatif : la source ne distingue pas un rouge direct d'un second jaune, donc chaque rouge compte 25 et non 35.",
+      "title": {
+        "match": "Points de cartons du match",
+        "team": "Points de cartons de l'équipe",
+        "rival": "Points de cartons de l'adversaire",
+        "each": "Points de cartons : chaque équipe"
+      },
+      "average": {
+        "match": "points par match",
+        "team": "points de l'équipe par match",
+        "rival": "points de l'adversaire par match"
+      }
+    },
+    "shots": {
+      "label": "Tirs",
+      "description": "Tirs au total, cadrés ou non.",
+      "detail": "Tirs",
+      "detailInline": "tirs",
+      "title": {
+        "match": "Tirs du match",
+        "team": "Tirs de l'équipe",
+        "rival": "Tirs de l'adversaire",
+        "each": "Tirs : chaque équipe"
+      },
+      "average": {
+        "match": "tirs par match",
+        "team": "tirs de l'équipe par match",
+        "rival": "tirs de l'adversaire par match"
+      }
+    },
+    "shotsOnTarget": {
+      "label": "Tirs cadrés",
+      "description": "Tirs cadrés.",
+      "detail": "Tirs cadrés",
+      "detailInline": "tirs cadrés",
+      "title": {
+        "match": "Tirs cadrés du match",
+        "team": "Tirs cadrés de l'équipe",
+        "rival": "Tirs cadrés de l'adversaire",
+        "each": "Tirs cadrés : chaque équipe"
+      },
+      "average": {
+        "match": "tirs cadrés par match",
+        "team": "tirs cadrés de l'équipe par match",
+        "rival": "tirs cadrés de l'adversaire par match"
+      }
+    },
+    "fouls": {
+      "label": "Fautes",
+      "description": "Fautes commises.",
+      "detail": "Fautes",
+      "detailInline": "fautes",
+      "title": {
+        "match": "Fautes du match",
+        "team": "Fautes de l'équipe",
+        "rival": "Fautes de l'adversaire",
+        "each": "Fautes : chaque équipe"
+      },
+      "average": {
+        "match": "fautes par match",
+        "team": "fautes commises par match",
+        "rival": "fautes de l'adversaire par match"
+      }
+    }
+  },
+  "market": {
+    "btts": {
+      "label": "Les deux équipes marquent",
+      "title": "Les deux équipes marquent",
+      "description": "Matchs où les deux équipes ont marqué (ou, avec « Non », où au moins une n'a pas marqué).",
+      "option": {
+        "yes": "Oui",
+        "no": "Non"
+      }
+    },
+    "bttsResult": {
+      "label": "Les 2 marquent et résultat",
+      "title": "Les deux équipes marquent et résultat",
+      "description": "Matchs où les deux équipes ont marqué et où, en plus, l'équipe a gagné, fait match nul ou perdu.",
+      "option": {
+        "win": "Et gagne",
+        "draw": "Et fait match nul",
+        "lose": "Et perd"
+      }
+    },
+    "goalsByHalf": {
+      "label": "Buts par période",
+      "title": "Buts par période",
+      "description": "Buts de la première et de la seconde période, séparément. La colonne supplémentaire est le score à la mi-temps.",
+      "option": {
+        "goalFirstHalf": "But en 1re période",
+        "over15FirstHalf": "Plus de 1,5 en 1re",
+        "goalSecondHalf": "But en 2e période",
+        "over15SecondHalf": "Plus de 1,5 en 2e",
+        "moreInSecondHalf": "Plus de buts en 2e",
+        "teamScoresBothHalves": "L'équipe marque dans les deux périodes"
+      }
+    },
+    "result": {
+      "label": "Résultat",
+      "title": "Résultat",
+      "description": "Résultat final du match du point de vue de l'équipe.",
+      "option": {
+        "win": "Gagne",
+        "draw": "Fait match nul",
+        "lose": "Perd",
+        "winOrDraw": "Gagne ou fait match nul",
+        "noWin": "Ne gagne pas"
+      }
+    },
+    "htFt": {
+      "label": "Mi-temps / Fin de match",
+      "title": "Mi-temps / Fin de match",
+      "description": "Résultat à la mi-temps et à la fin du match du point de vue de l'équipe. « Nul / Victoire » = à égalité à la mi-temps, puis victoire à la fin.",
+      "optionLabel": "{{ht}} / {{ft}}"
+    },
+    "cleanSheet": {
+      "label": "Clean sheet",
+      "title": "Clean sheet",
+      "description": "Matchs où l'équipe n'a encaissé aucun but (ou, avec « Non », où elle en a encaissé au moins un).",
+      "option": {
+        "yes": "Oui",
+        "no": "Non"
+      }
+    },
+    "cornerDuel": {
+      "label": "Duel des corners",
+      "title": "Duel des corners",
+      "description": "Si l'équipe obtient plus de corners que son adversaire dans le match.",
+      "option": {
+        "win": "Plus de corners",
+        "draw": "Autant de corners",
+        "winOrDraw": "Au moins autant de corners"
+      }
+    }
+  },
+  "page": {
+    "thisSeason": "cette saison",
+    "refereesLead": "Comment se déroulent les matchs de chaque arbitre : cartons, points de cartons, corners ou buts. Uniquement des marchés sur le match entier, qui ne dépendent pas de l'équipe qui reçoit.",
+    "search": {
+      "team": "Rechercher une équipe",
+      "referee": "Rechercher un arbitre"
+    },
+    "searchPlaceholder": {
+      "team": "Rechercher une équipe…",
+      "referee": "Rechercher un arbitre…"
+    },
+    "market": "Marché",
+    "season": "Saison",
+    "matches": "Matchs",
+    "wholeSeason": "Toute la saison",
+    "lastN": "{{n}} derniers",
+    "sort": "Trier",
+    "sortPct": "Trier par %",
+    "sortName": "Trier par nom",
+    "statistic": "Statistique",
+    "row": {
+      "over": "Plus de",
+      "under": "Moins de"
+    },
+    "option": "Option",
+    "view": "Vue",
+    "viewSplit": "Domicile / Extérieur",
+    "viewAll": "Tous les matchs",
+    "leagueRate": "Moyenne du championnat en {{season}} : <bold>{{pct}}</bold> des matchs ({{hits}} sur {{total}}).",
+    "leagueRateAverage": "Moyenne du championnat en {{season}} : <bold>{{pct}}</bold> des matchs ({{hits}} sur {{total}}) · {{average}} {{label}}.",
+    "withoutReferee_one": "{{count}} match de {{season}} n'a pas d'arbitre dans les sources de données et n'est compté pour aucun arbitre : les chiffres des arbitres peuvent être incomplets.",
+    "withoutReferee_many": "{{count}} matchs de {{season}} n'ont pas d'arbitre dans les sources de données et ne sont comptés pour aucun arbitre : les chiffres des arbitres peuvent être incomplets.",
+    "withoutReferee_other": "{{count}} matchs de {{season}} n'ont pas d'arbitre dans les sources de données et ne sont comptés pour aucun arbitre : les chiffres des arbitres peuvent être incomplets.",
+    "noRefereeData": "Pas de données d'arbitre pour ce championnat en {{season}}. Hors Premier League, les arbitres proviennent d'ESPN, qui ne les a pas avant 21/22.",
+    "noMatches": "Aucun match joué pour ce championnat et cette saison.",
+    "noSearchMatch": {
+      "team": "Aucune équipe de ce championnat ne correspond à « {{query}} ». Essayez un autre championnat.",
+      "referee": "Aucun arbitre de ce championnat ne correspond à « {{query}} ». Essayez un autre championnat."
+    },
+    "comparing": "Comparaison entre {{first}} et {{second}}.",
+    "pickAnother": {
+      "team": "Cochez une autre équipe pour la comparer à {{name}}.",
+      "referee": "Cochez un autre arbitre pour le comparer à {{name}}."
+    },
+    "clear": "Retirer",
+    "legend": {
+      "hit": "Vert : « {{option}} » s'est produit. Rouge : non.",
+      "detail": "La colonne de droite indique : {{detail}} (domicile - extérieur).",
+      "missing": "Gris : le match n'a pas cette donnée et ne compte pas dans le pourcentage.",
+      "lowSample": {
+        "team": "Avec moins de {{n}} matchs, le pourcentage d'une équipe apparaît atténué : il est peu fiable, à prendre comme une simple indication.",
+        "referee": "Avec moins de {{n}} matchs, le pourcentage d'un arbitre apparaît atténué : il est peu fiable, à prendre comme une simple indication."
+      }
+    },
+    "compare": "Comparer",
+    "average": "{{value}} {{label}}",
+    "home": "Domicile",
+    "away": "Extérieur",
+    "domestic": {
+      "title": "Voir dans son championnat",
+      "titleLeague": "Voir dans son championnat : {{league}}",
+      "error": "Impossible de charger ses matchs de championnat : {{error}}",
+      "loading": "Chargement de ses matchs de championnat...",
+      "none": "Nous n'avons pas son championnat dans nos données, ou elle n'a pas encore joué de match de championnat cette saison.",
+      "total": "Total en {{league}}"
+    },
+    "noData": "Pas de données",
+    "noMatchesShort": "Aucun match",
+    "noMatchesList": "Aucun match.",
+    "rateSummary_one": "{{hits}} sur {{count}} match",
+    "rateSummary_many": "{{hits}} sur {{count}} matchs",
+    "rateSummary_other": "{{hits}} sur {{count}} matchs",
+    "rateSummaryMissing_one": "{{hits}} sur {{count}} match ({{missing}} sans données)",
+    "rateSummaryMissing_many": "{{hits}} sur {{count}} matchs ({{missing}} sans données)",
+    "rateSummaryMissing_other": "{{hits}} sur {{count}} matchs ({{missing}} sans données)",
+    "rateLabel": "{{pct}} : {{summary}}",
+    "redCards_one": "Expulsion",
+    "redCards_many": "{{count}} expulsions",
+    "redCards_other": "{{count}} expulsions"
+  }
+}

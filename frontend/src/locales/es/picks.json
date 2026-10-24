@@ -1,0 +1,688 @@
+{
+  "strength": {
+    "high": "Fuerza alta",
+    "medium": "Fuerza media",
+    "low": "Fuerza baja",
+    "hint": "Partidos de los dos equipos juntos, con el límite inferior de Wilson al 95 %. Alta: el rival lo respalda y el límite es al menos 0,75. Media: al menos 0,60 y el rival no lo contradice. Baja: el resto."
+  },
+  "outcome": {
+    "hit": "Se cumplió",
+    "miss": "No se cumplió",
+    "unknown": "Sin dato en el partido"
+  },
+  "probable": {
+    "intro": "Lo que más se ha repetido en los partidos anteriores de cada equipo, y si el rival hace probable que se repita. Como mucho {{max}}, de más a menos fuerza.",
+    "introPlayed": "Partido ya jugado: los picks que se mostraban antes, calculados solo con los partidos anteriores, y si se cumplieron.",
+    "playedSummary": "Se cumplieron <bold>{{hits}}</bold> de {{decided}}.",
+    "loading": "Buscando patrones...",
+    "championsNote": "Champions: los patrones de cada equipo incluyen también sus partidos de liga de estas temporadas; lo habitual en la competición se mide solo con partidos de Champions.",
+    "error": "No se pudo cargar el historial de los equipos: {{error}}",
+    "empty": "No hay patrones con suficiente muestra para este partido.",
+    "method": {
+      "title": "Cómo se calcula",
+      "pattern": "Un patrón es algo que ha pasado al menos en el 80 % de los partidos anteriores de un equipo, en esta misma liga: con 5 partidos si pasó en todos y con 8 si no. Nunca cuentan este partido ni los posteriores.",
+      "contexts": "Se mira en el campo de este partido y en todos, esta temporada y en sus últimos 10 partidos en ese campo o 20 en total, que pueden incluir la temporada anterior.",
+      "lines": "De cada estadística solo sale la línea más exigente que se cumple. No sale lo que en toda la liga ya pasa en el 80 % de los partidos.",
+      "rival": "El contraste mira lo complementario en el rival, en su campo y con el mismo tipo de periodo: si un equipo marca fuera, si el otro encaja en casa. Respaldado: el rival también lo cumple, con muestra suficiente. Parcial: lo cumple al menos en la mitad de sus partidos. No respaldado: en menos.",
+      "strength": "Fuerza: se juntan los partidos de los dos equipos y se toma el límite inferior del intervalo de Wilson al 95 %, que penaliza las muestras pequeñas (5 de 5 da 0,57; 20 de 20, 0,84). Alta: el rival lo respalda y el límite es al menos 0,75. Media: al menos 0,60 y el rival no lo contradice. Baja: el resto."
+    },
+    "disclaimer": "Patrones históricos de alta frecuencia. No son predicciones garantizadas ni recomendaciones de apuesta.",
+    "historyLink": "¿Se cumplen? Mira las jornadas anteriores y el acierto de cada equipo →",
+    "leagueRate": "En toda la liga: {{pct}}.",
+    "modelLink": "Ver la probabilidad del modelo para este mercado ↓"
+  },
+  "teamRecord": {
+    "calculating": "Calculando su acierto...",
+    "none": "Sus picks en {{season}}: aún ninguno comprobado.",
+    "nonePlayed": "Sus picks en {{season}} antes de este partido: aún ninguno comprobado.",
+    "prefix": "Sus picks en {{season}}:",
+    "prefixPlayed": "Sus picks en {{season}} antes de este partido:",
+    "high": "alta <bold>{{pct}}</bold> de {{total}}",
+    "highNone": "alta: ninguno",
+    "medium": "media <bold>{{pct}}</bold> de {{total}}",
+    "mediumNone": "media: ninguno"
+  },
+  "strengthInfo": {
+    "label": "Acierto de los picks por nivel de fuerza",
+    "title": "Acierto en {{league}} {{season}}",
+    "titlePlayed": "Acierto en {{league}} {{season}}, antes de este partido",
+    "calculating": "Calculando...",
+    "none": "Aún no hay picks comprobados esta temporada.",
+    "count": "{{hits}} de {{total}}"
+  },
+  "rivalSentence": {
+    "notCrossable": "No hay una estadística del rival que lo complemente.",
+    "noMatches": "Sin partidos anteriores comparables.",
+    "match": "{{evidence}}.",
+    "team": "{{event}} {{evidence}}.",
+    "fewMatches": "Muy pocos partidos para contrastarlo."
+  },
+  "duel": {
+    "title": "Duelo de córners",
+    "pickLabel": "Pick muy probable",
+    "noData": "Sin dato",
+    "pickText": "<bold>{{team}}</bold>: {{text}}",
+    "evidenceWithRival_one": "{{evidence}}. {{state}}: {{team}}, {{text}} en {{hits}} de {{count}}.",
+    "evidenceWithRival_many": "{{evidence}}. {{state}}: {{team}}, {{text}} en {{hits}} de {{count}}.",
+    "evidenceWithRival_other": "{{evidence}}. {{state}}: {{team}}, {{text}} en {{hits}} de {{count}}.",
+    "evidenceNoRival": "{{evidence}}. {{state}}.",
+    "compact": "<bold>Duelo de córners</bold>: {{home}} {{homePct}} · mismos {{drawPct}} · {{away}} {{awayPct}}",
+    "compactNoData": "<bold>Duelo de córners</bold>: sin datos de córners",
+    "compactPlayed": "· córners: {{home}} {{homeCorners}} - {{awayCorners}} {{away}}",
+    "empty": "Todavía no hay córners de la liga con los que calcularlo.",
+    "teamMore": "{{team}} saca más",
+    "same": "Los mismos",
+    "summary": "No pierde el duelo: {{home}} {{homePct}} · {{away}} {{awayPct}}. Córners esperados: {{homeExpected}} - {{awayExpected}}.",
+    "resultWinner": "Córners del partido: {{home}} {{homeCorners}} - {{awayCorners}} {{away}}, ganó el duelo {{winner}}.",
+    "resultDraw": "Córners del partido: {{home}} {{homeCorners}} - {{awayCorners}} {{away}}, empate.",
+    "note": "Bloque nuevo, aparte de los picks de arriba y de sus cifras de acierto. Probabilidades de un modelo de córners con los partidos anteriores: lo que saca cada equipo en su campo y lo que concede el rival, con más peso a lo reciente y acercado a la media de la liga cuando hay pocos partidos. \"Pick muy probable\" solo cuando el patrón cumple el umbral del resto de picks.",
+    "noteSample": "Muestra: {{home}} partidos del local en casa y {{away}} del visitante fuera."
+  },
+  "kind": {
+    "safe": "Segura",
+    "reliable": "Fiable",
+    "medium": "Media",
+    "high": "Alta",
+    "bomb": "Bomba",
+    "sameMatch": "Mismo partido"
+  },
+  "leg": {
+    "draw": "Empate",
+    "win": "Gana {{team}}",
+    "homeOrDraw": "{{home}} o empate",
+    "drawOrAway": "Empate o {{away}}",
+    "homeOrAway": "{{home}} o {{away}} (sin empate)",
+    "goals": {
+      "over": "Más de {{line}} goles",
+      "under": "Menos de {{line}} goles"
+    },
+    "bttsYes": "Marcan los dos equipos",
+    "bttsNo": "No marcan los dos",
+    "teamScores": "{{team}} marca",
+    "teamGoalsAtLeast_one": "{{team}} marca al menos {{count}} gol",
+    "teamGoalsAtLeast_many": "{{team}} marca al menos {{count}} goles",
+    "teamGoalsAtLeast_other": "{{team}} marca al menos {{count}} goles",
+    "corners": {
+      "over": "Más de {{line}} córners",
+      "under": "Menos de {{line}} córners"
+    },
+    "teamCornersAtLeast_one": "{{team}} saca al menos {{count}} córner",
+    "teamCornersAtLeast_many": "{{team}} saca al menos {{count}} córners",
+    "teamCornersAtLeast_other": "{{team}} saca al menos {{count}} córners",
+    "yellowCards": {
+      "over": "Más de {{line}} amarillas",
+      "under": "Menos de {{line}} amarillas"
+    },
+    "teamYellowsAtLeast_one": "{{team}} ve al menos {{count}} amarilla",
+    "teamYellowsAtLeast_many": "{{team}} ve al menos {{count}} amarillas",
+    "teamYellowsAtLeast_other": "{{team}} ve al menos {{count}} amarillas",
+    "unit": {
+      "corners": "córners",
+      "yellowCards": "amarillas"
+    }
+  },
+  "oddsKind": {
+    "real": "Cuota media real de las casas, antes del partido",
+    "derived": "Calculada a partir de las cuotas reales del 1X2",
+    "estimated": "Estimada: probabilidad del modelo con un margen típico de casa. Compárala con la de tu casa de apuestas"
+  },
+  "oneInN": {
+    "outOfTen": "{{n}} de cada 10",
+    "oneIn": "1 de cada {{n}}"
+  },
+  "matchPick": {
+    "title": "Pick del partido",
+    "calculating": "Calculando el pick del partido...",
+    "error": "No se pudo calcular: {{error}}",
+    "uncalibrated": "Champions: el modelo no está calibrado para esta competición, sin pick del partido.",
+    "none": "Sin pick del partido: ningún candidato llega al 65 % sin ser algo que ya pasa casi siempre en la liga.",
+    "note": "Es la señal histórica más fuerte del partido según el modelo, no una recomendación; el mercado ya descuenta lo probable.",
+    "hit": "✓ Se cumplió",
+    "miss": "✗ No se cumplió",
+    "probability": "Probabilidad del modelo: <bold>{{p}}</bold> · Base de la liga: {{base}}",
+    "probabilityPlayed": "Probabilidad del modelo: <bold>{{p}}</bold> · Base de la liga: {{base}} · calculado antes del partido",
+    "kindSentence_one": "{{kind}}: acertó el {{hitRate}} frente al {{base}} habitual en la liga ({{edge}} pts, IC {{low}} a {{high}}; {{count}} partido de 25/26 y 26/27, calculado antes de jugarse).",
+    "kindSentence_many": "{{kind}}: acertó el {{hitRate}} frente al {{base}} habitual en la liga ({{edge}} pts, IC {{low}} a {{high}}; {{count}} partidos de 25/26 y 26/27, cada uno calculado antes de jugarse).",
+    "kindSentence_other": "{{kind}}: acertó el {{hitRate}} frente al {{base}} habitual en la liga ({{edge}} pts, IC {{low}} a {{high}}; {{count}} partidos de 25/26 y 26/27, cada uno calculado antes de jugarse).",
+    "lineNone": "Pick del partido: ninguno",
+    "lineLabel": "Pick del partido:",
+    "leagueBase": "(liga {{base}})",
+    "kindLabel": "{{family}} · {{detail}}",
+    "kind": {
+      "teamGoals": "Goles del equipo",
+      "concededGoals": "Goles que encaja",
+      "matchGoals": "Goles del partido",
+      "btts": "Ambos marcan",
+      "result": "Resultado",
+      "matchCorners": "Córners del partido",
+      "teamCorners": "Córners del equipo",
+      "matchCards": "Tarjetas del partido",
+      "teamCards": "Tarjetas del equipo",
+      "matchFouls": "Faltas del partido",
+      "teamFouls": "Faltas del equipo",
+      "matchShots": "Tiros del partido",
+      "teamShots": "Tiros del equipo",
+      "matchShotsOnTarget": "Tiros a puerta del partido",
+      "teamShotsOnTarget": "Tiros a puerta del equipo"
+    },
+    "kindDetail": {
+      "over": "más de",
+      "under": "menos de",
+      "yes": "sí",
+      "no": "no",
+      "win": "gana",
+      "draw": "empata",
+      "lose": "pierde",
+      "winOrDraw": "no pierde"
+    },
+    "text": {
+      "result": {
+        "win": "{{team}} gana",
+        "draw": "{{team}} empata",
+        "lose": "{{team}} pierde",
+        "winOrDraw": "{{team}} no pierde"
+      },
+      "btts": {
+        "yes": "Marcan los dos equipos",
+        "no": "No marcan los dos equipos"
+      },
+      "teamGoals": {
+        "yes": "{{team}} marca",
+        "no": "{{team}} no marca",
+        "over": "{{team}} marca más de {{line}} goles",
+        "under": "{{team}} marca menos de {{line}} goles"
+      },
+      "concededGoals": {
+        "yes": "{{team}} encaja",
+        "no": "{{team}} no encaja",
+        "over": "{{team}} encaja más de {{line}} goles",
+        "under": "{{team}} encaja menos de {{line}} goles"
+      },
+      "matchGoals": {
+        "over": "Más de {{line}} goles en el partido",
+        "under": "Menos de {{line}} goles en el partido"
+      },
+      "matchCorners": {
+        "over": "Más de {{line}} córners en el partido",
+        "under": "Menos de {{line}} córners en el partido"
+      },
+      "teamCorners": {
+        "over": "{{team}} saca más de {{line}} córners",
+        "under": "{{team}} saca menos de {{line}} córners"
+      },
+      "matchCards": {
+        "over": "Más de {{line}} tarjetas en el partido",
+        "under": "Menos de {{line}} tarjetas en el partido"
+      },
+      "teamCards": {
+        "over": "{{team}} recibe más de {{line}} tarjetas",
+        "under": "{{team}} recibe menos de {{line}} tarjetas"
+      },
+      "matchFouls": {
+        "over": "Más de {{line}} faltas en el partido",
+        "under": "Menos de {{line}} faltas en el partido"
+      },
+      "teamFouls": {
+        "over": "{{team}} comete más de {{line}} faltas",
+        "under": "{{team}} comete menos de {{line}} faltas"
+      },
+      "matchShots": {
+        "over": "Más de {{line}} tiros en el partido",
+        "under": "Menos de {{line}} tiros en el partido"
+      },
+      "teamShots": {
+        "over": "{{team}} hace más de {{line}} tiros",
+        "under": "{{team}} hace menos de {{line}} tiros"
+      },
+      "matchShotsOnTarget": {
+        "over": "Más de {{line}} tiros a puerta en el partido",
+        "under": "Menos de {{line}} tiros a puerta en el partido"
+      },
+      "teamShotsOnTarget": {
+        "over": "{{team}} hace más de {{line}} tiros a puerta",
+        "under": "{{team}} hace menos de {{line}} tiros a puerta"
+      }
+    }
+  },
+  "predictability": {
+    "title": "Índice de predecibilidad",
+    "note": "Mide la fiabilidad de los patrones históricos, no la probabilidad de ganar una apuesta. El mercado ya descuenta lo predecible.",
+    "band": {
+      "high": "Alta",
+      "medium": "Media",
+      "low": "Baja"
+    },
+    "chip": "Predecibilidad: {{band}} ({{index}}/100)",
+    "chipUncalibrated": "Predecibilidad: no calibrada",
+    "chipNoPicks": "Predecibilidad: sin picks",
+    "uncalibratedTitle": "La Champions no está calibrada: con tan pocos partidos por equipo, los pronósticos favorecen al local casi siempre. Queda fuera del índice.",
+    "estimate": "Estima cuánto se cumplirán los picks de este partido por encima de lo habitual en la liga para esos mismos sucesos (percentil {{index}} de 100).",
+    "estimatePlayed": "Estima cuánto se cumplirán los picks de este partido por encima de lo habitual en la liga para esos mismos sucesos (percentil {{index}} de 100, calculado antes de jugarse).",
+    "bandSentence_one": "Banda {{band}} en {{season}}: sus picks acertaron el {{hitRate}}, frente al {{base}} habitual en la liga ({{edge}} pts, IC {{low}} a {{high}}; {{count}} partido).",
+    "bandSentence_many": "Banda {{band}} en {{season}}: sus picks acertaron el {{hitRate}}, frente al {{base}} habitual en la liga ({{edge}} pts, IC {{low}} a {{high}}; {{count}} partidos).",
+    "bandSentence_other": "Banda {{band}} en {{season}}: sus picks acertaron el {{hitRate}}, frente al {{base}} habitual en la liga ({{edge}} pts, IC {{low}} a {{high}}; {{count}} partidos).",
+    "insufficientSentence": "Muestra insuficiente.",
+    "separationClear": "Alta − Baja en {{season}}: {{point}} pts (IC {{low}} a {{high}}).",
+    "separationUnclear": "Alta − Baja en {{season}}: {{point}} pts (IC {{low}} a {{high}}): las bandas no se separan de forma clara.",
+    "noMatches": "Sin partidos",
+    "insufficient": "Muestra insuficiente",
+    "tableUncalibrated": "La Champions no está calibrada (con tan pocos partidos por equipo, los pronósticos favorecen al local casi siempre): queda fuera del índice.",
+    "sixLeagues": "Seis ligas",
+    "intro": "Cada partido jugado se puntuó antes de jugarse con un modelo entrenado solo con partidos anteriores. La tabla compara el acierto de los picks de cada banda con lo habitual en la liga para esos mismos sucesos.",
+    "column": {
+      "season": "Temporada",
+      "scope": "Ámbito",
+      "band": "Banda",
+      "matches": "Partidos",
+      "hitRate": "Acierto",
+      "leagueBase": "Base de la liga",
+      "edge": "Ventaja (pts)",
+      "ci": "IC 95 %"
+    },
+    "seasonTest": "{{season}} (prueba)",
+    "seasonDev": "{{season}} (desarrollo)",
+    "footnote": "Bandas: terciles del índice (0–100) entre los partidos con los que se entrenó el modelo. Con menos de {{n}} partidos, \"muestra insuficiente\". La Champions queda fuera (no calibrada). Protocolo y resultados en docs/PREDECIBILIDAD_PROTOCOLO.md."
+  },
+  "pattern": {
+    "teamGoals": {
+      "yes": "Marca",
+      "no": "No marca",
+      "over": "Marca más de {{line}} goles",
+      "under": "Marca menos de {{line}} goles"
+    },
+    "concededGoals": {
+      "yes": "Encaja",
+      "no": "No encaja",
+      "over": "Encaja más de {{line}} goles",
+      "under": "Encaja menos de {{line}} goles"
+    },
+    "matchGoals": {
+      "over": "Más de {{line}} goles en el partido",
+      "under": "Menos de {{line}} goles en el partido"
+    },
+    "btts": {
+      "yes": "Marcan los dos equipos",
+      "no": "No marcan los dos equipos"
+    },
+    "result": {
+      "win": "Gana",
+      "draw": "Empata",
+      "lose": "Pierde",
+      "winOrDraw": "No pierde",
+      "loseOrDraw": "No gana"
+    },
+    "matchCorners": {
+      "over": "Más de {{line}} córners en el partido",
+      "under": "Menos de {{line}} córners en el partido"
+    },
+    "teamCorners": {
+      "over": "Saca más de {{line}} córners",
+      "under": "Saca menos de {{line}} córners"
+    },
+    "concededCorners": {
+      "over": "Concede más de {{line}} córners",
+      "under": "Concede menos de {{line}} córners"
+    },
+    "matchCards": {
+      "over": "Más de {{line}} tarjetas en el partido",
+      "under": "Menos de {{line}} tarjetas en el partido"
+    },
+    "teamCards": {
+      "over": "Recibe más de {{line}} tarjetas",
+      "under": "Recibe menos de {{line}} tarjetas"
+    },
+    "matchFouls": {
+      "over": "Más de {{line}} faltas en el partido",
+      "under": "Menos de {{line}} faltas en el partido"
+    },
+    "teamFouls": {
+      "over": "Comete más de {{line}} faltas",
+      "under": "Comete menos de {{line}} faltas"
+    },
+    "matchShots": {
+      "over": "Más de {{line}} tiros en el partido",
+      "under": "Menos de {{line}} tiros en el partido"
+    },
+    "teamShots": {
+      "over": "Hace más de {{line}} tiros",
+      "under": "Hace menos de {{line}} tiros"
+    },
+    "concededShots": {
+      "over": "Concede más de {{line}} tiros",
+      "under": "Concede menos de {{line}} tiros"
+    },
+    "matchShotsOnTarget": {
+      "over": "Más de {{line}} tiros a puerta en el partido",
+      "under": "Menos de {{line}} tiros a puerta en el partido"
+    },
+    "teamShotsOnTarget": {
+      "over": "Hace más de {{line}} tiros a puerta",
+      "under": "Hace menos de {{line}} tiros a puerta"
+    },
+    "concededShotsOnTarget": {
+      "over": "Concede más de {{line}} tiros a puerta",
+      "under": "Concede menos de {{line}} tiros a puerta"
+    },
+    "cornerDuel": {
+      "win": "Gana el duelo de córners",
+      "lose": "Pierde el duelo de córners",
+      "draw": "Empata el duelo de córners",
+      "winOrDraw": "No pierde el duelo de córners",
+      "loseOrDraw": "No gana el duelo de córners"
+    },
+    "cornerDuelInline": {
+      "win": "gana el duelo de córners",
+      "lose": "pierde el duelo de córners",
+      "draw": "empata el duelo de córners",
+      "winOrDraw": "no pierde el duelo de córners",
+      "loseOrDraw": "no gana el duelo de córners"
+    }
+  },
+  "context": {
+    "seasonVenue": {
+      "home_one": "partido en casa esta temporada ({{seasons}})",
+      "home_many": "partidos en casa esta temporada ({{seasons}})",
+      "home_other": "partidos en casa esta temporada ({{seasons}})",
+      "away_one": "partido fuera de casa esta temporada ({{seasons}})",
+      "away_many": "partidos fuera de casa esta temporada ({{seasons}})",
+      "away_other": "partidos fuera de casa esta temporada ({{seasons}})"
+    },
+    "seasonAll_one": "partido esta temporada ({{seasons}})",
+    "seasonAll_many": "partidos esta temporada ({{seasons}})",
+    "seasonAll_other": "partidos esta temporada ({{seasons}})",
+    "recentVenue": {
+      "home_one": "su último partido en casa ({{seasons}})",
+      "home_many": "sus últimos {{count}} partidos en casa ({{seasons}})",
+      "home_other": "sus últimos {{count}} partidos en casa ({{seasons}})",
+      "away_one": "su último partido fuera de casa ({{seasons}})",
+      "away_many": "sus últimos {{count}} partidos fuera de casa ({{seasons}})",
+      "away_other": "sus últimos {{count}} partidos fuera de casa ({{seasons}})"
+    },
+    "recentAll_one": "su último partido ({{seasons}})",
+    "recentAll_many": "sus últimos {{count}} partidos ({{seasons}})",
+    "recentAll_other": "sus últimos {{count}} partidos ({{seasons}})"
+  },
+  "evidence": {
+    "seasonVenue": {
+      "home_one": "En {{hits}} de {{count}} partido en casa esta temporada ({{seasons}})",
+      "home_many": "En {{hits}} de {{count}} partidos en casa esta temporada ({{seasons}})",
+      "home_other": "En {{hits}} de {{count}} partidos en casa esta temporada ({{seasons}})",
+      "away_one": "En {{hits}} de {{count}} partido fuera de casa esta temporada ({{seasons}})",
+      "away_many": "En {{hits}} de {{count}} partidos fuera de casa esta temporada ({{seasons}})",
+      "away_other": "En {{hits}} de {{count}} partidos fuera de casa esta temporada ({{seasons}})"
+    },
+    "seasonAll_one": "En {{hits}} de {{count}} partido esta temporada ({{seasons}})",
+    "seasonAll_many": "En {{hits}} de {{count}} partidos esta temporada ({{seasons}})",
+    "seasonAll_other": "En {{hits}} de {{count}} partidos esta temporada ({{seasons}})",
+    "recentVenue": {
+      "home_one": "En {{hits}} de {{count}} partido en casa ({{seasons}})",
+      "home_many": "En {{hits}} de sus últimos {{count}} partidos en casa ({{seasons}})",
+      "home_other": "En {{hits}} de sus últimos {{count}} partidos en casa ({{seasons}})",
+      "away_one": "En {{hits}} de {{count}} partido fuera de casa ({{seasons}})",
+      "away_many": "En {{hits}} de sus últimos {{count}} partidos fuera de casa ({{seasons}})",
+      "away_other": "En {{hits}} de sus últimos {{count}} partidos fuera de casa ({{seasons}})"
+    },
+    "recentAll_one": "En {{hits}} de {{count}} partido ({{seasons}})",
+    "recentAll_many": "En {{hits}} de sus últimos {{count}} partidos ({{seasons}})",
+    "recentAll_other": "En {{hits}} de sus últimos {{count}} partidos ({{seasons}})"
+  },
+  "evidenceInline": {
+    "seasonVenue": {
+      "home_one": "en {{hits}} de {{count}} partido en casa esta temporada ({{seasons}})",
+      "home_many": "en {{hits}} de {{count}} partidos en casa esta temporada ({{seasons}})",
+      "home_other": "en {{hits}} de {{count}} partidos en casa esta temporada ({{seasons}})",
+      "away_one": "en {{hits}} de {{count}} partido fuera de casa esta temporada ({{seasons}})",
+      "away_many": "en {{hits}} de {{count}} partidos fuera de casa esta temporada ({{seasons}})",
+      "away_other": "en {{hits}} de {{count}} partidos fuera de casa esta temporada ({{seasons}})"
+    },
+    "seasonAll_one": "en {{hits}} de {{count}} partido esta temporada ({{seasons}})",
+    "seasonAll_many": "en {{hits}} de {{count}} partidos esta temporada ({{seasons}})",
+    "seasonAll_other": "en {{hits}} de {{count}} partidos esta temporada ({{seasons}})",
+    "recentVenue": {
+      "home_one": "en {{hits}} de {{count}} partido en casa ({{seasons}})",
+      "home_many": "en {{hits}} de sus últimos {{count}} partidos en casa ({{seasons}})",
+      "home_other": "en {{hits}} de sus últimos {{count}} partidos en casa ({{seasons}})",
+      "away_one": "en {{hits}} de {{count}} partido fuera de casa ({{seasons}})",
+      "away_many": "en {{hits}} de sus últimos {{count}} partidos fuera de casa ({{seasons}})",
+      "away_other": "en {{hits}} de sus últimos {{count}} partidos fuera de casa ({{seasons}})"
+    },
+    "recentAll_one": "en {{hits}} de {{count}} partido ({{seasons}})",
+    "recentAll_many": "en {{hits}} de sus últimos {{count}} partidos ({{seasons}})",
+    "recentAll_other": "en {{hits}} de sus últimos {{count}} partidos ({{seasons}})"
+  },
+  "rivalState": {
+    "backed": "Respaldado por el rival",
+    "partial": "Parcialmente respaldado",
+    "against": "No respaldado",
+    "none": "Sin contraste con el rival"
+  },
+  "refereeFact": {
+    "amount": {
+      "cards": {
+        "over": "más de {{line}} tarjetas",
+        "under": "menos de {{line}} tarjetas"
+      },
+      "fouls": {
+        "over": "más de {{line}} faltas",
+        "under": "menos de {{line}} faltas"
+      }
+    },
+    "count_one": "{{hits}} de {{count}} partido",
+    "count_many": "{{hits}} de {{count}} partidos",
+    "count_other": "{{hits}} de {{count}} partidos",
+    "match": {
+      "always": "Con este árbitro, siempre ha habido {{amount}} en los partidos de {{team}} ({{matches}}).",
+      "some": "Con este árbitro, ha habido {{amount}} en {{matches}} de {{team}}."
+    },
+    "team": {
+      "cards": {
+        "always": "Con este árbitro, {{team}} siempre ha recibido {{amount}} ({{matches}}).",
+        "some": "Con este árbitro, {{team}} ha recibido {{amount}} en {{matches}}."
+      },
+      "fouls": {
+        "always": "Con este árbitro, {{team}} siempre ha cometido {{amount}} ({{matches}}).",
+        "some": "Con este árbitro, {{team}} ha cometido {{amount}} en {{matches}}."
+      }
+    }
+  },
+  "tierHint": {
+    "safe": "Cuota ~1,40 · 2 selecciones",
+    "reliable": "Cuota ~1,50 · 2 selecciones · acierta ~2 de cada 3",
+    "medium": "Cuota ~1,90 · 2-3 selecciones",
+    "high": "Cuota 3 - 5 · hasta 4 selecciones",
+    "bomb": "Cuota 8 o más · hasta 5 selecciones",
+    "sameMatch": "Dos o tres selecciones del mismo partido, probabilidad conjunta ≥ 70 %"
+  },
+  "page": {
+    "lead": "Combinadas para la próxima jornada construidas con estadística: cuotas pre-partido, córners y amarillas de cada equipo en casa y fuera. Para cada nivel de cuota se elige la combinada con más probabilidad de acierto, con pocas selecciones para no acumular el margen de la casa.",
+    "tabUpcoming": "Próxima jornada",
+    "tabHistory": "Histórico",
+    "loading": "Cargando picks...",
+    "empty": "Todavía no hay picks para la próxima jornada. Se generan con scripts/refresh_picks.py (mejor después de refresh_odds.py, para tener las cuotas).",
+    "upcomingNote": "Jornada del <bold>{{window}}</bold>. La probabilidad es la del modelo, que en el backtest fuera de muestra acertó lo que prometía (ver Histórico). Las cuotas marcadas como <em>estimadas</em> no son de ninguna casa: compáralas con la tuya. Si tu casa paga más, mejor para ti; si paga menos, la combinada te sale peor de lo que parece.",
+    "byLevel": "Combinadas por nivel",
+    "levelEmpty": "No hay selecciones suficientes para este nivel en esta jornada.",
+    "sameMatchTitle": "Una combinada muy probable por partido",
+    "sameMatchNote": "{{hint}}. Las selecciones del mismo partido no son independientes: la probabilidad ya lo tiene en cuenta."
+  },
+  "oddsKindTag": {
+    "real": "real",
+    "derived": "derivada",
+    "estimated": "estimada"
+  },
+  "combo": {
+    "actual": "Real: {{actual}} {{unit}}",
+    "probability": "Probabilidad <bold>{{pct}}</bold>",
+    "hits": " · acierta {{oneInN}}"
+  },
+  "history": {
+    "loading": "Cargando histórico...",
+    "empty": "Todavía no hay picks resueltos.",
+    "note": "Combinadas de 25/26 y 26/27 generadas con un modelo entrenado solo con temporadas anteriores, con reglas fijadas antes de ver estos partidos, más las jornadas ya jugadas desde entonces. Se cuentan todas, también las falladas. <bold>Compara el acierto con la probabilidad prometida</bold>: si se parecen, el modelo es fiable. El ROI usa las cuotas mostradas, que en casi todas las combinadas son estimadas con un margen de casa, así que es orientativo.",
+    "column": {
+      "level": "Nivel",
+      "combos": "Combinadas",
+      "hitRate": "Acierto",
+      "promised": "Prometido",
+      "avgOdds": "Cuota media",
+      "roi": "ROI (cuota mostrada)"
+    },
+    "allLevels": "Todos los niveles",
+    "latest": "Últimas combinadas",
+    "window": "Jornada {{window}}"
+  },
+  "strengthShort": {
+    "high": "Alta",
+    "medium": "Media",
+    "low": "Baja"
+  },
+  "probablePage": {
+    "title": "Picks muy probables",
+    "lead": "Los de la próxima jornada, los mismos que salen en la ficha de cada partido. Y, de cada partido ya jugado, los que se mostraban antes de jugarse, calculados solo con los partidos anteriores, y si se cumplieron.",
+    "viewLabel": "Vista",
+    "view": {
+      "next": {
+        "label": "Próxima jornada",
+        "short": "Próxima"
+      },
+      "played": {
+        "label": "Jornadas jugadas",
+        "short": "Jugadas"
+      },
+      "summary": {
+        "label": "Resumen",
+        "short": "Resumen"
+      },
+      "teams": {
+        "label": "Tabla de aciertos",
+        "short": "Equipos"
+      }
+    },
+    "noPending": "No hay partidos pendientes en esta liga",
+    "season": "Temporada",
+    "allSeasons": "Todas las temporadas",
+    "seasonCurrent": "{{season}} (actual)",
+    "searchingNext": "Buscando la próxima jornada...",
+    "firstSeason": "Primera temporada con datos: los patrones solo pueden usar esta temporada.",
+    "checking": "Comprobando partidos: {{done}} de {{total}}...",
+    "checkingAll": "Comprobando partidos de todas las temporadas: {{done}} de {{total}}...",
+    "noPlayed": "Aún no hay partidos jugados en esta temporada.",
+    "allSeasonsTitle": "Todas las temporadas ({{from}} a {{to}})",
+    "seasonTitle": "Temporada {{season}}",
+    "matchCount_one": "{{count}} partido",
+    "matchCount_many": "{{count}} partidos",
+    "matchCount_other": "{{count}} partidos",
+    "nextSeveral": "Próximas jornadas: {{list}} y {{last}}",
+    "nextOne": "Próxima jornada: jornada {{n}}",
+    "nextNote": "Calculados con todo lo jugado hasta hoy. Cuando se jueguen, aparecerán abajo con su resultado.",
+    "calculatingNext": "Calculando los picks de la próxima jornada...",
+    "noPendingMatches": "No hay partidos pendientes en esta liga.",
+    "noMatchesDay": "No hay partidos este día.",
+    "nextSummary_one": "<bold>{{count}}</bold> partido pendiente, <bold>{{picks}}</bold> {{picksWord}}: {{high}} de fuerza alta, {{medium}} de fuerza media y {{low}} de fuerza baja.",
+    "nextSummary_many": "<bold>{{count}}</bold> partidos pendientes, <bold>{{picks}}</bold> {{picksWord}}: {{high}} de fuerza alta, {{medium}} de fuerza media y {{low}} de fuerza baja.",
+    "nextSummary_other": "<bold>{{count}}</bold> partidos pendientes, <bold>{{picks}}</bold> {{picksWord}}: {{high}} de fuerza alta, {{medium}} de fuerza media y {{low}} de fuerza baja.",
+    "nextSummaryDay_one": "<bold>{{count}}</bold> partido pendiente este día, <bold>{{picks}}</bold> {{picksWord}}: {{high}} de fuerza alta, {{medium}} de fuerza media y {{low}} de fuerza baja.",
+    "nextSummaryDay_many": "<bold>{{count}}</bold> partidos pendientes este día, <bold>{{picks}}</bold> {{picksWord}}: {{high}} de fuerza alta, {{medium}} de fuerza media y {{low}} de fuerza baja.",
+    "nextSummaryDay_other": "<bold>{{count}}</bold> partidos pendientes este día, <bold>{{picks}}</bold> {{picksWord}}: {{high}} de fuerza alta, {{medium}} de fuerza media y {{low}} de fuerza baja.",
+    "hiddenNext": {
+      "high_one": "{{count}} partido no tiene picks de fuerza alta.",
+      "high_many": "{{count}} partidos no tienen picks de fuerza alta.",
+      "high_other": "{{count}} partidos no tienen picks de fuerza alta.",
+      "medium_one": "{{count}} partido no tiene picks de fuerza media.",
+      "medium_many": "{{count}} partidos no tienen picks de fuerza media.",
+      "medium_other": "{{count}} partidos no tienen picks de fuerza media.",
+      "low_one": "{{count}} partido no tiene picks de fuerza baja.",
+      "low_many": "{{count}} partidos no tienen picks de fuerza baja.",
+      "low_other": "{{count}} partidos no tienen picks de fuerza baja."
+    },
+    "hiddenMatchday": {
+      "high_one": "{{count}} partido no tiene picks de fuerza alta en esta jornada.",
+      "high_many": "{{count}} partidos no tienen picks de fuerza alta en esta jornada.",
+      "high_other": "{{count}} partidos no tienen picks de fuerza alta en esta jornada.",
+      "medium_one": "{{count}} partido no tiene picks de fuerza media en esta jornada.",
+      "medium_many": "{{count}} partidos no tienen picks de fuerza media en esta jornada.",
+      "medium_other": "{{count}} partidos no tienen picks de fuerza media en esta jornada.",
+      "low_one": "{{count}} partido no tiene picks de fuerza baja en esta jornada.",
+      "low_many": "{{count}} partidos no tienen picks de fuerza baja en esta jornada.",
+      "low_other": "{{count}} partidos no tienen picks de fuerza baja en esta jornada."
+    },
+    "playedBelow_one": "{{count}} partido de esta jornada ya jugado está abajo, con su resultado.",
+    "playedBelow_many": "{{count}} partidos de esta jornada ya jugados están abajo, con su resultado.",
+    "playedBelow_other": "{{count}} partidos de esta jornada ya jugados están abajo, con su resultado.",
+    "strengthLabel": "Fuerza",
+    "strengthPrefix": "Fuerza:",
+    "strengthAll": "Todas",
+    "points": "{{edge}} pts",
+    "edgeMore_one": ": {{count}} punto más.",
+    "edgeMore_many": ": {{count}} puntos más.",
+    "edgeMore_other": ": {{count}} puntos más.",
+    "edgeLess_one": ": {{count}} punto menos.",
+    "edgeLess_many": ": {{count}} puntos menos.",
+    "edgeLess_other": ": {{count}} puntos menos.",
+    "edgeSame": ": lo mismo.",
+    "allPicks": "Todos",
+    "summaryText": "De <bold>{{total}}</bold> picks en <bold>{{matches}}</bold> partidos se cumplieron <bold>{{hits}}</bold> ({{pct}}). En la liga, esos mismos sucesos pasan el {{expected}}",
+    "column": {
+      "level": "Nivel",
+      "picks": "Picks",
+      "hits": "Se cumplieron",
+      "misses": "Fallaron",
+      "hitRate": "Acierto",
+      "league": "En la liga",
+      "leagueTitle": "Frecuencia de esos mismos sucesos en la liga: lo esperable sin patrón",
+      "edge": "Ventaja"
+    },
+    "interval": "Intervalo 95 %: {{low}}–{{high}}",
+    "undecided_one": "{{count}} pick sin dato en el partido: no cuenta.",
+    "undecided_many": "{{count}} picks sin dato en el partido: no cuentan.",
+    "undecided_other": "{{count}} picks sin dato en el partido: no cuentan.",
+    "rankColumn": {
+      "high": {
+        "label": "Fuerza alta",
+        "short": "Alta"
+      },
+      "medium": {
+        "label": "Fuerza media",
+        "short": "Media"
+      },
+      "top": {
+        "label": "Alta y media",
+        "short": "Total"
+      }
+    },
+    "ranking": {
+      "title": "Tabla de aciertos por equipo",
+      "note": "Acierto de los picks que salen del historial de cada equipo. Pulsa una columna para ordenar por ella. Con menos de {{n}} picks en esa columna, al final de la lista. «Ventaja»: puntos por encima o por debajo de lo que pasa en la liga para esos mismos sucesos.",
+      "team": "Equipo",
+      "edgeTitle": "Acierto en alta y media menos lo que pasa en la liga para esos sucesos",
+      "edge": "Ventaja",
+      "edgeShort": "Vent."
+    },
+    "hitsOf": "{{hits}} de {{total}}",
+    "hitsOfPct": "{{hits}} de {{total}} ({{pct}})",
+    "matchdayHead": "Jornada {{n}} en {{league}}: se cumplieron <bold>{{hits}} de {{total}}</bold> picks",
+    "leagueExpected": "En la liga, esos mismos sucesos pasan el {{pct}}",
+    "undecidedPending_one": "{{count}} pick aún sin dato del partido: no cuenta.",
+    "undecidedPending_many": "{{count}} picks aún sin dato del partido: no cuentan.",
+    "undecidedPending_other": "{{count}} picks aún sin dato del partido: no cuentan.",
+    "duelSummary_one": "<bold>Duelo de córners:</bold> el resultado más probable acertó en <score>{{hits}} de {{count}}</score> partido ({{pct}}).",
+    "duelSummary_many": "<bold>Duelo de córners:</bold> el resultado más probable acertó en <score>{{hits}} de {{count}}</score> partidos ({{pct}}).",
+    "duelSummary_other": "<bold>Duelo de córners:</bold> el resultado más probable acertó en <score>{{hits}} de {{count}}</score> partidos ({{pct}}).",
+    "duelSummaryPicks_one": "<bold>Duelo de córners:</bold> el resultado más probable acertó en <score>{{hits}} de {{count}}</score> partido ({{pct}}) · picks muy probables del duelo: <picks>{{pickHits}} de {{pickTotal}}</picks> ({{pickPct}}).",
+    "duelSummaryPicks_many": "<bold>Duelo de córners:</bold> el resultado más probable acertó en <score>{{hits}} de {{count}}</score> partidos ({{pct}}) · picks muy probables del duelo: <picks>{{pickHits}} de {{pickTotal}}</picks> ({{pickPct}}).",
+    "duelSummaryPicks_other": "<bold>Duelo de córners:</bold> el resultado más probable acertó en <score>{{hits}} de {{count}}</score> partidos ({{pct}}) · picks muy probables del duelo: <picks>{{pickHits}} de {{pickTotal}}</picks> ({{pickPct}}).",
+    "cardTitle": "Se cumplieron {{hits}} de {{decided}} picks; en la liga, esos sucesos pasan {{expected}} de {{base}}",
+    "cardTitleMissing": "Se cumplieron {{hits}} de {{decided}} picks; en la liga, esos sucesos pasan {{expected}} de {{base}} · {{missing}} sin dato",
+    "noPicks": "Sin picks: no hay patrones con muestra suficiente.",
+    "outcome": {
+      "hit": "Se cumplió",
+      "miss": "No se cumplió",
+      "unknown": "Sin dato",
+      "pending": "Pendiente"
+    },
+    "checkedEvidence": "· {{team}}, {{hits}} de {{total}}",
+    "picksWord_one": "pick",
+    "picksWord_many": "picks",
+    "picksWord_other": "picks"
+  }
+}

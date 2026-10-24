@@ -10,13 +10,16 @@
     "test": "vitest run",
     "preview": "vite preview",
     "export:picks": "rolldown scripts/export-picks.ts --file node_modules/.cache/export-picks.mjs --platform node --format esm --log-level warn && node node_modules/.cache/export-picks.mjs",
-    "export:predictability": "rolldown scripts/export-predictability.ts --file node_modules/.cache/export-predictability.mjs --platform node --format esm --log-level warn && node node_modules/.cache/export-predictability.mjs"
+    "export:predictability": "rolldown scripts/export-predictability.ts --file node_modules/.cache/export-predictability.mjs --platform node --format esm --log-level warn && node node_modules/.cache/export-predictability.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",
     "gsap": "^3.15.0",
+    "i18next": "26.4.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-i18next": "17.0.15",
     "react-router-dom": "^7.18.3"
   },
   "devDependencies": {

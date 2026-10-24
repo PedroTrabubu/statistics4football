@@ -1,0 +1,260 @@
+{
+  "page": {
+    "intro": "The percentages you see here are <bold>historical frequency</bold>, not a promise of what will happen: they count how often something happened before, always alongside the number of matches used. That's not the same as a guaranteed probability. <link>More on how to read them →</link>"
+  },
+  "detail": {
+    "loading": "Loading match...",
+    "error": "Couldn't load the match: {{error}}",
+    "back": "← Back to matches",
+    "season": "Season {{season}}",
+    "sectionsLabel": "Match sections",
+    "section": {
+      "form": {
+        "label": "Recent form",
+        "short": "Form"
+      },
+      "h2h": {
+        "label": "Head-to-head",
+        "short": "H2H"
+      },
+      "referee": {
+        "label": "Referee",
+        "short": "Referee"
+      },
+      "picks": {
+        "label": "Very likely picks",
+        "short": "Picks"
+      },
+      "probabilities": {
+        "label": "Probabilities and expected value",
+        "short": "Probabilities & EV"
+      },
+      "probabilitiesOnly": {
+        "label": "Probabilities",
+        "short": "Probabilities"
+      },
+      "otherMatches": {
+        "label": "Other matches",
+        "short": "Other matches"
+      }
+    },
+    "statsLoading": "Calculating statistics...",
+    "statsError": "Couldn't calculate the statistics: {{error}}",
+    "recentLoading": "Loading recent matches...",
+    "recentError": "Couldn't load recent matches: {{error}}",
+    "h2hTitle": "Head-to-head",
+    "h2hLoading": "Loading head-to-head...",
+    "h2hError": "Couldn't load head-to-head: {{error}}",
+    "seasonTitle": "Season statistics",
+    "seasonLoading": "Loading season statistics...",
+    "referee": "Referee",
+    "refereeNamed": "Referee: <link>{{name}}</link>",
+    "refereeLinkTitle": "See their stats in Referees",
+    "picksTitle": "Very likely picks",
+    "probabilitiesTitle": "Probabilities and expected value (EV)",
+    "probabilitiesNote": "EV is never shown on its own: it always comes with a confidence and risk level.",
+    "probabilitiesOnlyTitle": "Probabilities",
+    "probabilitiesOnlyNote": "There are no market odds for this competition, so no expected value is calculated and nothing is flagged as ‘Value’. With your own odds, ‘Your EV’ is still calculated.",
+    "predictionsLoading": "Generating predictions...",
+    "predictionsError": "Couldn't generate the predictions: {{error}}"
+  },
+  "recent": {
+    "title": "Recent matches",
+    "scopeAll": "All",
+    "scopeVenue": "Hosts at home, visitors away",
+    "scopeLabel": "Teams' matches",
+    "legend": "Goals, corners and cards: for-against. H: home · A: away.",
+    "none": {
+      "all": "No matches recorded before this one.",
+      "home": "No home matches recorded before this one.",
+      "away": "No away matches recorded before this one."
+    },
+    "record": {
+      "all_one": "Last match: <num>{{win}}W {{draw}}D {{loss}}L</num>",
+      "all_other": "Last {{count}}: <num>{{win}}W {{draw}}D {{loss}}L</num>",
+      "home_one": "Last home match: <num>{{win}}W {{draw}}D {{loss}}L</num>",
+      "home_other": "Last {{count}} at home: <num>{{win}}W {{draw}}D {{loss}}L</num>",
+      "away_one": "Last away match: <num>{{win}}W {{draw}}D {{loss}}L</num>",
+      "away_other": "Last {{count}} away: <num>{{win}}W {{draw}}D {{loss}}L</num>"
+    },
+    "column": {
+      "result": "Result",
+      "date": "Date",
+      "rival": "Opponent",
+      "goals": "Goals",
+      "corners": "Corners",
+      "cards": "Cards"
+    },
+    "venue": {
+      "home": {
+        "title": "Home",
+        "label": "At home against",
+        "letter": "H"
+      },
+      "away": {
+        "title": "Away",
+        "label": "Away against",
+        "letter": "A"
+      }
+    },
+    "seeMatch": "View match"
+  },
+  "h2h": {
+    "none": "No previous meetings recorded between the two teams.",
+    "lead_one": "Their only meeting before this one, across all seasons.",
+    "lead_other": "Their last {{count}} meetings before this one, across all seasons.",
+    "scopeVenue": "At {{team}}'s ground",
+    "scopeLabel": "Head-to-head",
+    "noneAtHome": "No previous meetings at {{team}}'s ground.",
+    "tile": {
+      "wins": "{{team}} wins",
+      "draws": "Draws",
+      "goalsPerMatch": "Goals per match",
+      "over25": "Over 2.5 goals",
+      "btts": "Both teams scored",
+      "cornersPerMatch": "Corners per match",
+      "cardsPerMatch": "Cards per match"
+    },
+    "column": {
+      "home": "Home",
+      "away": "Away"
+    },
+    "halfTime": "Half-time",
+    "legend": "Corners and cards: home-away in each match. In brackets, at half-time."
+  },
+  "predictions": {
+    "empty": "Not enough statistics to generate predictions for this match.",
+    "column": {
+      "selection": "Selection",
+      "marketProb": "Market prob.",
+      "modelProb": "Model prob.",
+      "fairOdds": "Fair odds",
+      "marketEv": "Market EV",
+      "sample": "Sample",
+      "risk": "Risk",
+      "yourOdds": "Your odds",
+      "yourEv": "Your EV"
+    },
+    "valueTag": "VALUE",
+    "oddsPlaceholder": "e.g. 1.80",
+    "oddsLabel": "Your odds for {{selection}}",
+    "implied": "implied {{value}}",
+    "disclaimer": "‘Fair odds’ and ‘Your EV’ are estimates based on the model's historical frequency, not a guaranteed outcome. The odds you enter are never saved or sent anywhere."
+  },
+  "referee": {
+    "notDesignated": "Referee not yet appointed. Appointments are usually announced 2 or 3 days before the match; it will appear here as soon as matches are synced.",
+    "loading": "Loading referee statistics...",
+    "error": "Couldn't load referee statistics: {{error}}",
+    "column": {
+      "referee": "Referee ({{name}})",
+      "home": "{{team}} (home)",
+      "away": "{{team}} (away)"
+    },
+    "average": {
+      "bookingPoints": "Booking points",
+      "for": "For",
+      "against": "Against",
+      "cards": "Cards"
+    },
+    "summary": {
+      "season_one": "<bold>{{count}}</bold> previous match for {{name}} in the {{season}} season.",
+      "season_other": "<bold>{{count}}</bold> previous matches for {{name}} in the {{season}} season.",
+      "all_one": "<bold>{{count}}</bold> previous match for {{name}} in this league, across all seasons.",
+      "all_other": "<bold>{{count}}</bold> previous matches for {{name}} in this league, across all seasons."
+    },
+    "refereeScope": "Referee's matches",
+    "scopeSeason": "Referee: {{season}} season",
+    "scopeAll": "Referee: all seasons",
+    "teamScope": "Teams' matches",
+    "teamAll": "All their matches",
+    "teamVenue": "Home / Away",
+    "noneSeason": "No previous matches with data for {{name}} in the {{season}} season.",
+    "noneLeague": "No previous matches with data for {{name}} in this league.",
+    "few_one": "Only {{count}} previous match for {{name}}: small sample, treat it as a rough guide.",
+    "few_other": "Only {{count}} previous matches for {{name}}: small sample, treat it as a rough guide.",
+    "tryAllSeasons": "Try ‘all seasons’.",
+    "details": "See all the referee's averages and lines",
+    "averagesCaption": "Averages per match",
+    "matches": "Matches",
+    "linesCaption": "% of matches going over each line",
+    "section": {
+      "pointsMatch": "Match booking points",
+      "pointsEach": "Booking points for each team",
+      "cardsMatch": "Match cards",
+      "cardsEach": "Cards for each team"
+    },
+    "footnote": "Only matches before this one. Teams: {{season}} season. Booking points: yellow = 10, red = 25 (approximate: the source doesn't distinguish a straight red from a second yellow). ‘Each team’ = both teams go over the line. Streak = consecutive matches, from the most recent, in which the line was beaten.",
+    "factsTitle": "With these teams",
+    "factsNone": "This referee doesn't yet have enough matches with these teams to highlight any patterns.",
+    "factsNoneVenue": "This referee doesn't yet have enough matches with these teams, at the same ground as today, to highlight any patterns.",
+    "smallSample": "Small sample: treat it as a rough guide.",
+    "refereeAverage_one": "Referee's average in their only match: {{value}} {{label}}.",
+    "refereeAverage_other": "Referee's average across their {{count}} matches: {{value}} {{label}}.",
+    "lineTitle_one": "{{hits}} of {{count}} match",
+    "lineTitle_other": "{{hits}} of {{count}} matches",
+    "streak": "streak of {{n}}"
+  },
+  "statsPanel": {
+    "title_one": "Recent form (last match)",
+    "title_other": "Recent form (last {{count}} matches)",
+    "points": "Points",
+    "wdl": "W-D-L",
+    "goals": "Goals for/against",
+    "xgFor": "xG for (avg)",
+    "xgAgainst": "xG against (avg)",
+    "cornersFor": "Corners for (avg)",
+    "cornersAgainst": "Corners against (avg)",
+    "yellowCards": "Yellow cards (avg)",
+    "redCards": "Red cards (avg)",
+    "elo": "Elo rating",
+    "noDiscipline": "No corner or card data yet for these teams in the range analysed."
+  },
+  "seasonSummary": {
+    "noData": "Neither team has any recorded matches yet (the season has just started or the team has just been promoted).",
+    "season": "Season {{season}} · real data from matches already played.",
+    "played": "Matches played",
+    "pointsPerGame": "Points per match",
+    "over15": "Over 1.5 goals",
+    "over25": "Over 2.5 goals",
+    "btts": "Both teams to score",
+    "cleanSheet": "Clean sheet",
+    "fullTable": "See the full league table →"
+  },
+  "browser": {
+    "season": "Season",
+    "seasonOption": "Season {{season}}",
+    "played": "{{played}}/{{total}} played",
+    "previous": "Previous matchday",
+    "matchday": "Matchday",
+    "next": "Next matchday",
+    "estimated": "Matchdays inferred from the dates: this league's source doesn't provide them, and in seasons with many postponements some may not match the official numbering.",
+    "empty": "No matches loaded for this season."
+  },
+  "carousel": {
+    "title": "Other matches in matchday {{n}}",
+    "titleRound": "Other matches · {{round}}",
+    "previous": "Previous matches",
+    "next": "Next matches",
+    "loading": "Loading the matchday...",
+    "error": "Couldn't load the matchday's matches: {{error}}",
+    "empty": "No other matches in this matchday.",
+    "cardPlayed": "{{home}} {{homeGoals}} - {{awayGoals}} {{away}}",
+    "cardScheduled": "{{home}} v {{away}}"
+  },
+  "status": {
+    "played": "Played",
+    "scheduled": "Scheduled"
+  },
+  "outcome": {
+    "letter": {
+      "win": "W",
+      "draw": "D",
+      "loss": "L"
+    },
+    "label": {
+      "win": "Win",
+      "draw": "Draw",
+      "loss": "Loss"
+    }
+  }
+}
