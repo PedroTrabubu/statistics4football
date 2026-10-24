@@ -1,7 +1,9 @@
 import { useId, useMemo, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import type { Match, MatchHistory, MatchResult } from "../api/types";
-import { formatSeason } from "../lib/format";
+import { t } from "../i18n";
+import { formatSeason, withPercent } from "../lib/format";
 import { leagueName } from "../lib/leagues";
 import { cornerDuelForecast } from "../lib/cornerDuel";
 import { PredictabilityChip } from "./Predictability";
@@ -15,6 +17,7 @@ import {
   priorMatches,
   probablePicks,
   RIVAL_STATE_LABEL,
+  strengthLabel,
   summarizeByStrength,
   summarizeByTeam,
   type PicksSummary,
@@ -29,23 +32,13 @@ import { SampleBadge } from "./SampleBadge";
 import { EmptyView, ErrorView, LoadingView } from "./StatusView";
 import { TeamName } from "./TeamCrest";
 
-const STRENGTH_LABEL: Record<Strength, string> = {
-  alta: "Fuerza alta",
-  media: "Fuerza media",
-  baja: "Fuerza baja",
-};
-
-const STRENGTH_HINT =
-  "Partidos de los dos equipos juntos, con el límite inferior de Wilson al 95 %. Alta: el rival lo respalda y el límite es al menos 0.75. Media: al menos 0.60 y el rival no lo contradice. Baja: el resto.";
-
-const lowerFirst = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
-
 /** Acierto de los picks ya jugados de la temporada, por nivel de fuerza. */
 interface SeasonRecord {
-  /** "LaLiga 26/27" o, en un partido ya jugado, "LaLiga 25/26, antes de este partido". */
-  scope: string;
-  /** "en 26/27" o "en 25/26 antes de este partido": para la linea de cada equipo. */
-  teamScope: string;
+  /** "LaLiga" y "26/27": el ambito de las cifras. */
+  league: string;
+  season: string;
+  /** Partido ya jugado: las cifras son las de antes de este partido. */
+  played: boolean;
   byStrength: Record<Strength | "total", PicksSummary> | null;
   /** Por equipo (los picks de su historial); null mientras se calcula. */
   byTeam: Map<number, TeamPicksRecord> | null;
@@ -64,6 +57,7 @@ export function ProbablePicks({
   loading: boolean;
   error: string | null;
 }) {
+  const { t } = useTranslation();
   const picks = useMemo(() => (history ? probablePicks(match, history.matches, undefined, history.context ?? []) : []), [match, history]);
   const played = history?.played ?? null;
   // Nuevo: duelo de córners, aparte de los picks y de sus cifras.
@@ -102,8 +96,9 @@ export function ProbablePicks({
     [check.results],
   );
   const record: SeasonRecord = {
-    scope: `${leagueName(match.league_code)} ${formatSeason(match.season)}${played ? ", antes de este partido" : ""}`,
-    teamScope: `en ${formatSeason(match.season)}${played ? " antes de este partido" : ""}`,
+    league: leagueName(match.league_code),
+    season: formatSeason(match.season),
+    played: played !== null,
     byStrength: check.results ? summarizeByStrength(check.results) : null,
     byTeam,
   };
@@ -113,11 +108,7 @@ export function ProbablePicks({
 
   return (
     <div className="probable-picks">
-      <p className="muted">
-        {played
-          ? "Partido ya jugado: los picks que se mostraban antes, calculados solo con los partidos anteriores, y si se cumplieron."
-          : `Lo que más se ha repetido en los partidos anteriores de cada equipo, y si el rival hace probable que se repita. Como mucho ${MAX_PICKS}, de más a menos fuerza.`}
-      </p>
+      <p className="muted">{played ? t("picks:probable.introPlayed") : t("picks:probable.intro", { max: MAX_PICKS })}</p>
       {history && (
         <p className="predictability-line">
           <PredictabilityChip match={match} picks={picks} history={history.matches} showNote />
@@ -126,19 +117,14 @@ export function ProbablePicks({
       <MatchPickBlock match={match} />
       {played && picks.length > 0 && (
         <p className="picks-played-summary">
-          Se cumplieron <strong>{hits}</strong> de {decided}.
+          <Trans i18nKey="picks:probable.playedSummary" values={{ hits, decided }} components={{ bold: <strong /> }} />
         </p>
       )}
 
-      {loading && !history && <LoadingView label="Buscando patrones..." />}
-      {history?.context && history.context.length > 0 && (
-        <p className="small muted">
-          Champions: los patrones de cada equipo incluyen también sus partidos de liga de estas temporadas; lo
-          habitual en la competición se mide solo con partidos de Champions.
-        </p>
-      )}
-      {error && <ErrorView message={`No se pudo cargar el historial de los equipos: ${error}`} />}
-      {history && picks.length === 0 && <EmptyView message="No hay patrones con suficiente muestra para este partido." />}
+      {loading && !history && <LoadingView label={t("picks:probable.loading")} />}
+      {history?.context && history.context.length > 0 && <p className="small muted">{t("picks:probable.championsNote")}</p>}
+      {error && <ErrorView message={t("picks:probable.error", { error })} />}
+      {history && picks.length === 0 && <EmptyView message={t("picks:probable.empty")} />}
 
       {picks.length > 0 && (
         <ol className="picks-list">
@@ -157,45 +143,27 @@ export function ProbablePicks({
       {history && <CornerDuel match={match} forecast={duel} picks={duelPicks} played={played} />}
 
       <details className="picks-method">
-        <summary>Cómo se calcula</summary>
+        <summary>{t("picks:probable.method.title")}</summary>
         <ul>
-          <li>
-            Un patrón es algo que ha pasado al menos en el 80 % de los partidos anteriores de un equipo, en esta misma
-            liga: con 5 partidos si pasó en todos y con 8 si no. Nunca cuentan este partido ni los posteriores.
-          </li>
-          <li>
-            Se mira en el campo de este partido y en todos, esta temporada y en sus últimos 10 partidos en ese campo o
-            20 en total, que pueden incluir la temporada anterior.
-          </li>
-          <li>
-            De cada estadística solo sale la línea más exigente que se cumple. No sale lo que en toda la liga ya pasa en
-            el 80 % de los partidos.
-          </li>
-          <li>
-            El contraste mira lo complementario en el rival, en su campo y con el mismo tipo de periodo: si un equipo
-            marca fuera, si el otro encaja en casa. Respaldado: el rival también lo cumple, con muestra suficiente.
-            Parcial: lo cumple al menos en la mitad de sus partidos. No respaldado: en menos.
-          </li>
-          <li>
-            Fuerza: se juntan los partidos de los dos equipos y se toma el límite inferior del intervalo de Wilson al
-            95 %, que penaliza las muestras pequeñas (5 de 5 da 0.57; 20 de 20, 0.84). Alta: el rival lo respalda y el
-            límite es al menos 0.75. Media: al menos 0.60 y el rival no lo contradice. Baja: el resto.
-          </li>
+          <li>{t("picks:probable.method.pattern")}</li>
+          <li>{t("picks:probable.method.contexts")}</li>
+          <li>{t("picks:probable.method.lines")}</li>
+          <li>{t("picks:probable.method.rival")}</li>
+          <li>{t("picks:probable.method.strength")}</li>
         </ul>
       </details>
 
       <p className="small muted picks-disclaimer">
-        Patrones históricos de alta frecuencia. No son predicciones garantizadas ni recomendaciones de apuesta.{" "}
-        <Link to="/picks-probables">¿Se cumplen? Mira las jornadas anteriores y el acierto de cada equipo →</Link>
+        {t("picks:probable.disclaimer")} <Link to="/picks-probables">{t("picks:probable.historyLink")}</Link>
       </p>
     </div>
   );
 }
 
-const OUTCOME_LABEL = { hit: "Se cumplió", miss: "No se cumplió", unknown: "Sin dato en el partido" };
+const OUTCOME_KEYS = { hit: "hit", miss: "miss", unknown: "unknown" } as const;
 
 /** Marca del resultado de un pick: un circulo con ✓, ✗ o un guion. */
-function OutcomeIcon({ outcome }: { outcome: keyof typeof OUTCOME_LABEL }) {
+function OutcomeIcon({ outcome }: { outcome: keyof typeof OUTCOME_KEYS }) {
   return (
     <svg className="pick-outcome-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <circle cx="12" cy="12" r="11" />
@@ -217,6 +185,7 @@ function PickCard({
   played: MatchResult | null;
   record: SeasonRecord;
 }) {
+  const { t } = useTranslation();
   const { rate, rival } = pick;
   const perfect = rate.hits === rate.total;
   const hit = played ? pickOutcome(pick, played) : undefined;
@@ -227,14 +196,14 @@ function PickCard({
       {outcome && (
         <p className={`pick-outcome pick-outcome-${outcome}`}>
           <OutcomeIcon outcome={outcome} />
-          {OUTCOME_LABEL[outcome]}
+          {t(`picks:outcome.${OUTCOME_KEYS[outcome]}`)}
         </p>
       )}
       <div className="pick-head">
         <TeamName team={pick.team} league={league} size="md" />
         <span className="pick-head-strength">
-          <span className={`pick-strength pick-strength-${pick.strength}`} title={STRENGTH_HINT}>
-            {STRENGTH_LABEL[pick.strength]}
+          <span className={`pick-strength pick-strength-${pick.strength}`} title={t("picks:strength.hint")}>
+            {strengthLabel(pick.strength)}
           </span>
           <StrengthInfo record={record} level={pick.strength} />
         </span>
@@ -243,14 +212,14 @@ function PickCard({
 
       <p className="pick-statement">
         {pick.text}
-        {perfect && <span className="pick-perfect">100 %</span>}
+        {perfect && <span className="pick-perfect">{withPercent("100")}</span>}
       </p>
       <p className="pick-evidence">
         {evidenceText(rate.hits, rate.total, pick.context)}.
         {sampleTier(rate.total) === "low" && <SampleBadge matchesUsed={rate.total} />}
       </p>
       {pick.leagueRate !== null && (
-        <p className="pick-league small muted">En toda la liga: {Math.round(pick.leagueRate * 100)} %.</p>
+        <p className="pick-league small muted">{t("picks:probable.leagueRate", { pct: pct(pick.leagueRate) })}</p>
       )}
 
       <div className={`pick-rival pick-rival-${rival.state}`}>
@@ -263,36 +232,47 @@ function PickCard({
 
       {isModelMarket(pick) && (
         <a href="#probabilidades" className="pick-ev-link small">
-          Ver la probabilidad del modelo para este mercado ↓
+          {t("picks:probable.modelLink")}
         </a>
       )}
     </li>
   );
 }
 
-const pct = (x: number | null) => (x === null ? "—" : `${Math.round(x * 100)} %`);
+const pct = (x: number | null) => (x === null ? "—" : withPercent(String(Math.round(x * 100))));
 
 /** Acierto de los picks del equipo esta temporada, en fuerza alta y media,
  * siempre con cuantos picks hay detras. */
 function TeamRecordLine({ record, teamId }: { record: SeasonRecord; teamId: number }) {
-  if (record.byTeam === null) return <p className="pick-team-record small muted">Calculando su acierto...</p>;
+  const { t } = useTranslation();
+  if (record.byTeam === null) return <p className="pick-team-record small muted">{t("picks:teamRecord.calculating")}</p>;
   const team = record.byTeam.get(teamId);
+  const scope = { season: record.season };
   if (!team || team.top.total === 0) {
-    return <p className="pick-team-record small muted">Sus picks {record.teamScope}: aún ninguno comprobado.</p>;
+    return (
+      <p className="pick-team-record small muted">
+        {t(record.played ? "picks:teamRecord.nonePlayed" : "picks:teamRecord.none", scope)}
+      </p>
+    );
   }
-  const level = (label: string, s: PicksSummary) =>
+  const level = (key: "high" | "medium", s: PicksSummary) =>
     s.total === 0 ? (
-      <span>{label}: ninguno</span>
+      <span>{t(`picks:teamRecord.${key}None`)}</span>
     ) : (
       <span>
-        {label} <strong>{pct(s.rate)}</strong> de {s.total}
+        <Trans
+          i18nKey={`picks:teamRecord.${key}`}
+          values={{ pct: pct(s.rate), total: s.total }}
+          components={{ bold: <strong /> }}
+        />
       </span>
     );
   return (
     <p className="pick-team-record small">
-      <span className="muted">Sus picks {record.teamScope}:</span> {level("alta", team.alta)}
+      <span className="muted">{t(record.played ? "picks:teamRecord.prefixPlayed" : "picks:teamRecord.prefix", scope)}</span>{" "}
+      {level("high", team.alta)}
       <span className="muted"> · </span>
-      {level("media", team.media)}
+      {level("medium", team.media)}
     </p>
   );
 }
@@ -301,6 +281,7 @@ function TeamRecordLine({ record, teamId }: { record: SeasonRecord; teamId: numb
  * de fuerza alta y media (y baja, si el pick es de ese nivel). Con raton se
  * abre al pasar por encima; en tactil y con teclado, al pulsarla. */
 function StrengthInfo({ record, level }: { record: SeasonRecord; level: Strength }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   // Abierta por el raton encima: el click no debe cerrarla. En tactil no hay
   // "encima", y el toque la abre o la cierra.
@@ -326,7 +307,7 @@ function StrengthInfo({ record, level }: { record: SeasonRecord; level: Strength
       <button
         type="button"
         className="pick-info-button"
-        aria-label="Acierto de los picks por nivel de fuerza"
+        aria-label={t("picks:strengthInfo.label")}
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((v) => hovering.current || !v)}
@@ -337,19 +318,22 @@ function StrengthInfo({ record, level }: { record: SeasonRecord; level: Strength
       </button>
       {open && (
         <span className="pick-info-popover" id={id} role="tooltip">
-          <span className="pick-info-title">Acierto en {record.scope}</span>
+          <span className="pick-info-title">
+            {t(record.played ? "picks:strengthInfo.titlePlayed" : "picks:strengthInfo.title", {
+              league: record.league,
+              season: record.season,
+            })}
+          </span>
           {by === null ? (
-            <span className="pick-info-row">Calculando...</span>
+            <span className="pick-info-row">{t("picks:strengthInfo.calculating")}</span>
           ) : by.total.total === 0 ? (
-            <span className="pick-info-row">Aún no hay picks comprobados esta temporada.</span>
+            <span className="pick-info-row">{t("picks:strengthInfo.none")}</span>
           ) : (
             levels.map((l) => (
               <span key={l} className={l === level ? "pick-info-row pick-info-current" : "pick-info-row"}>
-                <span>{STRENGTH_LABEL[l]}</span>
+                <span>{strengthLabel(l)}</span>
                 <strong>{pct(by[l].rate)}</strong>
-                <span className="pick-info-n">
-                  {by[l].hits} de {by[l].total}
-                </span>
+                <span className="pick-info-n">{t("picks:strengthInfo.count", { hits: by[l].hits, total: by[l].total })}</span>
               </span>
             ))
           )}
@@ -362,9 +346,13 @@ function StrengthInfo({ record, level }: { record: SeasonRecord; level: Strength
 /** Lo que hizo el rival, con su muestra. */
 function rivalSentence(pick: ProbablePick): string {
   const { rival } = pick;
-  if (!rival.crossable) return "No hay una estadística del rival que lo complemente.";
-  if (!rival.rate || !rival.context || rival.rate.total === 0) return "Sin partidos anteriores comparables.";
-  const evidence = evidenceText(rival.rate.hits, rival.rate.total, rival.context);
-  const sentence = pick.matchLevel ? `${evidence}.` : `${rival.text} ${lowerFirst(evidence)}.`;
-  return rival.state === "none" ? `${sentence} Muy pocos partidos para contrastarlo.` : sentence;
+  if (!rival.crossable) return t("picks:rivalSentence.notCrossable");
+  if (!rival.rate || !rival.context || rival.rate.total === 0) return t("picks:rivalSentence.noMatches");
+  const sentence = pick.matchLevel
+    ? t("picks:rivalSentence.match", { evidence: evidenceText(rival.rate.hits, rival.rate.total, rival.context) })
+    : t("picks:rivalSentence.team", {
+        event: rival.text,
+        evidence: evidenceText(rival.rate.hits, rival.rate.total, rival.context, true),
+      });
+  return rival.state === "none" ? `${sentence} ${t("picks:rivalSentence.fewMatches")}` : sentence;
 }

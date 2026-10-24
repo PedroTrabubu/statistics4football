@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { t } from "../i18n";
 import { type MarketGroup, findMarket } from "./markets";
 
 /** Una tarjeta de la galeria de ligas de la portada. Nombre y pais salen de
@@ -24,6 +25,7 @@ export const LANDING_LEAGUES: LandingLeague[] = [
   { code: "INT-Champions League", glow: "86, 132, 255" },
 ];
 
+/** `label` y `blurb` salen del idioma actual al leerlos. */
 export interface StatCategory {
   to: string;
   label: string;
@@ -31,31 +33,49 @@ export interface StatCategory {
   blurb: string;
 }
 
-const MARKET_BLURBS: [slug: string, blurb: string][] = [
-  ["goles", "Más y menos goles del partido, del equipo o del rival."],
-  ["goles-por-parte", "Goles de la primera y de la segunda parte por separado."],
-  ["resultado", "Cuántas veces gana, empata o pierde cada equipo."],
-  ["descanso-final", "El resultado al descanso cruzado con el final."],
-  ["porteria-a-cero", "Partidos en los que el equipo no encajó ningún gol."],
-  ["corners", "Córners del partido, de cada equipo y hándicap."],
-  ["tarjetas", "Amarillas y rojas del partido y de cada equipo."],
-  ["puntos-tarjeta", "Amarilla, 10 puntos; roja, 25: el total por partido."],
-  ["tiros", "Tiros totales, a puerta o no, del partido y de cada equipo."],
-  ["tiros-puerta", "Solo los tiros a puerta, del partido y de cada equipo."],
-  ["faltas", "Faltas cometidas en el partido y por cada equipo."],
+/** Mercado y clave de su resumen en landing:stats.blurb. */
+const MARKET_BLURBS: [slug: string, blurbKey: string][] = [
+  ["goles", "goals"],
+  ["goles-por-parte", "goalsByHalf"],
+  ["resultado", "result"],
+  ["descanso-final", "htFt"],
+  ["porteria-a-cero", "cleanSheet"],
+  ["corners", "corners"],
+  ["tarjetas", "cards"],
+  ["puntos-tarjeta", "bookingPoints"],
+  ["tiros", "shots"],
+  ["tiros-puerta", "shotsOnTarget"],
+  ["faltas", "fouls"],
 ];
 
 /** Estadisticas de la seccion "Qué puedes analizar": nombre, grupo y ruta
  * salen de markets.ts, asi que siempre apuntan a paginas que existen. */
 export const STAT_CATEGORIES: StatCategory[] = [
-  ...MARKET_BLURBS.flatMap(([slug, blurb]) => {
+  ...MARKET_BLURBS.flatMap(([slug, blurbKey]): StatCategory[] => {
     const market = findMarket(slug);
-    return market ? [{ to: `/mercados/${slug}`, label: market.label, group: market.group, blurb }] : [];
+    return market
+      ? [
+          {
+            to: `/mercados/${slug}`,
+            get label() {
+              return market.label;
+            },
+            group: market.group,
+            get blurb() {
+              return t(`landing:stats.blurb.${blurbKey}`);
+            },
+          },
+        ]
+      : [];
   }),
   {
     to: "/arbitros",
-    label: "Árbitros",
-    group: "Estadísticas",
-    blurb: "Tarjetas, puntos de tarjeta, córners y goles según el árbitro.",
+    get label() {
+      return t("nav:referees");
+    },
+    group: "stats",
+    get blurb() {
+      return t("landing:stats.blurb.referees");
+    },
   },
 ];

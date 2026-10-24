@@ -1,3 +1,5 @@
+import { t } from "../i18n";
+
 /** Tres niveles cualitativos de tamano de muestra (ver glosario y
  * especificacion, seccion "Sistema de calculo estadistico"). Deliberadamente
  * NO es un score numerico de "confianza": un porcentaje con pinta cientifica
@@ -11,14 +13,8 @@ export function sampleTier(matchesUsed: number): SampleTier {
   return "wide";
 }
 
-const LABELS: Record<SampleTier, string> = {
-  low: "Muestra baja",
-  moderate: "Muestra moderada",
-  wide: "Muestra amplia",
-};
-
 export function sampleLabel(matchesUsed: number): string {
-  return LABELS[sampleTier(matchesUsed)];
+  return t(`common:sample.${sampleTier(matchesUsed)}`);
 }
 
 /** Un EV puntual muy alto casi siempre delata que el modelo discrepa

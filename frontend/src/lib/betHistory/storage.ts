@@ -1,5 +1,6 @@
 /** Las apuestas importadas se guardan solo en este navegador (localStorage). */
 
+import { t } from "../../i18n";
 import type { Bookmaker, ParsedBet } from "./types";
 
 const KEY = "s4b:mis-apuestas:v1";
@@ -171,22 +172,18 @@ export function mergeBets(current: ParsedBet[], incoming: ParsedBet[]): MergeRes
   return { bets, added, updated, unchanged };
 }
 
-const STATUS_TEXT: Record<ParsedBet["status"], string> = {
-  won: "Ganada",
-  lost: "Perdida",
-  void: "Anulada",
-  cashout: "Cash out",
-  pending: "En curso",
-  unknown: "Sin estado",
-};
-
 /** Qué ha cambiado en una apuesta actualizada, en una frase corta. */
 export function describeUpdate({ before, after }: BetUpdate): string {
-  if (before.status !== after.status) return `${STATUS_TEXT[before.status]} → ${STATUS_TEXT[after.status]}`;
-  if (before.warnings.length > after.warnings.length) return "Ahora se lee completa";
-  if (before.stake !== after.stake || before.returned !== after.returned) return "Importe o ganancias corregidos";
-  if (before.odds !== after.odds) return "Cuota corregida";
-  return "Datos corregidos";
+  if (before.status !== after.status) {
+    return t("mybets:update.status", {
+      before: t(`mybets:update.statusText.${before.status}`),
+      after: t(`mybets:update.statusText.${after.status}`),
+    });
+  }
+  if (before.warnings.length > after.warnings.length) return t("mybets:update.complete");
+  if (before.stake !== after.stake || before.returned !== after.returned) return t("mybets:update.money");
+  if (before.odds !== after.odds) return t("mybets:update.odds");
+  return t("mybets:update.other");
 }
 
 // --- Copia de seguridad -------------------------------------------------------
@@ -214,24 +211,34 @@ export function backupFileName(now: Date = new Date()): string {
   return `mis-apuestas-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}.json`;
 }
 
-/** Lee un archivo de copia. Lanza un Error con un mensaje para el usuario si no es válido. */
+/** Copia no valida: `code` es la clave de su mensaje (mybets:backupError.<code>). */
+export class BackupError extends Error {
+  code: string;
+
+  constructor(code: string) {
+    super(t(`mybets:backupError.${code}`));
+    this.code = code;
+  }
+}
+
+/** Lee un archivo de copia. Lanza un BackupError con un mensaje para el usuario si no es válido. */
 export function parseBackup(raw: string): Backup {
   let data: unknown;
   try {
     data = JSON.parse(raw);
   } catch {
-    throw new Error("El archivo no es una copia válida: no es JSON.");
+    throw new BackupError("notJson");
   }
   const bets = Array.isArray(data) ? data : (data as { kind?: string; bets?: unknown })?.bets;
   if (!Array.isArray(data) && (data as { kind?: string })?.kind !== BACKUP_KIND) {
-    throw new Error("El archivo no es una copia de «Mis apuestas».");
+    throw new BackupError("notBackup");
   }
-  if (!Array.isArray(bets)) throw new Error("La copia no contiene apuestas.");
+  if (!Array.isArray(bets)) throw new BackupError("noBets");
   const valid = bets.filter(
     (b): b is ParsedBet =>
       typeof b === "object" && b !== null && typeof (b as ParsedBet).id === "string" && typeof (b as ParsedBet).status === "string",
   );
-  if (valid.length === 0) throw new Error("La copia no contiene apuestas.");
+  if (valid.length === 0) throw new BackupError("noBets");
   const realMoneyRaw = Array.isArray(data) ? null : (data as { realMoney?: unknown }).realMoney;
   const realMoney = cleanRealMoneyByBook(realMoneyRaw);
   return {

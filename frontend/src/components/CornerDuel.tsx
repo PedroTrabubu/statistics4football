@@ -1,11 +1,11 @@
 import { useId } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import type { Match, MatchResult } from "../api/types";
 import type { DuelForecast } from "../lib/cornerDuel";
-import { evidenceText, RIVAL_STATE_LABEL, type ProbablePick, type Strength } from "../lib/patterns";
+import { formatFixed, withPercent } from "../lib/format";
+import { duelInlineText, evidenceText, RIVAL_STATE_LABEL, strengthLabel, type ProbablePick } from "../lib/patterns";
 
-const STRENGTH_LABEL: Record<Strength, string> = { alta: "Fuerza alta", media: "Fuerza media", baja: "Fuerza baja" };
-
-const pct = (p: number) => `${Math.round(p * 100)} %`;
+const pct = (p: number) => withPercent(String(Math.round(p * 100)));
 
 interface DuelPick {
   pick: ProbablePick;
@@ -21,23 +21,36 @@ function playedDuel(played: MatchResult | null): { home: number; away: number } 
 }
 
 function DuelPickItem({ pick, hit }: DuelPick) {
-  const outcome = hit === undefined ? null : hit === null ? "Sin dato" : hit ? "Se cumplió" : "No se cumplió";
+  const { t } = useTranslation();
+  const outcome =
+    hit === undefined ? null : hit === null ? t("picks:duel.noData") : hit ? t("picks:outcome.hit") : t("picks:outcome.miss");
+  const evidence = evidenceText(pick.rate.hits, pick.rate.total, pick.context);
+  const state = RIVAL_STATE_LABEL[pick.rival.state];
   return (
     <li className={`duel-pick${hit === true ? " duel-pick-hit" : hit === false ? " duel-pick-miss" : ""}`}>
       <div className="duel-pick-head">
-        <span className="duel-pick-label">Pick muy probable</span>
-        <span className={`pick-strength pick-strength-${pick.strength}`}>{STRENGTH_LABEL[pick.strength]}</span>
+        <span className="duel-pick-label">{t("picks:duel.pickLabel")}</span>
+        <span className={`pick-strength pick-strength-${pick.strength}`}>{strengthLabel(pick.strength)}</span>
         {outcome && <span className="duel-pick-outcome">{outcome}</span>}
       </div>
       <p className="duel-pick-text">
-        <strong>{pick.team}</strong>: {pick.text.charAt(0).toLowerCase() + pick.text.slice(1)}
+        <Trans
+          i18nKey="picks:duel.pickText"
+          values={{ team: pick.team, text: duelInlineText(pick, false) }}
+          components={{ bold: <strong /> }}
+        />
       </p>
       <p className="small muted">
-        {evidenceText(pick.rate.hits, pick.rate.total, pick.context)}.{" "}
-        {RIVAL_STATE_LABEL[pick.rival.state]}
         {pick.rival.rate && pick.rival.rate.total > 0
-          ? `: ${pick.rival.team}, ${pick.rival.text.charAt(0).toLowerCase() + pick.rival.text.slice(1)} en ${pick.rival.rate.hits} de ${pick.rival.rate.total}.`
-          : "."}
+          ? t("picks:duel.evidenceWithRival", {
+              evidence,
+              state,
+              team: pick.rival.team,
+              text: duelInlineText(pick, true),
+              hits: pick.rival.rate.hits,
+              count: pick.rival.rate.total,
+            })
+          : t("picks:duel.evidenceNoRival", { evidence, state })}
       </p>
     </li>
   );
@@ -59,25 +72,28 @@ export function CornerDuel({
   played?: MatchResult | null;
   compact?: boolean;
 }) {
+  const { t } = useTranslation();
   const titleId = useId();
   const result = playedDuel(played);
+  const teams = { home: match.home_team, away: match.away_team };
 
   if (compact) {
     return (
       <div className="corner-duel corner-duel-compact">
         <p className="small">
-          <strong>Duelo de córners</strong>
-          {forecast ? (
-            <>
-              : {match.home_team} {pct(forecast.home)} · mismos {pct(forecast.draw)} · {match.away_team} {pct(forecast.away)}
-            </>
-          ) : (
-            ": sin datos de córners"
-          )}
+          <Trans
+            i18nKey={forecast ? "picks:duel.compact" : "picks:duel.compactNoData"}
+            values={
+              forecast
+                ? { ...teams, homePct: pct(forecast.home), drawPct: pct(forecast.draw), awayPct: pct(forecast.away) }
+                : undefined
+            }
+            components={{ bold: <strong /> }}
+          />
           {result && (
             <span className="duel-played">
               {" "}
-              · córners: {match.home_team} {result.home} - {result.away} {match.away_team}
+              {t("picks:duel.compactPlayed", { ...teams, homeCorners: result.home, awayCorners: result.away })}
             </span>
           )}
         </p>
@@ -96,10 +112,10 @@ export function CornerDuel({
   return (
     <section className="corner-duel" aria-labelledby={titleId}>
       <div className="corner-duel-head">
-        <h3 id={titleId}>Duelo de córners</h3>
+        <h3 id={titleId}>{t("picks:duel.title")}</h3>
       </div>
       {forecast === null ? (
-        <p className="small muted">Todavía no hay córners de la liga con los que calcularlo.</p>
+        <p className="small muted">{t("picks:duel.empty")}</p>
       ) : (
         <>
           <div className="duel-bar" aria-hidden="true">
@@ -109,29 +125,34 @@ export function CornerDuel({
           </div>
           <dl className="duel-probs">
             <div>
-              <dt>{match.home_team} saca más</dt>
+              <dt>{t("picks:duel.teamMore", { team: match.home_team })}</dt>
               <dd>{pct(forecast.home)}</dd>
             </div>
             <div>
-              <dt>Los mismos</dt>
+              <dt>{t("picks:duel.same")}</dt>
               <dd>{pct(forecast.draw)}</dd>
             </div>
             <div>
-              <dt>{match.away_team} saca más</dt>
+              <dt>{t("picks:duel.teamMore", { team: match.away_team })}</dt>
               <dd>{pct(forecast.away)}</dd>
             </div>
           </dl>
           <p className="small">
-            No pierde el duelo: {match.home_team} {pct(forecast.homeNotLose)} · {match.away_team}{" "}
-            {pct(forecast.awayNotLose)}. Córners esperados: {forecast.homeExpected.toFixed(1)} -{" "}
-            {forecast.awayExpected.toFixed(1)}.
+            {t("picks:duel.summary", {
+              ...teams,
+              homePct: pct(forecast.homeNotLose),
+              awayPct: pct(forecast.awayNotLose),
+              homeExpected: formatFixed(forecast.homeExpected, 1),
+              awayExpected: formatFixed(forecast.awayExpected, 1),
+            })}
           </p>
         </>
       )}
       {result && (
         <p className="duel-result">
-          Córners del partido: {match.home_team} {result.home} - {result.away} {match.away_team}
-          {winner ? `, ganó el duelo ${winner}` : ", empate"}.
+          {winner
+            ? t("picks:duel.resultWinner", { ...teams, homeCorners: result.home, awayCorners: result.away, winner })
+            : t("picks:duel.resultDraw", { ...teams, homeCorners: result.home, awayCorners: result.away })}
         </p>
       )}
       {picks.length > 0 && (
@@ -142,11 +163,8 @@ export function CornerDuel({
         </ul>
       )}
       <p className="small muted">
-        Bloque nuevo, aparte de los picks de arriba y de sus cifras de acierto. Probabilidades de un modelo de córners con
-        los partidos anteriores: lo que saca cada equipo en su campo y lo que concede el rival, con más peso a lo reciente y
-        acercado a la media de la liga cuando hay pocos partidos. "Pick muy probable" solo cuando el patrón cumple el umbral
-        del resto de picks.
-        {forecast && ` Muestra: ${forecast.homeMatches} partidos del local en casa y ${forecast.awayMatches} del visitante fuera.`}
+        {t("picks:duel.note")}
+        {forecast && ` ${t("picks:duel.noteSample", { home: forecast.homeMatches, away: forecast.awayMatches })}`}
       </p>
     </section>
   );

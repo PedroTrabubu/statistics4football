@@ -5,7 +5,8 @@
 
 import type { Match, MatchResult } from "../api/types";
 import { cornerDuelForecast, type DuelForecast } from "./cornerDuel";
-import { formatSeason } from "./format";
+import { t } from "../i18n";
+import { formatLine, formatSeason } from "./format";
 import {
   average,
   findMarket,
@@ -81,34 +82,36 @@ interface OptionInfo {
   line: number | null;
 }
 
-const fmt = (line: number) => String(line);
-
-/** "Más de 2.5 X" / "Menos de 2.5 X". */
-const overUnder = (noun: string) => (o: OptionInfo) =>
-  `${o.dir === "over" ? "Más" : "Menos"} de ${fmt(o.line!)} ${noun}`;
+/** Textos de los patrones: picks:pattern.<clave>.<over|under>, una forma
+ * verbal por estadistica, con la linea como parametro ("Más de 2.5 goles en
+ * el partido", "Comete más de 10.5 faltas"). */
+const lineText = (key: string) => (o: OptionInfo) => t(`picks:pattern.${key}.${o.dir}`, { line: formatLine(o.line!) });
 
 /** Cifra propia del equipo: "Saca más de 4.5 córners"; desde el rival,
  * "Concede más de 4.5 córners". */
-const ownStat = (verb: string, mirrorVerb: string | null, noun: string) => (o: OptionInfo, mirror: boolean) =>
-  `${mirror && mirrorVerb ? mirrorVerb : verb} ${o.dir === "over" ? "más" : "menos"} de ${fmt(o.line!)} ${noun}`;
+const ownStat = (key: string, mirrorKey: string | null) => (o: OptionInfo, mirror: boolean) =>
+  lineText(mirror && mirrorKey ? mirrorKey : key)(o);
 
+/** "Marca" / "No marca" con la linea 0.5; si no, "Marca más de 1.5 goles". */
 function goalsText(scoring: boolean, o: OptionInfo): string {
-  const [yes, no, verb] = scoring ? ["Marca", "No marca", "Marca"] : ["Encaja", "No encaja", "Encaja"];
-  if (o.line === 0.5) return o.dir === "over" ? yes : no;
-  return `${verb} ${o.dir === "over" ? "más" : "menos"} de ${fmt(o.line!)} goles`;
+  const key = scoring ? "teamGoals" : "concededGoals";
+  if (o.line === 0.5) return t(`picks:pattern.${key}.${o.dir === "over" ? "yes" : "no"}`);
+  return lineText(key)(o);
 }
 
+/** Clave del texto de cada opcion (picks:pattern.result.*), desde el equipo
+ * y desde el rival. */
 const RESULT_TEXT: Record<string, [string, string]> = {
-  gana: ["Gana", "Pierde"],
-  empata: ["Empata", "Empata"],
-  pierde: ["Pierde", "Gana"],
-  "no-pierde": ["No pierde", "No gana"],
+  gana: ["win", "lose"],
+  empata: ["draw", "draw"],
+  pierde: ["lose", "win"],
+  "no-pierde": ["winOrDraw", "loseOrDraw"],
 };
 
 const DUEL_TEXT: Record<string, [string, string]> = {
-  gana: ["Gana el duelo de córners", "Pierde el duelo de córners"],
-  empata: ["Empata el duelo de córners", "Empata el duelo de córners"],
-  "no-pierde": ["No pierde el duelo de córners", "No gana el duelo de córners"],
+  gana: ["win", "lose"],
+  empata: ["draw", "draw"],
+  "no-pierde": ["winOrDraw", "loseOrDraw"],
 };
 
 /** Córners del equipo menos los del rival en ese partido; null sin el dato. */
@@ -125,16 +128,30 @@ const duel = (test: (diff: number) => boolean) => (v: TeamMatchView) => {
 
 /** Duelo de córners: solo para los picks probables (no es una página de
  * Mercados). El empate es una opción más: sale solo si es un patrón. */
+const duelOption = (key: string, textKey: string, hit: MarketOption["hit"]): MarketOption => ({
+  key,
+  get label() {
+    return t(`markets:market.cornerDuel.option.${textKey}`);
+  },
+  hit,
+});
+
 const CORNER_DUEL: MarketDef = {
   slug: "duelo-corners",
-  group: "Estadísticas",
-  label: "Duelo de córners",
-  title: "Duelo de córners",
-  description: "Si el equipo saca más córners que su rival en el partido.",
+  group: "stats",
+  get label() {
+    return t("markets:market.cornerDuel.label");
+  },
+  get title() {
+    return t("markets:market.cornerDuel.title");
+  },
+  get description() {
+    return t("markets:market.cornerDuel.description");
+  },
   options: [
-    { key: "gana", label: "Saca más córners", hit: duel((d) => d > 0) },
-    { key: "empata", label: "Los mismos córners", hit: duel((d) => d === 0) },
-    { key: "no-pierde", label: "Al menos los mismos córners", hit: duel((d) => d >= 0) },
+    duelOption("gana", "win", duel((d) => d > 0)),
+    duelOption("empata", "draw", duel((d) => d === 0)),
+    duelOption("no-pierde", "winOrDraw", duel((d) => d >= 0)),
   ],
   defaultOption: "gana",
   matchLevel: false,
@@ -149,29 +166,29 @@ function marketFor(slug: string): MarketDef | undefined {
 const FAMILIES: FamilySpec[] = [
   { slug: "goles-equipo", side: "for", crossable: true, text: (o, m) => goalsText(!m, o) },
   { slug: "goles-rival", side: "against", crossable: true, text: (o, m) => goalsText(m, o) },
-  { slug: "goles", side: "match", crossable: true, text: (o) => `${overUnder("goles")(o)} en el partido` },
+  { slug: "goles", side: "match", crossable: true, text: lineText("matchGoals") },
   {
     slug: "ambos-marcan",
     side: "match",
     crossable: true,
-    text: (o) => (o.key === "si" ? "Marcan los dos equipos" : "No marcan los dos equipos"),
+    text: (o) => t(`picks:pattern.btts.${o.key === "si" ? "yes" : "no"}`),
   },
-  { slug: "resultado", side: "for", crossable: true, text: (o, m) => RESULT_TEXT[o.key][m ? 1 : 0] },
-  { slug: "corners", side: "match", crossable: true, text: (o) => `${overUnder("córners")(o)} en el partido` },
-  { slug: "corners-equipo", side: "for", crossable: true, text: ownStat("Saca", "Concede", "córners") },
-  { slug: "tarjetas", side: "match", crossable: true, text: (o) => `${overUnder("tarjetas")(o)} en el partido` },
-  { slug: "tarjetas-equipo", side: "for", crossable: false, text: ownStat("Recibe", null, "tarjetas") },
-  { slug: "faltas", side: "match", crossable: true, text: (o) => `${overUnder("faltas")(o)} en el partido` },
-  { slug: "faltas-equipo", side: "for", crossable: false, text: ownStat("Comete", null, "faltas") },
-  { slug: "tiros", side: "match", crossable: true, text: (o) => `${overUnder("tiros")(o)} en el partido` },
-  { slug: "tiros-equipo", side: "for", crossable: true, text: ownStat("Hace", "Concede", "tiros") },
+  { slug: "resultado", side: "for", crossable: true, text: (o, m) => t(`picks:pattern.result.${RESULT_TEXT[o.key][m ? 1 : 0]}`) },
+  { slug: "corners", side: "match", crossable: true, text: lineText("matchCorners") },
+  { slug: "corners-equipo", side: "for", crossable: true, text: ownStat("teamCorners", "concededCorners") },
+  { slug: "tarjetas", side: "match", crossable: true, text: lineText("matchCards") },
+  { slug: "tarjetas-equipo", side: "for", crossable: false, text: ownStat("teamCards", null) },
+  { slug: "faltas", side: "match", crossable: true, text: lineText("matchFouls") },
+  { slug: "faltas-equipo", side: "for", crossable: false, text: ownStat("teamFouls", null) },
+  { slug: "tiros", side: "match", crossable: true, text: lineText("matchShots") },
+  { slug: "tiros-equipo", side: "for", crossable: true, text: ownStat("teamShots", "concededShots") },
+  { slug: "tiros-puerta", side: "match", crossable: true, text: lineText("matchShotsOnTarget") },
   {
-    slug: "tiros-puerta",
-    side: "match",
+    slug: "tiros-puerta-equipo",
+    side: "for",
     crossable: true,
-    text: (o) => `${overUnder("tiros a puerta")(o)} en el partido`,
+    text: ownStat("teamShotsOnTarget", "concededShotsOnTarget"),
   },
-  { slug: "tiros-puerta-equipo", side: "for", crossable: true, text: ownStat("Hace", "Concede", "tiros a puerta") },
 ];
 
 /** Duelo de córners (nuevo): mismas reglas que el resto, pero aparte. No
@@ -179,7 +196,12 @@ const FAMILIES: FamilySpec[] = [
  * para que las anteriores sigan siendo comparables. */
 export const DUEL_FAMILY = "duelo-corners";
 const DUEL_FAMILIES: FamilySpec[] = [
-  { slug: DUEL_FAMILY, side: "for", crossable: true, text: (o, m) => DUEL_TEXT[o.key][m ? 1 : 0] },
+  {
+    slug: DUEL_FAMILY,
+    side: "for",
+    crossable: true,
+    text: (o, m) => t(`picks:pattern.cornerDuel.${DUEL_TEXT[o.key][m ? 1 : 0]}`),
+  },
 ];
 const ALL_FAMILIES = [...FAMILIES, ...DUEL_FAMILIES];
 
@@ -253,7 +275,7 @@ export interface PatternContext {
 
 function seasonsLabel(views: TeamMatchView[]): string {
   const seasons = [...new Set(views.map((v) => v.match.season))].sort();
-  return seasons.map(formatSeason).join(" y ");
+  return seasons.map(formatSeason).join(t("common:listAnd"));
 }
 
 /** Contextos de un equipo: en su campo de este partido y en todos, esta
@@ -274,7 +296,15 @@ export function teamContexts(
     { kind: "season-all", venue, views: views.filter((v) => v.match.season === season) },
     { kind: "recent-all", venue, views: views.slice(0, ALL_WINDOW) },
   ];
-  return candidates.filter((c) => c.views.length > 0).map((c) => ({ ...c, seasons: seasonsLabel(c.views) }));
+  // Getter: "25/26 y 26/27" sigue al idioma aunque el contexto ya este calculado.
+  return candidates
+    .filter((c) => c.views.length > 0)
+    .map((c) => ({
+      ...c,
+      get seasons() {
+        return seasonsLabel(c.views);
+      },
+    }));
 }
 
 /** Sin repetir contextos con los mismos partidos (se queda el primero: "esta
@@ -290,25 +320,37 @@ export function distinctContexts(contexts: PatternContext[]): PatternContext[] {
 }
 
 /** "fuera de casa esta temporada (26/27)", "sus últimos 10 partidos en casa (25/26 y 26/27)". */
-export function contextLabel(context: PatternContext, total: number): string {
-  const place = context.venue === "home" ? "en casa" : "fuera de casa";
+/** Clave de un contexto en picks:context y picks:evidence. */
+function contextKey(context: PatternContext): string {
+  const venue = context.venue === "home" ? "home" : "away";
   switch (context.kind) {
     case "season-venue":
-      return `partidos ${place} esta temporada (${context.seasons})`;
+      return `seasonVenue.${venue}`;
     case "season-all":
-      return `partidos esta temporada (${context.seasons})`;
+      return "seasonAll";
     case "recent-venue":
-      return `sus últimos ${total} partidos ${place} (${context.seasons})`;
+      return `recentVenue.${venue}`;
     case "recent-all":
-      return `sus últimos ${total} partidos (${context.seasons})`;
+      return "recentAll";
   }
 }
 
+export function contextLabel(context: PatternContext, total: number): string {
+  return t(`picks:context.${contextKey(context)}`, { count: total, seasons: context.seasons });
+}
+
 /** "En 7 de 7 partidos fuera de casa esta temporada (26/27)", "En 9 de sus
- * últimos 10 partidos en casa (25/26 y 26/27)". */
-export function evidenceText(hits: number, total: number, context: PatternContext): string {
-  const label = contextLabel(context, total);
-  return context.kind.startsWith("recent") ? `En ${hits} de ${label}` : `En ${hits} de ${total} ${label}`;
+ * últimos 10 partidos en casa (25/26 y 26/27)". `inline`: la forma que va
+ * dentro de otra frase ("Encaja en 7 de 7 partidos..."). */
+export function evidenceText(hits: number, total: number, context: PatternContext, inline = false): string {
+  const key = `picks:${inline ? "evidenceInline" : "evidence"}.${contextKey(context)}`;
+  return t(key, { hits, count: total, seasons: context.seasons });
+}
+
+/** El texto de un pick del duelo de córners dentro de otra frase ("Getafe:
+ * gana el duelo de córners"); `mirror`: visto desde el rival. */
+export function duelInlineText(pick: Pick<TeamPattern, "option">, mirror: boolean): string {
+  return t(`picks:pattern.cornerDuelInline.${DUEL_TEXT[pick.option.key][mirror ? 1 : 0]}`);
 }
 
 // --- Patrones de equipo -------------------------------------------------------
@@ -403,7 +445,10 @@ export function findTeamPatterns(
         option: best.option,
         info,
         matchLevel: spec.side === "match",
-        text: spec.text(info, false),
+        // En el idioma actual cada vez que se lee.
+        get text() {
+          return spec.text(info, false);
+        },
         rate: best.rate,
         context: best.context,
         leagueRate,
@@ -437,10 +482,18 @@ function dropImplied(patterns: TeamPattern[]): TeamPattern[] {
 export type RivalState = "backed" | "partial" | "against" | "none";
 
 export const RIVAL_STATE_LABEL: Record<RivalState, string> = {
-  backed: "Respaldado por el rival",
-  partial: "Parcialmente respaldado",
-  against: "No respaldado",
-  none: "Sin contraste con el rival",
+  get backed() {
+    return t("picks:rivalState.backed");
+  },
+  get partial() {
+    return t("picks:rivalState.partial");
+  },
+  get against() {
+    return t("picks:rivalState.against");
+  },
+  get none() {
+    return t("picks:rivalState.none");
+  },
 };
 
 export interface RivalCheck {
@@ -470,11 +523,18 @@ export function checkRival(
   rival: { name: string },
 ): RivalCheck {
   const spec = ALL_FAMILIES.find((f) => f.slug === pattern.family)!;
-  const text = spec.text(pattern.info, true);
-  if (!spec.crossable) return { state: "none", crossable: false, team: rival.name, text, rate: null, context: null };
+  const info = pattern.info;
+  const check = (fields: Omit<RivalCheck, "text" | "team">): RivalCheck => ({
+    ...fields,
+    team: rival.name,
+    get text() {
+      return spec.text(info, true);
+    },
+  });
+  if (!spec.crossable) return check({ state: "none", crossable: false, rate: null, context: null });
   const context = rivalContexts.find((c) => c.kind === pattern.context.kind) ?? null;
   const rate = context ? hitRate(context.views.map(flipView), pattern.option) : null;
-  return { state: rivalState(rate), crossable: true, team: rival.name, text, rate, context };
+  return check({ state: rivalState(rate), crossable: true, rate, context });
 }
 
 // --- Picks muy probables ------------------------------------------------------
@@ -502,6 +562,18 @@ export function pickStrength(pattern: TeamPattern, rival: RivalCheck): { score: 
 }
 
 const STRENGTH_ORDER: Record<Strength, number> = { alta: 0, media: 1, baja: 2 };
+
+const STRENGTH_KEY: Record<Strength, string> = { alta: "high", media: "medium", baja: "low" };
+
+/** "Fuerza alta", "Fuerza media", "Fuerza baja"; `short`: "Alta", "Media", "Baja". */
+export function strengthLabel(strength: Strength, short = false): string {
+  return t(`picks:${short ? "strengthShort" : "strength"}.${STRENGTH_KEY[strength]}`);
+}
+
+/** Clave en ingles de cada nivel de fuerza ("high"...), para elegir textos. */
+export function strengthKey(strength: Strength): string {
+  return STRENGTH_KEY[strength];
+}
 
 /** Picks del partido: patrones de los dos equipos, contrastados con el rival,
  * de mas fuerte a mas debil. Un suceso del partido (goles, tarjetas...) que
@@ -547,7 +619,8 @@ function teamPicks(
     for (const pattern of findTeamPatterns(contexts[team.side], team, rates, families)) {
       const check = checkRival(pattern, contexts[rivalSide], rival);
       const { score, strength } = pickStrength(pattern, check);
-      picks.push({ ...pattern, rival: check, strengthScore: score, strength });
+      // Sin copiar el patron: su `text` es un getter (sigue al idioma).
+      picks.push(Object.assign(pattern, { rival: check, strengthScore: score, strength }));
     }
   }
   return picks.sort(
@@ -651,7 +724,15 @@ export function refereeFacts(
             score: wilsonLower(rate.hits, rate.total),
             smallSample: rate.total < SMALL_REFEREE_SAMPLE,
             refereeAverage:
-              avg !== null && market.average ? { value: avg, label: market.average.label, matches: allViews.length } : null,
+              avg !== null && market.average
+                ? {
+                    value: avg,
+                    get label() {
+                      return market.average!.label;
+                    },
+                    matches: allViews.length,
+                  }
+                : null,
           };
         }
         if (best) facts.push(best);
@@ -661,15 +742,12 @@ export function refereeFacts(
   return facts.sort((a, b) => b.score - a.score).slice(0, max);
 }
 
-const STAT_NOUN: Record<string, string> = {
-  "tarjetas-equipo": "tarjetas",
-  tarjetas: "tarjetas",
-  "faltas-equipo": "faltas",
-  faltas: "faltas",
-};
-const TEAM_VERB: Record<string, [string, string]> = {
-  "tarjetas-equipo": ["ha recibido", "siempre ha recibido"],
-  "faltas-equipo": ["ha cometido", "siempre ha cometido"],
+/** Estadistica de cada familia en picks:refereeFact (cifra y verbo propios). */
+const REFEREE_STAT: Record<string, string> = {
+  "tarjetas-equipo": "cards",
+  tarjetas: "cards",
+  "faltas-equipo": "fouls",
+  faltas: "fouls",
 };
 
 /** "Con este árbitro, Espanol siempre ha recibido más de 1.5 tarjetas (4 de 4
@@ -677,18 +755,12 @@ const TEAM_VERB: Record<string, [string, string]> = {
 export function refereeFactText(fact: Pick<RefereeFact, "team" | "family" | "info" | "matchLevel" | "rate">): string {
   const { hits, total } = fact.rate;
   const always = hits === total;
-  const noun = STAT_NOUN[fact.family];
-  const amount = `${fact.info.dir === "over" ? "más" : "menos"} de ${fmt(fact.info.line!)} ${noun}`;
-  const count = `${hits} de ${total} ${total === 1 ? "partido" : "partidos"}`;
-  if (fact.matchLevel) {
-    return always
-      ? `Con este árbitro, siempre ha habido ${amount} en los partidos de ${fact.team} (${count}).`
-      : `Con este árbitro, ha habido ${amount} en ${count} de ${fact.team}.`;
-  }
-  const [verb, alwaysVerb] = TEAM_VERB[fact.family];
-  return always
-    ? `Con este árbitro, ${fact.team} ${alwaysVerb} ${amount} (${count}).`
-    : `Con este árbitro, ${fact.team} ${verb} ${amount} en ${count}.`;
+  const stat = REFEREE_STAT[fact.family];
+  const amount = t(`picks:refereeFact.amount.${stat}.${fact.info.dir}`, { line: formatLine(fact.info.line!) });
+  const count = t("picks:refereeFact.count", { hits, count: total });
+  const when = always ? "always" : "some";
+  const key = fact.matchLevel ? `picks:refereeFact.match.${when}` : `picks:refereeFact.team.${stat}.${when}`;
+  return t(key, { team: fact.team, amount, matches: count });
 }
 
 // --- Comprobacion: ¿se cumplieron? ------------------------------------------

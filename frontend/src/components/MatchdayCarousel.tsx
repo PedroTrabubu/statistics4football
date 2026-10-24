@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getMatches } from "../api/client";
 import type { Match } from "../api/types";
@@ -11,6 +12,7 @@ import { TeamName } from "./TeamCrest";
 /** Los demas partidos de la jornada, en fila: se deslizan con el dedo o con
  * las flechas, y cada tarjeta abre ese partido. */
 export function MatchdayCarousel({ match }: { match: Match }) {
+  const { t } = useTranslation();
   const titleId = useId();
   const { data, loading, error } = useApi(
     () =>
@@ -54,24 +56,24 @@ export function MatchdayCarousel({ match }: { match: Match }) {
       <div className="section-head">
         <h2 id={titleId}>
           {match.league_code === CHAMPIONS_LEAGUE_CODE
-            ? `Otros partidos · ${formatMatchday(match.matchday, match.league_code)}`
-            : `Otros partidos de la jornada ${match.matchday}`}
+            ? t("matches:carousel.titleRound", { round: formatMatchday(match.matchday, match.league_code) })
+            : t("matches:carousel.title", { n: match.matchday })}
         </h2>
         {!(edges.start && edges.end) && (
           <div className="carousel-buttons">
-            <button type="button" aria-label="Partidos anteriores" disabled={edges.start} onClick={() => scroll(-1)}>
+            <button type="button" aria-label={t("matches:carousel.previous")} disabled={edges.start} onClick={() => scroll(-1)}>
               ←
             </button>
-            <button type="button" aria-label="Partidos siguientes" disabled={edges.end} onClick={() => scroll(1)}>
+            <button type="button" aria-label={t("matches:carousel.next")} disabled={edges.end} onClick={() => scroll(1)}>
               →
             </button>
           </div>
         )}
       </div>
 
-      {loading && !data && <LoadingView label="Cargando la jornada..." />}
-      {error && <ErrorView message={`No se pudieron cargar los partidos de la jornada: ${error}`} />}
-      {data && others.length === 0 && <p className="muted">No hay más partidos en esta jornada.</p>}
+      {loading && !data && <LoadingView label={t("matches:carousel.loading")} />}
+      {error && <ErrorView message={t("matches:carousel.error", { error })} />}
+      {data && others.length === 0 && <p className="muted">{t("matches:carousel.empty")}</p>}
 
       {others.length > 0 && (
         <ul className="carousel-track" ref={track} onScroll={measure}>
@@ -87,6 +89,7 @@ export function MatchdayCarousel({ match }: { match: Match }) {
 }
 
 function CarouselCard({ match }: { match: Match }) {
+  const { t } = useTranslation();
   const played = match.status === "historical" && match.home_goals !== null && match.away_goals !== null;
   const winner = !played ? null : match.home_goals! > match.away_goals! ? "home" : match.home_goals! < match.away_goals! ? "away" : null;
   const row = (side: "home" | "away") => {
@@ -105,12 +108,16 @@ function CarouselCard({ match }: { match: Match }) {
     <Link
       to={`/matches/${match.id}`}
       className="carousel-card"
-      aria-label={`${match.home_team} ${played ? `${match.home_goals} - ${match.away_goals}` : "contra"} ${match.away_team}`}
+      aria-label={
+        played
+          ? t("matches:carousel.cardPlayed", { home: match.home_team, away: match.away_team, homeGoals: match.home_goals, awayGoals: match.away_goals })
+          : t("matches:carousel.cardScheduled", { home: match.home_team, away: match.away_team })
+      }
     >
       <span className="carousel-date">{formatKickoff(match.date)}</span>
       {row("home")}
       {row("away")}
-      <span className={`status-pill status-${match.status}`}>{played ? "Jugado" : "Programado"}</span>
+      <span className={`status-pill status-${match.status}`}>{played ? t("matches:status.played") : t("matches:status.scheduled")}</span>
     </Link>
   );
 }

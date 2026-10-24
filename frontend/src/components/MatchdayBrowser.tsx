@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getLeagueMatchdays, getMatches } from "../api/client";
 import type { League } from "../api/types";
-import { formatDateRange, formatMatchday, formatSeason } from "../lib/format";
+import { formatDateRange, formatMatchday, formatSeason, matchDay } from "../lib/format";
 import { leagueName } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 import { MatchRow } from "./MatchRow";
@@ -12,6 +13,7 @@ const EAGER_ROWS = 6;
 
 /** Partidos de una liga por temporada y jornada; se abre en la jornada actual. */
 export function MatchdayBrowser({ league, showTitle = false }: { league: League; showTitle?: boolean }) {
+  const { t } = useTranslation();
   const [season, setSeason] = useState<string | undefined>(undefined);
   const [matchday, setMatchday] = useState<number | undefined>(undefined);
 
@@ -32,15 +34,24 @@ export function MatchdayBrowser({ league, showTitle = false }: { league: League;
 
   const goTo = (i: number) => setMatchday(info?.matchdays[i]?.matchday);
 
+  // Los partidos de la jornada, por día (en orden: ya vienen ordenados por fecha).
+  const days: { key: string; label: string; matches: typeof ordered }[] = [];
+  for (const match of ordered) {
+    const day = matchDay(match.date);
+    const last = days[days.length - 1];
+    if (last && last.key === day.key) last.matches.push(match);
+    else days.push({ ...day, matches: [match] });
+  }
+
   return (
     <section className="matchday-browser">
       {showTitle && <h2>{leagueName(league.code)}</h2>}
 
-      {calendar.error && <ErrorView message={`No se pudo conectar con la API: ${calendar.error}`} />}
+      {calendar.error && <ErrorView message={t("common:error.api", { error: calendar.error })} />}
       {info && (
         <div className="filters matchday-nav">
           <select
-            aria-label="Temporada"
+            aria-label={t("matches:browser.season")}
             value={info.season ?? ""}
             onChange={(e) => {
               setMatchday(undefined);
@@ -49,7 +60,7 @@ export function MatchdayBrowser({ league, showTitle = false }: { league: League;
           >
             {info.seasons.map((s) => (
               <option key={s} value={s}>
-                Temporada {formatSeason(s)}
+                {t("matches:browser.seasonOption", { season: formatSeason(s) })}
               </option>
             ))}
           </select>
@@ -57,15 +68,20 @@ export function MatchdayBrowser({ league, showTitle = false }: { league: League;
           {/* Temporada a la izquierda; la jornada, con sus flechas, a la derecha. */}
           <div className="matchday-nav-group">
             {current && (
-              <span className="small muted">
-                {current.played}/{current.total} jugados
+              <span className="matchday-progress">
+                <span className="small muted num">
+                  {t("matches:browser.played", { played: current.played, total: current.total })}
+                </span>
+                <span className="matchday-progress-track" aria-hidden="true">
+                  <span style={{ width: `${current.total ? (current.played / current.total) * 100 : 0}%` }} />
+                </span>
               </span>
             )}
-            <button type="button" disabled={index <= 0} onClick={() => goTo(index - 1)} aria-label="Jornada anterior">
+            <button type="button" disabled={index <= 0} onClick={() => goTo(index - 1)} aria-label={t("matches:browser.previous")}>
               ←
             </button>
             <select
-              aria-label="Jornada"
+              aria-label={t("matches:browser.matchday")}
               value={selected ?? ""}
               onChange={(e) => setMatchday(Number(e.target.value))}
             >
@@ -79,7 +95,7 @@ export function MatchdayBrowser({ league, showTitle = false }: { league: League;
               type="button"
               disabled={index < 0 || index >= info.matchdays.length - 1}
               onClick={() => goTo(index + 1)}
-              aria-label="Jornada siguiente"
+              aria-label={t("matches:browser.next")}
             >
               →
             </button>
@@ -87,24 +103,28 @@ export function MatchdayBrowser({ league, showTitle = false }: { league: League;
         </div>
       )}
       {info?.estimated && (
-        <p className="small muted matchday-note">
-          Jornadas deducidas de las fechas: la fuente de esta liga no las da, y en temporadas con muchos aplazados
-          alguna puede no coincidir con la oficial.
-        </p>
+        <p className="small muted matchday-note">{t("matches:browser.estimated")}</p>
       )}
 
-      {(calendar.loading || matches.loading) && <LoadingView label="Cargando partidos..." />}
-      {matches.error && <ErrorView message={`No se pudo conectar con la API: ${matches.error}`} />}
+      {(calendar.loading || matches.loading) && <LoadingView label={t("common:loading.matches")} />}
+      {matches.error && <ErrorView message={t("common:error.api", { error: matches.error })} />}
       {!calendar.loading && !matches.loading && !matches.error && info && ordered.length === 0 && (
-        <EmptyView message="No hay partidos cargados para esta temporada." />
+        <EmptyView message={t("matches:browser.empty")} />
       )}
-      {!matches.loading && ordered.length > 0 && (
-        <div className="match-list">
-          {ordered.map((match, i) => (
-            <MatchRow key={match.id} match={match} eager={i < EAGER_ROWS} />
-          ))}
-        </div>
-      )}
+      {!matches.loading &&
+        days.map((day, d) => (
+          <section key={day.key} className="match-day" aria-label={day.label}>
+            <div className="match-day-head">
+              <h3>{day.label}</h3>
+              <span className="match-day-count">{day.matches.length}</span>
+            </div>
+            <div className="match-list">
+              {day.matches.map((match, i) => (
+                <MatchRow key={match.id} match={match} eager={d === 0 && i < EAGER_ROWS} />
+              ))}
+            </div>
+          </section>
+        ))}
     </section>
   );
 }

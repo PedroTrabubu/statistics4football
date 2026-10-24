@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { MARKET_GROUPS, SIDEBAR_MARKETS, findMarket } from "../lib/markets";
+import { MARKET_GROUPS, SIDEBAR_MARKETS, findMarket, marketGroupLabel } from "../lib/markets";
 import {
   IconBook,
   IconCheck,
@@ -12,20 +13,24 @@ import {
   IconTicket,
   IconWallet,
 } from "./icons";
+import { LanguageSwitch } from "./LanguageSwitch";
 import { SiteFooter } from "./SiteFooter";
+import { ThemeSwitch } from "./ThemeSwitch";
 
+/** `label`: clave de su texto en nav. */
 const NAV_ITEMS = [
-  { to: "/partidos", label: "Partidos", end: false, icon: IconMatches },
-  { to: "/stats", label: "Clasificación", end: false, icon: IconStats },
-  { to: "/picks", label: "Picks", end: false, icon: IconTicket },
-  { to: "/picks-probables", label: "Picks probables", end: false, icon: IconCheck },
-  { to: "/rachas", label: "Rachas", end: false, icon: IconStreak },
-  { to: "/recommendations", label: "Recomendaciones", end: false, icon: IconTarget },
-  { to: "/mis-apuestas", label: "Mis apuestas", end: false, icon: IconWallet },
-  { to: "/glosario", label: "Glosario", end: false, icon: IconBook },
+  { to: "/partidos", label: "nav:matches", end: false, icon: IconMatches },
+  { to: "/stats", label: "nav:standings", end: false, icon: IconStats },
+  { to: "/picks", label: "nav:picks", end: false, icon: IconTicket },
+  { to: "/picks-probables", label: "nav:probablePicks", end: false, icon: IconCheck },
+  { to: "/rachas", label: "nav:streaks", end: false, icon: IconStreak },
+  { to: "/recommendations", label: "nav:recommendations", end: false, icon: IconTarget },
+  { to: "/mis-apuestas", label: "nav:myBets", end: false, icon: IconWallet },
+  { to: "/glosario", label: "nav:glossary", end: false, icon: IconBook },
 ];
 
 export function Layout() {
+  const { t } = useTranslation();
   const [navOpen, setNavOpen] = useState(false);
   const location = useLocation();
   const currentMarket = findMarket(location.pathname.match(/^\/mercados\/([^/]+)/)?.[1]);
@@ -39,19 +44,26 @@ export function Layout() {
       {/* index.html lleva el titulo de la portada; React 19 sube este a <head>. */}
       <title>Statistics 4 Bets</title>
       <header className="app-navbar">
-        <button
-          type="button"
-          className="sidebar-toggle"
-          aria-label={navOpen ? "Cerrar menú" : "Abrir menú"}
-          aria-expanded={navOpen}
-          onClick={() => setNavOpen((v) => !v)}
-        >
-          <IconMenu />
-        </button>
-        <NavLink to="/" className="app-brand" end>
-          <span className="app-mark">S4B</span>
-          <span className="app-title">Statistics 4 Bets</span>
-        </NavLink>
+        <div className="app-navbar-inner">
+          <button
+            type="button"
+            className="sidebar-toggle"
+            aria-label={navOpen ? t("nav:closeMenu") : t("nav:openMenu")}
+            aria-expanded={navOpen}
+            onClick={() => setNavOpen((v) => !v)}
+          >
+            <IconMenu />
+          </button>
+          <NavLink to="/" className="app-brand" end>
+            <span className="app-mark">S4B</span>
+            <span className="app-title">Statistics 4 Bets</span>
+          </NavLink>
+          <div className="header-switches">
+            <LanguageSwitch />
+            <ThemeSwitch />
+          </div>
+          <span className="scroll-progress" aria-hidden="true" />
+        </div>
       </header>
 
       <div className="app-body">
@@ -60,14 +72,18 @@ export function Layout() {
             {NAV_ITEMS.map(({ to, label, end, icon: Icon }) => (
               <NavLink key={to} to={to} end={end} className="sidebar-link">
                 <Icon className="sidebar-icon" />
-                <span>{label}</span>
+                <span>{t(label)}</span>
               </NavLink>
             ))}
           </nav>
 
           {MARKET_GROUPS.map((group) => (
-            <nav key={group} className="sidebar-nav sidebar-section" aria-label={`Mercados: ${group}`}>
-              <p className="sidebar-heading">{group}</p>
+            <nav
+              key={group}
+              className="sidebar-nav sidebar-section"
+              aria-label={t("nav:marketsGroup", { group: marketGroupLabel(group) })}
+            >
+              <p className="sidebar-heading">{marketGroupLabel(group)}</p>
               {SIDEBAR_MARKETS.filter((market) => market.group === group).map((market) => {
                 // Una familia (Córners, Tarjetas...) queda activa en cualquiera de sus variantes.
                 const active =
@@ -84,16 +100,16 @@ export function Layout() {
                   </NavLink>
                 );
               })}
-              {group === "Estadísticas" && (
+              {group === "stats" && (
                 <NavLink to="/arbitros" className="sidebar-link sidebar-sublink">
-                  <span>Árbitros</span>
+                  <span>{t("nav:referees")}</span>
                 </NavLink>
               )}
             </nav>
           ))}
 
           <div className="sidebar-footer">
-            <p>Análisis estadístico de fútbol. No es una casa de apuestas.</p>
+            <p>{t("legal:claim")}</p>
           </div>
         </aside>
 

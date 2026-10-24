@@ -1,4 +1,7 @@
 import { useId, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { currentLocale } from "../i18n";
+import { formatFixed } from "../lib/format";
 import type { GroupStats, Habits, MoneyHistory } from "../lib/betHistory/analysis";
 import { LOW_SAMPLE, euro, moneyClass, pct, roiPct, signedPp } from "../lib/betHistory/format";
 import type { TeamGroup } from "../lib/betHistory/teams";
@@ -14,15 +17,17 @@ import {
 import { BOOKMAKER_LABELS, type Bookmaker } from "../lib/betHistory/types";
 
 export function LowSampleTag({ n }: { n: number }) {
+  const { t } = useTranslation();
   if (n >= LOW_SAMPLE) return null;
   return (
-    <span className="low-tag" title={`Menos de ${LOW_SAMPLE} apuestas: cifra poco fiable`}>
-      poco fiable
+    <span className="low-tag" title={t("mybets:lowSample.title", { n: LOW_SAMPLE })}>
+      {t("mybets:lowSample.label")}
     </span>
   );
 }
 
 function StatsCard({ g, title }: { g: GroupStats; title: string }) {
+  const { t } = useTranslation();
   return (
     <div className="split-card">
       <h3>
@@ -30,25 +35,25 @@ function StatsCard({ g, title }: { g: GroupStats; title: string }) {
       </h3>
       <dl>
         <div>
-          <dt>Apuestas</dt>
+          <dt>{t("mybets:column.bets")}</dt>
           <dd>{g.bets}</dd>
         </div>
         <div>
-          <dt>Acierto</dt>
+          <dt>{t("mybets:column.hitRate")}</dt>
           <dd>
             {pct(g.hitRate)} <span className="muted small">({g.wins}/{g.decided})</span>
           </dd>
         </div>
         <div>
-          <dt>Apostado</dt>
+          <dt>{t("mybets:column.staked")}</dt>
           <dd>{euro(g.ownStaked)}</dd>
         </div>
         <div>
-          <dt>Beneficio</dt>
+          <dt>{t("mybets:column.profit")}</dt>
           <dd className={moneyClass(g.profit)}>{euro(g.profit, true)}</dd>
         </div>
         <div>
-          <dt>ROI</dt>
+          <dt>{t("mybets:column.roi")}</dt>
           <dd className={moneyClass(g.roi)}>{roiPct(g.roi)}</dd>
         </div>
       </dl>
@@ -58,17 +63,23 @@ function StatsCard({ g, title }: { g: GroupStats; title: string }) {
 
 /** Desglose fijo debajo del bloque principal: con y sin promoción, que suman el total. */
 export function PromoSplitCards({ split }: { split: PromoSplit }) {
+  const { t } = useTranslation();
   const { withPromo: a, withoutPromo: b, total } = split;
   return (
-    <section className="promo-split" aria-label="Con y sin promoción">
+    <section className="promo-split" aria-label={t("mybets:split.label")}>
       <div className="split-cards">
-        <StatsCard g={a} title="Con promoción" />
-        <StatsCard g={b} title="Sin promoción" />
+        <StatsCard g={a} title={t("mybets:column.withPromo")} />
+        <StatsCard g={b} title={t("mybets:column.withoutPromo")} />
       </div>
       <p className="small muted">
-        Suman el total: {a.bets} + {b.bets} = {total.bets} apuestas · {euro(a.profit, true)} + {euro(b.profit, true)} ={" "}
-        {euro(total.profit, true)}. Aquí una apuesta con dos promociones cuenta una sola vez; en la tabla «Por promoción»
-        cuenta en cada una.
+        {t("mybets:split.note", {
+          withBets: a.bets,
+          withoutBets: b.bets,
+          totalBets: total.bets,
+          withProfit: euro(a.profit, true),
+          withoutProfit: euro(b.profit, true),
+          totalProfit: euro(total.profit, true),
+        })}
       </p>
     </section>
   );
@@ -76,38 +87,54 @@ export function PromoSplitCards({ split }: { split: PromoSplit }) {
 
 /** Evidencia estadística de una promoción: acierto necesario e intervalo de Wilson. */
 export function PromoEvidenceCard({ e }: { e: PromoEvidence }) {
+  const { t } = useTranslation();
   return (
     <div className="evidence-card">
       <h3>
         {e.promo} <LowSampleTag n={e.decided} />
       </h3>
       <p>
-        <strong>{e.bets}</strong> apuestas · <strong>{e.wins}</strong> acertadas de {e.decided} ({pct(e.hitRate)}) ·
-        beneficio <span className={moneyClass(e.profit)}>{euro(e.profit, true)}</span>
+        <Trans i18nKey="mybets:evidence.bets" count={e.bets} components={{ bold: <strong /> }} /> ·{" "}
+        <Trans
+          i18nKey="mybets:evidence.wins"
+          count={e.wins}
+          values={{ decided: e.decided, pct: pct(e.hitRate) }}
+          components={{ bold: <strong /> }}
+        />{" "}
+        ·{" "}
+        <Trans
+          i18nKey="mybets:evidence.profit"
+          values={{ profit: euro(e.profit, true) }}
+          components={{ money: <span className={moneyClass(e.profit)} /> }}
+        />
       </p>
       {e.breakEven !== null && e.avgOdds !== null && (
         <p className="small">
-          Cuota media {e.avgOdds.toFixed(2)}: para no ganar ni perder hace falta acertar el{" "}
-          <strong>{pct(e.breakEven, 1)}</strong>.
+          <Trans
+            i18nKey="mybets:evidence.breakEven"
+            values={{ odds: formatFixed(e.avgOdds, 2), pct: pct(e.breakEven, 1) }}
+            components={{ bold: <strong /> }}
+          />
         </p>
       )}
       {e.ci && (
         <p className="small">
-          Con tus apuestas, tu acierto real está entre el <strong>{pct(e.ci[0])}</strong> y el{" "}
-          <strong>{pct(e.ci[1])}</strong> (intervalo de confianza del 95 %, Wilson).
+          <Trans
+            i18nKey="mybets:evidence.interval"
+            values={{ low: pct(e.ci[0]), high: pct(e.ci[1]) }}
+            components={{ bold: <strong /> }}
+          />
         </p>
       )}
       <p className={`small ${e.supported ? "ev-positive" : "muted"}`}>
-        {e.supported
-          ? "Incluso el extremo bajo del intervalo supera el acierto necesario: la muestra apoya que, hasta ahora, esta promoción te ha sido rentable."
-          : "El extremo bajo del intervalo no llega al acierto necesario: todavía no hay evidencia suficiente para decir si es rentable."}{" "}
-        Describe tus apuestas pasadas; no garantiza lo que pasará.
+        {e.supported ? t("mybets:evidence.supported") : t("mybets:evidence.notSupported")} {t("mybets:evidence.past")}
       </p>
     </div>
   );
 }
 
 function HabitsColumn({ title, h, n }: { title: string; h: Habits; n: number }) {
+  const { t } = useTranslation();
   return (
     <div className="split-card">
       <h3>
@@ -115,19 +142,20 @@ function HabitsColumn({ title, h, n }: { title: string; h: Habits; n: number }) 
       </h3>
       <ul className="bets-habits">
         <li>
-          Peor racha: <strong>{h.longestLosingStreak}</strong> perdidas seguidas · mejor: <strong>{h.longestWinningStreak}</strong>{" "}
-          ganadas seguidas.
+          <Trans i18nKey="mybets:habits.worst" count={h.longestLosingStreak} components={{ bold: <strong /> }} /> ·{" "}
+          <Trans i18nKey="mybets:habits.best" count={h.longestWinningStreak} components={{ bold: <strong /> }} />
         </li>
         {h.stakeAfterLoss !== null && h.stakeAfterWin !== null && (
           <li>
-            Tras perder apuestas de media <strong>{euro(h.stakeAfterLoss)}</strong>; tras ganar,{" "}
-            <strong>{euro(h.stakeAfterWin)}</strong>.{" "}
-            {h.stakeAfterLoss > h.stakeAfterWin * 1.2
-              ? "Subes el importe tras perder, la señal clásica de intentar recuperar lo perdido."
-              : "No subes el importe tras perder."}
+            <Trans
+              i18nKey="mybets:habits.stakes"
+              values={{ afterLoss: euro(h.stakeAfterLoss), afterWin: euro(h.stakeAfterWin) }}
+              components={{ bold: <strong /> }}
+            />{" "}
+            {h.stakeAfterLoss > h.stakeAfterWin * 1.2 ? t("mybets:habits.chasing") : t("mybets:habits.notChasing")}
             <span className="muted">
               {" "}
-              ({h.afterLossSamples} y {h.afterWinSamples} casos)
+              {t("mybets:habits.cases", { loss: h.afterLossSamples, win: h.afterWinSamples })}
             </span>
           </li>
         )}
@@ -151,21 +179,19 @@ export function HabitsBlock({
   hitRate: number | null;
   expectedStreak: number | null;
 }) {
+  const { t } = useTranslation();
   return (
     <section id="habitos">
-      <h2>Hábitos</h2>
+      <h2>{t("mybets:habits.title")}</h2>
       <div className="split-cards">
-        <HabitsColumn title="Todas las apuestas" h={all} n={allCount} />
-        <HabitsColumn title="Solo sin promoción" h={withoutPromo} n={withoutPromoCount} />
+        <HabitsColumn title={t("mybets:habits.all")} h={all} n={allCount} />
+        <HabitsColumn title={t("mybets:habits.withoutPromo")} h={withoutPromo} n={withoutPromoCount} />
       </div>
+      <p className="small muted">{t("mybets:habits.fixedNote")}</p>
       <p className="small muted">
-        Las promociones de importe fijo (como La Gran Supercuota, siempre 10 €) cambian la media de importes, así que
-        las dos lecturas son válidas: la primera es lo que has hecho, la segunda refleja mejor cómo eliges tú el importe.
-      </p>
-      <p className="small muted">
-        Con un acierto del 30–35 %, las rachas largas de apuestas perdidas son normales.
+        {t("mybets:habits.normal")}
         {expectedStreak !== null &&
-          ` Con tu acierto (${pct(hitRate)}) y ${allCount} apuestas, por puro azar cabe esperar una racha máxima de unas ${expectedStreak} perdidas seguidas.`}
+          ` ${t("mybets:habits.expected", { pct: pct(hitRate), n: allCount, streak: expectedStreak })}`}
       </p>
     </section>
   );
@@ -204,6 +230,7 @@ function TennisBall() {
 }
 
 function TeamCard({ g }: { g: TeamGroup }) {
+  const { t } = useTranslation();
   const gap = g.hitRate !== null && g.impliedRate !== null ? g.hitRate - g.impliedRate : null;
   return (
     <div className="team-card">
@@ -214,22 +241,31 @@ function TeamCard({ g }: { g: TeamGroup }) {
       </div>
       <p className="team-card-rate">
         <strong>{pct(g.hitRate)}</strong>{" "}
-        <span className="small muted">
-          {g.wins} de {g.decided} acertadas
-        </span>
+        <span className="small muted">{t("mybets:teams.won", { wins: g.wins, decided: g.decided })}</span>
       </p>
       <p className="small">
-        La cuota implicaba {pct(g.impliedRate)} <span className={moneyClass(gap)}>({signedPp(gap)})</span>
+        <Trans
+          i18nKey="mybets:teams.implied"
+          values={{ pct: pct(g.impliedRate), gap: signedPp(gap) }}
+          components={{ gap: <span className={moneyClass(gap)} /> }}
+        />
       </p>
       <p className="small">
-        Beneficio <strong className={moneyClass(g.profit)}>{euro(g.profit, true)}</strong>
-        {g.roi !== null && <span className={`muted ${moneyClass(g.roi)}`}> · ROI {roiPct(g.roi)}</span>}
+        <Trans
+          i18nKey="mybets:teams.profit"
+          values={{ profit: euro(g.profit, true) }}
+          components={{ bold: <strong className={moneyClass(g.profit)} /> }}
+        />
+        {g.roi !== null && (
+          <span className={`muted ${moneyClass(g.roi)}`}>{t("mybets:teams.roi", { roi: roiPct(g.roi) })}</span>
+        )}
       </p>
     </div>
   );
 }
 
 function TeamCards({ title, groups }: { title: string; groups: TeamGroup[] }) {
+  const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
   if (groups.length === 0) return null;
   const shown = showAll ? groups : groups.slice(0, TEAM_CARDS);
@@ -243,7 +279,7 @@ function TeamCards({ title, groups }: { title: string; groups: TeamGroup[] }) {
       </div>
       {groups.length > shown.length && (
         <button type="button" className="tab-button" onClick={() => setShowAll(true)}>
-          Ver los {groups.length}
+          {t("mybets:teams.showAll", { n: groups.length })}
         </button>
       )}
     </>
@@ -252,18 +288,14 @@ function TeamCards({ title, groups }: { title: string; groups: TeamGroup[] }) {
 
 /** Con qué equipos y con qué tenistas aciertas más, de más a menos acierto. */
 export function TeamsSection({ groups }: { groups: TeamGroup[] }) {
+  const { t } = useTranslation();
   if (groups.length === 0) return null;
   return (
     <section id="equipos">
-      <h2>Equipos y tenistas</h2>
-      <p className="small muted">
-        Cuánto aciertas en los partidos de cada equipo o tenista, con al menos 3 apuestas resueltas. Solo cuentan las
-        apuestas de un solo partido (simples y «crea tu apuesta»): en una combinada de varios partidos no se sabe cuál
-        la hizo fallar. Fíjate también en lo que implicaba la cuota: acertar mucho con favoritos no es mérito si las
-        cuotas ya lo daban.
-      </p>
-      <TeamCards title="Equipos" groups={groups.filter((g) => g.sport === "Fútbol")} />
-      <TeamCards title="Tenistas" groups={groups.filter((g) => g.sport === "Tenis")} />
+      <h2>{t("mybets:teams.title")}</h2>
+      <p className="small muted">{t("mybets:teams.note")}</p>
+      <TeamCards title={t("mybets:teams.teams")} groups={groups.filter((g) => g.sport === "Fútbol")} />
+      <TeamCards title={t("mybets:teams.players")} groups={groups.filter((g) => g.sport === "Tenis")} />
     </section>
   );
 }
@@ -283,38 +315,25 @@ function toInput(n: number | null): string {
 
 type MoneyPeriod = { book: Bookmaker; period: string };
 
-const FIELDS = [
-  ["opening", "Saldo al 1 de enero"],
-  ["deposited", "Ingresos"],
-  ["withdrawn", "Retiradas"],
-  ["closing", "Saldo al 31 de diciembre (o el actual)"],
-] as const;
+/** Campos del extracto; su rotulo, en mybets:realMoney.field.<campo>. */
+const FIELDS = ["opening", "deposited", "withdrawn", "closing"] as const;
 
-type Field = (typeof FIELDS)[number][0];
+type Field = (typeof FIELDS)[number];
 
 function fmtDay(d: string | null): string {
-  return d ? new Date(d).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }) : "—";
+  return d ? new Date(d).toLocaleDateString(currentLocale(), { day: "numeric", month: "short", year: "numeric" }) : "—";
 }
 
 /** Por qué no coinciden el resultado real de un año y el calculado con las apuestas. */
 function DiffCauses({ history }: { history: MoneyHistory }) {
+  const { t } = useTranslation();
   return (
     <ul className="small">
-      <li>
-        Apuestas que faltan por importar: las importadas de este año van del {fmtDay(history.first)} al{" "}
-        {fmtDay(history.last)}.
-      </li>
-      {history.pending > 0 && (
-        <li>
-          {history.pending} apuestas sin resolver: su importe ya ha salido del saldo, pero aún no cuentan en el cálculo.
-        </li>
-      )}
-      <li>
-        Bonificaciones y ajustes de cuenta mueven el saldo sin ser apuestas. Lo ganado con freebets y créditos de apuesta
-        ({euro(history.freebetProfit, true)}) sí está en el cálculo.
-      </li>
-      <li>Apuestas de finales de diciembre que se resolvieron en enero (o al revés).</li>
-      <li>Otros productos de la misma cuenta (casino, póker) también cambian el saldo.</li>
+      <li>{t("mybets:realMoney.cause.missing", { from: fmtDay(history.first), to: fmtDay(history.last) })}</li>
+      {history.pending > 0 && <li>{t("mybets:realMoney.cause.pending", { count: history.pending })}</li>}
+      <li>{t("mybets:realMoney.cause.bonuses", { freebet: euro(history.freebetProfit, true) })}</li>
+      <li>{t("mybets:realMoney.cause.december")}</li>
+      <li>{t("mybets:realMoney.cause.otherProducts")}</li>
     </ul>
   );
 }
@@ -336,6 +355,7 @@ function RealMoneyYearCard({
   history: MoneyHistory;
   onSave: (m: RealMoney | null) => void;
 }) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<Record<Field, string>>({
     opening: toInput(money.opening),
     deposited: toInput(money.deposited),
@@ -348,7 +368,7 @@ function RealMoneyYearCard({
     previousClosing !== null && money.opening !== null && Math.abs(previousClosing - money.opening) >= 0.01;
 
   function save() {
-    const values = Object.fromEntries(FIELDS.map(([key]) => [key, parseEuros(draft[key])])) as Record<Field, number | null>;
+    const values = Object.fromEntries(FIELDS.map((key) => [key, parseEuros(draft[key])])) as Record<Field, number | null>;
     if (Object.values(values).every((v) => v === null)) {
       onSave(null);
       return;
@@ -369,9 +389,9 @@ function RealMoneyYearCard({
         {bookmaker} · {year}
       </h3>
       <div className="real-money-fields">
-        {FIELDS.map(([key, label]) => (
+        {FIELDS.map((key) => (
           <label key={key}>
-            <span className="small">{label}</span>
+            <span className="small">{t(`mybets:realMoney.field.${key}`)}</span>
             <input
               inputMode="decimal"
               placeholder={key === "opening" && previousClosing !== null ? toInput(previousClosing) : "0,00"}
@@ -381,33 +401,46 @@ function RealMoneyYearCard({
           </label>
         ))}
         <button type="button" className="tab-button tab-button-active" onClick={save}>
-          Guardar
+          {t("mybets:realMoney.save")}
         </button>
       </div>
-      <p className="small muted">Los campos vacíos cuentan como 0. Para borrar el año, vacíalos todos y guarda.</p>
+      <p className="small muted">{t("mybets:realMoney.emptyNote")}</p>
 
       {result !== null && diff !== null && (
         <div className="real-money-result">
           <p>
-            Resultado real de {year} (saldo final − saldo inicial − ingresos + retiradas):{" "}
-            <strong className={moneyClass(result)}>{euro(result, true)}</strong>
+            <Trans
+              i18nKey="mybets:realMoney.yearResult"
+              values={{ year, result: euro(result, true) }}
+              components={{ bold: <strong className={moneyClass(result)} /> }}
+            />
             <br />
-            Beneficio calculado con tus {history.bets} apuestas de {bookmaker} de {year}:{" "}
-            <strong className={moneyClass(history.profit)}>{euro(history.profit, true)}</strong>
+            <Trans
+              i18nKey="mybets:realMoney.yearCalculated"
+              count={history.bets}
+              values={{ book: bookmaker, year, profit: euro(history.profit, true) }}
+              components={{ bold: <strong className={moneyClass(history.profit)} /> }}
+            />
           </p>
           {openingMismatch && (
             <p className="small bets-warning">
-              El saldo al 1 de enero ({euro(money.opening)}) no coincide con el saldo final que apuntaste para{" "}
-              {Number(year) - 1} ({euro(previousClosing)}).
+              {t("mybets:realMoney.openingMismatch", {
+                opening: euro(money.opening),
+                year: Number(year) - 1,
+                closing: euro(previousClosing),
+              })}
             </p>
           )}
           {Math.abs(diff) < 1 ? (
-            <p className="small">Coinciden: tus apuestas importadas explican el resultado real del año.</p>
+            <p className="small">{t("mybets:realMoney.match")}</p>
           ) : (
             <>
               <p className="small">
-                Hay una diferencia de <strong>{euro(Math.abs(diff))}</strong>. Es habitual que no coincidan del todo;
-                algunas causas posibles:
+                <Trans
+                  i18nKey="mybets:realMoney.difference"
+                  values={{ diff: euro(Math.abs(diff)) }}
+                  components={{ bold: <strong /> }}
+                />
               </p>
               <DiffCauses history={history} />
             </>
@@ -437,6 +470,7 @@ export function RealMoneySection({
   history: (p: MoneyPeriod) => MoneyHistory;
   onSave: (p: MoneyPeriod, m: RealMoney | null) => void;
 }) {
+  const { t } = useTranslation();
   const round2 = (n: number) => Math.round(n * 100) / 100;
   const years = [...new Set(books.flatMap((book) => Object.keys(realMoney[book] ?? {})))]
     .filter((period) => period !== WHOLE_ACCOUNT)
@@ -469,23 +503,20 @@ export function RealMoneySection({
   const byBook = books.length > 1;
   const bookNames = books.map((b) => BOOKMAKER_LABELS[b]).join(" + ");
   const selectedRow = rows.find((r) => r.year === year) ?? null;
-  const joinBooks = (list: Bookmaker[]) => list.map((b) => BOOKMAKER_LABELS[b]).join(" y ");
+  const joinBooks = (list: Bookmaker[]) => list.map((b) => BOOKMAKER_LABELS[b]).join(t("common:listAnd"));
 
   return (
     <section id="dinero-real">
-      <h2>Dinero real{year ? ` · ${year}` : ""}</h2>
-      <p className="small muted">
-        Lo que de verdad ha ganado o perdido tu cuenta en cada año natural, sacado del extracto de la casa (en bet365,
-        el resumen de la cuenta con las fechas del 1 de enero al 31 de diciembre: saldo inicial, ingresos, retiradas y
-        saldo final). Se compara con el beneficio de tus apuestas importadas de ese año, de todos los deportes. Se
-        guarda solo en este navegador, entra en la copia de seguridad y se borra con «Borrar mis datos».
-      </p>
+      <h2>{year ? t("mybets:realMoney.titleYear", { year }) : t("mybets:realMoney.title")}</h2>
+      <p className="small muted">{t("mybets:realMoney.note")}</p>
       {selectedRow && (
         <div className="real-money-year-total">
           <p>
-            Total de {selectedRow.year}
-            {byBook ? ` (${bookNames})` : ""}:{" "}
-            <strong className={`bets-hero-mid ${moneyClass(selectedRow.real)}`}>{euro(selectedRow.real, true)}</strong>
+            <Trans
+              i18nKey={byBook ? "mybets:realMoney.yearTotalBooks" : "mybets:realMoney.yearTotal"}
+              values={{ year: selectedRow.year, books: bookNames, total: euro(selectedRow.real, true) }}
+              components={{ bold: <strong className={`bets-hero-mid ${moneyClass(selectedRow.real)}`} /> }}
+            />
           </p>
           {byBook && (
             <p className="small">
@@ -496,16 +527,16 @@ export function RealMoneySection({
                   {c.result !== null ? (
                     <strong className={moneyClass(c.result)}>{euro(c.result, true)}</strong>
                   ) : (
-                    <span className="muted">{c.hasBets ? "sin apuntar" : "sin apuestas"}</span>
+                    <span className="muted">{c.hasBets ? t("mybets:realMoney.notEntered") : t("mybets:realMoney.noBets")}</span>
                   )}
                 </span>
               ))}
             </p>
           )}
           <p className="small muted">
-            Calculado con tus apuestas de esas casas en {selectedRow.year}: {euro(selectedRow.calc, true)}.
+            {t("mybets:realMoney.calculated", { year: selectedRow.year, calc: euro(selectedRow.calc, true) })}
             {selectedRow.missing.length > 0 &&
-              ` Falta apuntar ${joinBooks(selectedRow.missing)}: el total aún no incluye su resultado.`}
+              ` ${t("mybets:realMoney.missingBooks", { books: joinBooks(selectedRow.missing) })}`}
           </p>
         </div>
       )}
@@ -529,21 +560,21 @@ export function RealMoneySection({
           })}
         </div>
       ) : (
-        <p className="small">Elige un año arriba para apuntar su extracto.</p>
+        <p className="small">{t("mybets:realMoney.chooseYear")}</p>
       )}
 
       {rows.length > 0 && (
         <>
-          <h3>Año a año</h3>
+          <h3>{t("mybets:year.title")}</h3>
           <div className="table-scroll">
             <table className="predictions-table">
               <thead>
                 <tr>
-                  <th>Año</th>
+                  <th>{t("mybets:column.year")}</th>
                   {byBook && books.map((b) => <th key={b} className="num">{BOOKMAKER_LABELS[b]}</th>)}
-                  <th className="num">{byBook ? "Total real" : "Resultado real"}</th>
-                  <th className="num">Calculado con tus apuestas</th>
-                  <th className="num">Diferencia</th>
+                  <th className="num">{byBook ? t("mybets:realMoney.totalReal") : t("mybets:realMoney.resultReal")}</th>
+                  <th className="num">{t("mybets:realMoney.calculatedColumn")}</th>
+                  <th className="num">{t("mybets:column.difference")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -554,14 +585,14 @@ export function RealMoneySection({
                       {r.missing.length > 0 && (
                         <>
                           {" "}
-                          <span className="low-tag">falta {joinBooks(r.missing)}</span>
+                          <span className="low-tag">{t("mybets:realMoney.missingTag", { books: joinBooks(r.missing) })}</span>
                         </>
                       )}
                     </td>
                     {byBook &&
                       r.cells.map((c) => (
                         <td key={c.book} className={`num ${moneyClass(c.result)}`}>
-                          {c.result !== null ? euro(c.result, true) : c.hasBets ? "falta" : "—"}
+                          {c.result !== null ? euro(c.result, true) : c.hasBets ? t("mybets:realMoney.missingCell") : "—"}
                         </td>
                       ))}
                     <td className={`num ${moneyClass(r.real)}`}>
@@ -574,7 +605,7 @@ export function RealMoneySection({
                 {rows.length > 1 && (
                   <tr className="real-money-total">
                     <td className="rec-match" colSpan={byBook ? books.length + 1 : 1}>
-                      <strong>Suma de los años apuntados</strong>
+                      <strong>{t("mybets:realMoney.sumYears")}</strong>
                     </td>
                     <td className={`num ${moneyClass(total)}`}>
                       <strong>{euro(total, true)}</strong>
@@ -587,9 +618,12 @@ export function RealMoneySection({
             </table>
           </div>
           <p className="small">
-            En los años apuntados{byBook ? `, entre ${joinBooks(books)},` : ","} tu dinero real{" "}
-            {total >= 0 ? "ha ganado" : "ha perdido"} <strong className={moneyClass(total)}>{euro(Math.abs(total))}</strong>.
-            {rows.some((r) => r.missing.length > 0) && " Ojo: algún año está incompleto (le falta el extracto de una casa)."}
+            <Trans
+              i18nKey={`mybets:realMoney.summary.${byBook ? "books" : "one"}.${total >= 0 ? "won" : "lost"}`}
+              values={{ books: joinBooks(books), amount: euro(Math.abs(total)) }}
+              components={{ bold: <strong className={moneyClass(total)} /> }}
+            />
+            {rows.some((r) => r.missing.length > 0) && ` ${t("mybets:realMoney.incomplete")}`}
           </p>
         </>
       )}
@@ -600,28 +634,36 @@ export function RealMoneySection({
         const h = history({ book, period: WHOLE_ACCOUNT });
         return (
           <div key={book} className="real-money">
-            <h3>{BOOKMAKER_LABELS[book]} · toda la cuenta, sin año</h3>
+            <h3>{t("mybets:realMoney.whole.title", { book: BOOKMAKER_LABELS[book] })}</h3>
             <p className="small">
-              Lo que apuntaste antes de separar por años: ingresado {euro(money.deposited)}, retirado{" "}
-              {euro(money.withdrawn)}, saldo {euro(money.closing)}. Resultado real{" "}
-              <strong className={moneyClass(result)}>{euro(result, true)}</strong>, frente a{" "}
-              <strong className={moneyClass(h.profit)}>{euro(h.profit, true)}</strong> calculado con tus {h.bets} apuestas
-              de {BOOKMAKER_LABELS[book]}.
+              <Trans
+                i18nKey="mybets:realMoney.whole.text"
+                count={h.bets}
+                values={{
+                  deposited: euro(money.deposited),
+                  withdrawn: euro(money.withdrawn),
+                  closing: euro(money.closing),
+                  result: euro(result, true),
+                  profit: euro(h.profit, true),
+                  book: BOOKMAKER_LABELS[book],
+                }}
+                components={{
+                  result: <strong className={moneyClass(result)} />,
+                  profit: <strong className={moneyClass(h.profit)} />,
+                }}
+              />
             </p>
-            <p className="small muted">
-              No se puede repartir entre años: apunta el extracto de cada año arriba y, cuando lo tengas, borra este
-              dato.
-            </p>
+            <p className="small muted">{t("mybets:realMoney.whole.note")}</p>
             <button
               type="button"
               className="tab-button"
               onClick={() => {
-                if (window.confirm(`¿Borrar el dinero real de toda la cuenta de ${BOOKMAKER_LABELS[book]}?`)) {
+                if (window.confirm(t("mybets:realMoney.whole.confirm", { book: BOOKMAKER_LABELS[book] }))) {
                   onSave({ book, period: WHOLE_ACCOUNT }, null);
                 }
               }}
             >
-              Borrar este dato
+              {t("mybets:realMoney.whole.delete")}
             </button>
           </div>
         );

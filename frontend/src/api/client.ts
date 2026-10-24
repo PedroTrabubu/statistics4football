@@ -4,6 +4,7 @@ import type {
   Match,
   MatchFeatures,
   MatchHistory,
+  MatchRecent,
   MatchRefereeStats,
   MatchResult,
   MatchStatus,
@@ -132,6 +133,11 @@ export function getMatchStats(matchId: number, numMatches = 5): Promise<MatchFea
  * aqui salen los patrones de los dos equipos y lo habitual en la liga. */
 export function getMatchHistory(matchId: number): Promise<MatchHistory> {
   return request(`/matches/${matchId}/history`);
+}
+
+/** Enfrentamientos directos previos y ultimos partidos de cada equipo, uno a uno. */
+export function getMatchRecent(matchId: number): Promise<MatchRecent> {
+  return request(`/matches/${matchId}/recent`);
 }
 
 export function getMatchRefereeStats(matchId: number, refereeScope: RefereeScope): Promise<MatchRefereeStats> {

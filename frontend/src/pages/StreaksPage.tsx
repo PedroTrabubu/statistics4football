@@ -1,15 +1,28 @@
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { PageHero } from "../components/PageHero";
 import { Link, useSearchParams } from "react-router-dom";
 import { getLeagueResults, getLeagueSeasons, getLeagueUpcoming, getLeagues } from "../api/client";
 import type { League, MatchResult, UpcomingMatch } from "../api/types";
+import { DayTabs } from "../components/DayTabs";
 import { LeagueLogo } from "../components/LeagueLogo";
 import { LeagueSwitch } from "../components/LeagueSwitch";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
 import { MatchTeams, TeamCrest, TeamName } from "../components/TeamCrest";
-import { formatKickoff, formatOdds, formatSeason, formatShortDate, parseApiDate } from "../lib/format";
+import { currentLocale, t } from "../i18n";
+import {
+  formatKickoff,
+  formatLocaleNumber,
+  formatOdds,
+  formatSeason,
+  formatShortDate,
+  parseApiDate,
+  withPercent,
+} from "../lib/format";
 import { leagueName, leagueParam, orderLeagues, parseLeagueParam, useSelectedLeagueCode } from "../lib/leagues";
 import { parseOddsInput } from "../lib/oddsMath";
 import {
+  ALL_CATEGORIES,
   BAD_RUN_CHIP,
   BOOTSTRAP_SAMPLES,
   CATEGORIES,
@@ -22,6 +35,7 @@ import {
   MIN_LENGTH,
   REFEREE_CHIP,
   activeStreaks,
+  categoryLabel,
   dayKey,
   isClear,
   matchesChip,
@@ -73,17 +87,17 @@ function loadLeague(league: League): Promise<LeagueStreaks> {
 
 // --- Filtros -----------------------------------------------------------------
 
-const ALL_CHIP = "Todas";
-const POPULAR_CHIP = "Populares";
+/** Chips: claves; su texto, chipLabel. */
+const ALL_CHIP = ALL_CATEGORIES;
+const POPULAR_CHIP = "populares";
 const CHIPS = [ALL_CHIP, POPULAR_CHIP, ...CATEGORIES, REFEREE_CHIP, BAD_RUN_CHIP];
 
+function chipLabel(chip: string): string {
+  return chip === POPULAR_CHIP ? t("streaks:chip.popular") : categoryLabel(chip);
+}
+
 type ContextFilter = "any" | StreakContext;
-const CONTEXT_OPTIONS: { value: ContextFilter; label: string }[] = [
-  { value: "any", label: "Cualquier contexto" },
-  { value: "all", label: "Todos los partidos" },
-  { value: "home", label: "En casa" },
-  { value: "away", label: "Fuera de casa" },
-];
+const CONTEXT_OPTIONS: ContextFilter[] = ["any", "all", "home", "away"];
 
 /** En movil, tarjetas en lugar de tabla (se pinta solo una de las dos). */
 const MOBILE_QUERY = "(max-width: 720px)";
@@ -102,35 +116,33 @@ function useIsMobile(): boolean {
 /** Filas visibles de golpe; el resto, con "Ver más". */
 const PAGE_SIZE = 60;
 
-const pct = (x: number) => `${Math.round(x * 100)} %`;
+const pct = (x: number) => withPercent(String(Math.round(x * 100)));
 
 /** Rareza en palabras: "1 de cada 1500" (redondeado a dos cifras). */
 function chanceText(x: number): string {
   const n = 1 / x;
-  if (n >= 10_000) return "menos de 1 de cada 10.000";
-  return `1 de cada ${Number(n.toPrecision(2)).toLocaleString("es-ES")}`;
+  if (n >= 10_000) return t("streaks:chance.lessThan", { n: formatLocaleNumber(10_000) });
+  return t("streaks:chance.oneIn", { n: formatLocaleNumber(Number(n.toPrecision(2))) });
 }
 
-function dayLabel(key: string, index: number): { name: string; date: string } {
-  const [y, m, d] = key.split("-").map(Number);
-  const date = new Date(y, m - 1, d);
-  const weekday = date.toLocaleDateString("es-ES", { weekday: "short" }).replace(".", "");
-  return {
-    name: index === 0 ? "Hoy" : index === 1 ? "Mañana" : weekday.charAt(0).toUpperCase() + weekday.slice(1),
-    date: date.toLocaleDateString("es-ES", { day: "numeric", month: "short" }),
-  };
+/** Dia en que se tomo la cuota: "17 oct". */
+function takenDate(iso: string): string {
+  return parseApiDate(iso).toLocaleDateString(currentLocale(), { day: "numeric", month: "short" });
 }
 
 function takenText(match: UpcomingMatch): string | null {
   if (!match.odds_taken_at) return null;
-  const taken = parseApiDate(match.odds_taken_at).toLocaleDateString("es-ES", { day: "numeric", month: "short" });
-  return `Cuota media de varias casas ("Market Average", ${match.odds_source ?? "fuente desconocida"}), tomada el ${taken}. No es la cuota actual.`;
+  return t("streaks:odds.taken", {
+    source: match.odds_source ?? t("streaks:odds.unknownSource"),
+    date: takenDate(match.odds_taken_at),
+  });
 }
 
 // --- Pagina ------------------------------------------------------------------
 
 /** /rachas: rachas activas de los equipos que juegan en los proximos dias. */
 export function StreaksPage() {
+  const { t, i18n } = useTranslation();
   const [storedCode, setStoredCode] = useSelectedLeagueCode();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: leagues } = useApi(() => getLeagues(), []);
@@ -216,56 +228,35 @@ export function StreaksPage() {
     for (const d of data ?? []) {
       for (const m of d.upcoming) {
         if (!m.odds_taken_at) continue;
-        const taken = parseApiDate(m.odds_taken_at).toLocaleDateString("es-ES", { day: "numeric", month: "short" });
-        notes.add(`${leagueName(d.league.code)}: ${m.odds_source}, tomada el ${taken}`);
+        notes.add(
+          t("streaks:odds.note", { league: leagueName(d.league.code), source: m.odds_source, date: takenDate(m.odds_taken_at) }),
+        );
       }
     }
     return [...notes];
-  }, [data]);
+    // El idioma, para rehacer las notas al cambiarlo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, i18n.language]);
 
   const rows = view.rows.slice(0, shown);
   const odds = (row: StreakRow) => ({ raw: myOdds[row.id] ?? "", set: (v: string) => setMyOdds((p) => ({ ...p, [row.id]: v })) });
 
   return (
     <div>
-      <h1>Rachas</h1>
-      <p className="page-lead">
-        Rachas activas de los equipos que juegan en los próximos días: partidos seguidos, desde el más reciente, en los
-        que se ha cumplido un mercado. Ordenadas por rareza: lo poco probable que sería una racha así por pura casualidad.
-      </p>
+      <PageHero eyebrow={leagueCode === null ? t("common:league.all") : leagueName(leagueCode)} title={t("nav:streaks")} accentWords={0} lead={<p>{t("streaks:page.lead")}</p>} />
 
       <LeagueSwitch leagues={leagues} value={leagueCode} onChange={changeLeague} allowAll />
 
-      <div className="tab-group streak-days" role="group" aria-label="Día">
-        <button
-          type="button"
-          className={day === "all" ? "tab-button tab-button-active" : "tab-button"}
-          aria-pressed={day === "all"}
-          onClick={() => setDay("all")}
-        >
-          <span className="streak-day-name">Todos</span>
-          <span className="streak-day-date">7 días</span>
-        </button>
-        {days.map((key, i) => {
-          const label = dayLabel(key, i);
-          return (
-            <button
-              key={key}
-              type="button"
-              className={day === key ? "tab-button tab-button-active" : "tab-button"}
-              aria-pressed={day === key}
-              disabled={data !== null && !matchDays.has(key)}
-              title={data !== null && !matchDays.has(key) ? "Sin partidos este día" : `${dayCounts[key] ?? 0} rachas`}
-              onClick={() => setDay(key)}
-            >
-              <span className="streak-day-name">{label.name}</span>
-              <span className="streak-day-date">{label.date}</span>
-            </button>
-          );
-        })}
-      </div>
+      <DayTabs
+        days={days}
+        value={day === "all" ? null : day}
+        onChange={(d) => setDay(d ?? "all")}
+        allDate={t("streaks:page.allDays", { count: DAYS_AHEAD })}
+        enabled={data !== null ? (key) => matchDays.has(key) : null}
+        title={(key) => t("streaks:page.count", { count: dayCounts[key] ?? 0 })}
+      />
 
-      <div className="streak-chips" role="group" aria-label="Mercado">
+      <div className="streak-chips" role="group" aria-label={t("streaks:page.marketLabel")}>
         {CHIPS.map((c) => (
           <button
             key={c}
@@ -273,42 +264,49 @@ export function StreaksPage() {
             className="group-chip"
             aria-pressed={chip === c}
             disabled={data !== null && c !== ALL_CHIP && !chipCounts[c]}
-            title={c === POPULAR_CHIP && popular.length ? `Las categorías con más rachas: ${popular.join(", ")}` : undefined}
+            title={
+              c === POPULAR_CHIP && popular.length
+                ? t("streaks:page.popularTitle", { categories: popular.map(categoryLabel).join(", ") })
+                : undefined
+            }
             onClick={() => setChip(c)}
           >
-            {c}
+            {chipLabel(c)}
             {data && <span className="chip-count">{chipCounts[c] ?? 0}</span>}
           </button>
         ))}
       </div>
 
       <div className="filters">
-        <select aria-label="Contexto" value={context} onChange={(e) => setContext(e.target.value as ContextFilter)}>
-          {CONTEXT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
+        <select
+          aria-label={t("streaks:page.contextLabel")}
+          value={context}
+          onChange={(e) => setContext(e.target.value as ContextFilter)}
+        >
+          {CONTEXT_OPTIONS.map((value) => (
+            <option key={value} value={value}>
+              {t(`streaks:page.context.${value}`)}
             </option>
           ))}
         </select>
-        <select aria-label="Orden" value={sort} onChange={(e) => setSort(e.target.value as StreakSort)}>
-          <option value="rarity">Más raras primero</option>
-          <option value="length">Más largas primero</option>
+        <select aria-label={t("streaks:page.sortLabel")} value={sort} onChange={(e) => setSort(e.target.value as StreakSort)}>
+          <option value="rarity">{t("streaks:page.sort.rarity")}</option>
+          <option value="length">{t("streaks:page.sort.length")}</option>
         </select>
         {data && (
           <span className="small muted">
-            {view.rows.length} rachas
-            {view.minLength < MIN_LENGTH && ` (con ${view.minLength} partidos o más: con ${MIN_LENGTH} salían muy pocas)`}
+            {view.minLength < MIN_LENGTH
+              ? t("streaks:page.totalFallback", { count: view.rows.length, min: view.minLength, normal: MIN_LENGTH })
+              : t("streaks:page.count", { count: view.rows.length })}
           </span>
         )}
       </div>
 
       <RarityHelp />
 
-      {error && <ErrorView message={`No se pudo conectar con la API: ${error}`} />}
-      {!error && (loading || !data) && <LoadingView label="Calculando las rachas..." />}
-      {!error && !loading && data && view.rows.length === 0 && (
-        <EmptyView message="No hay rachas poco probables por azar con estos filtros. Prueba con otro día, mercado o liga." />
-      )}
+      {error && <ErrorView message={t("common:error.api", { error })} />}
+      {!error && (loading || !data) && <LoadingView label={t("streaks:page.loading")} />}
+      {!error && !loading && data && view.rows.length === 0 && <EmptyView message={t("streaks:page.empty")} />}
 
       {!loading && data && view.rows.length > 0 && (
         <>
@@ -335,11 +333,11 @@ export function StreaksPage() {
               <table className="predictions-table streaks-table">
                 <thead>
                   <tr>
-                    <th>Liga</th>
-                    <th>Racha</th>
-                    <th>Próximo partido</th>
-                    <th>Cuota</th>
-                    <th>Fecha</th>
+                    <th>{t("streaks:page.column.league")}</th>
+                    <th>{t("streaks:page.column.streak")}</th>
+                    <th>{t("streaks:page.column.nextMatch")}</th>
+                    <th>{t("streaks:page.column.odds")}</th>
+                    <th>{t("streaks:page.column.date")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -367,7 +365,7 @@ export function StreaksPage() {
 
           {view.rows.length > shown && (
             <button type="button" className="tab-button streak-more" onClick={() => setShown((n) => n + PAGE_SIZE)}>
-              Ver más ({view.rows.length - shown})
+              {t("streaks:page.more", { n: view.rows.length - shown })}
             </button>
           )}
         </>
@@ -375,25 +373,22 @@ export function StreaksPage() {
 
       <div className="streak-notes small muted">
         <p>
-          <strong>Las rachas describen lo que ha ocurrido; por sí solas no predecirán el siguiente partido.</strong> Hay
-          cientos de combinaciones de equipo, mercado y línea, así que algunas rachas largas aparecen por casualidad.
+          <Trans i18nKey="streaks:notes.describe" components={{ bold: <strong /> }} />
         </p>
         <p>
-          Cuota: la media de varias casas ("Market Average"), la misma referencia que usa el resto de la web, solo en
-          Resultado (gana, empata, pierde) y en más/menos de 2,5 goles del partido. En el resto de mercados, "—": no se
-          deriva ni se estima. Es la cuota de la última toma, no la actual
-          {oddsNotes.length > 0 ? `: ${oddsNotes.join(" · ")}.` : "; ahora mismo no hay ninguna para estos partidos."}
+          {oddsNotes.length > 0
+            ? t("streaks:notes.oddsWith", { notes: oddsNotes.join(" · ") })
+            : t("streaks:notes.oddsNone")}
         </p>
         <p>
-          Solo salen las de {MIN_LENGTH} partidos o más (
-          {FALLBACK_MIN_LENGTH} si salen muy pocas) que por casualidad saldrían como mucho 1 de cada {Math.round(1 / MAX_CHANCE)}, una por equipo y
-          mercado (la de la línea más exigente) y como mucho {MAX_PER_ENTITY} por equipo y día. Cuentan los partidos de la
-          misma competición, de esta temporada y la anterior. Las de árbitro, solo con el árbitro ya designado.
+          {t("streaks:notes.which", {
+            min: MIN_LENGTH,
+            fallback: FALLBACK_MIN_LENGTH,
+            chance: Math.round(1 / MAX_CHANCE),
+            perEntity: MAX_PER_ENTITY,
+          })}
         </p>
-        <p>
-          Tarjetas y puntos de tarjeta salen de nuestros datos: tarjetas = amarillas + rojas; puntos = amarilla 10, roja
-          25 (aproximado). Una estadística que una liga no tiene no sale, y un partido sin el dato no corta la racha.
-        </p>
+        <p>{t("streaks:notes.cards")}</p>
       </div>
 
       {data && <StudyPanel data={data} />}
@@ -403,38 +398,27 @@ export function StreaksPage() {
 
 /** Que es la rareza, junto al orden: con ejemplos y lo que no dice. */
 function RarityHelp() {
+  const { t } = useTranslation();
   return (
     <details className="picks-method streak-rarity">
-      <summary>¿Qué es la rareza?</summary>
+      <summary>{t("streaks:rarity.title")}</summary>
       <p>
-        La rareza mide lo difícil que sería ver una racha así <strong>por pura casualidad</strong>, si el equipo fuera
-        uno cualquiera de la liga. Se calcula con lo habitual en la liga para ese suceso, multiplicado por sí mismo tantas
-        veces como partidos tiene la racha. Es la cifra «Por casualidad» de cada fila: «1 de cada 1500» quiere decir
-        que, por pura suerte, solo 1 equipo de cada 1500 tendría una racha así.
+        <Trans i18nKey="streaks:rarity.what" components={{ bold: <strong /> }} />
       </p>
       <ul>
         <li>
-          Ganar 8 seguidos cuando en la liga se gana el 40 % de los partidos: 0,40<sup>8</sup> ≈ 1 de cada 1500. Muy
-          rara.
+          <Trans i18nKey="streaks:rarity.example1" components={{ sup: <sup /> }} />
         </li>
         <li>
-          9 seguidos de algo que pasa el 90 % de las veces: 0,90<sup>9</sup> ≈ 1 de cada 3. Es lo normal, así que no sale
-          en la tabla.
+          <Trans i18nKey="streaks:rarity.example2" components={{ sup: <sup /> }} />
         </li>
         <li>
-          6 seguidos de algo que pasa la mitad de las veces: 0,50<sup>6</sup> ≈ 1 de cada 64. Es más corta que la
-          anterior, pero mucho más rara: por eso va antes.
+          <Trans i18nKey="streaks:rarity.example3" components={{ sup: <sup /> }} />
         </li>
       </ul>
+      <p>{t("streaks:rarity.order")}</p>
       <p>
-        Por eso «Más raras primero» no ordena por longitud: así no suben arriba las rachas largas de cosas que pasan casi
-        siempre.
-      </p>
-      <p>
-        <strong>Lo que no dice:</strong> no es la probabilidad de que la racha siga. Supone que el equipo es uno medio y
-        que cada partido es independiente, y no siempre es así: un equipo que tira mucho lo hace casi siempre, y su racha
-        puede salir rarísima sin ser ninguna sorpresa. Si quieres saber si las rachas siguen, mira «¿Se prolongan las
-        rachas?» al final de la página. <Link to="/glosario">Más en el glosario →</Link>
+        <Trans i18nKey="streaks:rarity.notSay" components={{ bold: <strong />, link: <Link to="/glosario" /> }} />
       </p>
     </details>
   );
@@ -449,27 +433,27 @@ function LeagueCell({ code }: { code: string }) {
   );
 }
 
-const CONTEXT_BASE: Record<StreakContext, string> = { all: "", home: " en casa", away: " fuera de casa" };
-
 /** La frase y, debajo, su contexto: lo normal en la competicion y la rareza. */
 function StreakText({ row }: { row: StreakRow }) {
-  const where = row.kind === "referee" ? "" : CONTEXT_BASE[row.context];
+  const { t } = useTranslation();
+  const where = row.kind === "referee" ? "all" : row.context;
   return (
     <div className="streak-entity">
       {row.kind === "team" && <TeamCrest team={row.entity} league={row.leagueCode} />}
       <div>
         <p className="streak-text">{row.text}</p>
         <p className="streak-context small muted">
-          Lo normal en {leagueName(row.leagueCode)}: {pct(row.baseRate)} de los partidos{where} ·{" "}
+          {t(`streaks:row.normal.${where}`, { league: leagueName(row.leagueCode), pct: pct(row.baseRate) })} ·{" "}
           <span
             className="streak-chance"
-            title={`${pct(row.baseRate)} multiplicado por sí mismo ${row.length} veces. Supone que cada partido es independiente del anterior.`}
+            title={t("streaks:row.chanceTitle", { pct: pct(row.baseRate), n: row.length })}
           >
-            Por casualidad: {chanceText(row.chance)}
+            {t("streaks:row.chance", { chance: chanceText(row.chance) })}
           </span>{" "}
-          · Desde el {formatShortDate(row.since)}
-          {row.skipped > 0 && ` · ${row.skipped} ${row.skipped === 1 ? "partido sin dato no cuenta" : "partidos sin dato no cuentan"}`}
-          {row.odds && ` · La cuota ${formatOdds(row.odds.odds)} pide acertar al menos el ${pct(1 / row.odds.odds)} para no perder`}
+          · {t("streaks:row.since", { date: formatShortDate(row.since) })}
+          {row.skipped > 0 && ` · ${t("streaks:row.skipped", { count: row.skipped })}`}
+          {row.odds &&
+            ` · ${t("streaks:row.odds", { odds: formatOdds(row.odds.odds), pct: pct(1 / row.odds.odds) })}`}
         </p>
       </div>
     </div>
@@ -477,6 +461,7 @@ function StreakText({ row }: { row: StreakRow }) {
 }
 
 function NextMatch({ row }: { row: StreakRow }) {
+  const { t } = useTranslation();
   const m = row.match;
   if (row.kind === "referee") {
     return (
@@ -484,14 +469,14 @@ function NextMatch({ row }: { row: StreakRow }) {
         <Link to={`/matches/${m.id}`} className="streak-next">
           <MatchTeams home={m.home_team} away={m.away_team} league={row.leagueCode} middle="vs" />
         </Link>
-        <div className="small muted">Árbitro: {row.entity}</div>
+        <div className="small muted">{t("streaks:row.referee", { name: row.entity })}</div>
       </div>
     );
   }
   const rival = row.side === "home" ? m.away_team : m.home_team;
   return (
     <Link to={`/matches/${m.id}`} className="streak-next">
-      <span className="streak-venue">{row.side === "home" ? "Local" : "Visitante"}</span>
+      <span className="streak-venue">{row.side === "home" ? t("streaks:row.home") : t("streaks:row.away")}</span>
       <span className="muted">vs</span>
       <TeamName team={rival} league={row.leagueCode} />
     </Link>
@@ -499,6 +484,7 @@ function NextMatch({ row }: { row: StreakRow }) {
 }
 
 function OddsCell({ row, raw, set }: { row: StreakRow; raw: string; set: (v: string) => void }) {
+  const { t } = useTranslation();
   const mine = parseOddsInput(raw);
   return (
     <>
@@ -507,7 +493,7 @@ function OddsCell({ row, raw, set }: { row: StreakRow; raw: string; set: (v: str
           {formatOdds(row.odds.odds)}
         </span>
       ) : (
-        <span className="muted" title="Sin cuota media de mercado para este suceso: no se deriva ni se estima.">
+        <span className="muted" title={t("streaks:odds.none")}>
           —
         </span>
       )}
@@ -515,12 +501,12 @@ function OddsCell({ row, raw, set }: { row: StreakRow; raw: string; set: (v: str
         type="text"
         inputMode="decimal"
         className="odds-input"
-        placeholder="Tu cuota"
+        placeholder={t("streaks:odds.yours")}
         value={raw}
         onChange={(e) => set(e.target.value)}
-        aria-label={`Tu cuota para: ${row.text}`}
+        aria-label={t("streaks:odds.yoursFor", { text: row.text })}
       />
-      {mine !== null && <div className="small muted">exige {pct(1 / mine)}</div>}
+      {mine !== null && <div className="small muted">{t("streaks:odds.requires", { pct: pct(1 / mine) })}</div>}
     </>
   );
 }
@@ -588,9 +574,10 @@ function useStudy(data: LeagueStreaks[], enabled: boolean): { rows: StudyRow[] |
 }
 
 function StudyPanel({ data }: { data: LeagueStreaks[] }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { rows, progress } = useStudy(data, open);
-  const seasons = [...new Set(data.flatMap((d) => d.seasons))].sort().map(formatSeason).join(" y ");
+  const seasons = [...new Set(data.flatMap((d) => d.seasons))].sort().map(formatSeason).join(t("common:listAnd"));
   const leagues = data.map((d) => leagueName(d.league.code)).join(", ");
 
   const cells = rows?.flatMap((r) => LENGTH_BUCKETS.map((b) => r.cells[b]).filter((c): c is StudyCell => c !== null)) ?? [];
@@ -599,39 +586,43 @@ function StudyPanel({ data }: { data: LeagueStreaks[] }) {
 
   return (
     <details className="picks-method streak-study" onToggle={(e) => setOpen(e.currentTarget.open)}>
-      <summary>¿Se prolongan las rachas?</summary>
+      <summary>{t("streaks:study.title")}</summary>
       <p className="small muted">
-        Con los partidos de {seasons} ({leagues}): antes de cada partido, las rachas que habría mostrado esta tabla (de{" "}
-        {MIN_LENGTH} partidos o más, calculadas solo con los partidos anteriores) y si siguieron en ese partido, frente a
-        lo habitual en la liga hasta entonces para ese mismo suceso. Entre paréntesis, la diferencia con su intervalo del
-        95 % (remuestreando partidos, {BOOTSTRAP_SAMPLES} muestras, semilla fija). Sin dato: menos de {MIN_CELL_EVENTS}{" "}
-        rachas.
+        {t("streaks:study.method", {
+          seasons,
+          leagues,
+          min: MIN_LENGTH,
+          samples: BOOTSTRAP_SAMPLES,
+          minEvents: MIN_CELL_EVENTS,
+        })}
       </p>
       {rows === null ? (
-        <LoadingView label={`Calculando... ${Math.round(progress * 100)} %`} />
+        <LoadingView label={t("streaks:study.loading", { pct: withPercent(String(Math.round(progress * 100))) })} />
       ) : rows.length === 0 ? (
-        <EmptyView message="No hay suficientes partidos para medirlo." />
+        <EmptyView message={t("streaks:study.empty")} />
       ) : (
         <>
           <p className="streak-study-verdict">
             {above === 0 && below === 0
-              ? "No hay una diferencia clara: con estos datos, las rachas siguieron más o menos como lo habitual en la liga."
-              : `En ${above} de ${cells.length} casillas la racha siguió claramente más que lo habitual en la liga${below ? ` y en ${below}, menos` : ""}; en el resto no hay una diferencia clara. Que siga más que la media de la liga no es inercia: sobre todo dice que ese equipo no es uno medio en ese mercado.`}
+              ? t("streaks:study.verdictNone")
+              : below
+                ? t("streaks:study.verdictAboveBelow", { above, cells: cells.length, below })
+                : t("streaks:study.verdictAbove", { above, cells: cells.length })}
           </p>
           <div className="table-scroll">
             <table className="predictions-table streak-study-table">
               <thead>
                 <tr>
-                  <th>Mercado</th>
+                  <th>{t("streaks:study.market")}</th>
                   {LENGTH_BUCKETS.map((b) => (
-                    <th key={b}>{b} partidos</th>
+                    <th key={b}>{t("streaks:study.bucket", { n: b })}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.category} className={row.category === "Todas" ? "picks-summary-total" : undefined}>
-                    <td>{row.category}</td>
+                  <tr key={row.category} className={row.category === ALL_CATEGORIES ? "picks-summary-total" : undefined}>
+                    <td>{categoryLabel(row.category)}</td>
                     {LENGTH_BUCKETS.map((b) => (
                       <td key={b}>
                         <StudyCellView cell={row.cells[b]} />
@@ -651,17 +642,19 @@ function StudyPanel({ data }: { data: LeagueStreaks[] }) {
 const pp = (x: number) => `${x >= 0 ? "+" : "−"}${Math.abs(Math.round(x * 100))}`;
 
 function StudyCellView({ cell }: { cell: StudyCell | null }) {
+  const { t } = useTranslation();
   if (!cell) return <span className="muted">—</span>;
   const clear = isClear(cell);
+  const diff = { diff: pp(cell.diff), low: pp(cell.low), high: pp(cell.high) };
   return (
     <>
       <span>
-        {pct(cell.rate)} <span className="muted">vs {pct(cell.expected)}</span>
+        {pct(cell.rate)} <span className="muted">{t("streaks:study.versus", { expected: pct(cell.expected) })}</span>
       </span>
       <div className={`small ${clear ? (cell.diff > 0 ? "edge-up" : "edge-down") : "muted"}`}>
-        {pp(cell.diff)} pp ({pp(cell.low)} a {pp(cell.high)}){clear ? "" : " · sin diferencia clara"}
+        {t(clear ? "streaks:study.diff" : "streaks:study.diffUnclear", diff)}
       </div>
-      <div className="small muted">{cell.events} rachas</div>
+      <div className="small muted">{t("streaks:page.count", { count: cell.events })}</div>
     </>
   );
 }

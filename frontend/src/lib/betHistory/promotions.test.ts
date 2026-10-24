@@ -125,6 +125,6 @@ describe("rachas y resumen", () => {
       ...Array.from({ length: 4 }, () => bet()),
     ]);
     const [first] = insights(rows);
-    expect(first).toMatch(/^Con promoción llevas \+50,00\s€ \(ROI \+100%\) en 5 apuestas; sin promoción, -20,00\s€ \(ROI -20%\) en 10\.$/);
+    expect(first).toMatch(/^Con promoción llevas \+50,00\s€ \(ROI \+100\s%\) en 5 apuestas; sin promoción, -20,00\s€ \(ROI -20\s%\) en 10\.$/);
   });
 });

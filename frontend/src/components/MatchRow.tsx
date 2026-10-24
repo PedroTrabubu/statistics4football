@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { leagueName } from "../lib/leagues";
 import { Link } from "react-router-dom";
 import type { Match } from "../api/types";
@@ -7,6 +8,7 @@ import { MatchTeams } from "./TeamCrest";
 
 /** `eager`: la fila se ve sin hacer scroll, sus escudos no esperan. */
 export function MatchRow({ match, eager = false }: { match: Match; eager?: boolean }) {
+  const { t } = useTranslation();
   const played = match.status === "historical";
   return (
     <Link to={`/matches/${match.id}`} className="match-row">
@@ -35,7 +37,7 @@ export function MatchRow({ match, eager = false }: { match: Match; eager?: boole
         }
       />
       <span className={`status-pill status-${match.status}`}>
-        {played ? "Jugado" : "Programado"}
+        {played ? t("matches:status.played") : t("matches:status.scheduled")}
       </span>
     </Link>
   );

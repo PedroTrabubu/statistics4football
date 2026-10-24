@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { monthLabel, type MonthSplit } from "../lib/betHistory/analysis";
 import { LOW_SAMPLE } from "../lib/betHistory/format";
+import { useTranslation } from "react-i18next";
+import { currentLocale } from "../i18n";
 import { niceTicks } from "../lib/chartTicks";
 
 const HEIGHT = 240;
@@ -10,7 +12,7 @@ const PAD = { top: 24, right: 12, bottom: 40, left: 60 };
 const MAX_TOTAL_LABELS = 12;
 
 function euro(n: number, signed = true): string {
-  const s = n.toLocaleString("es-ES", { style: "currency", currency: "EUR" });
+  const s = n.toLocaleString(currentLocale(), { style: "currency", currency: "EUR" });
   return signed && n > 0 ? `+${s}` : s;
 }
 
@@ -74,6 +76,7 @@ export function MonthlyChart({
   selected: string | null;
   onSelect: (key: string | null) => void;
 }) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(640);
   const [hover, setHover] = useState<number | null>(null);
@@ -104,7 +107,7 @@ export function MonthlyChart({
   const totalText = (v: number) =>
     band >= 64
       ? euro(v)
-      : `${v > 0 ? "+" : ""}${Math.round(v).toLocaleString("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 })}`;
+      : `${v > 0 ? "+" : ""}${Math.round(v).toLocaleString(currentLocale(), { style: "currency", currency: "EUR", maximumFractionDigits: 0 })}`;
 
   function toggle(key: string) {
     onSelect(selected === key ? null : key);
@@ -124,16 +127,16 @@ export function MonthlyChart({
     <div className="profit-chart monthly-chart" ref={ref}>
       <div className="chart-legend" aria-hidden="true">
         <span>
-          <span className="legend-rect legend-without" /> Sin promoción
+          <span className="legend-rect legend-without" /> {t("mybets:chart.withoutPromo")}
         </span>
         <span>
-          <span className="legend-rect legend-with" /> Con promoción
+          <span className="legend-rect legend-with" /> {t("mybets:chart.withPromo")}
         </span>
         <span>
-          <span className="legend-line" /> Total del mes
+          <span className="legend-line" /> {t("mybets:chart.monthTotal")}
         </span>
       </div>
-      <svg width={width} height={HEIGHT} role="group" aria-label="Beneficio por mes, sin y con promoción">
+      <svg width={width} height={HEIGHT} role="group" aria-label={t("mybets:chart.monthlyLabel")}>
         {ticks.map((t) => (
           <g key={t}>
             <line className={t === 0 ? "chart-zero-solid" : "chart-grid"} x1={PAD.left} x2={PAD.left + plotW} y1={y(t)} y2={y(t)} />
@@ -154,7 +157,13 @@ export function MonthlyChart({
               role="button"
               tabIndex={0}
               aria-pressed={selected === m.key}
-              aria-label={`${monthLabel(m.key)}: total ${euro(m.total.profit)}; sin promoción ${euro(m.withoutPromo.profit)}; con promoción ${euro(m.withPromo.profit)}; ${m.total.bets} apuestas`}
+              aria-label={t("mybets:chart.monthBar", {
+                month: monthLabel(m.key),
+                total: euro(m.total.profit),
+                without: euro(m.withoutPromo.profit),
+                with: euro(m.withPromo.profit),
+                count: m.total.bets,
+              })}
               onClick={() => toggle(m.key)}
               onKeyDown={(e) => onKey(e, m.key)}
               onPointerEnter={() => setHover(i)}
@@ -199,17 +208,15 @@ export function MonthlyChart({
       </svg>
       {h && hover !== null && (
         <div className="chart-tooltip" style={{ left: tipLeft }}>
-          <span>
-            {monthLabel(h.key)} · {h.total.bets} apuestas
-          </span>
-          <strong>Total del mes: {euro(h.total.profit)}</strong>
+          <span>{t("mybets:chart.tooltipMonth", { month: monthLabel(h.key), count: h.total.bets })}</span>
+          <strong>{t("mybets:chart.tooltipTotal", { total: euro(h.total.profit) })}</strong>
           <span className="tooltip-row">
-            <span className="legend-rect legend-without" /> Sin promoción: {euro(h.withoutPromo.profit)}
+            <span className="legend-rect legend-without" /> {t("mybets:chart.tooltipWithout", { value: euro(h.withoutPromo.profit) })}
           </span>
           <span className="tooltip-row">
-            <span className="legend-rect legend-with" /> Con promoción: {euro(h.withPromo.profit)}
+            <span className="legend-rect legend-with" /> {t("mybets:chart.tooltipWith", { value: euro(h.withPromo.profit) })}
           </span>
-          {h.total.bets < LOW_SAMPLE && <span>Poco fiable: menos de {LOW_SAMPLE} apuestas</span>}
+          {h.total.bets < LOW_SAMPLE && <span>{t("mybets:chart.tooltipLow", { n: LOW_SAMPLE })}</span>}
         </div>
       )}
     </div>

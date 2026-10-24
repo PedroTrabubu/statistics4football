@@ -4,7 +4,8 @@
  * solo) y se cuentan con su `streak`. Funciones puras. */
 
 import type { MarketOdds, MatchResult, UpcomingMatch } from "../api/types";
-import { parseApiDate } from "./format";
+import { currentLocale, t } from "../i18n";
+import { formatLocaleNumber, parseApiDate } from "./format";
 import { CHAMPIONS_LEAGUE_CODE } from "./leagues";
 import {
   MARKETS,
@@ -52,14 +53,23 @@ export interface StreakType {
 
 /** Condiciones que piden las rachas y no estan como boton en Mercados. */
 const EXTRA_OPTIONS: Record<string, MarketOption[]> = {
-  resultado: [{ key: "sin-ganar", label: "No gana", hit: (v) => v.goalsFor <= v.goalsAgainst }],
+  resultado: [
+    {
+      key: "sin-ganar",
+      get label() {
+        return t("markets:market.result.option.noWin");
+      },
+      hit: (v) => v.goalsFor <= v.goalsAgainst,
+    },
+  ],
 };
 
-/** Chip de cada mercado: el de su familia (Goles, Córners...) o el suyo. */
-const CATEGORY_ALIAS: Record<string, string> = { "ambos-marcan-resultado": "Ambos marcan" };
+/** Chip de cada mercado: el de su familia (Goles, Córners...) o el suyo. La
+ * categoria es una clave (la familia o el slug); su texto, categoryLabel. */
+const CATEGORY_ALIAS: Record<string, string> = { "ambos-marcan-resultado": "ambos-marcan" };
 
 export function categoryOf(market: MarketDef): string {
-  return CATEGORY_ALIAS[market.slug] ?? market.family?.label ?? market.label;
+  return CATEGORY_ALIAS[market.slug] ?? market.family?.key ?? market.slug;
 }
 
 export const STREAK_TYPES: StreakType[] = MARKETS.flatMap((market) =>
@@ -73,36 +83,60 @@ export const STREAK_TYPES: StreakType[] = MARKETS.flatMap((market) =>
 /** Por arbitro, los mercados de partido: los mismos que la pagina de Árbitros. */
 const REFEREE_TYPES = STREAK_TYPES.filter((t) => t.market.matchLevel);
 
-export const REFEREE_CHIP = "Árbitros";
-export const BAD_RUN_CHIP = "Mala racha";
+export const REFEREE_CHIP = "arbitros";
+export const BAD_RUN_CHIP = "mala-racha";
+/** Primera fila del estudio "¿Se prolongan?": todas las categorias juntas. */
+export const ALL_CATEGORIES = "todas";
 const BAD_RUN_OPTIONS = new Set(["resultado|pierde", "resultado|sin-ganar"]);
-const FIRST_CATEGORIES = ["Resultado", "Goles", "Ambos marcan", "Goles por parte", "Descanso / Final", "Portería a cero"];
+const FIRST_CATEGORIES = ["resultado", "goles", "ambos-marcan", "goles-por-parte", "descanso-final", "porteria-a-cero"];
 
 /** Chips de mercado, en el orden de la seccion y luego el del registro. */
 export const CATEGORIES: string[] = [
   ...new Set([
-    ...FIRST_CATEGORIES.filter((c) => STREAK_TYPES.some((t) => t.category === c)),
-    ...STREAK_TYPES.map((t) => t.category),
+    ...FIRST_CATEGORIES.filter((c) => STREAK_TYPES.some((type) => type.category === c)),
+    ...STREAK_TYPES.map((type) => type.category),
   ]),
 ];
+
+/** Texto de una categoria (o de los chips "Árbitros", "Mala racha" y de la
+ * fila "Todas"): el de su familia o su mercado. */
+export function categoryLabel(category: string): string {
+  if (category === REFEREE_CHIP) return t("streaks:chip.referees");
+  if (category === BAD_RUN_CHIP) return t("streaks:chip.badRun");
+  if (category === ALL_CATEGORIES) return t("streaks:chip.all");
+  const market = MARKETS.find((m) => categoryOf(m) === category);
+  return market ? (market.family?.label ?? market.label) : category;
+}
 
 // --- Textos ---------------------------------------------------------------------
 // Cada frase dice de quien es la cifra (del equipo, de su rival o de los dos
 // sumados) y, en las de linea, que se cumplio en cada partido, no en la suma.
 
-const num = (x: number) => x.toLocaleString("es-ES");
+// Las frases son plantillas de streaks:text con sus partes ya traducidas:
+// {{last}} ("los últimos 6 partidos de liga de X"), {{own}} ("sus últimos 6
+// partidos de liga") y {{amount}} ("más de 8,5 córners").
 
 function lineOf(option: MarketOption): { dir: "over" | "under"; line: number } | null {
   const m = option.key.match(/^(over|under)-(\d+(?:\.\d+)?)$/);
   return m ? { dir: m[1] as "over" | "under", line: Number(m[2]) } : null;
 }
 
-const nounOf = (market: MarketDef) => (market.family?.label ?? market.label).toLowerCase();
+/** Clave de la estadistica de cada familia en streaks:amount y streaks:text. */
+const STAT_KEYS: Record<string, string> = {
+  goles: "goals",
+  corners: "corners",
+  tarjetas: "cards",
+  "puntos-tarjeta": "bookingPoints",
+  tiros: "shots",
+  "tiros-puerta": "shotsOnTarget",
+  faltas: "fouls",
+};
 
-/** "más de 8,5 córners" (null si la opcion no es de linea). */
+/** "más de 8,5 córners" (null si la opcion no es de linea o de otra familia). */
 function lineText(market: MarketDef, option: MarketOption): string | null {
   const info = lineOf(option);
-  return info ? `${info.dir === "over" ? "más" : "menos"} de ${num(info.line)} ${nounOf(market)}` : null;
+  const stat = STAT_KEYS[market.family?.key ?? ""];
+  return info && stat ? t(`streaks:amount.${stat}.${info.dir}`, { line: formatLocaleNumber(info.line) }) : null;
 }
 
 type Variant = "match" | "team" | "rival" | "each" | "handicap" | null;
@@ -115,45 +149,31 @@ function variantOf(market: MarketDef): Variant {
   return ({ equipo: "team", rival: "rival", "cada-equipo": "each", handicap: "handicap" } as const)[suffix] ?? null;
 }
 
-/** Participio de lo que hace un equipo con cada estadistica ("ha sacado"). */
-const VERBS: Record<string, string> = {
-  goles: "marcado",
-  corners: "sacado",
-  tarjetas: "recibido",
-  "puntos-tarjeta": "sumado",
-  tiros: "hecho",
-  "tiros-puerta": "hecho",
-  faltas: "cometido",
-};
-/** Las del rival que se dicen "ha concedido" (córners y tiros). */
-const CONCEDED = new Set(["corners", "tiros", "tiros-puerta"]);
-
+/** Claves de streaks:text.goalsByHalf, resultado y descanso/final. */
 const HALF_TEXT: Record<string, string> = {
-  "gol-1p": "Ha habido gol en la primera parte",
-  "over-1.5-1p": "Ha habido más de 1,5 goles en la primera parte",
-  "gol-2p": "Ha habido gol en la segunda parte",
-  "over-1.5-2p": "Ha habido más de 1,5 goles en la segunda parte",
-  "mas-2p": "Se han marcado más goles en la segunda parte que en la primera",
+  "gol-1p": "goalFirstHalf",
+  "over-1.5-1p": "over15FirstHalf",
+  "gol-2p": "goalSecondHalf",
+  "over-1.5-2p": "over15SecondHalf",
+  "mas-2p": "moreInSecondHalf",
 };
-const RESULT_TEXT: Record<string, [string, boolean]> = {
-  gana: ["ha ganado", false],
-  empata: ["ha empatado", false],
-  pierde: ["ha perdido", false],
-  "no-pierde": ["no ha perdido", true],
-  "sin-ganar": ["no ha ganado", true],
+const RESULT_TEXT: Record<string, string> = {
+  gana: "win",
+  empata: "draw",
+  pierde: "lose",
+  "no-pierde": "winOrDraw",
+  "sin-ganar": "noWin",
 };
-const HT_TEXT: Record<string, string> = { g: "ganando", e: "empatando", p: "perdiendo" };
-const FT_TEXT: Record<string, string> = { g: "ganado", e: "empatado", p: "perdido" };
+const OUTCOME_TEXT: Record<string, string> = { g: "win", e: "draw", p: "lose" };
 
 /** Hándicap: "al menos 2 córners más que su rival", "como mucho 1 córner menos...". */
-function handicapText(line: number, noun: string): string {
+function handicapKey(line: number): { key: string; count: number } {
   if (line < 0) {
     const k = -line + 0.5;
-    return k === 1 ? `más ${noun} que su rival` : `al menos ${k} ${noun} más que su rival`;
+    return k === 1 ? { key: "more", count: k } : { key: "atLeastMore", count: k };
   }
   const k = line - 0.5;
-  if (k === 0) return `al menos tantos ${noun} como su rival`;
-  return `como mucho ${k} ${k === 1 ? noun.replace(/s$/, "") : noun} menos que su rival`;
+  return k === 0 ? { key: "asMany", count: k } : { key: "atMostFewer", count: k };
 }
 
 export interface StreakSubject {
@@ -161,80 +181,82 @@ export interface StreakSubject {
   name: string;
 }
 
-/** La frase de una racha de `n` partidos. `ctx`: "partidos de liga", "partidos en casa"... */
-export function streakText(who: StreakSubject, type: StreakType, n: number, ctx: string): string {
+/** Contexto de la frase: liga (o Champions), en casa o fuera. */
+function contextKey(context: StreakContext, leagueCode: string): string {
+  if (context === "home" || context === "away") return context;
+  return leagueCode === CHAMPIONS_LEAGUE_CODE ? "champions" : "league";
+}
+
+/** La frase de una racha de `n` partidos, en un contexto (todos los partidos
+ * de la liga, o solo en casa o fuera). */
+export function streakText(
+  who: StreakSubject,
+  type: StreakType,
+  n: number,
+  context: StreakContext,
+  leagueCode: string,
+): string {
   const { market, option } = type;
   const key = option.key;
   const name = who.name;
-  // "los últimos 6 partidos de liga de Barcelona" / "... del árbitro X"
-  const last = `los últimos ${n} ${ctx} ${who.kind === "team" ? `de ${name}` : `del árbitro ${name}`}`;
-  const own = `sus últimos ${n} ${ctx}`;
+  const ctx = contextKey(context, leagueCode);
+  const params = {
+    name,
+    // "los últimos 6 partidos de liga de Barcelona" / "... del árbitro X"
+    last: t(`streaks:last.${who.kind}.${ctx}`, { n, name }),
+    own: t(`streaks:own.${ctx}`, { n }),
+    lastPlain: t(`streaks:lastPlain.${ctx}`, { n }),
+    amount: lineText(market, option) ?? "",
+    market: market.title,
+    option: option.label,
+  };
+  const text = (path: string, extra?: Record<string, unknown>) => t(`streaks:text.${path}`, { ...params, ...extra });
   const familyKey = market.family?.key ?? "";
+  const stat = STAT_KEYS[familyKey];
   const info = lineOf(option);
-  const amount = lineText(market, option);
-  const verb = VERBS[familyKey] ?? "tenido";
+  const amount = params.amount !== "";
   const variant = variantOf(market);
 
   // Lo que pasa en el partido: vale para equipos y arbitros.
-  if (market.slug === "ambos-marcan") {
-    return key === "si"
-      ? `Han marcado los dos equipos en cada uno de ${last}`
-      : `Al menos un equipo se ha quedado sin marcar en cada uno de ${last}`;
-  }
-  if (market.slug === "goles-por-parte" && HALF_TEXT[key]) return `${HALF_TEXT[key]} en cada uno de ${last}`;
-  if (who.kind === "referee" && variant === "match" && familyKey === "tarjetas" && amount) {
-    return `El árbitro ${name} ha sacado ${amount} en cada uno de ${own}`;
-  }
-  if (variant === "match" && amount) return `En cada uno de ${last} ha habido ${amount} entre los dos equipos`;
-  if (variant === "each" && amount) return `En cada uno de ${last}, los dos equipos han ${verb} ${amount}`;
-  if (who.kind === "referee") return `En cada uno de ${last} se ha cumplido «${market.title}: ${option.label}»`;
+  if (market.slug === "ambos-marcan") return text(key === "si" ? "btts.yes" : "btts.no");
+  if (market.slug === "goles-por-parte" && HALF_TEXT[key]) return text(`goalsByHalf.${HALF_TEXT[key]}`);
+  if (who.kind === "referee" && variant === "match" && familyKey === "tarjetas" && amount) return text("refereeCards");
+  if (variant === "match" && amount) return text("match");
+  if (variant === "each" && amount) return text(`each.${stat}`);
+  if (who.kind === "referee") return text("refereeOther");
 
   // Lo que hace el equipo (o su rival).
   switch (market.slug) {
     case "ambos-marcan-resultado":
-      if (RESULT_TEXT[key]) return `${name} ${RESULT_TEXT[key][0]} ${own} y en todos han marcado los dos equipos`;
+      if (RESULT_TEXT[key]) return text(`bttsResult.${RESULT_TEXT[key]}`);
       break;
     case "goles-por-parte":
-      if (key === "marca-ambas") return `${name} ha marcado en las dos partes en cada uno de ${own}`;
+      if (key === "marca-ambas") return text("scoresBothHalves");
       break;
     case "resultado":
-      if (RESULT_TEXT[key]) return `${name} ${RESULT_TEXT[key][0]} ${RESULT_TEXT[key][1] ? "en " : ""}${own}`;
+      if (RESULT_TEXT[key]) return text(`result.${RESULT_TEXT[key]}`);
       break;
     case "descanso-final":
-      if (HT_TEXT[key[0]] && FT_TEXT[key[1]]) {
-        return `${name} ha ido ${HT_TEXT[key[0]]} al descanso y ha ${FT_TEXT[key[1]]} al final en ${own}`;
+      if (OUTCOME_TEXT[key[0]] && OUTCOME_TEXT[key[1]]) {
+        return text(`htFt.${OUTCOME_TEXT[key[0]]}.${OUTCOME_TEXT[key[1]]}`);
       }
       break;
     case "porteria-a-cero":
-      return key === "si" ? `${name} ha dejado la portería a cero en ${own}` : `${name} ha encajado gol en ${own}`;
+      return text(key === "si" ? "cleanSheet.yes" : "cleanSheet.no");
   }
   if (variant === "team" && info && amount) {
-    if (familyKey === "goles" && info.line === 0.5) return `${name} ${info.dir === "over" ? "ha" : "no ha"} marcado en ${own}`;
-    return `${name} ha ${verb} ${amount} en cada uno de ${own}`;
+    if (familyKey === "goles" && info.line === 0.5) return text(`teamScored.${info.dir}`);
+    return text(`team.${stat}`);
   }
   if (variant === "rival" && info && amount) {
-    if (familyKey === "goles") {
-      if (info.line === 0.5) return `${name} ${info.dir === "over" ? "ha" : "no ha"} encajado gol en ${own}`;
-      return `${name} ha encajado ${amount} en cada uno de ${own}`;
-    }
-    if (CONCEDED.has(familyKey)) return `${name} ha concedido ${amount} en cada uno de ${own}`;
-    return `Los rivales de ${name} han ${verb} ${amount} en cada uno de los últimos ${n} ${ctx}`;
+    if (familyKey === "goles" && info.line === 0.5) return text(`teamConceded.${info.dir}`);
+    return text(`rival.${stat}`);
   }
-  if (variant === "handicap" && /^h-?\d/.test(key)) {
-    return `${name} ha ${verb} ${handicapText(Number(key.slice(1)), nounOf(market))} en cada uno de ${own}`;
+  if (variant === "handicap" && /^h-?\d/.test(key) && stat === "corners") {
+    const handicap = handicapKey(Number(key.slice(1)));
+    return text(`handicap.${stat}.${handicap.key}`, { count: handicap.count });
   }
-  return `${name} ha cumplido «${market.title}: ${option.label}» en ${own}`;
-}
-
-function competitionOf(leagueCode: string): string {
-  return leagueCode === CHAMPIONS_LEAGUE_CODE ? "de Champions" : "de liga";
-}
-
-/** "partidos de liga", "partidos en casa", "partidos fuera de casa". */
-export function contextNoun(context: StreakContext, leagueCode: string): string {
-  if (context === "home") return "partidos en casa";
-  if (context === "away") return "partidos fuera de casa";
-  return `partidos ${competitionOf(leagueCode)}`;
+  return text("fallback");
 }
 
 // --- Rachas activas -----------------------------------------------------------
@@ -281,6 +303,24 @@ export function upcomingDays(now = new Date()): string[] {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
     return dayKey(d);
   });
+}
+
+/** Rotulo de la pestaña `index` de upcomingDays: "Hoy", "Mañana" y luego el
+ * dia de la semana ("Sáb"), con la fecha ("24 oct"). */
+export function dayLabel(key: string, index: number): { name: string; date: string } {
+  const [y, m, d] = key.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  const locale = currentLocale();
+  const weekday = date.toLocaleDateString(locale, { weekday: "short" }).replace(".", "");
+  return {
+    name:
+      index === 0
+        ? t("common:today")
+        : index === 1
+          ? t("common:tomorrow")
+          : weekday.charAt(0).toLocaleUpperCase(locale) + weekday.slice(1),
+    date: date.toLocaleDateString(locale, { day: "numeric", month: "short" }),
+  };
 }
 
 /** Frecuencia de cada tipo en la liga, por campo (con cache). */
@@ -371,13 +411,18 @@ export function activeStreaks(leagueCode: string, played: MatchResult[], upcomin
       chance,
       skipped,
       since: oldest.match.date,
-      text: text(length),
+      get text() {
+        return text(length);
+      },
       odds: base.side ? oddsFor(base.match, type, base.side) : null,
     });
   };
 
   for (const match of [...upcoming].sort((a, b) => toTime(a.date) - toTime(b.date))) {
     const day = dayKey(parseApiDate(match.date));
+    // La frase, en el idioma actual cada vez que se lee.
+    const phrase = (who: StreakSubject, type: StreakType, context: StreakContext) => (n: number) =>
+      streakText(who, type, n, context, leagueCode);
     // Cada equipo, con su proximo partido de la liga.
     for (const side of ["home", "away"] as const) {
       const teamId = side === "home" ? match.home_team_id : match.away_team_id;
@@ -389,8 +434,8 @@ export function activeStreaks(leagueCode: string, played: MatchResult[], upcomin
       const base = { kind: "team" as const, leagueCode, match, day, side, entityKey: `t${teamId}`, entity: team };
       const who: StreakSubject = { kind: "team", name: team };
       for (const type of STREAK_TYPES) {
-        add(base, views, type, "all", (n) => streakText(who, type, n, contextNoun("all", leagueCode)));
-        add(base, atVenue, type, side, (n) => streakText(who, type, n, contextNoun(side, leagueCode)));
+        add(base, views, type, "all", phrase(who, type, "all"));
+        add(base, atVenue, type, side, phrase(who, type, side));
       }
     }
     // El arbitro, solo si ya esta designado en nuestros datos.
@@ -404,7 +449,7 @@ export function activeStreaks(leagueCode: string, played: MatchResult[], upcomin
       const base = { kind: "referee" as const, leagueCode, match, day, side: null, entityKey: `r${referee}`, entity: referee };
       const who: StreakSubject = { kind: "referee", name: referee };
       for (const type of REFEREE_TYPES) {
-        add(base, views, type, "all", (n) => streakText(who, type, n, contextNoun("all", leagueCode)));
+        add(base, views, type, "all", phrase(who, type, "all"));
       }
     }
   }
@@ -693,8 +738,8 @@ export interface StudyRow {
 export function* summarizeStudySteps(events: StudyEvent[]): Generator<void, StudyRow[]> {
   const random = seeded(BOOTSTRAP_SEED);
   const rows: StudyRow[] = [];
-  for (const category of ["Todas", ...CATEGORIES, REFEREE_CHIP]) {
-    const own = category === "Todas" ? events : events.filter((e) => e.category === category);
+  for (const category of [ALL_CATEGORIES, ...CATEGORIES, REFEREE_CHIP]) {
+    const own = category === ALL_CATEGORIES ? events : events.filter((e) => e.category === category);
     const cells = {} as Record<LengthBucket, StudyCell | null>;
     for (const bucket of LENGTH_BUCKETS) {
       cells[bucket] = cell(

@@ -1,22 +1,19 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import { PageHero } from "../components/PageHero";
 import { useSearchParams } from "react-router-dom";
 import { getLeagues, getLeagueSeasonStats, getLeagueSeasons } from "../api/client";
 import type { FormResult, SplitStats, TeamSeasonStats } from "../api/types";
 import { LeagueSwitch } from "../components/LeagueSwitch";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
 import { TeamName } from "../components/TeamCrest";
-import { formatPct } from "../lib/format";
-import { DEFAULT_LEAGUE_CODE, useSelectedLeagueCode } from "../lib/leagues";
+import { formatFixed, formatPct } from "../lib/format";
+import { DEFAULT_LEAGUE_CODE, useSelectedLeagueCode, leagueName } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 
 type SplitKey = "overall" | "home" | "away" | "last5";
 
-const SPLIT_LABELS: Record<SplitKey, string> = {
-  overall: "Total",
-  home: "Local",
-  away: "Visitante",
-  last5: "Últimos 5",
-};
+const SPLITS: SplitKey[] = ["overall", "home", "away", "last5"];
 
 function splitOf(team: TeamSeasonStats, split: SplitKey): SplitStats {
   return team[split];
@@ -26,6 +23,7 @@ type SortDir = "asc" | "desc";
 
 type ColumnGroup = "General" | "Goles" | "Descanso" | "Corners" | "Tarjetas";
 
+/** `label`, `title` y `short`: claves de sus textos (standings:column). */
 interface Column {
   key: string;
   group: ColumnGroup;
@@ -70,7 +68,10 @@ const avgColumn = (
   label,
   title,
   value,
-  render: (s) => value(s)?.toFixed(digits) ?? "—",
+  render: (s) => {
+    const x = value(s);
+    return x != null ? formatFixed(x, digits) : "—";
+  },
   lowSampleAware: true,
   heat: true,
 });
@@ -85,52 +86,52 @@ const countColumn = (key: string, label: string, title: string, value: (s: Split
 });
 
 const COLUMNS: Column[] = [
-  { ...countColumn("pj", "PJ", "Partidos jugados", (s) => s.matches_played), lowSampleAware: true },
-  { ...countColumn("g", "G", "Ganados", (s) => s.wins), hide: "sm" },
-  { ...countColumn("e", "E", "Empatados", (s) => s.draws), hide: "sm" },
-  { ...countColumn("p", "P", "Perdidos", (s) => s.losses), hide: "sm" },
-  { ...countColumn("gf", "GF", "Goles a favor", (s) => s.goals_for), hide: "sm" },
-  { ...countColumn("gc", "GC", "Goles en contra", (s) => s.goals_against), hide: "sm" },
+  { ...countColumn("pj", "standings:column.played.label", "standings:column.played.title", (s) => s.matches_played), lowSampleAware: true },
+  { ...countColumn("g", "standings:column.won.label", "standings:column.won.title", (s) => s.wins), hide: "sm" },
+  { ...countColumn("e", "standings:column.drawn.label", "standings:column.drawn.title", (s) => s.draws), hide: "sm" },
+  { ...countColumn("p", "standings:column.lost.label", "standings:column.lost.title", (s) => s.losses), hide: "sm" },
+  { ...countColumn("gf", "standings:column.goalsFor.label", "standings:column.goalsFor.title", (s) => s.goals_for), hide: "sm" },
+  { ...countColumn("gc", "standings:column.goalsAgainst.label", "standings:column.goalsAgainst.title", (s) => s.goals_against), hide: "sm" },
   {
-    ...countColumn("dg", "DG", "Diferencia de goles", (s) => s.goals_for - s.goals_against),
+    ...countColumn("dg", "standings:column.goalDifference.label", "standings:column.goalDifference.title", (s) => s.goals_for - s.goals_against),
     render: (s) => {
       const dg = s.goals_for - s.goals_against;
       return dg > 0 ? `+${dg}` : dg;
     },
   },
-  { ...countColumn("pts", "Pts", "Puntos", (s) => s.points), render: (s) => <strong>{s.points}</strong> },
-  avgColumn("General", "ppg", "Pts/PJ", "Puntos por partido", (s) => s.points_per_game, 2),
-  avgColumn("Goles", "gfa", "GF/PJ", "Goles a favor por partido", (s) => s.goals_for_avg, 2),
+  { ...countColumn("pts", "standings:column.points.label", "standings:column.points.title", (s) => s.points), render: (s) => <strong>{s.points}</strong> },
+  avgColumn("General", "ppg", "standings:column.pointsPerGame.label", "standings:column.pointsPerGame.title", (s) => s.points_per_game, 2),
+  avgColumn("Goles", "gfa", "standings:column.goalsForPerGame.label", "standings:column.goalsForPerGame.title", (s) => s.goals_for_avg, 2),
   {
-    ...avgColumn("Goles", "gca", "GC/PJ", "Goles en contra por partido", (s) => s.goals_against_avg, 2),
+    ...avgColumn("Goles", "gca", "standings:column.goalsAgainstPerGame.label", "standings:column.goalsAgainstPerGame.title", (s) => s.goals_against_avg, 2),
     hide: "sm",
   },
-  { ...pctColumn("Goles", "o15", "+1.5", "% de partidos con más de 1.5 goles", (s) => s.over_1_5_pct), hide: "sm" },
-  pctColumn("Goles", "o25", "+2.5", "% de partidos con más de 2.5 goles", (s) => s.over_2_5_pct),
-  { ...pctColumn("Goles", "o35", "+3.5", "% de partidos con más de 3.5 goles", (s) => s.over_3_5_pct), hide: "md" },
+  { ...pctColumn("Goles", "o15", "standings:column.over15.label", "standings:column.over15.title", (s) => s.over_1_5_pct), hide: "sm" },
+  pctColumn("Goles", "o25", "standings:column.over25.label", "standings:column.over25.title", (s) => s.over_2_5_pct),
+  { ...pctColumn("Goles", "o35", "standings:column.over35.label", "standings:column.over35.title", (s) => s.over_3_5_pct), hide: "md" },
   {
-    ...pctColumn("Goles", "btts", "Ambos anotan", "% de partidos en los que marcan los dos equipos", (s) => s.btts_pct),
-    short: "Ambos",
+    ...pctColumn("Goles", "btts", "standings:column.btts.label", "standings:column.btts.title", (s) => s.btts_pct),
+    short: "standings:column.btts.short",
   },
-  { ...pctColumn("Goles", "cs", "Portería a 0", "% de partidos sin encajar", (s) => s.clean_sheet_pct), short: "P. a 0" },
-  { ...pctColumn("Goles", "fts", "No marca", "% de partidos sin marcar", (s) => s.failed_to_score_pct), hide: "md" },
+  { ...pctColumn("Goles", "cs", "standings:column.cleanSheet.label", "standings:column.cleanSheet.title", (s) => s.clean_sheet_pct), short: "standings:column.cleanSheet.short" },
+  { ...pctColumn("Goles", "fts", "standings:column.failedToScore.label", "standings:column.failedToScore.title", (s) => s.failed_to_score_pct), hide: "md" },
   {
-    ...pctColumn("Descanso", "ht05", "+0.5 1ª parte", "% de partidos con algún gol en la 1ª parte", (s) => s.ht_over_0_5_pct),
+    ...pctColumn("Descanso", "ht05", "standings:column.htOver05.label", "standings:column.htOver05.title", (s) => s.ht_over_0_5_pct),
     hide: "sm",
   },
   {
-    ...pctColumn("Descanso", "htw", "Gana al descanso", "% de partidos que llega ganando al descanso", (s) => s.ht_win_pct),
+    ...pctColumn("Descanso", "htw", "standings:column.htWin.label", "standings:column.htWin.title", (s) => s.ht_win_pct),
     hide: "md",
   },
-  { ...avgColumn("Corners", "cf", "A favor", "Media de corners a favor por partido", (s) => s.corners_for_avg), short: "Córn. +" },
+  { ...avgColumn("Corners", "cf", "standings:column.cornersFor.label", "standings:column.cornersFor.title", (s) => s.corners_for_avg), short: "standings:column.cornersFor.short" },
   {
-    ...avgColumn("Corners", "cc", "En contra", "Media de corners en contra por partido", (s) => s.corners_against_avg),
-    short: "Córn. −",
+    ...avgColumn("Corners", "cc", "standings:column.cornersAgainst.label", "standings:column.cornersAgainst.title", (s) => s.corners_against_avg),
+    short: "standings:column.cornersAgainst.short",
   },
-  { ...avgColumn("Tarjetas", "yf", "Amarillas", "Media de amarillas vistas por partido", (s) => s.yellow_for_avg), short: "Amar." },
+  { ...avgColumn("Tarjetas", "yf", "standings:column.yellowFor.label", "standings:column.yellowFor.title", (s) => s.yellow_for_avg), short: "standings:column.yellowFor.short" },
   {
-    ...avgColumn("Tarjetas", "ya", "Del rival", "Media de amarillas del rival por partido", (s) => s.yellow_against_avg),
-    short: "Amar. rival",
+    ...avgColumn("Tarjetas", "ya", "standings:column.yellowAgainst.label", "standings:column.yellowAgainst.title", (s) => s.yellow_against_avg),
+    short: "standings:column.yellowAgainst.short",
   },
 ];
 
@@ -144,21 +145,22 @@ function columnGroups(columns: Column[]) {
   }, []);
 }
 
+/** Clave del rotulo de cada grupo de columnas (el grupo da tambien su clase CSS). */
 const GROUP_LABEL: Record<ColumnGroup, string> = {
-  General: "General",
-  Goles: "Goles",
-  Descanso: "Descanso",
-  Corners: "Córners",
-  Tarjetas: "Tarjetas",
+  General: "standings:group.general",
+  Goles: "standings:group.goals",
+  Descanso: "standings:group.halfTime",
+  Corners: "standings:group.corners",
+  Tarjetas: "standings:group.cards",
 };
 const groupClass = (g: ColumnGroup) => `grp-${g.toLowerCase()}`;
 
 /** Una vista cada vez: cada una cabe en el ancho de la pagina. */
 type View = "clasificacion" | "goles" | "corners";
 const VIEWS: { key: View; label: string; groups: ColumnGroup[]; sort: string }[] = [
-  { key: "clasificacion", label: "Clasificación", groups: ["General"], sort: "pts" },
-  { key: "goles", label: "Goles y descanso", groups: ["Goles", "Descanso"], sort: "o25" },
-  { key: "corners", label: "Córners y tarjetas", groups: ["Corners", "Tarjetas"], sort: "cf" },
+  { key: "clasificacion", label: "standings:view.standings", groups: ["General"], sort: "pts" },
+  { key: "goles", label: "standings:view.goals", groups: ["Goles", "Descanso"], sort: "o25" },
+  { key: "corners", label: "standings:view.corners", groups: ["Corners", "Tarjetas"], sort: "cf" },
 ];
 const VIEW_KEY = "season-stats-view";
 const FORM_KEY = "season-stats-form";
@@ -184,8 +186,8 @@ function store(key: string, value: string): void {
 const MIN_MATCHES_OPTIONS = [0, 3, 5, 10];
 const LOW_SAMPLE = 5;
 
-const FORM_LABELS: Record<FormResult, string> = { W: "G", D: "E", L: "P" };
-const FORM_TITLES: Record<FormResult, string> = { W: "Ganó", D: "Empató", L: "Perdió" };
+/** Claves de la letra y del texto de cada resultado (standings:form). */
+const FORM_KEYS: Record<FormResult, string> = { W: "win", D: "draw", L: "loss" };
 
 /** Orden de clasificacion: puntos, diferencia de goles y goles a favor. */
 function compareStandings(a: SplitStats, b: SplitStats): number {
@@ -197,12 +199,14 @@ function compareStandings(a: SplitStats, b: SplitStats): number {
 }
 
 function FormDots({ form }: { form: FormResult[] }) {
+  const { t } = useTranslation();
   if (form.length === 0) return <span className="muted">—</span>;
+  const title = (r: FormResult) => t(`standings:form.${FORM_KEYS[r]}.title`);
   return (
-    <span className="form-dots" aria-label={`Últimos resultados: ${form.map((r) => FORM_TITLES[r]).join(", ")}`}>
+    <span className="form-dots" aria-label={t("standings:form.label", { results: form.map(title).join(", ") })}>
       {form.map((result, i) => (
-        <span key={i} className={`form-dot form-${result}`} title={FORM_TITLES[result]}>
-          {FORM_LABELS[result]}
+        <span key={i} className={`form-dot form-${result}`} title={title(result)}>
+          {t(`standings:form.${FORM_KEYS[result]}.letter`)}
         </span>
       ))}
     </span>
@@ -210,6 +214,7 @@ function FormDots({ form }: { form: FormResult[] }) {
 }
 
 export function SeasonStatsPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const leagueFromUrl = searchParams.get("league");
 
@@ -324,16 +329,11 @@ export function SeasonStatsPage() {
 
   return (
     <div>
-      <h1>Clasificación y estadísticas</h1>
-      <p className="muted">
-        Datos reales de partidos jugados: % over/under, ambos anotan, porterías a cero, descanso, corners y tarjetas,
-        en total, como local, como visitante o en los últimos 5 partidos. Pulsa en una cabecera para ordenar por esa
-        columna (otra vez para invertir el orden).
-      </p>
+      <PageHero eyebrow={leagueName(leagueCode)} title={t("standings:title")} lead={<p>{t("standings:lead")}</p>} />
 
       <LeagueSwitch leagues={leagues} value={leagueCode} onChange={(code) => code && setLeagueCode(code)} />
 
-      <div className="tab-group stats-views" role="tablist" aria-label="Columnas de la tabla">
+      <div className="tab-group stats-views" role="tablist" aria-label={t("standings:viewsLabel")}>
         {VIEWS.map((v) => (
           <button
             key={v.key}
@@ -343,7 +343,7 @@ export function SeasonStatsPage() {
             className={view === v.key ? "tab-button tab-button-active" : "tab-button"}
             onClick={() => setView(v.key)}
           >
-            {v.label}
+            {t(v.label)}
           </button>
         ))}
       </div>
@@ -358,23 +358,23 @@ export function SeasonStatsPage() {
         </select>
 
         <div className="tab-group">
-          {(Object.keys(SPLIT_LABELS) as SplitKey[]).map((key) => (
+          {SPLITS.map((key) => (
             <button
               key={key}
               className={split === key ? "tab-button tab-button-active" : "tab-button"}
               onClick={() => setSplit(key)}
             >
-              {SPLIT_LABELS[key]}
+              {t(`standings:split.${key}`)}
             </button>
           ))}
         </div>
 
         <label className="filter-label">
-          Mín. partidos
+          {t("standings:minMatches")}
           <select value={minMatches} onChange={(e) => setMinMatches(Number(e.target.value))}>
             {MIN_MATCHES_OPTIONS.map((n) => (
               <option key={n} value={n}>
-                {n === 0 ? "Todos" : n}
+                {n === 0 ? t("standings:minMatchesAll") : n}
               </option>
             ))}
           </select>
@@ -382,31 +382,28 @@ export function SeasonStatsPage() {
 
         <label className="filter-label">
           <input type="checkbox" checked={heatmap} onChange={(e) => setHeatmap(e.target.checked)} />
-          Mapa de calor
+          {t("standings:heatmap")}
         </label>
 
         <label className="filter-label">
           <input type="checkbox" checked={showForm} onChange={(e) => setShowForm(e.target.checked)} />
-          Racha
+          {t("standings:form.column")}
         </label>
       </div>
 
       {noCornersYet && (
         <p className="small muted intro-note">
-          Todavía no hay datos de corners ni tarjetas para la temporada{" "}
-          {effectiveSeason ? `${effectiveSeason.slice(0, 2)}/${effectiveSeason.slice(2)}` : "seleccionada"}: la fuente
-          que alimenta los partidos en curso (football-data.org, plan gratuito) no los incluye, solo resultados. Solo
-          están disponibles en temporadas ya cerradas. Prueba con una temporada anterior en el selector de arriba.
+          {effectiveSeason
+            ? t("standings:noCorners", { season: `${effectiveSeason.slice(0, 2)}/${effectiveSeason.slice(2)}` })
+            : t("standings:noCornersSelected")}
         </p>
       )}
 
-      {loading && <LoadingView label="Cargando estadísticas..." />}
-      {error && <ErrorView message={`No se pudo conectar con la API: ${error}`} />}
-      {!loading && !error && standings?.length === 0 && (
-        <EmptyView message="No hay estadísticas para esta liga/temporada." />
-      )}
+      {loading && <LoadingView label={t("standings:loading")} />}
+      {error && <ErrorView message={t("common:error.api", { error })} />}
+      {!loading && !error && standings?.length === 0 && <EmptyView message={t("standings:empty")} />}
       {!loading && !error && standings && standings.length > 0 && sorted?.length === 0 && (
-        <EmptyView message={`Ningún equipo tiene al menos ${minMatches} partidos en esta vista.`} />
+        <EmptyView message={t("standings:emptyFiltered", { n: minMatches })} />
       )}
 
       {!loading && !error && sorted && sorted.length > 0 && (
@@ -417,17 +414,17 @@ export function SeasonStatsPage() {
                   <th colSpan={showForm ? 3 : 2} />
                   {shownGroups.map(({ group, span }) => (
                     <th key={group} colSpan={span} className={`group-head ${groupClass(group)}`}>
-                      {GROUP_LABEL[group]}
+                      {t(GROUP_LABEL[group])}
                     </th>
                   ))}
                 </tr>
               )}
               <tr>
                 <th className="num stats-pos">#</th>
-                <th className="stats-team">Equipo</th>
+                <th className="stats-team">{t("standings:team")}</th>
                 {showForm && (
-                  <th className="stats-form" title="Últimos 5 partidos de la temporada, del más antiguo al más reciente">
-                    Racha
+                  <th className="stats-form" title={t("standings:form.columnTitle")}>
+                    {t("standings:form.column")}
                   </th>
                 )}
                 {shown.map((col, i) => {
@@ -440,17 +437,17 @@ export function SeasonStatsPage() {
                     <th
                       key={col.key}
                       className={classes.join(" ")}
-                      title={col.title}
+                      title={t(col.title)}
                       aria-sort={active ? (sort.dir === "desc" ? "descending" : "ascending") : "none"}
                     >
                       <button type="button" onClick={() => toggleSort(col.key)}>
                         {col.short ? (
                           <>
-                            <span className="label-long">{col.label}</span>
-                            <span className="label-short">{col.short}</span>
+                            <span className="label-long">{t(col.label)}</span>
+                            <span className="label-short">{t(col.short)}</span>
                           </>
                         ) : (
-                          col.label
+                          t(col.label)
                         )}
                         <span className="sort-arrow">{active ? (sort.dir === "desc" ? "▼" : "▲") : ""}</span>
                       </button>
@@ -495,13 +492,8 @@ export function SeasonStatsPage() {
 
       {!loading && !error && sorted && sorted.length > 0 && (
         <p className="muted small">
-          # = posición en la clasificación de la vista elegida · PJ = partidos jugados · G/E/P =
-          ganados/empatados/perdidos · GF/GC/DG = goles a favor/en contra/diferencia · Racha: G/E/P de los últimos 5
-          partidos, el más reciente a la derecha. En pantallas estrechas se ocultan algunas columnas; en un
-          ordenador se ven todas. Descanso, corners y tarjetas se calculan solo con los partidos que
-          traen ese dato. Con menos de {LOW_SAMPLE} partidos (en gris, sin mapa de calor) los porcentajes son poco
-          fiables — tómalos como orientativos, no como un patrón asentado.
-          {hiddenCount > 0 && ` Ocultos ${hiddenCount} equipos con menos de ${minMatches} partidos.`}
+          {t("standings:legend", { n: LOW_SAMPLE })}
+          {hiddenCount > 0 && ` ${t("standings:hidden", { count: hiddenCount, n: minMatches })}`}
         </p>
       )}
     </div>

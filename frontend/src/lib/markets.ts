@@ -1,4 +1,6 @@
 import type { MatchResult, TeamMatchStats } from "../api/types";
+import { t } from "../i18n";
+import { formatLine } from "./format";
 
 /** Un partido visto desde uno de los dos equipos: todos los mercados se
  * evaluan desde esta perspectiva (el "gana" de un mercado es del equipo de
@@ -26,7 +28,11 @@ export interface MarketOption {
   hit: (v: TeamMatchView) => boolean | null;
 }
 
-export type MarketGroup = "Goles" | "Resultado" | "Estadísticas";
+export type MarketGroup = "goals" | "result" | "stats";
+
+export function marketGroupLabel(group: MarketGroup): string {
+  return t(`markets:group.${group}`);
+}
 
 /** Cifra de cada fila, local - visitante, con las rojas de cada equipo
  * aparte para poder marcarlas. */
@@ -37,6 +43,8 @@ export interface DetailValue {
   awayRed?: number;
 }
 
+/** Los textos (label, title, description, note...) son getters: salen del
+ * idioma actual cada vez que se leen. */
 export interface MarketDef {
   slug: string;
   group: MarketGroup;
@@ -56,7 +64,7 @@ export interface MarketDef {
   family?: { key: string; label: string; variant: string };
   /** Cifra propia del mercado que se muestra en cada fila, junto al
    * marcador (ej. corners "7 - 5"). null si el partido no tiene ese dato. */
-  detail?: { label: string; value: (m: MatchResult) => DetailValue | null };
+  detail?: { label: string; inlineLabel: string; value: (m: MatchResult) => DetailValue | null };
   /** Media por partido que se muestra en la cabecera de cada tarjeta. */
   average?: { label: string; value: (v: TeamMatchView) => number | null };
   note?: string;
@@ -99,22 +107,30 @@ const secondHalfTotal = (v: TeamMatchView) => add(secondHalfFor(v), secondHalfAg
 type Outcome = "G" | "E" | "P";
 const outcome = (goalsFor: number, goalsAgainst: number): Outcome =>
   goalsFor > goalsAgainst ? "G" : goalsFor === goalsAgainst ? "E" : "P";
-const OUTCOME_LABEL: Record<Outcome, string> = { G: "Gana", E: "Empata", P: "Pierde" };
+const OUTCOME_KEY: Record<Outcome, string> = { G: "win", E: "draw", P: "lose" };
 
 /** Una fila de botones "Más de" y otra de "Menos de" con las mismas lineas. */
 function overUnderOptions(hitOver: (line: number) => MarketOption["hit"], hitUnder: (line: number) => MarketOption["hit"], lines: number[]): MarketOption[] {
   return [
     ...lines.map((line) => ({
       key: `over-${line}`,
-      label: `Más de ${line}`,
-      short: String(line),
+      get label() {
+        return t("markets:option.over", { line: formatLine(line) });
+      },
+      get short() {
+        return formatLine(line);
+      },
       row: "over" as const,
       hit: hitOver(line),
     })),
     ...lines.map((line) => ({
       key: `under-${line}`,
-      label: `Menos de ${line}`,
-      short: String(line),
+      get label() {
+        return t("markets:option.under", { line: formatLine(line) });
+      },
+      get short() {
+        return formatLine(line);
+      },
       row: "under" as const,
       hit: hitUnder(line),
     })),
@@ -162,7 +178,13 @@ const statDetail =
   };
 
 const HALF_TIME_DETAIL: MarketDef["detail"] = {
-  label: "Descanso",
+  get label() {
+    return t("markets:halfTime");
+  },
+  /** En mitad de una frase ("La columna de la derecha es: descanso"). */
+  get inlineLabel() {
+    return t("markets:halfTimeInline");
+  },
   value: (m) =>
     m.home_ht_goals === null || m.away_ht_goals === null
       ? null
@@ -170,111 +192,158 @@ const HALF_TIME_DETAIL: MarketDef["detail"] = {
 };
 
 /** Una estadistica con sus variantes: del partido, del equipo, del rival,
- * cada equipo y (opcional) handicap. */
+ * cada equipo y (opcional) handicap. Sus textos, en markets:stat.<textKey>. */
 interface StatSpec {
   key: string;
-  label: string;
+  textKey: string;
   group: MarketGroup;
-  /** En minusculas, para textos: "córners", "tarjetas"... */
-  noun: string;
   forValue: Value;
   againstValue: Value;
   lines: { match: number[]; team: number[]; each: number[] };
   handicap?: number[];
-  detail?: MarketDef["detail"];
-  note?: string;
-  /** Descripcion general; se completa con la de cada variante. */
-  description: string;
+  /** Cifra de cada fila (su rotulo es markets:stat.<textKey>.detail). */
+  detail?: NonNullable<MarketDef["detail"]>["value"];
+  /** Tiene nota (markets:stat.<textKey>.note). */
+  note?: boolean;
 }
 
 function defaultLine(lines: number[]): string {
   return `over-${lines[Math.floor((lines.length - 1) / 2)]}`;
 }
 
+type Variant = "match" | "team" | "rival" | "each" | "handicap";
+
 function statFamily(spec: StatSpec): MarketDef[] {
-  const family = (variant: string) => ({ key: spec.key, label: spec.label, variant });
-  const base = {
-    group: spec.group,
-    label: spec.label,
-    detail: spec.detail,
-    note: spec.note,
-  };
+  const key = (path: string) => `markets:stat.${spec.textKey}.${path}`;
+  const detail = spec.detail;
+  /** Textos comunes de una variante: el de la familia y los suyos. */
+  const variantTexts = (variant: Variant, averageKey: string) => ({
+    get label() {
+      return t(key("label"));
+    },
+    family: {
+      key: spec.key,
+      get label() {
+        return t(key("label"));
+      },
+      get variant() {
+        return t(`markets:variant.${variant}.label`);
+      },
+    },
+    get title() {
+      return t(key(`title.${variant}`));
+    },
+    get description() {
+      return t(`markets:variant.${variant}.description`, { base: t(key("description")) });
+    },
+    detail: detail
+      ? {
+          get label() {
+            return t(key("detail"));
+          },
+          get inlineLabel() {
+            return t(key("detailInline"));
+          },
+          value: detail,
+        }
+      : undefined,
+    get note() {
+      return spec.note ? t(key("note")) : undefined;
+    },
+    averageLabel: () => t(key(`average.${averageKey}`)),
+  });
   const matchValue: Value = (v) => add(spec.forValue(v), spec.againstValue(v));
 
+  const make = (
+    variant: Variant,
+    averageKey: string,
+    rest: Omit<MarketDef, "label" | "title" | "description" | "family" | "detail" | "note" | "group" | "average"> & {
+      average: Value;
+    },
+  ): MarketDef => {
+    const texts = variantTexts(variant, averageKey);
+    const market: MarketDef = {
+      ...rest,
+      group: spec.group,
+      family: texts.family,
+      detail: texts.detail,
+      average: {
+        get label() {
+          return texts.averageLabel();
+        },
+        value: rest.average,
+      },
+      get label() {
+        return texts.label;
+      },
+      get title() {
+        return texts.title;
+      },
+      get description() {
+        return texts.description;
+      },
+      get note() {
+        return texts.note;
+      },
+    };
+    return market;
+  };
+
   const markets: MarketDef[] = [
-    {
-      ...base,
+    make("match", "match", {
       slug: spec.key,
-      family: family("Total del partido"),
-      title: `${spec.label} del partido`,
-      description: `${spec.description} Total del partido: suma de los dos equipos.`,
       options: valueOverUnder(matchValue, spec.lines.match),
       defaultOption: defaultLine(spec.lines.match),
       matchLevel: true,
-      average: { label: `${spec.noun} por partido`, value: matchValue },
-    },
-    {
-      ...base,
+      average: matchValue,
+    }),
+    make("team", "team", {
       slug: `${spec.key}-equipo`,
-      family: family("Del equipo"),
-      title: `${spec.label} del equipo`,
-      description: `${spec.description} Del equipo: solo los del equipo de cada tarjeta.`,
       options: valueOverUnder(spec.forValue, spec.lines.team),
       defaultOption: defaultLine(spec.lines.team),
       matchLevel: false,
-      average: { label: `${spec.noun} a favor por partido`, value: spec.forValue },
-    },
-    {
-      ...base,
+      average: spec.forValue,
+    }),
+    make("rival", "rival", {
       slug: `${spec.key}-rival`,
-      family: family("Del rival"),
-      title: `${spec.label} del rival`,
-      description: `${spec.description} Del rival: los del equipo contrario en cada partido.`,
       options: valueOverUnder(spec.againstValue, spec.lines.team),
       defaultOption: defaultLine(spec.lines.team),
       matchLevel: false,
-      average: { label: `${spec.noun} en contra por partido`, value: spec.againstValue },
-    },
-    {
-      ...base,
+      average: spec.againstValue,
+    }),
+    make("each", "match", {
       slug: `${spec.key}-cada-equipo`,
-      family: family("Cada equipo"),
-      title: `${spec.label}: cada equipo`,
-      description: `${spec.description} Cada equipo: los dos equipos por encima de la línea (o, en «Menos de», los dos por debajo).`,
       options: eachTeamOverUnder(spec.forValue, spec.againstValue, spec.lines.each),
       defaultOption: defaultLine(spec.lines.each),
       matchLevel: true,
-      average: { label: `${spec.noun} por partido`, value: matchValue },
-    },
+      average: matchValue,
+    }),
   ];
 
   if (spec.handicap) {
-    markets.push({
-      ...base,
-      slug: `${spec.key}-handicap`,
-      family: family("Hándicap"),
-      title: `Hándicap de ${spec.noun}`,
-      description: `${spec.description} Hándicap: se suma la línea a los del equipo y se compara con los del rival. «-1.5» = el equipo saca al menos 2 más que el rival; «+1.5» = el equipo no queda 2 o más por debajo del rival.`,
-      options: spec.handicap.map((line) => ({
-        key: `h${line}`,
-        label: `${line > 0 ? "+" : ""}${line}`,
-        hit: (v: TeamMatchView) => {
-          const x = spec.forValue(v);
-          const y = spec.againstValue(v);
-          return x === null || y === null ? null : x + line > y;
-        },
-      })),
-      defaultOption: `h${spec.handicap[Math.floor(spec.handicap.length / 2)]}`,
-      matchLevel: false,
-      average: {
-        label: `${spec.noun} de diferencia por partido`,
-        value: (v) => {
+    markets.push(
+      make("handicap", "handicap", {
+        slug: `${spec.key}-handicap`,
+        options: spec.handicap.map((line) => ({
+          key: `h${line}`,
+          get label() {
+            return `${line > 0 ? "+" : ""}${formatLine(line)}`;
+          },
+          hit: (v: TeamMatchView) => {
+            const x = spec.forValue(v);
+            const y = spec.againstValue(v);
+            return x === null || y === null ? null : x + line > y;
+          },
+        })),
+        defaultOption: `h${spec.handicap[Math.floor(spec.handicap.length / 2)]}`,
+        matchLevel: false,
+        average: (v) => {
           const x = spec.forValue(v);
           const y = spec.againstValue(v);
           return x === null || y === null ? null : x - y;
         },
-      },
-    });
+      }),
+    );
   }
 
   return markets;
@@ -296,105 +365,125 @@ const foulsOf = teamStatValue((s) => stat(s, "fouls"));
 const range = (from: number, to: number, step = 1) =>
   Array.from({ length: Math.round((to - from) / step) + 1 }, (_, i) => from + i * step);
 
+/** Textos de un mercado suelto: markets:market.<textKey>.{label,title,description}. */
+function marketTexts(textKey: string) {
+  const key = (path: string) => `markets:market.${textKey}.${path}`;
+  return {
+    get label() {
+      return t(key("label"));
+    },
+    get title() {
+      return t(key("title"));
+    },
+    get description() {
+      return t(key("description"));
+    },
+  };
+}
+
+/** Opcion de un mercado suelto con su texto en markets:market.<textKey>.option.<optionKey>. */
+function option(textKey: string, key: string, optionKey: string, hit: MarketOption["hit"]): MarketOption {
+  return {
+    key,
+    get label() {
+      return t(`markets:market.${textKey}.option.${optionKey}`);
+    },
+    hit,
+  };
+}
+
+/** Un mercado suelto: los textos de marketTexts como getters del objeto. */
+function single(textKey: string, def: Omit<MarketDef, "label" | "title" | "description">): MarketDef {
+  const texts = marketTexts(textKey);
+  return {
+    ...def,
+    get label() {
+      return texts.label;
+    },
+    get title() {
+      return texts.title;
+    },
+    get description() {
+      return texts.description;
+    },
+  };
+}
+
 // --- Mercados ------------------------------------------------------------
 
 export const MARKETS: MarketDef[] = [
-  {
+  single("btts", {
     slug: "ambos-marcan",
-    group: "Goles",
-    label: "Ambos marcan",
-    title: "Ambos equipos marcan",
-    description: "Partidos en los que marcaron los dos equipos (o, con «No», en los que al menos uno se quedó sin marcar).",
-    options: [
-      { key: "si", label: "Sí", hit: btts },
-      { key: "no", label: "No", hit: (v) => !btts(v) },
-    ],
+    group: "goals",
+    options: [option("btts", "si", "yes", btts), option("btts", "no", "no", (v) => !btts(v))],
     defaultOption: "si",
     matchLevel: true,
-  },
-  {
+  }),
+  single("bttsResult", {
     slug: "ambos-marcan-resultado",
-    group: "Goles",
-    label: "Ambos marcan y resultado",
-    title: "Ambos marcan y resultado",
-    description: "Partidos en los que marcaron los dos equipos y, además, el equipo ganó, empató o perdió.",
+    group: "goals",
     options: [
-      { key: "gana", label: "Y gana", hit: (v) => btts(v) && wins(v) },
-      { key: "empata", label: "Y empata", hit: (v) => btts(v) && draws(v) },
-      { key: "pierde", label: "Y pierde", hit: (v) => btts(v) && loses(v) },
+      option("bttsResult", "gana", "win", (v) => btts(v) && wins(v)),
+      option("bttsResult", "empata", "draw", (v) => btts(v) && draws(v)),
+      option("bttsResult", "pierde", "lose", (v) => btts(v) && loses(v)),
     ],
     defaultOption: "gana",
     matchLevel: false,
-  },
+  }),
   ...statFamily({
     key: "goles",
-    label: "Goles",
-    group: "Goles",
-    noun: "goles",
+    textKey: "goals",
+    group: "goals",
     forValue: (v) => v.goalsFor,
     againstValue: (v) => v.goalsAgainst,
     lines: { match: range(0.5, 6.5), team: range(0.5, 4.5), each: range(0.5, 2.5) },
-    description: "Goles marcados.",
   }),
-  {
+  single("goalsByHalf", {
     slug: "goles-por-parte",
-    group: "Goles",
-    label: "Goles por parte",
-    title: "Goles por parte",
-    description: "Goles de la primera y la segunda parte por separado. La columna extra es el marcador al descanso.",
+    group: "goals",
     options: [
-      { key: "gol-1p", label: "Gol en la 1ª parte", hit: (v) => gt(htTotal(v), 0.5) },
-      { key: "over-1.5-1p", label: "Más de 1.5 en la 1ª", hit: (v) => gt(htTotal(v), 1.5) },
-      { key: "gol-2p", label: "Gol en la 2ª parte", hit: (v) => gt(secondHalfTotal(v), 0.5) },
-      { key: "over-1.5-2p", label: "Más de 1.5 en la 2ª", hit: (v) => gt(secondHalfTotal(v), 1.5) },
-      {
-        key: "mas-2p",
-        label: "Más goles en la 2ª",
-        hit: (v) => {
-          const first = htTotal(v);
-          const second = secondHalfTotal(v);
-          return first === null || second === null ? null : second > first;
-        },
-      },
-      {
-        key: "marca-ambas",
-        label: "El equipo marca en ambas partes",
-        hit: (v) => {
-          const second = secondHalfFor(v);
-          return v.htFor === null || second === null ? null : v.htFor > 0 && second > 0;
-        },
-      },
+      option("goalsByHalf", "gol-1p", "goalFirstHalf", (v) => gt(htTotal(v), 0.5)),
+      option("goalsByHalf", "over-1.5-1p", "over15FirstHalf", (v) => gt(htTotal(v), 1.5)),
+      option("goalsByHalf", "gol-2p", "goalSecondHalf", (v) => gt(secondHalfTotal(v), 0.5)),
+      option("goalsByHalf", "over-1.5-2p", "over15SecondHalf", (v) => gt(secondHalfTotal(v), 1.5)),
+      option("goalsByHalf", "mas-2p", "moreInSecondHalf", (v) => {
+        const first = htTotal(v);
+        const second = secondHalfTotal(v);
+        return first === null || second === null ? null : second > first;
+      }),
+      option("goalsByHalf", "marca-ambas", "teamScoresBothHalves", (v) => {
+        const second = secondHalfFor(v);
+        return v.htFor === null || second === null ? null : v.htFor > 0 && second > 0;
+      }),
     ],
     defaultOption: "gol-1p",
     matchLevel: false,
     detail: HALF_TIME_DETAIL,
-  },
-  {
+  }),
+  single("result", {
     slug: "resultado",
-    group: "Resultado",
-    label: "Resultado",
-    title: "Resultado",
-    description: "Resultado final del partido desde el punto de vista del equipo.",
+    group: "result",
     options: [
-      { key: "gana", label: "Gana", hit: wins },
-      { key: "empata", label: "Empata", hit: draws },
-      { key: "pierde", label: "Pierde", hit: loses },
-      { key: "no-pierde", label: "Gana o empata", hit: (v) => !loses(v) },
+      option("result", "gana", "win", wins),
+      option("result", "empata", "draw", draws),
+      option("result", "pierde", "lose", loses),
+      option("result", "no-pierde", "winOrDraw", (v) => !loses(v)),
     ],
     defaultOption: "gana",
     matchLevel: false,
-  },
-  {
+  }),
+  single("htFt", {
     slug: "descanso-final",
-    group: "Resultado",
-    label: "Descanso / Final",
-    title: "Descanso / Final",
-    description:
-      "Resultado al descanso y al final del partido desde el punto de vista del equipo. «Empata / Gana» = empataba al descanso y acabó ganando.",
+    group: "result",
     options: (["G", "E", "P"] as Outcome[]).flatMap((ht) =>
       (["G", "E", "P"] as Outcome[]).map((ft) => ({
         key: `${ht}${ft}`.toLowerCase(),
-        label: `${OUTCOME_LABEL[ht]} / ${OUTCOME_LABEL[ft]}`,
+        get label() {
+          return t("markets:market.htFt.optionLabel", {
+            ht: t(`markets:outcome.${OUTCOME_KEY[ht]}`),
+            ft: t(`markets:outcome.${OUTCOME_KEY[ft]}`),
+          });
+        },
         hit: (v: TeamMatchView) =>
           v.htFor === null || v.htAgainst === null
             ? null
@@ -404,91 +493,76 @@ export const MARKETS: MarketDef[] = [
     defaultOption: "gg",
     matchLevel: false,
     detail: HALF_TIME_DETAIL,
-  },
-  {
+  }),
+  single("cleanSheet", {
     slug: "porteria-a-cero",
-    group: "Resultado",
-    label: "Portería a cero",
-    title: "Portería a cero",
-    description: "Partidos en los que el equipo no encajó ningún gol (o, con «No», en los que encajó al menos uno).",
+    group: "result",
     options: [
-      { key: "si", label: "Sí", hit: (v) => v.goalsAgainst === 0 },
-      { key: "no", label: "No", hit: (v) => v.goalsAgainst > 0 },
+      option("cleanSheet", "si", "yes", (v) => v.goalsAgainst === 0),
+      option("cleanSheet", "no", "no", (v) => v.goalsAgainst > 0),
     ],
     defaultOption: "si",
     matchLevel: false,
-  },
+  }),
   ...statFamily({
     key: "corners",
-    label: "Córners",
-    group: "Estadísticas",
-    noun: "córners",
+    textKey: "corners",
+    group: "stats",
     forValue: cornersOf("for"),
     againstValue: cornersOf("against"),
     lines: { match: range(6.5, 13.5), team: range(1.5, 8.5), each: range(1.5, 5.5) },
     handicap: [-3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5],
-    detail: { label: "Córners", value: statDetail((s) => stat(s, "corners")) },
-    description: "Córners lanzados.",
+    detail: statDetail((s) => stat(s, "corners")),
   }),
   ...statFamily({
     key: "tarjetas",
-    label: "Tarjetas",
-    group: "Estadísticas",
-    noun: "tarjetas",
+    textKey: "cards",
+    group: "stats",
     forValue: cardsOf("for"),
     againstValue: cardsOf("against"),
     lines: { match: range(0.5, 9.5), team: range(0.5, 5.5), each: range(0.5, 3.5) },
-    detail: { label: "Tarjetas", value: statDetail(cards, true) },
-    description: "Tarjetas recibidas (amarillas + rojas); el cuadrado rojo junto a la cifra indica una expulsión.",
+    detail: statDetail(cards, true),
   }),
   ...statFamily({
     key: "puntos-tarjeta",
-    label: "Puntos de tarjeta",
-    group: "Estadísticas",
-    noun: "puntos",
+    textKey: "bookingPoints",
+    group: "stats",
     forValue: pointsOf("for"),
     againstValue: pointsOf("against"),
     lines: { match: range(10.5, 90.5, 10), team: range(5.5, 55.5, 10), each: range(5.5, 35.5, 10) },
-    detail: { label: "Puntos", value: statDetail(bookingPoints, true) },
-    note: "Aproximado: la fuente no distingue una roja directa de una segunda amarilla, así que cada roja cuenta 25 y no 35.",
-    description: "Puntos de tarjeta: amarilla = 10, roja = 25.",
+    detail: statDetail(bookingPoints, true),
+    note: true,
   }),
   ...statFamily({
     key: "tiros",
-    label: "Tiros",
-    group: "Estadísticas",
-    noun: "tiros",
+    textKey: "shots",
+    group: "stats",
     forValue: shotsOf("for"),
     againstValue: shotsOf("against"),
     lines: { match: range(16.5, 30.5), team: range(6.5, 18.5), each: range(6.5, 14.5) },
-    detail: { label: "Tiros", value: statDetail((s) => stat(s, "shots")) },
-    description: "Tiros totales, a puerta o no.",
+    detail: statDetail((s) => stat(s, "shots")),
   }),
   ...statFamily({
     key: "tiros-puerta",
-    label: "Tiros a puerta",
-    group: "Estadísticas",
-    noun: "tiros a puerta",
+    textKey: "shotsOnTarget",
+    group: "stats",
     forValue: onTargetOf("for"),
     againstValue: onTargetOf("against"),
     lines: { match: range(4.5, 12.5), team: range(1.5, 7.5), each: range(1.5, 5.5) },
-    detail: { label: "Tiros a puerta", value: statDetail((s) => stat(s, "shots_on_target")) },
-    description: "Tiros a puerta.",
+    detail: statDetail((s) => stat(s, "shots_on_target")),
   }),
   ...statFamily({
     key: "faltas",
-    label: "Faltas",
-    group: "Estadísticas",
-    noun: "faltas",
+    textKey: "fouls",
+    group: "stats",
     forValue: foulsOf("for"),
     againstValue: foulsOf("against"),
     lines: { match: range(18.5, 28.5), team: range(8.5, 15.5), each: range(8.5, 13.5) },
-    detail: { label: "Faltas", value: statDetail((s) => stat(s, "fouls")) },
-    description: "Faltas cometidas.",
+    detail: statDetail((s) => stat(s, "fouls")),
   }),
 ];
 
-export const MARKET_GROUPS: MarketGroup[] = ["Goles", "Resultado", "Estadísticas"];
+export const MARKET_GROUPS: MarketGroup[] = ["goals", "result", "stats"];
 
 /** Una entrada por mercado suelto o por familia (su primera variante). */
 export const SIDEBAR_MARKETS: MarketDef[] = MARKETS.filter(

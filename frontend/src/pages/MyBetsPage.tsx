@@ -1,4 +1,8 @@
 import { useMemo, useState, type ChangeEvent } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { PageHero } from "../components/PageHero";
+import { currentLocale, t } from "../i18n";
+import { formatFixed } from "../lib/format";
 import { MonthlyChart } from "../components/MonthlyChart";
 import {
   HabitsBlock,
@@ -50,10 +54,12 @@ import {
 } from "../lib/betHistory/analysis";
 import { looksLikeBet365, parseBet365History } from "../lib/betHistory/bet365";
 import { LOW_SAMPLE, euro, moneyClass, pct, roiPct, roiPer100, signedPp } from "../lib/betHistory/format";
+import { dimensionLabel, groupLabel, warningLabel } from "../lib/betHistory/labels";
 import { teamGroups } from "../lib/betHistory/teams";
 import { getTeamCrest } from "../lib/logos";
 import { excludingPromotions, fixedStakePromotions, promoEvidence, promoSplit } from "../lib/betHistory/promotions";
 import {
+  BackupError,
   backupFileName,
   clearBets,
   describeUpdate,
@@ -79,19 +85,12 @@ const BOOKMAKERS = Object.keys(BOOKMAKER_LABELS) as Bookmaker[];
 /** Un año ("2026") o toda la cuenta (WHOLE_ACCOUNT) de una casa. */
 type MoneyPeriod = { book: Bookmaker; period: string };
 
-const STATUS_LABELS: Record<ParsedBet["status"], string> = {
-  won: "Ganada",
-  lost: "Perdida",
-  void: "Anulada",
-  cashout: "Cash out",
-  pending: "En curso",
-  unknown: "Desconocido",
-};
-
 type ImportTag = "added" | "updated";
 
+/** Un error de importacion: `key`, la clave de su texto (sale del idioma
+ * actual al pintarlo); `text`, un mensaje que no es nuestro. */
 type ImportReport =
-  | { kind: "error"; text: string }
+  | { kind: "error"; key: string; text?: string }
   | { kind: "cleared" }
   | {
       kind: "done";
@@ -108,13 +107,27 @@ type ImportReport =
 
 /** "Deportivo de A Coruña – Real Betis (20/09)" o, en combinadas, el número de selecciones. */
 function betTitle(b: ParsedBet): string {
-  if (b.legs.length > 1) return `${b.typeLabel || "Combinada"}: ${b.legs.map((l) => l.participants[0] ?? "?").join(", ")}`;
+  if (b.legs.length > 1) {
+    return t("mybets:import.comboTitle", {
+      type: b.typeLabel || t("mybets:import.combo"),
+      participants: b.legs.map((l) => l.participants[0] ?? "?").join(", "),
+    });
+  }
   const leg = b.legs[0];
   if (!leg) return b.ref ?? b.id;
   return `${leg.participants.slice(0, 2).join(" – ")}${leg.eventDate ? ` (${leg.eventDate})` : ""}`;
 }
 
+/** El error de una copia o de lo pegado, para guardarlo en el informe. */
+function importError(err: unknown): ImportReport {
+  if (err instanceof BackupError) return { kind: "error", key: `mybets:backupError.${err.code}` };
+  return err instanceof Error
+    ? { kind: "error", key: "", text: err.message }
+    : { kind: "error", key: "mybets:import.backupUnreadable" };
+}
+
 export function MyBetsPage() {
+  const { t } = useTranslation();
   const [bets, setBets] = useState<ParsedBet[]>(() => loadBets());
   const [report, setReport] = useState<ImportReport | null>(null);
   const [lastImport, setLastImport] = useState<Map<string, ImportTag>>(new Map());
@@ -161,16 +174,13 @@ export function MyBetsPage() {
         restoreBackup(parseBackup(html));
         setPasted("");
       } catch (err) {
-        setReport({ kind: "error", text: err instanceof Error ? err.message : "No se pudo leer la copia." });
+        setReport(importError(err));
       }
       return;
     }
     const { bets: parsed, failed } = looksLikeBet365(html) ? parseBet365History(html) : parseWinamaxHistory(html);
     if (parsed.length === 0) {
-      setReport({
-        kind: "error",
-        text: "No he encontrado apuestas en ese HTML. Asegúrate de copiar la lista de «Mis apuestas → Finalizadas» de Winamax o la del historial de apuestas deportivas de bet365 (ver los pasos de abajo).",
-      });
+      setReport({ kind: "error", key: "mybets:import.noBets" });
       return;
     }
     applyIncoming(parsed, failed, "html");
@@ -238,7 +248,7 @@ export function MyBetsPage() {
     try {
       restoreBackup(parseBackup(await file.text()));
     } catch (err) {
-      setReport({ kind: "error", text: err instanceof Error ? err.message : "No se pudo leer la copia." });
+      setReport(importError(err));
     }
   }
 
@@ -249,7 +259,7 @@ export function MyBetsPage() {
   }
 
   function onClear() {
-    if (!window.confirm("¿Borrar todas las apuestas importadas y el dinero real apuntado en este navegador?")) return;
+    if (!window.confirm(t("mybets:import.confirmClear"))) return;
     clearBets();
     setBets([]);
     setRealMoney({});
@@ -304,127 +314,127 @@ export function MyBetsPage() {
 
   return (
     <div>
-      <h1>Mis apuestas</h1>
-      <p className="page-lead">
-        Pega tu historial de Winamax o de bet365 y mira en qué ganas y en qué pierdes dinero, año a año: por cuota, tipo
-        de apuesta, deporte, mercado, importe y hábitos.
-      </p>
+      <PageHero title={t("nav:myBets")} lead={<p>{t("mybets:page.lead")}</p>} />
 
       <section className="bets-import">
         <p className="small muted">
-          <strong>Privacidad:</strong> el historial se analiza en tu navegador y se guarda solo en él. No se envía a
-          ningún servidor. Por eso conviene <strong>descargar una copia</strong> de vez en cuando: si borras los datos
-          del navegador o cambias de ordenador, con «Restaurar copia» las recuperas.
+          <Trans i18nKey="mybets:import.privacy" components={{ bold: <strong /> }} />
         </p>
         <textarea
           value={pasted}
           onChange={(e) => setPasted(e.target.value)}
-          placeholder="Pega aquí el HTML del historial de Winamax o de bet365 (o el texto de una copia de seguridad)…"
+          placeholder={t("mybets:import.placeholder")}
           rows={5}
-          aria-label="HTML del historial de apuestas"
+          aria-label={t("mybets:import.textareaLabel")}
         />
         <div className="filters">
           <button type="button" className="tab-button tab-button-active" disabled={!pasted.trim()} onClick={() => importHtml(pasted)}>
-            Analizar
+            {t("mybets:import.analyze")}
           </button>
           <label className="tab-button bets-file">
-            Subir archivo .html
+            {t("mybets:import.upload")}
             <input type="file" accept=".html,.htm,.txt,text/html" onChange={onFile} />
           </label>
           {bets.length > 0 && (
             <button type="button" className="tab-button" onClick={onDownloadBackup}>
-              Descargar copia ({bets.length})
+              {t("mybets:import.download", { n: bets.length })}
             </button>
           )}
           <label className="tab-button bets-file">
-            Restaurar copia
+            {t("mybets:import.restore")}
             <input type="file" accept=".json,application/json" onChange={onRestore} />
           </label>
           {bets.length > 0 && (
             <button type="button" className="tab-button" onClick={onClear}>
-              Borrar mis datos
+              {t("mybets:import.clear")}
             </button>
           )}
         </div>
         {report && <ImportReportPanel report={report} onClose={() => setReport(null)} />}
         {backupText && (
           <div className="import-report" role="status">
-            <button type="button" className="import-report-close" onClick={() => setBackupText(null)} aria-label="Cerrar">
+            <button
+              type="button"
+              className="import-report-close"
+              onClick={() => setBackupText(null)}
+              aria-label={t("mybets:import.close")}
+            >
               ×
             </button>
             <p className="import-report-title">
-              Copia de {bets.length} apuestas preparada: <code>{backupFileName()}</code>
+              <Trans
+                i18nKey="mybets:backup.ready"
+                count={bets.length}
+                values={{ file: backupFileName() }}
+                components={{ file: <code /> }}
+              />
             </p>
             <p className="small">
-              Si no se ha descargado (algunos visores, como el navegador integrado de VS Code, no permiten descargas),
-              cópiala y guárdala tú en un archivo <code>.json</code>. Para restaurarla, súbela con «Restaurar copia» o
-              pega el texto en el cuadro de arriba y pulsa «Analizar».
+              <Trans i18nKey="mybets:backup.help" components={{ file: <code /> }} />
             </p>
             <div className="filters">
               <button type="button" className="tab-button tab-button-active" onClick={onCopyBackup}>
-                {copied ? "Copiada ✓" : "Copiar al portapapeles"}
+                {copied ? t("mybets:backup.copied") : t("mybets:backup.copy")}
               </button>
             </div>
-            <textarea id="backup-text" className="backup-text" readOnly value={backupText} rows={3} aria-label="Copia de seguridad" />
+            <textarea
+              id="backup-text"
+              className="backup-text"
+              readOnly
+              value={backupText}
+              rows={3}
+              aria-label={t("mybets:backup.label")}
+            />
           </div>
         )}
         <details className="small muted">
-          <summary>Cómo sacar el historial de Winamax</summary>
+          <summary>{t("mybets:howTo.winamax.title")}</summary>
           <ol>
             <li>
-              En Winamax, entra en <strong>Mis apuestas → Finalizadas</strong> y baja hasta el final para que se carguen
-              todas las que quieras analizar.
+              <Trans i18nKey="mybets:howTo.winamax.step1" components={{ bold: <strong /> }} />
             </li>
             <li>
-              <strong>Opción A:</strong> pulsa Ctrl+S, elige «Página web completa» y sube aquí el archivo .html.
+              <Trans i18nKey="mybets:howTo.winamax.step2" components={{ bold: <strong /> }} />
             </li>
             <li>
-              <strong>Opción B:</strong> clic derecho sobre la lista → «Inspeccionar», clic derecho sobre el elemento
-              resaltado → «Copiar → Copiar elemento» (outerHTML), y pégalo arriba.
+              <Trans i18nKey="mybets:howTo.winamax.step3" components={{ bold: <strong /> }} />
             </li>
-            <li>Puedes importar varias veces: las apuestas repetidas no se duplican.</li>
+            <li>{t("mybets:howTo.winamax.step4")}</li>
           </ol>
         </details>
         <details className="small muted">
-          <summary>Cómo sacar el historial de bet365</summary>
+          <summary>{t("mybets:howTo.bet365.title")}</summary>
           <ol>
             <li>
-              En bet365, abre el <strong>Historial</strong> de tu cuenta, elige <strong>Apuestas deportivas</strong> y
-              las fechas que quieras, y baja hasta el final para que se carguen todas.
+              <Trans i18nKey="mybets:howTo.bet365.step1" components={{ bold: <strong /> }} />
             </li>
-            <li>
-              Igual que con Winamax: guarda la página con Ctrl+S («Página web completa») y súbela, o copia el elemento
-              de la lista con «Inspeccionar → Copiar elemento» y pégalo arriba.
-            </li>
-            <li>
-              bet365 no indica en el historial si una apuesta se ganó o se perdió: se deduce de lo cobrado. Si cobraste
-              menos de lo que pagaba la cuota (cash out o una selección anulada), sale como «Cash out». Las apuestas
-              con créditos de apuesta cuentan como freebets.
-            </li>
-            <li>
-              Las sencillas solo traen la selección («Real Madrid»), sin el partido ni el mercado, así que no entran en
-              «Por mercado» ni en «Partidos».
-            </li>
+            <li>{t("mybets:howTo.bet365.step2")}</li>
+            <li>{t("mybets:howTo.bet365.step3")}</li>
+            <li>{t("mybets:howTo.bet365.step4")}</li>
           </ol>
         </details>
       </section>
 
       {bets.length === 0 ? (
-        <p className="muted">Todavía no has importado ninguna apuesta.</p>
+        <p className="muted">{t("mybets:page.empty")}</p>
       ) : (
         <>
           <div className="filters">
-            <select aria-label="Año" value={year ?? "all"} onChange={(e) => selectYear(e.target.value === "all" ? null : e.target.value)}>
+            <select
+              aria-label={t("mybets:filter.year")}
+              value={year ?? "all"}
+              onChange={(e) => selectYear(e.target.value === "all" ? null : e.target.value)}
+            >
               {allYears.map((y) => (
                 <option key={y} value={y}>
-                  Año {y}
+                  {t("mybets:filter.yearOption", { year: y })}
                 </option>
               ))}
-              <option value="all">Todos los años</option>
+              <option value="all">{t("mybets:filter.allYears")}</option>
             </select>
             {books.length > 1 && (
-              <select aria-label="Casa" value={book} onChange={(e) => setBook(e.target.value as Bookmaker | "")}>
-                <option value="">Todas las casas</option>
+              <select aria-label={t("mybets:filter.book")} value={book} onChange={(e) => setBook(e.target.value as Bookmaker | "")}>
+                <option value="">{t("mybets:filter.allBooks")}</option>
                 {books.map((k) => (
                   <option key={k} value={k}>
                     {BOOKMAKER_LABELS[k]}
@@ -432,22 +442,27 @@ export function MyBetsPage() {
                 ))}
               </select>
             )}
-            <select aria-label="Deporte" value={sport} onChange={(e) => setSport(e.target.value)}>
-              <option value="">Todos los deportes</option>
+            <select aria-label={t("mybets:filter.sport")} value={sport} onChange={(e) => setSport(e.target.value)}>
+              <option value="">{t("mybets:filter.allSports")}</option>
               {sports.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {groupLabel(s)}
                 </option>
               ))}
             </select>
             {month && (
-              <button type="button" className="month-chip" onClick={() => setMonth(null)} aria-label="Quitar el filtro de mes">
-                Mes: {monthLabel(month)} <span aria-hidden="true">✕</span>
+              <button
+                type="button"
+                className="month-chip"
+                onClick={() => setMonth(null)}
+                aria-label={t("mybets:filter.clearMonth")}
+              >
+                {t("mybets:filter.month", { month: monthLabel(month) })} <span aria-hidden="true">✕</span>
               </button>
             )}
           </div>
           {settled.length === 0 ? (
-            <p className="muted">No hay apuestas resueltas con estos filtros.</p>
+            <p className="muted">{t("mybets:filter.noSettled")}</p>
           ) : (
             <Analysis
               bets={filtered}
@@ -473,153 +488,155 @@ export function MyBetsPage() {
 }
 
 function ImportReportPanel({ report, onClose }: { report: ImportReport; onClose: () => void }) {
+  const { t } = useTranslation();
+  const close = (
+    <button type="button" className="import-report-close" onClick={onClose} aria-label={t("mybets:import.close")}>
+      ×
+    </button>
+  );
   if (report.kind === "error") {
     return (
       <div className="import-report import-report-error" role="alert">
-        <p>{report.text}</p>
-        <button type="button" className="import-report-close" onClick={onClose} aria-label="Cerrar">
-          ×
-        </button>
+        <p>{report.key ? t(report.key) : report.text}</p>
+        {close}
       </div>
     );
   }
   if (report.kind === "cleared") {
     return (
       <div className="import-report" role="status">
-        <p>Se han borrado todas las apuestas guardadas en este navegador.</p>
-        <button type="button" className="import-report-close" onClick={onClose} aria-label="Cerrar">
-          ×
-        </button>
+        <p>{t("mybets:import.cleared")}</p>
+        {close}
       </div>
     );
   }
   const nothingNew = report.added.length === 0 && report.updated.length === 0;
+  const chip = (key: string, n: number) => <Trans i18nKey={`mybets:import.chip.${key}`} count={n} components={{ bold: <strong /> }} />;
   return (
     <div className="import-report" role="status">
-      <button type="button" className="import-report-close" onClick={onClose} aria-label="Cerrar">
-        ×
-      </button>
+      {close}
       <p className="import-report-title">
         {nothingNew
-          ? `Las ${report.read} apuestas de ${report.source === "backup" ? "la copia" : "este HTML"} ya estaban guardadas. No ha cambiado nada.`
-          : `${report.source === "backup" ? "Copia restaurada" : "Importación hecha"}: he leído ${report.read} apuestas.`}
+          ? t(report.source === "backup" ? "mybets:import.nothingNewBackup" : "mybets:import.nothingNewHtml", { count: report.read })
+          : t(report.source === "backup" ? "mybets:import.doneBackup" : "mybets:import.doneHtml", { count: report.read })}
       </p>
       <div className="import-chips">
         <span className={`import-chip import-chip-added${report.added.length ? "" : " import-chip-zero"}`}>
-          <strong>{report.added.length}</strong> nuevas
+          {chip("added", report.added.length)}
         </span>
         <span className={`import-chip import-chip-updated${report.updated.length ? "" : " import-chip-zero"}`}>
-          <strong>{report.updated.length}</strong> actualizadas
+          {chip("updated", report.updated.length)}
         </span>
         <span className={`import-chip import-chip-unchanged${report.unchanged ? "" : " import-chip-zero"}`}>
-          <strong>{report.unchanged}</strong> repetidas sin cambios
+          {chip("unchanged", report.unchanged)}
         </span>
         {report.withWarnings > 0 && (
-          <span className="import-chip import-chip-warning">
-            <strong>{report.withWarnings}</strong> con datos incompletos
-          </span>
+          <span className="import-chip import-chip-warning">{chip("warnings", report.withWarnings)}</span>
         )}
-        {report.failed > 0 && (
-          <span className="import-chip import-chip-error">
-            <strong>{report.failed}</strong> no se pudieron leer
-          </span>
-        )}
+        {report.failed > 0 && <span className="import-chip import-chip-error">{chip("failed", report.failed)}</span>}
       </div>
       {report.updated.length > 0 && (
         <div className="import-report-list">
-          <p className="small">Qué ha cambiado en las actualizadas:</p>
+          <p className="small">{t("mybets:import.whatChanged")}</p>
           <ul>
             {report.updated.slice(0, 8).map((u) => (
               <li key={u.after.id}>
                 {betTitle(u.after)}: <strong>{describeUpdate(u)}</strong>
               </li>
             ))}
-            {report.updated.length > 8 && <li className="muted">…y {report.updated.length - 8} más.</li>}
+            {report.updated.length > 8 && <li className="muted">{t("mybets:import.andMore", { n: report.updated.length - 8 })}</li>}
           </ul>
         </div>
       )}
       <p className="small muted">
-        Ahora tienes <strong>{report.total}</strong> apuestas guardadas. En la tabla de abajo, las de esta importación
-        llevan la etiqueta «Nueva» o «Actualizada».
-        {!report.saved && " Ojo: este navegador no permite guardarlas, se perderán al cerrar la página."}
+        <Trans i18nKey="mybets:import.total" count={report.total} components={{ bold: <strong /> }} />
+        {!report.saved && ` ${t("mybets:import.notSaved")}`}
       </p>
     </div>
   );
 }
 
 function Headline({ s, period }: { s: Summary; period: string }) {
+  const { t } = useTranslation();
   const gap = s.hitRate !== null && s.impliedRate !== null ? s.hitRate - s.impliedRate : null;
   const share = (n: number) => (s.bets ? `${(100 * n) / s.bets}%` : "0%");
   return (
-    <section className="bets-hero" aria-label="Resumen">
+    <section className="bets-hero" aria-label={t("mybets:hero.label")}>
       <div className="bets-hero-top">
         <div className="bets-hero-profit">
           <span className="bets-hero-label">
-            Beneficio neto {period} <LowSampleTag n={s.bets} />
+            {t("mybets:hero.netProfit", { period })} <LowSampleTag n={s.bets} />
           </span>
           <span className={`bets-hero-value ${moneyClass(s.profit)}`}>{euro(s.profit, true)}</span>
           <span className="small muted">
-            Apuestas con saldo {euro(s.ownProfit, true)} · con freebets {euro(s.freebetProfit, true)}
+            {t("mybets:hero.split", { own: euro(s.ownProfit, true), freebet: euro(s.freebetProfit, true) })}
           </span>
         </div>
         <div className="bets-hero-record">
           <div className="bets-record-numbers">
             <span>
-              <strong className="ev-positive">{s.wins}</strong> acertadas
+              <Trans i18nKey="mybets:hero.wins" count={s.wins} components={{ bold: <strong className="ev-positive" /> }} />
             </span>
             <span>
-              <strong className="ev-negative">{s.losses}</strong> falladas
+              <Trans i18nKey="mybets:hero.losses" count={s.losses} components={{ bold: <strong className="ev-negative" /> }} />
             </span>
             {s.cashouts > 0 && (
               <span className="muted small">
-                <strong>{s.cashouts}</strong> cash out
+                <Trans i18nKey="mybets:hero.cashouts" values={{ n: s.cashouts }} components={{ bold: <strong /> }} />
               </span>
             )}
           </div>
           <div
             className="bets-record-bar"
             role="img"
-            aria-label={`${s.wins} acertadas, ${s.losses} falladas${s.cashouts ? ` y ${s.cashouts} cash out` : ""}`}
+            aria-label={t(s.cashouts ? "mybets:hero.barLabelCashout" : "mybets:hero.barLabel", {
+              wins: t("mybets:hero.winsText", { count: s.wins }),
+              losses: t("mybets:hero.lossesText", { count: s.losses }),
+              cashouts: t("mybets:hero.cashoutsText", { count: s.cashouts }),
+            })}
           >
             <span className="bets-record-won" style={{ width: share(s.wins) }} />
             <span className="bets-record-lost" style={{ width: share(s.losses) }} />
             {s.cashouts > 0 && <span className="bets-record-cashout" style={{ width: share(s.cashouts) }} />}
           </div>
           <span className="small muted">
-            {s.bets} resueltas = {s.wins} + {s.losses}
-            {s.cashouts > 0 && ` + ${s.cashouts} cash out (cuentan en el dinero, no en el acierto)`}
+            {s.cashouts > 0
+              ? t("mybets:hero.settledCashout", { count: s.bets, wins: s.wins, losses: s.losses, cashouts: s.cashouts })
+              : t("mybets:hero.settled", { count: s.bets, wins: s.wins, losses: s.losses })}
           </span>
         </div>
       </div>
       <div className="bets-hero-second">
         <div>
-          <span className="bets-hero-label">ROI</span>
+          <span className="bets-hero-label">{t("mybets:hero.roi")}</span>
           <span className={`bets-hero-mid ${moneyClass(s.roi)}`}>{roiPct(s.roi, 1)}</span>
           <span className="small muted">{roiPer100(s.roi)}</span>
         </div>
         <div>
-          <span className="bets-hero-label">Volumen apostado</span>
+          <span className="bets-hero-label">{t("mybets:hero.staked")}</span>
           <span className="bets-hero-mid">{euro(s.ownStaked)}</span>
-          <span className="small muted bets-hero-hint">
-            Suma de todos los importes apostados (sin freebets); el dinero reinvertido cuenta varias veces. No es lo que
-            has ingresado.
-          </span>
+          <span className="small muted bets-hero-hint">{t("mybets:hero.stakedHint")}</span>
         </div>
         <div>
-          <span className="bets-hero-label">Acierto frente a tus cuotas</span>
+          <span className="bets-hero-label">{t("mybets:hero.hitVsOdds")}</span>
           <span className="bets-hero-mid">
-            {pct(s.hitRate, 1)} <span className="muted small">frente al</span> {pct(s.impliedRate, 1)}
+            {pct(s.hitRate, 1)} <span className="muted small">{t("mybets:hero.versus")}</span> {pct(s.impliedRate, 1)}
           </span>
           <span className={`small ${moneyClass(gap)}`}>
-            {signedPp(gap)} {gap !== null && (gap < 0 ? "por debajo de lo que implican" : "por encima de lo que implican")}
+            {signedPp(gap)} {gap !== null && (gap < 0 ? t("mybets:hero.below") : t("mybets:hero.above"))}
           </span>
         </div>
       </div>
       {(s.voids > 0 || s.pending > 0) && (
         <p className="small muted bets-hero-note">
-          No cuentan: {s.voids > 0 && `${s.voids} anuladas`}
-          {s.voids > 0 && s.pending > 0 && " · "}
-          {s.pending > 0 && `${s.pending} sin resolver`}.
+          {t("mybets:hero.notCounted", {
+            items: [
+              s.voids > 0 ? t("mybets:hero.voids", { count: s.voids }) : null,
+              s.pending > 0 ? t("mybets:hero.pending", { n: s.pending }) : null,
+            ]
+              .filter(Boolean)
+              .join(" · "),
+          })}
         </p>
       )}
     </section>
@@ -630,26 +647,27 @@ function MonthlyTable({
   months,
   selected,
   onSelect,
-  unit = "Mes",
+  unit = "month",
 }: {
   months: MonthSplit[];
   selected: string | null;
   onSelect: (key: string | null) => void;
-  unit?: "Mes" | "Año";
+  unit?: "month" | "year";
 }) {
+  const { t } = useTranslation();
   return (
     <div className="table-scroll">
       <table className="predictions-table">
         <thead>
           <tr>
-            <th>{unit}</th>
-            <th className="num">Apuestas</th>
-            <th className="num">Acierto</th>
-            <th className="num">Apostado</th>
-            <th className="num">Beneficio</th>
-            <th className="num">Sin promoción</th>
-            <th className="num">Con promoción</th>
-            <th className="num">ROI</th>
+            <th>{t(`mybets:column.${unit}`)}</th>
+            <th className="num">{t("mybets:column.bets")}</th>
+            <th className="num">{t("mybets:column.hitRate")}</th>
+            <th className="num">{t("mybets:column.staked")}</th>
+            <th className="num">{t("mybets:column.profit")}</th>
+            <th className="num">{t("mybets:column.withoutPromo")}</th>
+            <th className="num">{t("mybets:column.withPromo")}</th>
+            <th className="num">{t("mybets:column.roi")}</th>
           </tr>
         </thead>
         <tbody>
@@ -701,26 +719,23 @@ function YearSection({
   selected: string | null;
   onSelect: (key: string | null) => void;
 }) {
+  const { t } = useTranslation();
   const byBook = books.length > 1;
   return (
     <section id="anual">
-      <h2>Año a año</h2>
-      <p className="small muted">
-        Por año natural, del 1 de enero al 31 de diciembre: es el periodo con el que se declaran las ganancias del juego
-        en la renta. Cada apuesta cuenta en el año en que la hiciste; una de finales de diciembre que se resolvió en enero
-        podría ir al año siguiente. El beneficio incluye lo ganado con freebets. Pulsa un año para ver solo ese año.
-      </p>
+      <h2>{t("mybets:year.title")}</h2>
+      <p className="small muted">{t("mybets:year.note")}</p>
       <div className="table-scroll">
         <table className="predictions-table">
           <thead>
             <tr>
-              <th>Año</th>
-              <th className="num">Apuestas</th>
-              <th className="num">Acierto</th>
-              <th className="num">Apostado</th>
-              <th className="num">Beneficio</th>
+              <th>{t("mybets:column.year")}</th>
+              <th className="num">{t("mybets:column.bets")}</th>
+              <th className="num">{t("mybets:column.hitRate")}</th>
+              <th className="num">{t("mybets:column.staked")}</th>
+              <th className="num">{t("mybets:column.profit")}</th>
               {byBook && books.map((k) => <th key={k} className="num">{BOOKMAKER_LABELS[k]}</th>)}
-              <th className="num">ROI</th>
+              <th className="num">{t("mybets:column.roi")}</th>
             </tr>
           </thead>
           <tbody>
@@ -797,10 +812,15 @@ function Analysis({
   moneyHistoryOf: (p: MoneyPeriod) => MoneyHistory;
   lastImport: Map<string, ImportTag>;
 }) {
+  const { t } = useTranslation();
   const s = summarize(bets, settled);
   const sentences = insights(settled);
   const shownMonths = year ? months.filter((m) => m.key.startsWith(year)) : months;
-  const period = selectedMonth ? `en ${monthLabel(selectedMonth)}` : year ? `en ${year}` : "en todos los años";
+  const period = selectedMonth
+    ? t("mybets:period.in", { period: monthLabel(selectedMonth) })
+    : year
+      ? t("mybets:period.in", { period: year })
+      : t("mybets:period.allYears");
   const dimensions = {
     "Cuota": groupBy(settled, (r) => oddsBucket(r.bet.odds), ODDS_BUCKETS.map((b) => b[2])),
     "Tipo de apuesta": groupBy(settled, (r) => betType(r.bet), TYPE_ORDER),
@@ -833,34 +853,35 @@ function Analysis({
   return (
     <>
       <SectionNav
-        label="Secciones de mis apuestas"
+        label={t("mybets:sections.label")}
         sections={[
-          { id: "anual", label: "Año a año", short: "Por año" },
-          { id: "mensual", label: "Mes a mes", short: "Por mes" },
-          { id: "evolucion", label: "Evolución" },
-          { id: "dinero-real", label: "Dinero real" },
-          ...(leaks.length > 0 ? [{ id: "donde-pierdes", label: "Dónde pierdes más", short: "Dónde pierdes" }] : []),
-          { id: "por-categoria", label: "Cuota, importe, deporte…", short: "Categorías" },
-          ...(promos.length > 0 ? [{ id: "promociones", label: "Promociones" }] : []),
-          { id: "habitos", label: "Hábitos" },
-          ...(teams.length > 0 ? [{ id: "equipos", label: "Equipos y tenistas", short: "Equipos" }] : []),
-          { id: "apuestas", label: "Apuestas importadas", short: "Apuestas" },
+          { id: "anual", label: t("mybets:sections.year"), short: t("mybets:sections.yearShort") },
+          { id: "mensual", label: t("mybets:sections.month"), short: t("mybets:sections.monthShort") },
+          { id: "evolucion", label: t("mybets:sections.evolution") },
+          { id: "dinero-real", label: t("mybets:sections.realMoney") },
+          ...(leaks.length > 0
+            ? [{ id: "donde-pierdes", label: t("mybets:sections.leaks"), short: t("mybets:sections.leaksShort") }]
+            : []),
+          { id: "por-categoria", label: t("mybets:sections.categories"), short: t("mybets:sections.categoriesShort") },
+          ...(promos.length > 0 ? [{ id: "promociones", label: t("mybets:sections.promotions") }] : []),
+          { id: "habitos", label: t("mybets:sections.habits") },
+          ...(teams.length > 0
+            ? [{ id: "equipos", label: t("mybets:sections.teams"), short: t("mybets:sections.teamsShort") }]
+            : []),
+          { id: "apuestas", label: t("mybets:sections.bets"), short: t("mybets:sections.betsShort") },
         ]}
       />
       <Headline s={s} period={period} />
       <PromoSplitCards split={split} />
 
       {settled.length < 30 && (
-        <p className="small muted intro-note">
-          Solo hay {settled.length} apuestas resueltas: con tan pocas, los porcentajes cambian mucho con cada apuesta.
-          Tómalos como orientativos.
-        </p>
+        <p className="small muted intro-note">{t("mybets:fewBets", { count: settled.length })}</p>
       )}
 
       {sentences.length > 0 && (
         <div className="bets-insights">
-          {sentences.map((t) => (
-            <p key={t}>{t}</p>
+          {sentences.map((sentence) => (
+            <p key={sentence}>{sentence}</p>
           ))}
         </div>
       )}
@@ -868,18 +889,15 @@ function Analysis({
       <YearSection years={years} settled={baseSettled} books={books} selected={year} onSelect={onSelectYear} />
 
       <section id="mensual">
-        <h2>Mes a mes{year ? ` · ${year}` : ""}</h2>
-        <p className="small muted">
-          Por la fecha en que hiciste la apuesta. Pulsa un mes (en el gráfico o en la tabla) para ver solo ese mes en el
-          resto de la página; púlsalo otra vez, o «Mes ✕» arriba, para quitar el filtro.
-        </p>
+        <h2>{year ? t("mybets:month.titleYear", { year }) : t("mybets:month.title")}</h2>
+        <p className="small muted">{t("mybets:month.note")}</p>
         <MonthlyChart months={shownMonths} selected={selectedMonth} onSelect={onSelectMonth} />
         <MonthlyTable months={shownMonths} selected={selectedMonth} onSelect={onSelectMonth} />
-        <p className="small muted">Con menos de {LOW_SAMPLE} apuestas (en gris) el mes es poco fiable.</p>
+        <p className="small muted">{t("mybets:month.lowSample", { n: LOW_SAMPLE })}</p>
       </section>
 
       <section id="evolucion">
-        <h2>Evolución del beneficio{year && !selectedMonth ? ` · ${year}` : ""}</h2>
+        <h2>{year && !selectedMonth ? t("mybets:evolution.titleYear", { year }) : t("mybets:evolution.title")}</h2>
         <ProfitChart points={cumulativeProfit(settled)} />
       </section>
 
@@ -893,21 +911,24 @@ function Analysis({
 
       {leaks.length > 0 && (
         <section className="bets-leaks" id="donde-pierdes">
-          <h2>Dónde pierdes más</h2>
+          <h2>{t("mybets:leaks.title")}</h2>
           <ul>
             {leaks.map(({ dimension, group }) => (
               <li key={`${dimension}-${group.key}`}>
-                <strong>
-                  {dimension}: {group.key}
-                </strong>{" "}
-                — <span className="ev-negative">{euro(group.profit, true)}</span> en {group.bets} apuestas
-                {group.hitRate !== null && group.impliedRate !== null && (
-                  <>
-                    {" "}
-                    (aciertas un {pct(group.hitRate)} y sus cuotas implicaban un {pct(group.impliedRate)})
-                  </>
-                )}
-                .
+                <Trans
+                  i18nKey={
+                    group.hitRate !== null && group.impliedRate !== null ? "mybets:leaks.itemRates" : "mybets:leaks.item"
+                  }
+                  values={{
+                    dimension: dimensionLabel(dimension),
+                    group: groupLabel(group.key),
+                    profit: euro(group.profit, true),
+                    bets: group.bets,
+                    hitRate: pct(group.hitRate),
+                    implied: pct(group.impliedRate),
+                  }}
+                  components={{ bold: <strong />, loss: <span className="ev-negative" /> }}
+                />
               </li>
             ))}
           </ul>
@@ -916,23 +937,23 @@ function Analysis({
 
       <Breakdown
         id="por-categoria"
-        title="Por cuota"
+        title={t("mybets:breakdown.odds.title")}
         rows={dimensions["Cuota"]}
-        note="La columna clave es la diferencia: cuánto aciertas por encima o por debajo de lo que implica la cuota."
+        note={t("mybets:breakdown.odds.note")}
       />
-      <Breakdown title="Simples y combinadas" rows={dimensions["Tipo de apuesta"]} />
+      <Breakdown title={t("mybets:breakdown.type.title")} rows={dimensions["Tipo de apuesta"]} />
       {promos.length > 0 && (
         <section id="promociones">
-          <h2>Promociones</h2>
+          <h2>{t("mybets:promotions.title")}</h2>
           <ul className="promo-summary">
             {promos.map((g) => (
               <li key={g.key}>
                 <span className="badge promo-badge">{g.key}</span>{" "}
-                <strong>
-                  {g.wins} de {g.decided}
-                </strong>{" "}
-                acertadas ({pct(g.hitRate)}) · beneficio{" "}
-                <span className={moneyClass(g.profit)}>{euro(g.profit, true)}</span>
+                <Trans
+                  i18nKey="mybets:promotions.item"
+                  values={{ wins: g.wins, decided: g.decided, pct: pct(g.hitRate), profit: euro(g.profit, true) }}
+                  components={{ bold: <strong />, money: <span className={moneyClass(g.profit)} /> }}
+                />
               </li>
             ))}
           </ul>
@@ -944,39 +965,36 @@ function Analysis({
             </div>
           )}
           <Breakdown
-            title="Por promoción"
+            title={t("mybets:breakdown.promotion.title")}
             rows={dimensions["Promoción"]}
-            note="Supercuotas y operaciones de Winamax (Bang to the Moon, misiones...) y aumentos de bet365 (de cuota y de ganancias). Una apuesta con dos promociones cuenta en las dos."
+            note={t("mybets:breakdown.promotion.note")}
           />
         </section>
       )}
-      <Breakdown title="Por deporte" rows={dimensions["Deporte"]} />
+      <Breakdown title={t("mybets:breakdown.sport.title")} rows={dimensions["Deporte"]} />
       <Breakdown
-        title="Por mercado (apuestas simples)"
+        title={t("mybets:breakdown.market.title")}
         rows={dimensions["Mercado (simples)"]}
-        note="Solo apuestas simples: en una combinada no se puede saber qué mercado la hizo ganar o perder."
+        note={t("mybets:breakdown.market.note")}
       />
       {builder.length > 0 && (
         <section>
-          <h2>Selecciones dentro de «Crea tu apuesta»</h2>
-          <p className="small muted">
-            Winamax da el resultado de cada selección, así que aquí sí se ve cuáles fallan. bet365 no lo da: sus «Crear
-            apuesta» no entran aquí.
-          </p>
+          <h2>{t("mybets:builder.title")}</h2>
+          <p className="small muted">{t("mybets:builder.note")}</p>
           <div className="table-scroll">
             <table className="predictions-table">
               <thead>
                 <tr>
-                  <th>Mercado</th>
-                  <th className="num">Selecciones</th>
-                  <th className="num">Acertadas</th>
-                  <th className="num">Acierto</th>
+                  <th>{t("mybets:column.market")}</th>
+                  <th className="num">{t("mybets:column.selections")}</th>
+                  <th className="num">{t("mybets:column.won")}</th>
+                  <th className="num">{t("mybets:column.hitRate")}</th>
                 </tr>
               </thead>
               <tbody>
                 {builder.map((b) => (
                   <tr key={b.family} className={b.selections < LOW_SAMPLE ? "low-sample-row" : undefined}>
-                    <td className="rec-match">{b.family}</td>
+                    <td className="rec-match">{groupLabel(b.family)}</td>
                     <td className="num">{b.selections}</td>
                     <td className="num">{b.won}</td>
                     <td className="num">{pct(b.hitRate)}</td>
@@ -988,19 +1006,19 @@ function Analysis({
         </section>
       )}
       <Breakdown
-        title="Por importe — todas las apuestas"
+        title={t("mybets:breakdown.stake.title")}
         rows={dimensions["Importe"]}
-        note="Por el importe de cada apuesta (las freebets no cuentan). Cada tramo empieza en su importe: una apuesta de 5 € va en «5 – 9,99 €»."
+        note={t("mybets:breakdown.stake.note")}
       />
       {fixedPromos.length > 0 && (
         <Breakdown
-          title={`Por importe — sin promociones de importe fijo (${fixedPromos.join(", ")})`}
+          title={t("mybets:breakdown.stakeWithoutFixed.title", { promotions: fixedPromos.join(", ") })}
           rows={stakeWithoutFixed}
-          note="Las promociones de importe fijo concentran apuestas en un mismo importe; sin ellas se ve mejor cómo eliges tú cuánto apostar. Las dos lecturas son válidas."
+          note={t("mybets:breakdown.stakeWithoutFixed.note")}
         />
       )}
-      <Breakdown title="Por día de la semana" rows={dimensions["Día"]} />
-      <Breakdown title="Por hora de la apuesta" rows={dimensions["Hora"]} />
+      <Breakdown title={t("mybets:breakdown.weekday.title")} rows={dimensions["Día"]} />
+      <Breakdown title={t("mybets:breakdown.hour.title")} rows={dimensions["Hora"]} />
 
       <HabitsBlock
         all={h}
@@ -1019,6 +1037,7 @@ function Analysis({
 }
 
 function Breakdown({ id, title, rows, note }: { id?: string; title: string; rows: GroupStats[]; note?: string }) {
+  const { t } = useTranslation();
   if (rows.length === 0) return null;
   return (
     <section id={id}>
@@ -1028,14 +1047,14 @@ function Breakdown({ id, title, rows, note }: { id?: string; title: string; rows
         <table className="predictions-table">
           <thead>
             <tr>
-              <th>Categoría</th>
-              <th className="num">Apuestas</th>
-              <th className="num">Acierto</th>
-              <th className="num">Implica la cuota</th>
-              <th className="num">Diferencia</th>
-              <th className="num">Apostado</th>
-              <th className="num">Beneficio</th>
-              <th className="num">ROI</th>
+              <th>{t("mybets:column.category")}</th>
+              <th className="num">{t("mybets:column.bets")}</th>
+              <th className="num">{t("mybets:column.hitRate")}</th>
+              <th className="num">{t("mybets:column.implied")}</th>
+              <th className="num">{t("mybets:column.difference")}</th>
+              <th className="num">{t("mybets:column.staked")}</th>
+              <th className="num">{t("mybets:column.profit")}</th>
+              <th className="num">{t("mybets:column.roi")}</th>
             </tr>
           </thead>
           <tbody>
@@ -1044,7 +1063,7 @@ function Breakdown({ id, title, rows, note }: { id?: string; title: string; rows
               return (
                 <tr key={g.key} className={g.bets < LOW_SAMPLE ? "low-sample-row" : undefined}>
                   <td className="rec-match">
-                    {g.key} <LowSampleTag n={g.bets} />
+                    {groupLabel(g.key)} <LowSampleTag n={g.bets} />
                   </td>
                   <td className="num">{g.bets}</td>
                   <td className="num">
@@ -1062,15 +1081,13 @@ function Breakdown({ id, title, rows, note }: { id?: string; title: string; rows
           </tbody>
         </table>
       </div>
-      <p className="small muted">
-        Con menos de {LOW_SAMPLE} apuestas (en gris) la fila es poco fiable. El ROI es el beneficio por cada 100 €
-        apostados (las freebets no cuentan como importe); el beneficio sí incluye lo ganado con freebets.
-      </p>
+      <p className="small muted">{t("mybets:breakdown.note", { n: LOW_SAMPLE })}</p>
     </section>
   );
 }
 
 function BetList({ bets, settled, lastImport }: { bets: ParsedBet[]; settled: SettledBet[]; lastImport: Map<string, ImportTag> }) {
+  const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
   const [onlyLast, setOnlyLast] = useState(false);
   const profitOf = new Map(settled.map((r) => [r.bet.id, r.profit]));
@@ -1078,27 +1095,27 @@ function BetList({ bets, settled, lastImport }: { bets: ParsedBet[]; settled: Se
   const shown = showAll ? pool : pool.slice(0, 30);
   return (
     <section id="apuestas">
-      <h2>Apuestas importadas</h2>
-      <p className="small muted">Para comprobar que se han leído bien. Las más recientes primero.</p>
+      <h2>{t("mybets:list.title")}</h2>
+      <p className="small muted">{t("mybets:list.note")}</p>
       {lastImport.size > 0 && (
         <label className="filter-label">
           <input type="checkbox" checked={onlyLast} onChange={(e) => setOnlyLast(e.target.checked)} />
-          Ver solo las nuevas y actualizadas en la última importación ({lastImport.size})
+          {t("mybets:list.onlyLast", { n: lastImport.size })}
         </label>
       )}
       <div className="table-scroll">
         <table className="predictions-table">
           <thead>
             <tr>
-              <th>Fecha</th>
-              <th>Casa</th>
-              <th>Tipo</th>
-              <th>Deporte</th>
-              <th>Selecciones</th>
-              <th className="num">Cuota</th>
-              <th className="num">Importe</th>
-              <th>Resultado</th>
-              <th className="num">Beneficio</th>
+              <th>{t("mybets:column.date")}</th>
+              <th>{t("mybets:column.book")}</th>
+              <th>{t("mybets:column.type")}</th>
+              <th>{t("mybets:column.sport")}</th>
+              <th>{t("mybets:column.selections")}</th>
+              <th className="num">{t("mybets:column.odds")}</th>
+              <th className="num">{t("mybets:column.stake")}</th>
+              <th>{t("mybets:column.result")}</th>
+              <th className="num">{t("mybets:column.profit")}</th>
             </tr>
           </thead>
           <tbody>
@@ -1107,12 +1124,17 @@ function BetList({ bets, settled, lastImport }: { bets: ParsedBet[]; settled: Se
               return (
                 <tr key={b.id} className={lastImport.has(b.id) ? `bet-row-${lastImport.get(b.id)}` : undefined}>
                   <td className="num">
-                    {lastImport.get(b.id) === "added" && <span className="badge import-tag-added">Nueva</span>}
-                    {lastImport.get(b.id) === "updated" && <span className="badge import-tag-updated">Actualizada</span>}{" "}
-                    {b.placedAt ? new Date(b.placedAt).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" }) : "—"}</td>
+                    {lastImport.get(b.id) === "added" && <span className="badge import-tag-added">{t("mybets:list.added")}</span>}
+                    {lastImport.get(b.id) === "updated" && (
+                      <span className="badge import-tag-updated">{t("mybets:list.updated")}</span>
+                    )}{" "}
+                    {b.placedAt
+                      ? new Date(b.placedAt).toLocaleString(currentLocale(), { dateStyle: "short", timeStyle: "short" })
+                      : "—"}
+                  </td>
                   <td className="rec-match">{BOOKMAKER_LABELS[b.bookmaker] ?? b.bookmaker}</td>
                   <td className="rec-match">{b.typeLabel || "—"}</td>
-                  <td className="rec-match">{sportOf(b)}</td>
+                  <td className="rec-match">{groupLabel(sportOf(b))}</td>
                   <td className="rec-match bets-legs">
                     {(b.promotions ?? []).length > 0 && (
                       <div>
@@ -1127,18 +1149,23 @@ function BetList({ bets, settled, lastImport }: { bets: ParsedBet[]; settled: Se
                       <div key={i}>
                         {l.participants.length > 0 && `${l.participants.slice(0, 2).join(" – ")}: `}
                         {l.builder ? l.pick : [l.market, l.pick].filter(Boolean).join(" · ")}
-                        {l.boosted && <span className="muted"> ({b.bookmaker === "bet365" ? "cuota aumentada" : "supercuota"})</span>}
+                        {l.boosted && (
+                          <span className="muted">
+                            {" "}
+                            {t(b.bookmaker === "bet365" ? "mybets:list.boostedBet365" : "mybets:list.boostedWinamax")}
+                          </span>
+                        )}
                       </div>
                     ))}
-                    {b.warnings.length > 0 && <div className="bets-warning">{b.warnings.join(" ")}</div>}
+                    {b.warnings.length > 0 && <div className="bets-warning">{b.warnings.map(warningLabel).join(" ")}</div>}
                   </td>
-                  <td className="num">{b.odds?.toFixed(2) ?? "—"}</td>
+                  <td className="num">{b.odds != null ? formatFixed(b.odds, 2) : "—"}</td>
                   <td className="num">
                     {euro(b.stake)}
-                    {b.freebet && <span className="muted small"> freebet</span>}
+                    {b.freebet && <span className="muted small"> {t("mybets:list.freebet")}</span>}
                   </td>
                   <td className="rec-match">
-                    <span className={`badge bet-status-${b.status}`}>{STATUS_LABELS[b.status]}</span>
+                    <span className={`badge bet-status-${b.status}`}>{t(`mybets:status.${b.status}`)}</span>
                   </td>
                   <td className={`num ${moneyClass(profit)}`}>{profit === null ? "—" : euro(profit, true)}</td>
                 </tr>
@@ -1149,7 +1176,7 @@ function BetList({ bets, settled, lastImport }: { bets: ParsedBet[]; settled: Se
       </div>
       {pool.length > shown.length && (
         <button type="button" className="tab-button" onClick={() => setShowAll(true)}>
-          Ver las {pool.length} apuestas
+          {t("mybets:list.showAll", { n: pool.length })}
         </button>
       )}
     </section>

@@ -1,11 +1,7 @@
+import { useTranslation } from "react-i18next";
 import type { RecommendationOutcome } from "../api/types";
 
-const LABELS: Record<RecommendationOutcome, string> = {
-  won: "Acertó",
-  lost: "Falló",
-  pending: "Pendiente",
-};
-
 export function OutcomeBadge({ outcome }: { outcome: RecommendationOutcome }) {
-  return <span className={`badge outcome-${outcome}`}>{LABELS[outcome]}</span>;
+  const { t } = useTranslation();
+  return <span className={`badge outcome-${outcome}`}>{t(`common:outcome.${outcome}`)}</span>;
 }
