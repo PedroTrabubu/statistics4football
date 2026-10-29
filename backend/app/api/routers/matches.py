@@ -105,7 +105,11 @@ def get_match_predictions(
     El modelo de la liga se cachea en memoria por dia (ver
     `get_cached_league_model`), asi que solo el primer partido consultado
     ese dia para esa liga paga el coste de ajustar Dixon-Coles.
+
+    Con ENABLE_EV=false (modelo de valor retirado) responde 404.
     """
+    if not settings.enable_ev:
+        raise HTTPException(status_code=404, detail="Modelo de valor retirado (ENABLE_EV=false)")
     match = _get_match_or_404(db, match_id)
     model = get_cached_league_model(db, match.league_id, as_of_date=match.date)
     predictions = generate_predictions_for_match(db, match, model, settings.ev_threshold)
