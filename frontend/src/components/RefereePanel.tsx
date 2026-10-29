@@ -9,6 +9,7 @@ import {
   bookingPoints,
   cards,
   hitRate,
+  matchRedCards,
   streak,
   viewFrom,
   type TeamMatchView,
@@ -77,7 +78,13 @@ const SECTIONS: LineSection[] = [
     key: "cardsEach",
     lines: [0.5, 1.5, 2.5].map((line) => ({ line, hit: eachOver(cardsFor, cardsAgainst, line) })),
   },
+  {
+    key: "redsMatch",
+    lines: [0.5, 1.5].map((line) => ({ line, hit: over(matchRedCards, line) })),
+  },
 ];
+
+const anyRed = over(matchRedCards, 0.5);
 
 const overLabel = (line: number) => t("markets:option.over", { line: formatLine(line) });
 
@@ -156,6 +163,7 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
     { label: t("matches:referee.average.cards"), pick: cardsTotal, teamOnly: false, sub: false },
     { label: t("matches:referee.average.for"), pick: cardsFor, teamOnly: true, sub: true },
     { label: t("matches:referee.average.against"), pick: cardsAgainst, teamOnly: true, sub: true },
+    { label: t("matches:referee.average.redCards"), pick: matchRedCards, teamOnly: false, sub: false },
   ];
 
   const seasonLabel = formatSeason(match.season);
@@ -217,6 +225,8 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
           {refereeScope === "season" && ` ${t("matches:referee.tryAllSeasons")}`}
         </p>
       )}
+
+      <RefereeExtras views={columns[0].views} history={history ?? null} />
 
       <RefereeFacts facts={facts} league={match.league_code} venueOnly={venue} />
 
@@ -299,6 +309,31 @@ export function RefereePanel({ match, history }: { match: Match; history?: Match
         <p className="small muted">{t("matches:referee.footnote", { season: seasonLabel })}</p>
       </details>
     </div>
+  );
+}
+
+/** Expulsiones con este árbitro, junto a lo habitual en la liga (`history`).
+ * Suceso raro: se da siempre con su muestra. */
+function RefereeExtras({ views, history }: { views: TeamMatchView[]; history: MatchResult[] | null }) {
+  const { t } = useTranslation();
+  const leagueViews = (history ?? []).map((m) => viewFrom(m, "home")).filter((v): v is TeamMatchView => v !== null);
+  const reds = hitRate(views, { hit: anyRed });
+  const leagueReds = hitRate(leagueViews, { hit: anyRed });
+  const pct = (x: number) => withPercent(String(Math.round(x * 100)));
+  if (reds.pct === null) return null;
+
+  return (
+    <p className="referee-extras small">
+      <Trans
+        i18nKey="matches:referee.extras.reds"
+        count={reds.total}
+        values={{ hits: reds.hits, pct: pct(reds.pct) }}
+        components={{ bold: <strong /> }}
+      />
+      {leagueReds.pct !== null && (
+        <span className="muted"> · {t("matches:referee.extras.league", { value: pct(leagueReds.pct) })}</span>
+      )}
+    </p>
   );
 }
 

@@ -228,11 +228,25 @@
         "draw": "Los mismos córners",
         "winOrDraw": "Al menos los mismos córners"
       }
+    },
+    "redCards": {
+      "label": "Expulsiones",
+      "title": "Expulsiones en el partido",
+      "description": "Partidos con alguna tarjeta roja (de cualquiera de los dos equipos), sin ninguna o con dos o más.",
+      "option": {
+        "yes": "Alguna",
+        "no": "Ninguna",
+        "twoOrMore": "2 o más"
+      },
+      "detail": "Rojas",
+      "detailInline": "rojas",
+      "average": "rojas por partido",
+      "note": "La fuente no distingue una roja directa de una segunda amarilla: cuentan las dos."
     }
   },
   "page": {
     "thisSeason": "esta temporada",
-    "refereesLead": "Cómo se comportan los partidos de cada árbitro: tarjetas, puntos de tarjeta, córners o goles. Solo mercados del partido completo, que no dependen de qué equipo sea local.",
+    "refereesLead": "Cómo se comportan los partidos de cada árbitro: tarjetas, puntos de tarjeta, expulsiones, córners o goles. Solo mercados del partido completo, que no dependen de qué equipo sea local.",
     "search": {
       "team": "Buscar equipo",
       "referee": "Buscar árbitro"
@@ -317,6 +331,12 @@
     "rateLabel": "{{pct}}: {{summary}}",
     "redCards_one": "Expulsión",
     "redCards_many": "{{count}} expulsiones",
-    "redCards_other": "{{count}} expulsiones"
+    "redCards_other": "{{count}} expulsiones",
+    "allSeasons": "Todas las temporadas",
+    "interval": "Intervalo 95 %: {{low}}–{{high}}",
+    "vsLeague": {
+      "above": "por encima de la liga ({{pct}})",
+      "below": "por debajo de la liga ({{pct}})"
+    }
   }
 }

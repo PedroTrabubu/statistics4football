@@ -228,11 +228,25 @@
         "draw": "Same number of corners",
         "winOrDraw": "At least as many corners"
       }
+    },
+    "redCards": {
+      "label": "Red cards",
+      "title": "Red cards in the match",
+      "description": "Matches with at least one red card (for either team), with none, or with two or more.",
+      "option": {
+        "yes": "Any",
+        "no": "None",
+        "twoOrMore": "2 or more"
+      },
+      "detail": "Reds",
+      "detailInline": "red cards",
+      "average": "red cards per match",
+      "note": "The source doesn't distinguish a straight red from a second yellow: both count."
     }
   },
   "page": {
     "thisSeason": "this season",
-    "refereesLead": "How each referee's matches play out: cards, booking points, corners or goals. Full-match markets only, which don't depend on which team is at home.",
+    "refereesLead": "How each referee's matches play out: cards, booking points, red cards, corners or goals. Full-match markets only, which don't depend on which team is at home.",
     "search": {
       "team": "Search team",
       "referee": "Search referee"
@@ -313,6 +327,12 @@
     "rateSummaryMissing_other": "{{hits}} of {{count}} matches ({{missing}} without data)",
     "rateLabel": "{{pct}}: {{summary}}",
     "redCards_one": "Red card",
-    "redCards_other": "{{count}} red cards"
+    "redCards_other": "{{count}} red cards",
+    "allSeasons": "All seasons",
+    "interval": "95% interval: {{low}}–{{high}}",
+    "vsLeague": {
+      "above": "above the league ({{pct}})",
+      "below": "below the league ({{pct}})"
+    }
   }
 }
