@@ -39,6 +39,7 @@ from app.ingestion.odds_api_client import LEAGUE_SPORT_KEY_MAP
 from app.ingestion.referee_overrides import apply_referee_overrides
 from app.ingestion.soccerdata_client import leagues_with_source
 from app.ingestion.xg_backfill import backfill_understat_xg
+from app.stats.own_elo import refresh_own_elo
 
 
 def run_update(db: Session, settings: Settings, log: Callable[[str], None] = print) -> list[str]:
@@ -102,6 +103,10 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
         extra = "".join(f"\n  AVISO: arbitros_manual.csv sin partido para {label}" for label in unmatched)
         return f"{updated} actualizados{extra}"
 
+    def own_elo() -> str:
+        run = refresh_own_elo(db)
+        return f"status={run.status.value} {run.notes}"
+
     step("football-data.org", football_data_org)
     step(f"Football-Data.co.uk {season}", match_history)
     step(f"Understat xG {season}", understat)
@@ -113,4 +118,7 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
     if CHAMPIONS in settings.leagues:
         step("Champions League (ESPN)", champions)
     step("Árbitros corregidos a mano", overrides)
+    # Despues de los resultados: el Elo previo de los partidos recien jugados y
+    # el actual de los programados (incremental; las filas finales no se tocan).
+    step("Elo propio", own_elo)
     return failures

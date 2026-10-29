@@ -19,6 +19,8 @@ from app.schemas.match import (
     match_to_result_out,
 )
 from app.schemas.season_stats import TeamSeasonStatsOut
+from app.schemas.stats import MatchEloOut
+from app.stats.own_elo import league_season_elo
 from app.stats.season_stats import (
     compute_league_season_stats,
     latest_season_with_history,
@@ -152,6 +154,24 @@ def list_league_results(
         .all()
     )
     return [match_to_result_out(m) for m in matches]
+
+
+@router.get("/{league_id}/elo", response_model=list[MatchEloOut])
+def list_league_elo(
+    league_id: int,
+    season: str | None = None,
+    db: Session = Depends(get_db),
+) -> list[MatchEloOut]:
+    """Elo propio previo de cada partido de una temporada (la mas reciente con
+    partidos jugados, si no se especifica), jugados y programados. Solo lee
+    `own_elo_pre` (scripts/refresh_own_elo.py): el export estatico lo guarda
+    en un fichero por liga y temporada."""
+    if season is None:
+        latest = latest_season_with_history(db, league_id)
+        if latest is None:
+            return []
+        season = latest.name
+    return [MatchEloOut.model_validate(e) for e in league_season_elo(db, league_id, season)]
 
 
 @router.get("/{league_id}/context-results", response_model=list[MatchResultOut])

@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -44,6 +47,26 @@ class DisciplineFormOut(BaseModel):
     avg_red_cards: float | None
 
 
+class EloSideOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    elo: float | None
+    matches_rated: int | None
+    missing: Literal["champions", "insufficient_history", "not_generated"] | None
+
+
+class MatchEloOut(BaseModel):
+    """Elo propio previo al partido (app/stats/own_elo.py)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    match_id: int
+    min_matches: int
+    home: EloSideOut
+    away: EloSideOut
+    computed_until: datetime | None
+
+
 class MatchFeaturesOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -56,3 +79,4 @@ class MatchFeaturesOut(BaseModel):
     away_discipline: DisciplineFormOut
     home_elo: float | None
     away_elo: float | None
+    elo: MatchEloOut
