@@ -555,6 +555,69 @@ a:hover {
   cursor: default;
 }
 
+/* Botones de acción (no pestañas): píldora con borde, a la altura de los
+   campos. Principal en relleno; destructivo en rojo. Vale para <button> y
+   para el <label> de un campo de archivo. */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.6rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-none);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.action-button:hover {
+  border-color: var(--ink-2);
+}
+.action-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.action-button:focus-visible,
+.action-button:has(> input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.action-button-primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-weight: var(--fw-semibold);
+}
+.action-button-primary:hover {
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
+}
+.action-button:disabled,
+.action-button:disabled:hover {
+  border-color: var(--border);
+  background: var(--surface-alt);
+  color: var(--faint);
+  cursor: not-allowed;
+}
+.action-button-danger {
+  border-color: color-mix(in srgb, var(--red) 35%, var(--border));
+  color: var(--red);
+}
+.action-button-danger:hover {
+  border-color: var(--red);
+  background: var(--red-bg);
+}
+
 /* Selector de liga: rejilla de botones; el activo en negro. */
 .league-switch {
   display: grid;
@@ -807,11 +870,23 @@ a:hover {
 
 /* Barras de acierto: píldora verde/roja que crece al aparecer. */
 .rate-bar {
+  position: relative;
+  isolation: isolate;
   height: 1.5rem;
   line-height: 1.5rem;
   border-radius: var(--radius-full);
-  background: var(--red-fill);
   font-size: var(--fs-2xs);
+}
+/* El rojo que el verde va tapando al crecer, 1px por dentro: si llegara al
+   borde, asomaría bajo el borde suavizado del verde (una raya roja arriba o
+   abajo según dónde caiga la barra). */
+.rate-bar:not(.rate-bar-empty)::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--red-fill);
 }
 .rate-bar-yes {
   border-radius: var(--radius-full) 0 0 var(--radius-full);
@@ -2070,6 +2145,10 @@ section[id] {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  /* El degradado solo pinta dentro de la caja, y la cola de la "p" cursiva
+     sale por la izquierda: se amplía la caja sin mover el texto. */
+  padding-left: 0.12em;
+  margin-left: -0.12em;
   padding-right: 0.05em;
 }
 .page-hero-lead p {
@@ -2180,6 +2259,31 @@ section[id] {
 .side-card-row-teams .serif-accent {
   color: var(--muted);
   font-weight: 400;
+}
+/* Fila de partido: la fecha arriba y los equipos debajo, con el "vs" en el
+   centro en todas las filas aunque los nombres midan distinto. */
+.side-card-match {
+  flex-direction: column;
+  align-items: stretch;
+}
+.side-card-match .side-card-row-teams {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+.side-card-match-team {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.side-card-match-team.is-away {
+  justify-content: flex-start;
+}
+.side-card-match-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .side-card-league {
   display: flex;
