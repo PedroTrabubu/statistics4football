@@ -4,23 +4,25 @@ import type {
   Match,
   MatchFeatures,
   MatchHistory,
+  MatchPicksResponse,
   MatchRecent,
   MatchRefereeStats,
   MatchResult,
+  LeagueResultProbabilities,
+  MatchResultProbabilities,
   MatchStatus,
+  PicksHistory,
+  PicksUpcoming,
+  PredictabilityData,
   Prediction,
   Recommendation,
   RecommendationHistoryResponse,
   RecommendationStrategy,
-  PicksHistory,
-  PicksUpcoming,
   RefereeScope,
   RiskLevel,
   Team,
   TeamSeasonStats,
   UpcomingMatch,
-  PredictabilityData,
-  MatchPicksResponse,
 } from "./types";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -146,6 +148,16 @@ export function getMatchRefereeStats(matchId: number, refereeScope: RefereeScope
 
 export function getMatchPredictions(matchId: number): Promise<Prediction[]> {
   return request(`/matches/${matchId}/predictions`);
+}
+
+/** Porcentajes de resultado ya guardados (solo lectura) y el acierto histórico de la liga. */
+export function getMatchResultProbabilities(matchId: number): Promise<MatchResultProbabilities> {
+  return request(`/matches/${matchId}/result-probabilities`);
+}
+
+/** Porcentajes de resultado de cada partido de una liga y temporada (la última jugada si no se indica). */
+export function getLeagueResultProbabilities(leagueId: number, season?: string): Promise<LeagueResultProbabilities> {
+  return request(`/leagues/${leagueId}/result-probabilities`, { season });
 }
 
 export interface RecommendationFilters {

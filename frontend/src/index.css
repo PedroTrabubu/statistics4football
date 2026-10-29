@@ -563,6 +563,31 @@ h4 {
   margin-top: 0;
 }
 
+/* Ficha: predictor de estadísticas (cerrado de entrada) y el error medio
+   junto al nombre de cada estadística. */
+.stats-predictor .next-compare-toggle {
+  margin-bottom: var(--space-2);
+}
+.stats-predictor-panel {
+  margin-top: var(--space-3);
+}
+.predictor-error {
+  margin-left: var(--space-1);
+  font-family: var(--font-mono);
+  color: var(--faint);
+  white-space: nowrap;
+}
+/* Partido jugado comparado con el predictor: su estimación, debajo de cada cifra. */
+.match-stat-predicted {
+  display: block;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-regular);
+  color: var(--faint);
+}
+.stats-predictor + .small {
+  margin-top: var(--space-3);
+}
+
 /* Cabecera de la ficha de partido: escudos grandes encima de cada nombre. */
 .match-hero {
   display: grid;
@@ -3879,6 +3904,28 @@ a.hero-card:hover {
 .pick-info-current > span:first-child {
   color: var(--accent);
   font-weight: var(--fw-semibold);
+}
+/* La misma nota dentro de una fila de comparación (Elo propio): centrada
+   sobre la "i" para que quepa en móvil. */
+.info-tip .pick-info-popover {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.info-tip .pick-info-popover::before {
+  right: auto;
+  left: calc(50% - 5px);
+}
+.elo-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+.elo-diff {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--ink);
+  font-size: var(--fs-xs);
 }
 .picks-played-summary {
   margin: var(--space-2-5) 0 0;

@@ -4,13 +4,12 @@ import { Link, useParams } from "react-router-dom";
 import {
   getMatch,
   getMatchHistory,
-  getMatchPredictions,
   getMatchRecent,
   getMatchStats,
   getTeamSeasonStatsOrNull,
 } from "../api/client";
 import { MatchdayCarousel } from "../components/MatchdayCarousel";
-import { PredictionsTable } from "../components/PredictionsTable";
+import { MatchStatsTable, StatsPredictor } from "../components/MatchStats";
 import { ProbablePicks } from "../components/ProbablePicks";
 import { HeadToHead, RecentMatches } from "../components/RecentMatches";
 import { RefereePanel } from "../components/RefereePanel";
@@ -19,6 +18,7 @@ import { SectionNav } from "../components/SectionNav";
 import { ErrorView, LoadingView } from "../components/StatusView";
 import { StatsPanel } from "../components/StatsPanel";
 import { TeamCrest } from "../components/TeamCrest";
+import { WinProbability } from "../components/WinProbability";
 import { formatDateTime, formatMatchday, formatSeason } from "../lib/format";
 import { CHAMPIONS_LEAGUE_CODE, leagueName, useSelectedLeagueCode } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
@@ -27,11 +27,12 @@ import { useApi } from "../lib/useApi";
  * en matches:detail.section.<clave>). `short`: en movil, para que quepan en
  * dos filas. */
 const SECTIONS = [
+  { id: "porcentajes", key: "probabilities" },
+  { id: "estadisticas", key: "stats" },
   { id: "forma", key: "form" },
   { id: "h2h", key: "h2h" },
   { id: "arbitro", key: "referee" },
   { id: "picks", key: "picks" },
-  { id: "probabilidades", key: "probabilities" },
   { id: "otros-partidos", key: "otherMatches" },
 ];
 
@@ -52,11 +53,6 @@ export function MatchDetailPage() {
     () => getMatchStats(id),
     [id],
   );
-  const {
-    data: predictions,
-    loading: loadingPredictions,
-    error: predictionsError,
-  } = useApi(() => getMatchPredictions(id), [id]);
   // Partidos de la liga anteriores a este: patrones de los equipos y lo
   // habitual en la liga (picks muy probables y hechos del arbitro).
   const history = useApi(() => getMatchHistory(id), [id]);
@@ -77,8 +73,10 @@ export function MatchDetailPage() {
   if (matchError || !match) return <ErrorView message={t("matches:detail.error", { error: matchError })} />;
 
   const played = match.status === "historical";
-  // Sin cuotas de mercado (la Champions: Football-Data.co.uk no la cubre), ni EV ni «Valor».
-  const marketOdds = match.league_code !== CHAMPIONS_LEAGUE_CODE;
+  // El predictor no se evaluó en la Champions (docs/PREDICTOR_ESTADISTICAS_PROTOCOLO.md):
+  // allí, por jugar no hay nada que enseñar y, jugado, solo lo que pasó.
+  const predictor = match.league_code !== CHAMPIONS_LEAGUE_CODE;
+  const showStats = played || predictor;
 
   return (
     <div>
@@ -118,15 +116,36 @@ export function MatchDetailPage() {
 
       <SectionNav
         label={t("matches:detail.sectionsLabel")}
-        sections={SECTIONS.filter((s) => s.id !== "otros-partidos" || match.matchday !== null).map((s) => {
-          const key = s.id === "probabilidades" && !marketOdds ? "probabilitiesOnly" : s.key;
-          return {
-            id: s.id,
-            label: t(`matches:detail.section.${key}.label`),
-            short: t(`matches:detail.section.${key}.short`),
-          };
-        })}
+        sections={SECTIONS.filter(
+          (s) => (s.id !== "otros-partidos" || match.matchday !== null) && (s.id !== "estadisticas" || showStats),
+        ).map((s) => ({
+          id: s.id,
+          label: t(`matches:detail.section.${s.key}.label`),
+          short: t(`matches:detail.section.${s.key}.short`),
+        }))}
       />
+
+      <WinProbability match={match} />
+
+      {/* Jugado: lo que hizo cada equipo. Por jugar: el predictor, cerrado. */}
+      {showStats && (
+        <section className="detail-section" id="estadisticas">
+          <h2>{t("matches:detail.matchStatsTitle")}</h2>
+          {!played ? (
+            <StatsPredictor match={match} history={history.data} loading={history.loading} error={history.error} />
+          ) : history.data?.played ? (
+            <MatchStatsTable
+              match={match}
+              played={history.data.played}
+              prior={predictor ? history.data.matches : null}
+            />
+          ) : history.error ? (
+            <ErrorView message={t("matches:matchStats.error", { error: history.error })} />
+          ) : (
+            <LoadingView label={t("matches:matchStats.loading")} />
+          )}
+        </section>
+      )}
 
       <section className="detail-section" id="forma">
         {loadingStats && <LoadingView label={t("matches:detail.statsLoading")} />}
@@ -189,35 +208,10 @@ export function MatchDetailPage() {
         <RefereePanel match={match} history={history.data?.matches} />
       </section>
 
-      {/* Justo antes del modelo: primero lo que se ha repetido, despues lo que
-          estima el modelo para 1X2, más/menos 2.5 y ambos marcan. */}
+      {/* Lo que se ha repetido en los partidos de los dos equipos. */}
       <section className="detail-section" id="picks">
         <h2>{t("matches:detail.picksTitle")}</h2>
         <ProbablePicks match={match} history={history.data} loading={history.loading} error={history.error} />
-      </section>
-
-      <section className="detail-section" id="probabilidades">
-        {marketOdds ? (
-          <>
-            <h2>{t("matches:detail.probabilitiesTitle")}</h2>
-            <p className="muted">{t("matches:detail.probabilitiesNote")}</p>
-          </>
-        ) : (
-          <>
-            <h2>{t("matches:detail.probabilitiesOnlyTitle")}</h2>
-            <p className="muted">{t("matches:detail.probabilitiesOnlyNote")}</p>
-          </>
-        )}
-        {loadingPredictions && <LoadingView label={t("matches:detail.predictionsLoading")} />}
-        {predictionsError && <ErrorView message={t("matches:detail.predictionsError", { error: predictionsError })} />}
-        {predictions && (
-          <PredictionsTable
-            predictions={predictions}
-            homeTeam={match.home_team}
-            awayTeam={match.away_team}
-            marketOdds={marketOdds}
-          />
-        )}
       </section>
 
       <MatchdayCarousel key={match.id} match={match} />

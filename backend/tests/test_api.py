@@ -202,6 +202,8 @@ def test_league_results_only_played_matches_of_one_season() -> None:
     assert all(m["home_ht_goals"] is not None and m["referee"] for m in matches)
     assert all(m["home_ht_goals"] <= m["home_goals"] and m["away_ht_goals"] <= m["away_goals"] for m in matches)
     assert all(m["home_stats"] is not None and m["home_stats"]["corners"] is not None for m in matches)
+    # xG de Understat: en la Premier sí (puede faltar en el último partido, si aún no lo ha publicado).
+    assert any(m["home_stats"]["xg"] is not None for m in matches)
 
     older = client.get(f"/leagues/{league.id}/results", params={"season": seasons[-1]}).json()
     assert {m["season"] for m in older} == {seasons[-1]}

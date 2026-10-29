@@ -9,6 +9,14 @@
     "season": "Season {{season}}",
     "sectionsLabel": "Match sections",
     "section": {
+      "probabilities": {
+        "label": "Result percentages",
+        "short": "Percentages"
+      },
+      "stats": {
+        "label": "Match stats",
+        "short": "Stats"
+      },
       "form": {
         "label": "Recent form",
         "short": "Form"
@@ -24,14 +32,6 @@
       "picks": {
         "label": "Very likely picks",
         "short": "Picks"
-      },
-      "probabilities": {
-        "label": "Probabilities and expected value",
-        "short": "Probabilities & EV"
-      },
-      "probabilitiesOnly": {
-        "label": "Probabilities",
-        "short": "Probabilities"
       },
       "otherMatches": {
         "label": "Other matches",
@@ -51,12 +51,76 @@
     "refereeNamed": "Referee: <link>{{name}}</link>",
     "refereeLinkTitle": "See their stats in Referees",
     "picksTitle": "Very likely picks",
-    "probabilitiesTitle": "Probabilities and expected value (EV)",
-    "probabilitiesNote": "EV is never shown on its own: it always comes with a confidence and risk level.",
-    "probabilitiesOnlyTitle": "Probabilities",
-    "probabilitiesOnlyNote": "There are no market odds for this competition, so no expected value is calculated and nothing is flagged as ‘Value’. With your own odds, ‘Your EV’ is still calculated.",
-    "predictionsLoading": "Generating predictions...",
-    "predictionsError": "Couldn't generate the predictions: {{error}}"
+    "matchStatsTitle": "Match stats"
+  },
+  "winProb": {
+    "title": "Result percentages",
+    "titlePlayed": "Result percentages before the match",
+    "sourceEloDc": "Model · Elo + Dixon-Coles",
+    "sourceElo": "Model · calibrated in-house Elo",
+    "win": "{{team}} win",
+    "draw": "Draw",
+    "actual": "Result",
+    "loading": "Loading percentages…",
+    "error": "Couldn't load the percentages.",
+    "status": {
+      "insufficient_history": "Not enough data: one of the two teams still has little history in the league.",
+      "champions": "No percentages in the Champions League: the model isn't calibrated for this competition.",
+      "not_available": "No percentages for this league.",
+      "not_generated": "Not calculated yet for this match."
+    },
+    "doubleTitle": "Double chance",
+    "dc1X": "{{home}} or draw",
+    "dcX2": "Draw or {{away}}",
+    "dc12": "{{home}} or {{away}}",
+    "hit": "Correct",
+    "miss": "Wrong",
+    "highConfidence": "High confidence",
+    "highConfidenceLabel": "What High confidence means",
+    "highConfidenceTip": "Double chance at 80% or more. In {{seasons}} it was right ~{{low}} of the time between 80% and 85%, and ~{{high}} from 85%.",
+    "highConfidenceCurrent": "In {{season}}: ~{{pct}} from 85%.",
+    "highConfidenceCoverage": "It applies to ~{{min}}–{{max}} of matches; they are usually clear favourites.",
+    "historyTitle": "Historical accuracy in {{league}} ({{seasons}})",
+    "historyTop": "Most likely result",
+    "historyDouble": "Best double chance",
+    "historyRate_one": "{{hits}} of {{n}} match · 95% CI: {{low}}–{{high}}",
+    "historyRate_other": "{{hits}} of {{n}} matches · 95% CI: {{low}}–{{high}}",
+    "historyRef": "Reference: always choosing 1X would have been right {{pct}} of the time. The best double chance is never estimated below 66.7% (it only leaves out the least likely result).",
+    "calibrationTitle": "Calibration by band (all 6 leagues)",
+    "calibrationIntro": "Each match contributes its three probabilities (home, draw and away). Each band compares the average announced probability with what happened.",
+    "calibrationBin": "Band",
+    "calibrationAnnounced": "Announced",
+    "calibrationObserved": "Observed (95% CI)",
+    "calibrationN": "n",
+    "calibrationDev": "Seasons {{seasons}}",
+    "calibrationCurrent": "Season {{season}} (in progress)",
+    "lowSample": "few samples",
+    "note": "Statistical estimate using data from before the match; the market tends to be slightly more accurate. This is not betting advice.",
+    "historyButton": "Historical accuracy in the league",
+    "tableButton": "Accuracy table",
+    "table": {
+      "title": "Accuracy by team · {{league}} {{season}}",
+      "note": "Matches played this season, with the percentages worked out before each match. Each match counts for both teams. In grey, teams with fewer than {{n}} matches: treat them as a rough guide.",
+      "team": "Team",
+      "top": "Most likely result",
+      "topShort": "1X2",
+      "double": "Best double chance",
+      "doubleShort": "Double",
+      "league": "Whole league",
+      "hitsOf": "{{hits}} of {{n}}",
+      "interval": "95% CI: {{low}}–{{high}}",
+      "loading": "Loading the accuracy table…",
+      "error": "The accuracy table could not be loaded.",
+      "empty": "No matches with percentages have been played this season yet."
+    },
+    "historySelect": "Accuracy season",
+    "historySeason": "Season {{season}}",
+    "historySeasonCurrent": "Season {{season}} (in progress)",
+    "historyAll": "All seasons ({{seasons}})",
+    "historySeasonTitle": "Accuracy in {{league}} · season {{season}}",
+    "historyLoading": "Loading the season's accuracy…",
+    "historyError": "The season's accuracy could not be loaded.",
+    "historyEmpty": "No matches with percentages have been played this season yet."
   },
   "recent": {
     "title": "Recent matches",
@@ -121,25 +185,6 @@
     },
     "halfTime": "Half-time",
     "legend": "Corners and cards: home-away in each match. In brackets, at half-time."
-  },
-  "predictions": {
-    "empty": "Not enough statistics to generate predictions for this match.",
-    "column": {
-      "selection": "Selection",
-      "marketProb": "Market prob.",
-      "modelProb": "Model prob.",
-      "fairOdds": "Fair odds",
-      "marketEv": "Market EV",
-      "sample": "Sample",
-      "risk": "Risk",
-      "yourOdds": "Your odds",
-      "yourEv": "Your EV"
-    },
-    "valueTag": "VALUE",
-    "oddsPlaceholder": "e.g. 1.80",
-    "oddsLabel": "Your odds for {{selection}}",
-    "implied": "implied {{value}}",
-    "disclaimer": "‘Fair odds’ and ‘Your EV’ are estimates based on the model's historical frequency, not a guaranteed outcome. The odds you enter are never saved or sent anywhere."
   },
   "referee": {
     "notDesignated": "Referee not yet appointed. Appointments are usually announced 2 or 3 days before the match; it will appear here as soon as matches are synced.",
@@ -206,8 +251,79 @@
     "cornersAgainst": "Corners against (avg)",
     "yellowCards": "Yellow cards (avg)",
     "redCards": "Red cards (avg)",
-    "elo": "Elo rating",
-    "noDiscipline": "No corner or card data yet for these teams in the range analysed."
+    "elo": "In-house Elo",
+    "eloInfoLabel": "What the in-house Elo is",
+    "eloInfo": "Calculated from the league's previous results; not comparable across leagues or with other websites' ratings.",
+    "eloUntil": "Elo calculated up to {{date}}.",
+    "eloPromoted": "Newly promoted teams may be overrated at first.",
+    "eloDiff": "+{{diff}} in favour of {{team}}",
+    "eloEqual": "Same Elo",
+    "eloTip": {
+      "updated": "Updated to {{date}}",
+      "expected": "By Elo, {{team}} would take on average <bold>{{pct}}</bold> of the points in a match-up like this (a win counts 1, a draw ½).",
+      "source": "Built from this league's previous results.",
+      "comparable": "Not comparable across leagues or with other websites."
+    },
+    "eloMissing": {
+      "champions": "Champions League match: the in-house Elo is only calculated from league matches.",
+      "insufficient_history_one": "{{team}}: not enough history ({{count}} previous match; {{min}} needed).",
+      "insufficient_history_other": "{{team}}: not enough history ({{count}} previous matches; {{min}} needed).",
+      "not_generated": "{{team}}: not calculated yet for this match."
+    },
+    "noDiscipline": "No corner or card data yet for these teams in the range analysed.",
+    "caption": "Recent form of {{home}} and {{away}}"
+  },
+  "matchStats": {
+    "caption": "{{home}} and {{away}} stats in the match",
+    "stat": {
+      "xg": "xG",
+      "shots": "Shots",
+      "shots_on_target": "Shots on target",
+      "corners": "Corners",
+      "fouls": "Fouls",
+      "yellow_cards": "Yellow cards",
+      "red_cards": "Red cards"
+    },
+    "statInline": {
+      "xg": "xG",
+      "shots": "shots",
+      "shots_on_target": "shots on target",
+      "corners": "corners",
+      "fouls": "fouls",
+      "yellow_cards": "yellow cards",
+      "red_cards": "red cards"
+    },
+    "none": "No stats for this match.",
+    "source": "Shots, corners, fouls and cards: Football-Data.co.uk and ESPN. xG: Understat, only in the big five leagues.",
+    "loading": "Loading match stats...",
+    "error": "Couldn't load the match stats: {{error}}",
+    "compareButton": "See the predictor's stats",
+    "compareIntro": "Below each figure, in grey, what the predictor estimated before the match, using only earlier matches. Next to each stat, its average error per team in past matches (±).",
+    "predictedLabel": "Predictor estimate:",
+    "noPrediction": "There were no earlier league matches to estimate it from."
+  },
+  "predictor": {
+    "notPlayed": "The match hasn't been played yet.",
+    "button": "Stats predictor",
+    "loading": "Calculating...",
+    "loadError": "Couldn't calculate it: {{error}}",
+    "noData": "There are no earlier league matches to estimate it from.",
+    "intro": "What to expect from each team based on their earlier league matches (this season and last): what they usually do and what the opponent usually concedes, allowing for home and away and with more weight on recent games. For yellow cards, the referee too. It's an estimate, not what will happen.",
+    "caption": "Expected stats for {{home}} and {{away}}",
+    "errorValue": "±{{value}}",
+    "errorTitle": "Average error per team when the predictor was tested on matches already played",
+    "sample": "Based on {{home}} home matches of {{homeTeam}} and {{away}} away matches of {{awayTeam}}.",
+    "sampleAll": "Based on {{home}} matches of {{homeTeam}} and {{away}} of {{awayTeam}} (home and away), this season and last.",
+    "lowSample": "With so few matches, the estimate stays close to the league average.",
+    "refereeBase": "Yellow cards with referee {{name}}: {{matches}} of their league matches, this season and last.",
+    "needsReferee": "Yellow cards are only estimated once a referee is appointed: without one, they don't beat the league average.",
+    "errorNote": "±: average error per team when tested on the {{matches}} matches of {{from}} and {{to}}, each one using only earlier matches. It has between {{min}} and {{max}} less error than the league average.",
+    "excluded": "No estimate: {{stats}}. In that test they didn't have less error than both the league and the team average.",
+    "excludedReferee": "They don't improve either when the appointed referee is taken into account.",
+    "total": "{{stat}} · predicted total",
+    "how": "How it is calculated",
+    "badge": "Prediction",
+    "notReal": "The model's estimate before the match, not real data. Once it is played, you will see the real figures here compared with this prediction."
   },
   "seasonSummary": {
     "noData": "Neither team has any recorded matches yet (the season has just started or the team has just been promoted).",

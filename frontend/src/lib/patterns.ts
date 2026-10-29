@@ -60,6 +60,11 @@ export function wilsonLower(hits: number, n: number, z = 1.96): number {
   return (centre - margin) / (1 + z2 / n);
 }
 
+/** Limite superior de Wilson al 95 %. */
+export function wilsonUpper(hits: number, n: number, z = 1.96): number {
+  return n === 0 ? 0 : 1 - wilsonLower(n - hits, n, z);
+}
+
 // --- Catalogo ---------------------------------------------------------------
 
 /** De quien es la cifra: del equipo, la que le hacen (en contra) o del partido. */
@@ -878,11 +883,6 @@ export interface PicksSummary {
   /** Lo esperable si estos equipos no tuvieran nada especial: la media de la
    * frecuencia en la liga de esos mismos sucesos. */
   expected: number | null;
-}
-
-/** Limite superior de Wilson al 95 %. */
-function wilsonUpper(hits: number, n: number, z = 1.96): number {
-  return n === 0 ? 0 : 1 - wilsonLower(n - hits, n, z);
 }
 
 /** Acierto de un conjunto de picks, contra lo habitual en la liga. */

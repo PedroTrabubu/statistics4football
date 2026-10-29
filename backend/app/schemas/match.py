@@ -33,11 +33,13 @@ class TeamMatchStatsOut(BaseModel):
     fouls: int | None
     shots: int | None
     shots_on_target: int | None
+    # Understat: solo las cinco grandes ligas; None en el resto.
+    xg: float | None = None
 
 
 class MatchResultOut(MatchOut):
     """Partido jugado + stats de cada equipo (corners, tarjetas, faltas,
-    tiros), para los mercados por equipo del frontend."""
+    tiros, xG), para los mercados por equipo del frontend."""
 
     home_stats: TeamMatchStatsOut | None
     away_stats: TeamMatchStatsOut | None
@@ -129,6 +131,7 @@ def _stats_out(stats: TeamMatchStats | None) -> TeamMatchStatsOut | None:
         fouls=stats.fouls,
         shots=stats.shots,
         shots_on_target=stats.shots_on_target,
+        xg=stats.xg,
     )
 
 
