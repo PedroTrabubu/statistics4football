@@ -1,8 +1,9 @@
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { getLeagueResults, getLeagueSeasons, getLeagues, getMatches } from "../api/client";
+import { getLeagueResults, getLeagueSeasons, getLeagues, getUpcomingMatches } from "../api/client";
+import type { Match } from "../api/types";
 import { formatDateTime, formatSeason, withPercent } from "../lib/format";
-import { DEFAULT_LEAGUE_CODE, leagueName } from "../lib/leagues";
+import { defaultLeagueCode, leagueName } from "../lib/leagues";
 import { findMarket, groupByTeam, hitRate, marketGroupLabel } from "../lib/markets";
 import { useApi } from "../lib/useApi";
 import { useCountUp } from "../lib/useCountUp";
@@ -14,27 +15,44 @@ const TEAMS_SHOWN = 3;
 const FORM_SHOWN = 9;
 
 /** Tarjeta de la portada: la página de un mercado en pequeño, con datos
- * reales (los tres equipos con más "Ambos marcan" de LaLiga en la temporada
- * actual). Enlaza a esa página. Si la API falla, no se pinta. */
+ * reales (los tres equipos con más "Ambos marcan" de la liga del idioma en la
+ * temporada actual: LaLiga, Premier League o Ligue 1) y, flotando al lado, el próximo partido de esos tres. Enlaza a
+ * esa página. Si la API falla, no se pinta. */
 export function HeroPreview() {
   const { t } = useTranslation();
   const market = findMarket(MARKET_SLUG);
+  // useTranslation vuelve a pintar al cambiar de idioma: la liga cambia con él.
+  const code = defaultLeagueCode();
   const option = market?.options.find((o) => o.key === market.defaultOption) ?? market?.options[0];
 
   const data = useApi(async () => {
+    if (!option) return null;
     const leagues = await getLeagues();
-    const league = leagues.find((l) => l.code === DEFAULT_LEAGUE_CODE);
+    const league = leagues.find((l) => l.code === code);
     if (!league) return null;
     const seasons = await getLeagueSeasons(league.id);
     const season = seasons[0];
     if (!season) return null;
-    const [results, upcoming] = await Promise.all([
-      getLeagueResults(league.id, season),
-      getMatches({ league_id: league.id, status: "scheduled", limit: 10 }).catch(() => []),
-    ]);
-    const next = [...upcoming].sort((a, b) => a.date.localeCompare(b.date))[0] ?? null;
-    return { league, season, results, next };
-  }, []);
+    const results = await getLeagueResults(league.id, season);
+    const groups = groupByTeam(results)
+      .map((group) => ({ group, rate: hitRate(group.all, option) }))
+      .filter((r) => r.rate.pct !== null && r.rate.total >= 5)
+      .sort((a, b) => (b.rate.pct ?? 0) - (a.rate.pct ?? 0) || b.rate.total - a.rate.total)
+      .slice(0, TEAMS_SHOWN);
+    // El partido más cercano de cualquiera de los tres.
+    const upcoming = await Promise.all(
+      groups.map(({ group }) =>
+        group.teamId === null
+          ? null
+          : getUpcomingMatches({ league_id: league.id, team_id: group.teamId, limit: 1 })
+              .then((matches) => matches[0] ?? null)
+              .catch(() => null),
+      ),
+    );
+    const next =
+      upcoming.filter((m): m is Match => m !== null).sort((a, b) => a.date.localeCompare(b.date))[0] ?? null;
+    return { league, season, results, groups, next };
+  }, [code]);
 
   const progress = useCountUp(data.data !== null, 1500, 500);
 
@@ -52,12 +70,7 @@ export function HeroPreview() {
     );
   }
 
-  const { league, season, results, next } = data.data;
-  const groups = groupByTeam(results)
-    .map((group) => ({ group, rate: hitRate(group.all, option) }))
-    .filter((r) => r.rate.pct !== null && r.rate.total >= 5)
-    .sort((a, b) => (b.rate.pct ?? 0) - (a.rate.pct ?? 0) || b.rate.total - a.rate.total)
-    .slice(0, TEAMS_SHOWN);
+  const { league, season, results, groups, next } = data.data;
   if (groups.length === 0) return null;
 
   const leagueViews = groupByTeam(results).flatMap((g) => g.home);
@@ -138,8 +151,8 @@ export function HeroPreview() {
       )}
     </Link>
 
-    {/* Etiquetas flotantes, como en el diseño: el próximo partido y la vista
-        local / visitante. */}
+    {/* Etiquetas flotantes, como en el diseño: el próximo partido de esos
+        equipos y la vista local / visitante. */}
     {next && (
       <Link to={`/matches/${next.id}`} className="hero-chip hero-chip-match">
         <span className="hero-chip-icon" aria-hidden="true">

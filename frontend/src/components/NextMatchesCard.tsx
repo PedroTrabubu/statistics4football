@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { getMatches } from "../api/client";
+import { getUpcomingMatches } from "../api/client";
 import type { League } from "../api/types";
 import { formatDateTime } from "../lib/format";
 import { leagueName } from "../lib/leagues";
@@ -17,7 +17,7 @@ export function NextMatchesCard({ league }: { league: League | undefined }) {
   const upcoming = useApi(
     () =>
       league
-        ? getMatches({ league_id: league.id, status: "scheduled", limit: 20 }).then((list) =>
+        ? getUpcomingMatches({ league_id: league.id, limit: 20 }).then((list) =>
             [...list].sort((a, b) => a.date.localeCompare(b.date)).slice(0, SHOWN),
           )
         : Promise.resolve([]),
