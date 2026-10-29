@@ -39,6 +39,9 @@ from app.ingestion.odds_api_client import LEAGUE_SPORT_KEY_MAP
 from app.ingestion.referee_overrides import apply_referee_overrides
 from app.ingestion.soccerdata_client import leagues_with_source
 from app.ingestion.xg_backfill import backfill_understat_xg
+from app.probability.dc_monthly import refresh_dc_monthly
+from app.probability.result_predictions import LEAGUES as RESULT_LEAGUES
+from app.probability.result_predictions import refresh_result_predictions
 from app.stats.own_elo import refresh_own_elo
 
 
@@ -107,6 +110,14 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
         run = refresh_own_elo(db)
         return f"status={run.status.value} {run.notes}"
 
+    def dc_monthly() -> str:
+        run = refresh_dc_monthly(db, RESULT_LEAGUES)
+        return f"status={run.status.value} {run.notes}"
+
+    def result_probabilities() -> str:
+        run = refresh_result_predictions(db)
+        return f"status={run.status.value} {run.notes}"
+
     step("football-data.org", football_data_org)
     step(f"Football-Data.co.uk {season}", match_history)
     step(f"Understat xG {season}", understat)
@@ -121,4 +132,9 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
     # Despues de los resultados: el Elo previo de los partidos recien jugados y
     # el actual de los programados (incremental; las filas finales no se tocan).
     step("Elo propio", own_elo)
+    # Con el Elo ya al dia: la prediccion de los programados hasta su inicio
+    # (la ultima antes de empezar queda congelada) y los jugados que falten.
+    # Si Dixon-Coles falla en una liga, el paso sale con aviso y esa liga usa solo Elo.
+    step("Dixon-Coles mensual", dc_monthly)
+    step("Porcentajes de resultado", result_probabilities)
     return failures

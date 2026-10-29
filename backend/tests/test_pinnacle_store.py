@@ -3,6 +3,7 @@ aparecen tarde, fallos sin perder nada y aislamiento de "Market Average"."""
 
 import importlib.util
 import json
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -286,5 +287,7 @@ def test_market_reference_code_does_not_read_pinnacle_tables():
                                                   "refresh_predictions.py", "refresh_picks.py")]  # fmt: skip
     for path in sources:
         code = path.read_text(encoding="utf-8")
-        for name in ("pinnacle_odds", "PinnaclePrice", "pinnacle_captures", "pinnacle_queries", "app.analysis"):
+        for name in ("pinnacle_odds", "PinnaclePrice", "pinnacle_captures", "pinnacle_queries"):
             assert name not in code, f"{path.name} usa {name}"
+        # De app.analysis solo vale stats.py: estadistica pura, sin tablas.
+        assert not re.search(r"app\.analysis(?!\.stats\b)", code), f"{path.name} usa app.analysis"

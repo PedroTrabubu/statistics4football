@@ -9,6 +9,7 @@ from app.db.models.own_elo import OwnEloPre
 from app.db.models.pick import PickCombo, PickLeg
 from app.db.models.pinnacle import PinnacleCapture, PinnacleMatchSnapshot, PinnaclePrice
 from app.db.models.prediction import ModelPrediction, RiskLevel
+from app.db.models.result_prediction import ResultPrediction
 from app.db.models.season import Season
 from app.db.models.stats import TeamMatchStats
 from app.db.models.team import Team
@@ -28,6 +29,7 @@ __all__ = [
     "PinnacleCapture",
     "PinnacleMatchSnapshot",
     "PinnaclePrice",
+    "ResultPrediction",
     "RiskLevel",
     "Season",
     "Team",

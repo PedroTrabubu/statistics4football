@@ -10,6 +10,7 @@ from app.core.config import Settings, get_settings
 from app.db.models import Match, MatchStatus, Season
 from app.db.session import get_db
 from app.probability.engine import generate_predictions_for_match, get_cached_league_model
+from app.probability.result_predictions import match_result_probabilities
 from app.schemas.match import (
     MatchHistoryOut,
     MatchOut,
@@ -19,6 +20,7 @@ from app.schemas.match import (
     match_to_result_out,
 )
 from app.schemas.prediction import PredictionOut
+from app.schemas.result import MatchResultProbabilitiesOut
 from app.schemas.stats import MatchFeaturesOut
 from app.stats.features import compute_match_features, excluded_leagues
 
@@ -71,6 +73,14 @@ def list_matches(
 @router.get("/{match_id}", response_model=MatchOut)
 def get_match(match_id: int, db: Session = Depends(get_db)) -> MatchOut:
     return match_to_out(_get_match_or_404(db, match_id))
+
+
+@router.get("/{match_id}/result-probabilities", response_model=MatchResultProbabilitiesOut)
+def get_match_result_probabilities(match_id: int, db: Session = Depends(get_db)) -> MatchResultProbabilitiesOut:
+    """Porcentajes de resultado (1X2) ya guardados del partido, con el acierto
+    historico de su liga. Solo lee (scripts/refresh_result_predictions.py los genera)."""
+    match = _get_match_or_404(db, match_id)
+    return MatchResultProbabilitiesOut.model_validate(match_result_probabilities(db, match))
 
 
 @router.get("/{match_id}/stats", response_model=MatchFeaturesOut)
