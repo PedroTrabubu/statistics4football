@@ -5,6 +5,7 @@ from app.db.models.ingestion import IngestionRun, IngestionStatus
 from app.db.models.league import League
 from app.db.models.match import Match, MatchStatus
 from app.db.models.odds import MatchOdds
+from app.db.models.own_elo import OwnEloPre
 from app.db.models.pick import PickCombo, PickLeg
 from app.db.models.pinnacle import PinnacleCapture, PinnacleMatchSnapshot, PinnaclePrice
 from app.db.models.prediction import ModelPrediction, RiskLevel
@@ -21,6 +22,7 @@ __all__ = [
     "MatchOdds",
     "MatchStatus",
     "ModelPrediction",
+    "OwnEloPre",
     "PickCombo",
     "PickLeg",
     "PinnacleCapture",

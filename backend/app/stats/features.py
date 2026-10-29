@@ -13,9 +13,9 @@ from sqlalchemy.orm import Session
 from app.core.competitions import CHAMPIONS_LEAGUE
 from app.db.models import League, Match
 from app.stats.discipline import DisciplineForm, compute_discipline_form
-from app.stats.elo import get_elo_at
 from app.stats.form import TeamForm, compute_team_form
 from app.stats.h2h import HeadToHead, compute_h2h
+from app.stats.own_elo import MatchElo, match_elo
 from app.stats.xg import XgForm, compute_xg_form
 
 
@@ -28,8 +28,11 @@ class MatchFeatures:
     away_xg_form: XgForm
     home_discipline: DisciplineForm
     away_discipline: DisciplineForm
+    # Elo propio previo al partido (own_elo_pre); None cuando la ficha muestra
+    # "—", con el motivo en `elo`. Ya no sale de ClubElo (`get_elo_at`).
     home_elo: float | None
     away_elo: float | None
+    elo: MatchElo
 
 
 def excluded_leagues(db: Session, match: Match) -> list[int]:
@@ -43,6 +46,7 @@ def excluded_leagues(db: Session, match: Match) -> list[int]:
 
 def compute_match_features(db: Session, match: Match, num_matches: int = 5) -> MatchFeatures:
     skip = excluded_leagues(db, match)
+    elo = match_elo(db, match)
     return MatchFeatures(
         home_form=compute_team_form(db, match.home_team_id, match.date, num_matches, skip),
         away_form=compute_team_form(db, match.away_team_id, match.date, num_matches, skip),
@@ -51,6 +55,7 @@ def compute_match_features(db: Session, match: Match, num_matches: int = 5) -> M
         away_xg_form=compute_xg_form(db, match.away_team_id, match.date, num_matches, skip),
         home_discipline=compute_discipline_form(db, match.home_team_id, match.date, num_matches, skip),
         away_discipline=compute_discipline_form(db, match.away_team_id, match.date, num_matches, skip),
-        home_elo=get_elo_at(db, match.home_team_id, match.date),
-        away_elo=get_elo_at(db, match.away_team_id, match.date),
+        home_elo=elo.home.elo,
+        away_elo=elo.away.elo,
+        elo=elo,
     )
