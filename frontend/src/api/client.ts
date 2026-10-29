@@ -164,7 +164,6 @@ export interface RecommendationFilters {
   league_id?: number;
   market?: string;
   risk_level?: RiskLevel;
-  min_ev?: number;
   strategy?: RecommendationStrategy;
   limit?: number;
 }
@@ -177,6 +176,8 @@ export interface RecommendationHistoryFilters {
   league_id?: number;
   market?: string;
   strategy?: RecommendationStrategy;
+  /** Solo los partidos de ese equipo (su nombre). */
+  team?: string;
   limit?: number;
 }
 

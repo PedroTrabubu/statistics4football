@@ -38,10 +38,6 @@
     "all": "All",
     "noMatches": "No matches on this day"
   },
-  "evFlag": {
-    "label": "check",
-    "title": "An EV this high almost always means the model disagrees sharply with the market (small sample, a team with little history...), not a sure-fire opportunity. Check the sample before trusting this figure."
-  },
   "outcome": {
     "won": "Won",
     "lost": "Lost",

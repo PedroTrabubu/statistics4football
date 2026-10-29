@@ -1,7 +1,7 @@
 {
   "intro": "Qué significa cada término que verás en las páginas de partido, sin dar por hecho que ya lo sabes.",
   "basics": {
-    "title": "Frecuencia, probabilidad y valor no son lo mismo",
+    "title": "Frecuencia y probabilidad no son lo mismo",
     "frequency": {
       "term": "Frecuencia histórica",
       "def": "Cuántas veces ha ocurrido algo sobre un número concreto de partidos pasados. Es un hecho contable, no una predicción: \"over 2,5 ocurrió en 13 de los últimos 20 partidos\" es frecuencia."
@@ -9,10 +9,6 @@
     "modelProbability": {
       "term": "Probabilidad del modelo",
       "def": "Una estimación, calculada con un modelo estadístico (Dixon-Coles) que tiene en cuenta la fuerza de ataque/defensa de cada equipo, no solo el recuento simple. Sigue siendo una estimación, no un hecho."
-    },
-    "value": {
-      "term": "Valor (EV)",
-      "def": "Compara esa probabilidad estimada con una cuota concreta. Un EV positivo describe una ventaja esperada a largo plazo bajo los supuestos del modelo — no garantiza ganar la próxima apuesta, y una racha de pérdidas con EV positivo es perfectamente normal."
     }
   },
   "markets": {
@@ -58,10 +54,6 @@
     "fair": {
       "term": "Cuota justa",
       "def": "La cuota que correspondería exactamente a la probabilidad del modelo, sin margen del operador: 1 ÷ probabilidad del modelo. Sirve como referencia para comparar, no como una cuota que vayas a encontrar necesariamente en ningún sitio."
-    },
-    "yourEv": {
-      "term": "Tu EV",
-      "def": "Al introducir la cuota que te ofrece tu operador junto a la probabilidad del modelo, se calcula el valor esperado de esa combinación concreta. Nunca se guarda ni se envía a ningún sitio."
     }
   },
   "risk": {
@@ -72,7 +64,7 @@
     },
     "level": {
       "term": "Riesgo bajo / medio / alto",
-      "def": "Sube cuando la confianza es baja o cuando la cuota es muy alta (mayor varianza), aunque el EV puntual sea positivo. No es una nota de calidad del dato, es una señal de cuánto puede variar el resultado real."
+      "def": "Sube cuando la confianza es baja o cuando la cuota es muy alta (mayor varianza). No es una nota de calidad del dato, es una señal de cuánto puede variar el resultado real."
     }
   }
 }

@@ -67,15 +67,17 @@ export function orderLeagues(leagues: League[]): League[] {
   );
 }
 
-/** Picks y Recomendaciones solo se ofrecen en ligas validadas. Si la liga
- * elegida en otra pagina no lo esta, se ven todas en vez de una pagina vacia. */
+/** Picks y Alta probabilidad solo se ofrecen en ligas validadas (`flag`: la
+ * marca de cada uno). Si la liga elegida en otra pagina no lo esta, se ven
+ * todas en vez de una pagina vacia. */
 export function onlyValidated(
   leagues: League[] | null,
   code: string | null,
+  flag: "validated" | "high_probability" = "validated",
 ): { leagues: League[] | null; code: string | null; pending: string | null } {
   if (!leagues) return { leagues: null, code, pending: null };
-  const validated = leagues.filter((l) => l.validated);
-  const pending = orderLeagues(leagues.filter((l) => !l.validated)).map((l) => leagueName(l.code));
+  const validated = leagues.filter((l) => l[flag]);
+  const pending = orderLeagues(leagues.filter((l) => !l[flag])).map((l) => leagueName(l.code));
   return {
     leagues: validated,
     code: code === null || validated.some((l) => l.code === code) ? code : null,

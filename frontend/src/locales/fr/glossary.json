@@ -1,7 +1,7 @@
 {
   "intro": "Ce que signifie chaque terme que vous verrez sur les pages de match, sans supposer que vous le savez déjà.",
   "basics": {
-    "title": "Fréquence, probabilité et valeur, ce n'est pas la même chose",
+    "title": "Fréquence et probabilité, ce n'est pas la même chose",
     "frequency": {
       "term": "Fréquence historique",
       "def": "Combien de fois quelque chose s'est produit sur un nombre précis de matchs passés. C'est un décompte, pas une prédiction : « plus de 2,5 buts lors de 13 des 20 derniers matchs » est une fréquence."
@@ -9,10 +9,6 @@
     "modelProbability": {
       "term": "Probabilité du modèle",
       "def": "Une estimation, calculée avec un modèle statistique (Dixon-Coles) qui tient compte de la force offensive et défensive de chaque équipe, pas seulement d'un simple décompte. Cela reste une estimation, pas un fait."
-    },
-    "value": {
-      "term": "Valeur (EV)",
-      "def": "Compare cette probabilité estimée à une cote précise. Un EV positif décrit un avantage attendu sur le long terme selon les hypothèses du modèle — il ne garantit pas de gagner le prochain pari, et une série de pertes avec un EV positif est parfaitement normale."
     }
   },
   "markets": {
@@ -58,10 +54,6 @@
     "fair": {
       "term": "Cote juste",
       "def": "La cote qui correspondrait exactement à la probabilité du modèle, sans marge de l'opérateur : 1 ÷ probabilité du modèle. Elle sert de référence pour comparer, pas de cote que vous trouverez forcément quelque part."
-    },
-    "yourEv": {
-      "term": "Votre EV",
-      "def": "Quand vous saisissez la cote que vous propose votre opérateur à côté de la probabilité du modèle, la valeur attendue de cette combinaison précise est calculée. Elle n'est jamais enregistrée ni envoyée nulle part."
     }
   },
   "risk": {
@@ -72,7 +64,7 @@
     },
     "level": {
       "term": "Risque faible / moyen / élevé",
-      "def": "Il augmente quand la confiance est faible ou quand la cote est très élevée (variance plus forte), même si l'EV ponctuel est positif. Ce n'est pas une note de qualité de la donnée : c'est un signal de la variabilité possible du résultat réel."
+      "def": "Il augmente quand la confiance est faible ou quand la cote est très élevée (variance plus forte). Ce n'est pas une note de qualité de la donnée : c'est un signal de la variabilité possible du résultat réel."
     }
   }
 }

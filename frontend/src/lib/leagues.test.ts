@@ -3,8 +3,8 @@ import type { League } from "../api/types";
 import { leagueParam, parseLeagueParam } from "./leagues";
 
 const LEAGUES: League[] = [
-  { id: 1, code: "ENG-Premier League", name: "ENG-Premier League", country: null, validated: true },
-  { id: 2, code: "ESP-La Liga", name: "ESP-La Liga", country: null, validated: true },
+  { id: 1, code: "ENG-Premier League", name: "ENG-Premier League", country: null, validated: true, high_probability: true },
+  { id: 2, code: "ESP-La Liga", name: "ESP-La Liga", country: null, validated: true, high_probability: true },
 ];
 
 describe("parseLeagueParam", () => {

@@ -1,20 +1,32 @@
 {
   "lead": "This is an analysis tool, not a promise of profit. Always compare the hit rate with what the market already expected: hitting lots of bets the market already rated as very likely is no credit to the model.",
-  "strategy": {
-    "highProbability": "High probability",
-    "value": "Value (EV)"
+  "notice": "It describes likely events; the market already prices them in. These are not betting recommendations.",
+  "callout": {
+    "title": "Margin over the market",
+    "definition": "How many points above (+) or below (−) what the market expected it hits: if the market expected 68% and it hits 71%, that's +3 pts. If the interval (95% CI) includes 0, the margin can't be told apart from chance.",
+    "before": "22/23–24/25",
+    "recent": "25/26–26/27",
+    "detail": "95% CI: {{low}} to {{high}} · {{n}} selections",
+    "detailNoCi": "{{n}} selections",
+    "method": "22/23–24/25: in the Premier League and LaLiga, with the model retrained each season on earlier seasons only; in Hypermotion and Serie A, with the current model, which never saw those leagues. 25/26–26/27: the history below."
   },
+  "points": "{{value}} pts",
   "intro": {
-    "highProbability": "<bold>High probability:</bold> at most one selection per match, when the model gives it at least 62% and at least 3 points more than the market. It combines pre-match odds, Dixon-Coles and each team's patterns. In 25/26 and 26/27 it hit 74.8% when the market expected 68.5%, but in the three previous seasons (22/23–24/25) it hit 68.7%, exactly what the market expected. It hits a lot because it picks likely selections, not because it knows more than the bookmakers.",
-    "value": "<bold>Value (EV):</bold> selections where Dixon-Coles gives a higher probability than the odds. They hit less often (they include away wins and draws) and are judged by ROI, not hit rate."
+    "highProbability": "<bold>High probability:</bold> at most one selection per match, when the model gives it at least 62% and at least 3 points more than the market. It combines pre-match odds, Dixon-Coles and each team's patterns. It hits a lot because it picks likely selections, not because it knows more than the bookmakers."
+  },
+  "rule": {
+    "min": "<bold>≥ 62%</bold> according to the model",
+    "edge": "<bold>+3 pts</bold> above the market",
+    "one": "<bold>1</bold> selection per match at most",
+    "more": "How the selections are chosen"
   },
   "tabUpcoming": "Upcoming",
   "tabHistory": "History",
-  "loading": "Loading recommendations...",
-  "emptyHighProbability": "No high-probability selections for the upcoming matches. The model needs pre-match odds (scripts/refresh_odds.py and then refresh_predictions.py), and in many matches no selection clears both thresholds: that's expected, not an error.",
-  "emptyValue": "No value recommendations yet for matches still to be played: calculating EV requires real market odds. Load the pre-match odds (scripts/refresh_odds.py) and generate the predictions again. In the meantime, use ‘Your odds’ on each match page to compare your own odds with the model.",
-  "anyRisk": "Any risk",
-  "minEv": "Minimum EV",
+  "loading": "Loading selections...",
+  "emptyHighProbability": "There are no high-probability selections for the upcoming matches right now. They show up once bookmakers publish their odds, usually a few days before each matchday, and only in matches where the model sees a very likely selection.",
+  "seeHistory": "See how the previous ones did →",
+  "dayCount_one": "{{count}} selection",
+  "dayCount_other": "{{count}} selections",
   "column": {
     "match": "Match",
     "market": "Market",
@@ -22,35 +34,42 @@
     "modelProb": "Model prob.",
     "marketProb": "Market prob.",
     "edge": "Edge",
-    "ev": "EV",
-    "evTitle": "Only in 1X2 and Over/Under 2.5, which have real odds in the data",
     "sample": "Sample",
-    "risk": "Risk",
     "result": "Result",
-    "hit": "Hit?",
-    "pnl": "PnL"
+    "hit": "Hit?"
   },
   "history": {
     "loading": "Loading history...",
-    "empty": "No settled recommendations yet on matches already played for this filter.",
+    "empty": "No settled selections yet on matches already played for this filter.",
+    "listTitle": "Selections already played",
+    "modelShort": "Model",
+    "marketShort": "Market",
     "tile": {
       "hitRate": "Hit rate",
       "marketExpected": "Market expected",
       "margin": "Margin over market",
-      "roi": "ROI ({{n}} with odds)",
-      "pnl": "PnL (stake=1)",
       "wonLost": "Won / lost"
     },
     "note": {
-      "highProbability": "High-probability model selections over 25/26 and 26/27, calculated with a model trained only on earlier seasons and with thresholds fixed before seeing these matches. <bold>The margin over the market is the measure of merit</bold>, not the hit rate: always choosing what the market rates as most likely also hits a lot, and loses money. ROI only counts 1X2 and Over/Under 2.5, the only markets with real odds in the data. Misses are never left out of this list or these calculations.",
-      "value": "Selections the model flagged as value (positive EV) in matches already played. <bold>ROI is the measure that matters, not the hit rate on its own</bold>: a low-probability selection (e.g. an away win at 15%) is expected to lose most of the time even with genuinely positive EV. Misses are never left out of this list or these calculations."
+      "highProbability": "High-probability model selections over 25/26 and 26/27, calculated with a model trained only on earlier seasons and with thresholds fixed before seeing these matches. <bold>The margin over the market is the measure of merit</bold>, not the hit rate: always choosing what the market rates as most likely also hits a lot, and loses money. The interval (95% CI) comes from resampling the matches with a fixed seed: if it includes 0, the margin can't be told apart from chance. Misses are never left out of this list or these calculations."
     },
     "column": {
       "selections": "Selections",
       "hitRate": "Hit rate",
       "marketExpected": "Market expected",
-      "withOdds": "With odds",
-      "roi": "ROI"
-    }
+      "margin": "Margin",
+      "ci": "95% CI",
+      "team": "Team"
+    },
+    "ci": "95% CI: {{low}} to {{high}}",
+    "ciRange": "{{low}} to {{high}}",
+    "showHits": "Show the ones that hit",
+    "hitsTitle": "{{n}} hits in {{team}} matches:"
+  },
+  "origin": {
+    "real": "Real odds: bookmaker average, margin removed.",
+    "derived": "Sum of the real 1X2 odds, margin removed.",
+    "realOverUnder": "Real Over/Under 2.5 odds, margin removed; estimated when missing.",
+    "estimated": "Estimate: Poisson fitted to the 1X2 and Over/Under 2.5 odds."
   }
 }

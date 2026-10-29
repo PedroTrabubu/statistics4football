@@ -38,10 +38,6 @@
     "all": "Todos",
     "noMatches": "Sin partidos este día"
   },
-  "evFlag": {
-    "label": "revisar",
-    "title": "Un EV tan alto casi siempre indica que el modelo discrepa mucho del mercado (muestra pequeña, equipo con poco histórico...), no una oportunidad segura. Revisa la muestra antes de fiarte de este número."
-  },
   "outcome": {
     "won": "Acertó",
     "lost": "Falló",

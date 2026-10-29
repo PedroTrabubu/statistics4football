@@ -6,8 +6,10 @@ export interface League {
   code: string;
   name: string;
   country: string | null;
-  /** Picks y Recomendaciones validados en esta liga. */
+  /** Picks validados en esta liga. */
   validated: boolean;
+  /** Alta probabilidad validada en esta liga (puede estarlo sin Picks). */
+  high_probability: boolean;
 }
 
 export interface Team {
@@ -331,15 +333,14 @@ export interface Recommendation {
   selection: string;
   prob_market_implied: number;
   prob_model: number;
-  /** null en mercados sin cuota real (estrategia "alta probabilidad"). */
-  ev: number | null;
   confidence: number;
   risk_level: RiskLevel;
   matches_used: number;
 }
 
-/** "valor": EV contra la cuota (Dixon-Coles). "alta_probabilidad": modelo de patrones. */
-export type RecommendationStrategy = "valor" | "alta_probabilidad";
+/** "alta_probabilidad": modelo de patrones. "valor" (EV de Dixon-Coles) está
+ * retirado: la API solo lo sirve con ENABLE_EV=true. */
+export type RecommendationStrategy = "alta_probabilidad";
 
 export type RecommendationOutcome = "won" | "lost" | "pending";
 
@@ -356,10 +357,8 @@ export interface RecommendationHistoryItem {
   selection: string;
   prob_market_implied: number | null;
   prob_model: number;
-  ev: number | null;
   matches_used: number;
   outcome: RecommendationOutcome;
-  pnl_units: number | null;
 }
 
 export interface RecommendationHistoryBreakdown {
@@ -371,10 +370,9 @@ export interface RecommendationHistoryBreakdown {
   hit_rate: number | null;
   /** Probabilidad media que el mercado daba a esas mismas selecciones. */
   market_expected_hit_rate: number | null;
-  /** Selecciones con cuota real: el ROI solo se calcula sobre estas. */
-  with_odds: number;
-  pnl_units: number;
-  roi: number | null;
+  /** Intervalo al 95 % del margen sobre el mercado (pp), remuestreando partidos. */
+  margin_ci_low: number | null;
+  margin_ci_high: number | null;
 }
 
 export interface RecommendationHistorySummary {
@@ -385,15 +383,20 @@ export interface RecommendationHistorySummary {
   hit_rate: number | null;
   /** Probabilidad media que el mercado daba a esas mismas selecciones. */
   market_expected_hit_rate: number | null;
-  /** Selecciones con cuota real: el ROI solo se calcula sobre estas. */
-  with_odds: number;
-  pnl_units: number;
-  roi: number | null;
+  /** Intervalo al 95 % del margen sobre el mercado (pp), remuestreando partidos. */
+  margin_ci_low: number | null;
+  margin_ci_high: number | null;
 }
 
 export interface RecommendationHistoryResponse {
   summary: RecommendationHistorySummary;
   by_market: RecommendationHistoryBreakdown[];
+  /** Cada liga por separado (key = código de la liga). */
+  by_league: RecommendationHistoryBreakdown[];
+  /** Cada equipo por separado (key = su nombre): las selecciones de sus partidos. */
+  by_team: RecommendationHistoryBreakdown[];
+  /** Los mercados de cada equipo (clave = su nombre). */
+  by_team_market: Record<string, RecommendationHistoryBreakdown[]>;
   items: RecommendationHistoryItem[];
 }
 

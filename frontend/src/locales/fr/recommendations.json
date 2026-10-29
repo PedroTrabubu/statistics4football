@@ -1,20 +1,33 @@
 {
   "lead": "C'est un outil d'analyse, pas une promesse de gain. Comparez toujours la réussite avec ce que le marché attendait déjà : réussir beaucoup de paris que le marché donnait déjà comme très probables n'est pas un mérite du modèle.",
-  "strategy": {
-    "highProbability": "Haute probabilité",
-    "value": "Valeur (EV)"
+  "notice": "Décrit des événements probables ; le marché les intègre déjà. Ce ne sont pas des recommandations de pari.",
+  "callout": {
+    "title": "Marge sur le marché",
+    "definition": "De combien de points il réussit au-dessus (+) ou en dessous (−) de ce qu'attendait le marché : si le marché attendait 68 % et qu'il réussit 71 %, cela fait +3 pts. Si l'intervalle (IC 95 %) inclut 0, la marge ne se distingue pas du hasard.",
+    "before": "22/23–24/25",
+    "recent": "25/26–26/27",
+    "detail": "IC 95 % : {{low}} à {{high}} · {{n}} sélections",
+    "detailNoCi": "{{n}} sélections",
+    "method": "22/23–24/25 : en Premier League et en LaLiga, avec le modèle réentraîné chaque saison uniquement sur les précédentes ; en Hypermotion et en Serie A, avec le modèle actuel, qui n'a jamais vu ces compétitions. 25/26–26/27 : l'historique ci-dessous."
   },
+  "points": "{{value}} pts",
   "intro": {
-    "highProbability": "<bold>Haute probabilité :</bold> au maximum une sélection par match, quand le modèle lui donne au moins 62 % et au moins 3 points de plus que le marché. Elle combine les cotes d'avant-match, Dixon-Coles et les tendances de chaque équipe. En 25/26 et 26/27, elle a réussi 74,8 % quand le marché attendait 68,5 %, mais lors des trois saisons précédentes (22/23–24/25), elle a réussi 68,7 %, exactement ce qu'attendait le marché. Elle réussit souvent parce qu'elle choisit des sélections probables, pas parce qu'elle en sait plus que les bookmakers.",
-    "value": "<bold>Valeur (EV) :</bold> sélections où Dixon-Coles donne une probabilité plus élevée que la cote. Elles réussissent moins souvent (elles incluent des victoires à l'extérieur et des nuls) et se jugent au ROI, pas à la réussite."
+    "highProbability": "<bold>Haute probabilité :</bold> au maximum une sélection par match, quand le modèle lui donne au moins 62 % et au moins 3 points de plus que le marché. Elle combine les cotes d'avant-match, Dixon-Coles et les tendances de chaque équipe. Elle réussit souvent parce qu'elle choisit des sélections probables, pas parce qu'elle en sait plus que les bookmakers."
+  },
+  "rule": {
+    "min": "<bold>≥ 62 %</bold> selon le modèle",
+    "edge": "<bold>+3 pts</bold> au-dessus du marché",
+    "one": "<bold>1</bold> sélection par match au maximum",
+    "more": "Comment les sélections sont choisies"
   },
   "tabUpcoming": "À venir",
   "tabHistory": "Historique",
-  "loading": "Chargement des recommandations...",
-  "emptyHighProbability": "Aucune sélection à haute probabilité pour les prochains matchs. Le modèle a besoin des cotes d'avant-match (scripts/refresh_odds.py puis refresh_predictions.py), et sur beaucoup de matchs aucune sélection ne franchit les deux seuils : c'est normal, pas une erreur.",
-  "emptyValue": "Pas encore de recommandations de valeur pour les matchs à venir : calculer l'EV nécessite une vraie cote du marché. Chargez les cotes d'avant-match (scripts/refresh_odds.py) et générez à nouveau les prédictions. En attendant, utilisez « Votre cote » sur la page de chaque match pour comparer votre propre cote au modèle.",
-  "anyRisk": "Tous les risques",
-  "minEv": "EV minimum",
+  "loading": "Chargement des sélections...",
+  "emptyHighProbability": "Aucune sélection à haute probabilité pour les prochains matchs pour le moment. Elles apparaissent quand les bookmakers publient leurs cotes, généralement quelques jours avant chaque journée, et seulement pour les matchs où le modèle voit une sélection très probable.",
+  "seeHistory": "Voir le bilan des précédentes →",
+  "dayCount_one": "{{count}} sélection",
+  "dayCount_many": "{{count}} sélections",
+  "dayCount_other": "{{count}} sélections",
   "column": {
     "match": "Match",
     "market": "Marché",
@@ -22,35 +35,42 @@
     "modelProb": "Proba modèle",
     "marketProb": "Proba marché",
     "edge": "Écart",
-    "ev": "EV",
-    "evTitle": "Uniquement en 1X2 et Over/Under 2,5, qui ont une vraie cote dans les données",
     "sample": "Échantillon",
-    "risk": "Risque",
     "result": "Résultat",
-    "hit": "Validée ?",
-    "pnl": "PnL"
+    "hit": "Validée ?"
   },
   "history": {
     "loading": "Chargement de l'historique...",
-    "empty": "Pas encore de recommandations réglées sur des matchs déjà joués pour ce filtre.",
+    "empty": "Pas encore de sélections réglées sur des matchs déjà joués pour ce filtre.",
+    "listTitle": "Sélections déjà jouées",
+    "modelShort": "Modèle",
+    "marketShort": "Marché",
     "tile": {
       "hitRate": "Réussite",
       "marketExpected": "Le marché attendait",
       "margin": "Marge sur le marché",
-      "roi": "ROI ({{n}} avec cote)",
-      "pnl": "PnL (mise = 1)",
       "wonLost": "Gagnées / perdues"
     },
     "note": {
-      "highProbability": "Sélections du modèle à haute probabilité sur 25/26 et 26/27, calculées avec un modèle entraîné uniquement sur les saisons précédentes et avec des seuils fixés avant de voir ces matchs. <bold>La marge sur le marché est l'indicateur du mérite</bold>, pas la réussite : choisir toujours ce que le marché donne comme le plus probable réussit aussi très souvent, et perd de l'argent. Le ROI ne compte que le 1X2 et l'Over/Under 2,5, les seuls marchés avec une vraie cote dans les données. Les échecs ne sont jamais exclus de cette liste ni de ces calculs.",
-      "value": "Sélections que le modèle a marquées comme valeur (EV positif) sur des matchs déjà joués. <bold>Le ROI est l'indicateur qui compte, pas la réussite seule</bold> : une sélection à faible probabilité (ex. victoire à l'extérieur à 15 %) doit échouer la plupart du temps, même avec un EV réellement positif. Les échecs ne sont jamais exclus de cette liste ni de ces calculs."
+      "highProbability": "Sélections du modèle à haute probabilité sur 25/26 et 26/27, calculées avec un modèle entraîné uniquement sur les saisons précédentes et avec des seuils fixés avant de voir ces matchs. <bold>La marge sur le marché est l'indicateur du mérite</bold>, pas la réussite : choisir toujours ce que le marché donne comme le plus probable réussit aussi très souvent, et perd de l'argent. L'intervalle (IC 95 %) vient d'un rééchantillonnage des matchs avec une graine fixe : s'il inclut 0, la marge ne se distingue pas du hasard. Les échecs ne sont jamais exclus de cette liste ni de ces calculs."
     },
     "column": {
       "selections": "Sélections",
       "hitRate": "Réussite",
       "marketExpected": "Attendu par le marché",
-      "withOdds": "Avec cote",
-      "roi": "ROI"
-    }
+      "margin": "Marge",
+      "ci": "IC 95 %",
+      "team": "Équipe"
+    },
+    "ci": "IC 95 % : {{low}} à {{high}}",
+    "ciRange": "{{low}} à {{high}}",
+    "showHits": "Voir celles qui sont passées",
+    "hitsTitle": "{{n}} réussies dans les matchs de {{team}} :"
+  },
+  "origin": {
+    "real": "Cote réelle : moyenne des bookmakers, sans marge.",
+    "derived": "Somme des cotes réelles 1X2, sans marge.",
+    "realOverUnder": "Cote réelle Over/Under 2,5, sans marge ; estimation si elle manque.",
+    "estimated": "Estimation : Poisson ajusté aux cotes 1X2 et Over/Under 2,5."
   }
 }
