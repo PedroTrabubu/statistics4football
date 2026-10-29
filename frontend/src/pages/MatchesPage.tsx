@@ -59,7 +59,7 @@ export function MatchesPage() {
           <p>
             <Trans
               i18nKey="matches:page.intro"
-              components={{ bold: <strong />, link: <Link to="/glosario" /> }}
+              components={{ bold: <strong />, anchor: <Link to="/glosario" /> }}
             />
           </p>
         }

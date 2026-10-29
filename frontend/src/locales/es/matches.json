@@ -1,6 +1,6 @@
 {
   "page": {
-    "intro": "Los porcentajes que ves aquí son <bold>frecuencia histórica</bold>, no una promesa de lo que va a pasar: cuentan cuántas veces ocurrió algo antes, siempre junto al número de partidos usado. No es lo mismo que una probabilidad garantizada. <link>Más sobre cómo leerlos →</link>"
+    "intro": "Los porcentajes que ves aquí son <bold>frecuencia histórica</bold>, no una promesa de lo que va a pasar: cuentan cuántas veces ocurrió algo antes, siempre junto al número de partidos usado. No es lo mismo que una probabilidad garantizada. <anchor>Más sobre cómo leerlos →</anchor>"
   },
   "detail": {
     "loading": "Cargando partido...",
@@ -48,7 +48,7 @@
     "seasonTitle": "Estadísticas de temporada",
     "seasonLoading": "Cargando estadísticas de temporada...",
     "referee": "Árbitro",
-    "refereeNamed": "Árbitro: <link>{{name}}</link>",
+    "refereeNamed": "Árbitro: <anchor>{{name}}</anchor>",
     "refereeLinkTitle": "Ver sus estadísticas en Árbitros",
     "picksTitle": "Picks muy probables",
     "matchStatsTitle": "Estadísticas del partido"

@@ -68,7 +68,7 @@
     "example2": "9 seguidos de algo que pasa el 90 % de las veces: 0,90<sup>9</sup> ≈ 1 de cada 3. Es lo normal, así que no sale en la tabla.",
     "example3": "6 seguidos de algo que pasa la mitad de las veces: 0,50<sup>6</sup> ≈ 1 de cada 64. Es más corta que la anterior, pero mucho más rara: por eso va antes.",
     "order": "Por eso «Más raras primero» no ordena por longitud: así no suben arriba las rachas largas de cosas que pasan casi siempre.",
-    "notSay": "<bold>Lo que no dice:</bold> no es la probabilidad de que la racha siga. Supone que el equipo es uno medio y que cada partido es independiente, y no siempre es así: un equipo que tira mucho lo hace casi siempre, y su racha puede salir rarísima sin ser ninguna sorpresa. Si quieres saber si las rachas siguen, mira «¿Se prolongan las rachas?» al final de la página. <link>Más en el glosario →</link>"
+    "notSay": "<bold>Lo que no dice:</bold> no es la probabilidad de que la racha siga. Supone que el equipo es uno medio y que cada partido es independiente, y no siempre es así: un equipo que tira mucho lo hace casi siempre, y su racha puede salir rarísima sin ser ninguna sorpresa. Si quieres saber si las rachas siguen, mira «¿Se prolongan las rachas?» al final de la página. <anchor>Más en el glosario →</anchor>"
   },
   "row": {
     "normal": {

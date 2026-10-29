@@ -192,8 +192,9 @@ export function MatchDetailPage() {
               i18nKey="matches:detail.refereeNamed"
               values={{ name: match.referee }}
               components={{
-                link: (
+                anchor: (
                   <Link
+                    className="referee-link"
                     to={`/arbitros?arbitro=${encodeURIComponent(match.referee)}`}
                     onClick={() => setLeagueCode(match.league_code)}
                     title={t("matches:detail.refereeLinkTitle")}

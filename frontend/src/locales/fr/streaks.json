@@ -68,7 +68,7 @@
     "example2": "9 fois de suite quelque chose qui arrive 90 % du temps : 0,90<sup>9</sup> ≈ 1 sur 3. C'est normal, donc elle n'apparaît pas dans le tableau.",
     "example3": "6 fois de suite quelque chose qui arrive une fois sur deux : 0,50<sup>6</sup> ≈ 1 sur 64. Elle est plus courte que la précédente, mais beaucoup plus rare : c'est pourquoi elle passe devant.",
     "order": "C'est pourquoi « Les plus rares d'abord » ne trie pas par longueur : ainsi, les longues séries de choses qui arrivent presque toujours ne remontent pas en haut.",
-    "notSay": "<bold>Ce qu'elle ne dit pas :</bold> ce n'est pas la probabilité que la série continue. Elle suppose que l'équipe est moyenne et que chaque match est indépendant, ce qui n'est pas toujours le cas : une équipe qui tire beaucoup le fait presque toujours, et sa série peut paraître très rare sans être une surprise. Pour savoir si les séries se prolongent, consultez « Les séries se prolongent-elles ? » en bas de la page. <link>Plus d'infos dans le glossaire →</link>"
+    "notSay": "<bold>Ce qu'elle ne dit pas :</bold> ce n'est pas la probabilité que la série continue. Elle suppose que l'équipe est moyenne et que chaque match est indépendant, ce qui n'est pas toujours le cas : une équipe qui tire beaucoup le fait presque toujours, et sa série peut paraître très rare sans être une surprise. Pour savoir si les séries se prolongent, consultez « Les séries se prolongent-elles ? » en bas de la page. <anchor>Plus d'infos dans le glossaire →</anchor>"
   },
   "row": {
     "normal": {
