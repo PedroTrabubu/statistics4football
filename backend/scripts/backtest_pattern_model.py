@@ -13,6 +13,12 @@ Ligas nuevas (protocolo en docs/LIGAS_NUEVAS.md), con el modelo de la web sin to
     python scripts/backtest_pattern_model.py build-ligas  # dataset de LaLiga Hypermotion y Ligue 1
     python scripts/backtest_pattern_model.py ligas        # una sola vez: criterios de validacion por liga
 
+Ampliacion de Alta probabilidad a Bundesliga y Serie A (misma seccion de docs/LIGAS_NUEVAS.md):
+
+    python scripts/backtest_pattern_model.py build-ampliacion    # dataset de Bundesliga y Serie A
+    python scripts/backtest_pattern_model.py ampliacion          # una sola vez: criterios 1 y 2 por liga
+    python scripts/backtest_pattern_model.py history-ampliacion  # historico web de las que pasaron
+
 `dev` nunca lee filas del test. `test` se niega a ejecutarse sin la
 configuracion congelada por `dev`.
 """
@@ -395,7 +401,6 @@ def history() -> None:
     el mismo modelo y la misma regla del test: es el historico real fuera de
     muestra que muestra la web (sin elegir nada a posteriori). Incluye las
     ligas nuevas ya validadas (docs/LIGAS_NUEVAS.md), en el mismo periodo."""
-    params = _tested_params()
     test_df = load_dataset()
     test_df = test_df[test_df.season.isin(TEST)]
     extra_leagues = validated_new_leagues()
@@ -403,7 +408,13 @@ def history() -> None:
         new_df = pd.read_csv(NEW_LEAGUES_DATASET, dtype={"season": str})
         test_df = pd.concat([test_df, new_df[new_df.league.isin(extra_leagues) & new_df.season.isin(TEST)]])
     test_df = test_df.reset_index(drop=True)
+    _save_history(test_df, PROTOCOL_LEAGUES + extra_leagues, f"ligas nuevas validadas: {extra_leagues or 'ninguna'}")
 
+
+def _save_history(test_df: pd.DataFrame, league_codes: list[str], label: str) -> None:
+    """Sustituye las predicciones pattern_v1 de esos partidos por las del
+    modelo probado; `league_codes`: las ligas de esos partidos."""
+    params = _tested_params()
     db = SessionLocal()
     try:
         match_ids = test_df["match_id"].astype(int).tolist()
@@ -413,7 +424,7 @@ def history() -> None:
 
         # Muestra point-in-time de cada partido: partidos previos de cada equipo.
         matches_used: dict[int, int] = {}
-        for league in db.query(League).filter(League.code.in_(PROTOCOL_LEAGUES + extra_leagues)).all():
+        for league in db.query(League).filter(League.code.in_(league_codes)).all():
             tracker = PatternTracker()
             for m in (
                 db.query(Match)
@@ -448,10 +459,7 @@ def history() -> None:
             n_picks += sum(r.is_recommended for r in rows)
             db.add_all(rows)
         db.commit()
-        print(
-            f"Historico pattern_v1: {len(test_df)} partidos, {n_picks} selecciones recomendadas"
-            f" (ligas nuevas validadas: {extra_leagues or 'ninguna'})"
-        )
+        print(f"Historico pattern_v1: {len(test_df)} partidos, {n_picks} selecciones recomendadas ({label})")
     finally:
         db.close()
 
@@ -487,12 +495,17 @@ def _dc_gap(df: pd.DataFrame) -> float:
 
 def new_leagues() -> None:
     """Una sola ejecucion: el modelo de la web, sin tocar, en cada liga nueva."""
+    _evaluate_leagues(NEW_LEAGUES_DATASET, "build-ligas", CACHE_DIR / "ligas_nuevas_patrones.json")
+
+
+def _evaluate_leagues(dataset: Path, build_stage: str, out: Path) -> None:
+    """Criterios de validacion de docs/LIGAS_NUEVAS.md, por liga del dataset."""
     params = load_params()
     if params is None:
         sys.exit("Falta pattern_model_params.json: es el modelo que se evalua.")
-    if not NEW_LEAGUES_DATASET.exists():
-        sys.exit("Falta el dataset de las ligas nuevas: ejecuta primero `build-ligas`.")
-    df_all = pd.read_csv(NEW_LEAGUES_DATASET, dtype={"season": str})
+    if not dataset.exists():
+        sys.exit(f"Falta el dataset {dataset.name}: ejecuta primero `{build_stage}`.")
+    df_all = pd.read_csv(dataset, dtype={"season": str})
     df_all = df_all[df_all.season.isin(NEW_LEAGUES_SEASONS)]
     reference = load_dataset()
     reference_gap = _dc_gap(reference[reference.season.isin(NEW_LEAGUES_SEASONS)].reset_index(drop=True))
@@ -521,9 +534,36 @@ def new_leagues() -> None:
         for name, ok in criteria.items():
             print(f"  criterio {name}: {'CUMPLE' if ok else 'NO CUMPLE'}")
 
-    out = CACHE_DIR / "ligas_nuevas_patrones.json"
     out.write_text(json.dumps(results, indent=2, ensure_ascii=False, default=bool), encoding="utf-8")
     print(f"\nResultados en {out}")
+
+
+# --- ampliacion: Bundesliga y Serie A, solo Alta probabilidad ----------------
+# (docs/LIGAS_NUEVAS.md). Deciden los criterios 1 y 2; el 6 (Dixon-Coles) se
+# informa, porque el modelo de valor esta retirado.
+
+EXTENSION_DATASET = CACHE_DIR / "pattern_dataset_ampliacion.csv"
+EXTENSION_LEAGUES = ["GER-Bundesliga", "ITA-Serie A"]
+
+
+def build_extension() -> None:
+    build(EXTENSION_LEAGUES, EXTENSION_DATASET)
+
+
+def extension() -> None:
+    """Una sola ejecucion: el modelo de la web, sin tocar, en Bundesliga y Serie A."""
+    _evaluate_leagues(EXTENSION_DATASET, "build-ampliacion", CACHE_DIR / "ligas_ampliacion_patrones.json")
+
+
+def history_extension() -> None:
+    """Historico web (25/26 y lo jugado de 26/27) de las ligas de la
+    ampliacion que pasaron y ya estan en HIGH_PROBABILITY_LEAGUES."""
+    leagues = [code for code in EXTENSION_LEAGUES if code in get_settings().pattern_leagues]
+    if not leagues:
+        sys.exit("Ninguna liga de la ampliacion esta en HIGH_PROBABILITY_LEAGUES.")
+    df = pd.read_csv(EXTENSION_DATASET, dtype={"season": str})
+    df = df[df.league.isin(leagues) & df.season.isin(TEST)].reset_index(drop=True)
+    _save_history(df, leagues, f"ampliacion: {leagues}")
 
 
 if __name__ == "__main__":
@@ -536,5 +576,8 @@ if __name__ == "__main__":
         "history": history,
         "build-ligas": build_new_leagues,
         "ligas": new_leagues,
+        "build-ampliacion": build_extension,
+        "ampliacion": extension,
+        "history-ampliacion": history_extension,
     }
     stages.get(stage, lambda: sys.exit(__doc__))()

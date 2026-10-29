@@ -137,3 +137,54 @@ los mismos modelos.
 - **LaLiga Hypermotion** entra en `VALIDATED_LEAGUES`.
 - **La Ligue 1** sigue cargada y visible, pero sin Picks ni Recomendaciones. Para volver a evaluarla haría falta un
   protocolo nuevo, con un periodo que no se haya visto, es decir, con la temporada 26/27 terminada o la siguiente.
+
+## Ampliación: Bundesliga y Serie A, solo Alta probabilidad (protocolo del 26 de octubre de 2026)
+
+Esta sección se escribió **antes** de construir el dataset y de evaluar nada. El modelo de alta probabilidad no se ha
+evaluado nunca en estas dos ligas. Sus datos sí se usaron en otros protocolos (`PREDECIBILIDAD_PROTOCOLO.md`,
+`PICK_DEL_PARTIDO_PROTOCOLO.md`), con otros modelos.
+
+- **Qué se evalúa:** solo Alta probabilidad, con el mismo `pattern_model_params.json` (τ = 0.62, δ = 0.03), sin
+  reentrenarlo ni cambiar nada. Picks no se evalúa y no cambia. El modelo de valor está retirado (ver
+  `MODELO_PATRONES.md`), así que el criterio 6 se informa, pero no decide.
+- **Ligas:** `GER-Bundesliga` e `ITA-Serie A`. La Ligue 1 no entra: ya se evaluó y no pasó, y no se repite con el
+  mismo periodo. La Champions tampoco: no tiene cuotas `Market Average` pre-partido, y el modelo las necesita.
+- **Periodo:** 21/22–26/27, con lo jugado de 26/27 hasta el 26 de octubre, y 20/21 de calentamiento. Las reglas son
+  las de arriba: todo point-in-time, cuotas pre-partido `Market Average` y todas las selecciones.
+- **Criterios, por liga (los dos):**
+  1. Al menos 200 selecciones.
+  2. El acierto no queda más de 3 puntos por debajo de la probabilidad media que daba el modelo.
+- **Una sola ejecución**, cuyo resultado se acepta tal cual salga:
+
+  ```bash
+  python scripts/backtest_pattern_model.py build-ampliacion
+  python scripts/backtest_pattern_model.py ampliacion
+  ```
+
+- **Si una liga cumple los dos:** entra en `HIGH_PROBABILITY_LEAGUES`, que solo usa Alta probabilidad, y no en
+  `VALIDATED_LEAGUES`, así que Picks sigue igual. Su histórico en la web es el de las demás, 25/26 y lo jugado de 26/27
+  (`history-ampliacion`). Sus cuotas pre-partido llegan con `fixtures.csv` de Football-Data, las mismas del backtest;
+  `refresh_odds.py` no las pide.
+- **Si no los cumple:** sigue cargada y visible en el resto de la web, sin Alta probabilidad. Para volver a evaluarla
+  haría falta un protocolo nuevo, con un periodo que no se haya visto.
+
+### Resultados de la ampliación (26 de octubre de 2026, una sola ejecución)
+
+| Criterio | Bundesliga | Serie A |
+|---|---|---|
+| 1. Al menos 200 selecciones | Cumple (741) | Cumple (538) |
+| 2. Acierta lo que promete | **No cumple: 68.6% frente a 71.9% (−3.3 puntos)** | Cumple: 71.0% frente a 72.7% (−1.7 puntos) |
+| 6. Dixon-Coles frente al mercado (informativo; referencia +0.0111) | +0.0169 | +0.0117 |
+| **Decisión** | **No validada** | **Validada** |
+
+El mercado esperaba un 67.9% en la Bundesliga (1593 partidos) y un 69.0% en la Serie A (1979 partidos), así que el
+margen sobre el mercado es de +0.7 y +2.0 puntos. En la Bundesliga, como en la Ligue 1, el modelo promete más de lo
+que acierta, y el límite de 3 puntos se aplica tal cual.
+
+- **La Serie A** entra en `HIGH_PROBABILITY_LEAGUES`: Alta probabilidad, no Picks.
+- **La Bundesliga** sigue cargada y visible, sin Alta probabilidad. Para volver a evaluarla haría falta un protocolo
+  nuevo, con un periodo que no se haya visto.
+- **Cambio posterior (26 de octubre de 2026, decisión del usuario):** las cuotas pre-partido de la Serie A también se
+  piden a the-odds-api.com con `refresh_odds.py` (2 créditos por refresco), como en las demás ligas de Alta
+  probabilidad, para tenerlas antes que con `fixtures.csv`. Es la media de las casas que devuelve esa API, la misma
+  fuente que ya usan en la web Premier, LaLiga e Hypermotion. El backtest usó la de Football-Data.

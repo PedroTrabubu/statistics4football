@@ -10,8 +10,10 @@ class LeagueOut(BaseModel):
     code: str
     name: str
     country: str | None = None
-    # Picks y Recomendaciones validados en esta liga (VALIDATED_LEAGUES).
+    # Picks validados en esta liga (VALIDATED_LEAGUES).
     validated: bool = False
+    # Alta probabilidad validada en esta liga (HIGH_PROBABILITY_LEAGUES).
+    high_probability: bool = False
 
 
 class MatchdayOut(BaseModel):

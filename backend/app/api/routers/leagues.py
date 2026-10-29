@@ -21,6 +21,7 @@ from app.schemas.match import (
 from app.schemas.season_stats import TeamSeasonStatsOut
 from app.schemas.result import LeagueResultProbabilitiesOut
 from app.schemas.stats import MatchEloOut
+from app.probability.result_predictions import league_season_result_probabilities
 from app.stats.own_elo import league_season_elo
 from app.stats.season_stats import (
     compute_league_season_stats,
@@ -178,6 +179,23 @@ def list_league_elo(
             return []
         season = latest.name
     return [MatchEloOut.model_validate(e) for e in league_season_elo(db, league_id, season)]
+
+
+@router.get("/{league_id}/result-probabilities", response_model=LeagueResultProbabilitiesOut)
+def list_league_result_probabilities(
+    league_id: int,
+    season: str | None = None,
+    db: Session = Depends(get_db),
+) -> LeagueResultProbabilitiesOut:
+    """Porcentajes de resultado de cada partido de una temporada (la mas reciente
+    con partidos jugados, si no se especifica) y el resumen de la liga. Solo
+    lee: el export estatico lo guarda en un fichero por liga y temporada."""
+    if season is None:
+        latest = latest_season_with_history(db, league_id)
+        if latest is None:
+            return LeagueResultProbabilitiesOut(summary=None, predictions=[])
+        season = latest.name
+    return LeagueResultProbabilitiesOut.model_validate(league_season_result_probabilities(db, league_id, season))
 
 
 @router.get("/{league_id}/context-results", response_model=list[MatchResultOut])
