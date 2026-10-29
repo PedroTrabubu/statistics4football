@@ -19,7 +19,7 @@ import { MatchTeams, TeamCrest, TeamName } from "../components/TeamCrest";
 import { formatDateRange, formatDateTime, formatFixed, formatSeason, joinParts, parseApiDate, withPercent } from "../lib/format";
 import { DAYS_AHEAD, dayKey, upcomingDays } from "../lib/streaks";
 import {
-  DEFAULT_LEAGUE_CODE,
+  defaultLeagueCode,
   leagueName,
   leagueParam,
   parseLeagueParam,
@@ -97,11 +97,12 @@ export function PicksHistoryPage() {
     );
 
   // Sin "todas las ligas": cada liga se comprueba con su propio historial. La
-  // del enlace manda; si no hay, la elegida en el resto de la web.
+  // del enlace manda; si no hay, la elegida en el resto de la web (o la del
+  // idioma si allí se eligieron todas).
   const fromUrl = leagues
     ? parseLeagueParam(params.get("liga"), leagues)
     : undefined;
-  const leagueCode = fromUrl ?? storedCode ?? DEFAULT_LEAGUE_CODE;
+  const leagueCode = fromUrl ?? storedCode ?? defaultLeagueCode();
   const league = leagues?.find((l) => l.code === leagueCode);
   useEffect(() => {
     if (!league) return;
