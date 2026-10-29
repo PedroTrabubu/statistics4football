@@ -19,6 +19,7 @@ from app.schemas.match import (
     match_to_result_out,
 )
 from app.schemas.season_stats import TeamSeasonStatsOut
+from app.schemas.result import LeagueResultProbabilitiesOut
 from app.schemas.stats import MatchEloOut
 from app.stats.own_elo import league_season_elo
 from app.stats.season_stats import (
@@ -35,7 +36,12 @@ def list_leagues(db: Session = Depends(get_db), settings: Settings = Depends(get
     """Las ligas activas: las de contexto (solo para el historial de los equipos
     de Champions) no salen en la web."""
     return [
-        LeagueOut.model_validate(league).model_copy(update={"validated": league.code in settings.model_leagues})
+        LeagueOut.model_validate(league).model_copy(
+            update={
+                "validated": league.code in settings.model_leagues,
+                "high_probability": league.code in settings.pattern_leagues,
+            }
+        )
         for league in db.query(League).filter(League.code.in_(settings.leagues)).order_by(League.name)
     ]
 
