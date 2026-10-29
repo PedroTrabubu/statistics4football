@@ -1029,10 +1029,45 @@ a:hover {
 .section-nav ul::-webkit-scrollbar {
   display: none;
 }
-@media (min-width: 1100px) {
-  .section-nav ul {
-    justify-content: safe center;
-  }
+/* Centrada si cabe en una línea; si no, desde el principio para deslizarla,
+   con los bordes difuminados por donde queda fila escondida. Se centra con
+   márgenes automáticos y no con justify-content: center, que al desbordar
+   cortaría los primeros botones sin dejar llegar a ellos. */
+.section-nav ul {
+  justify-content: flex-start;
+}
+.section-nav li:first-child {
+  margin-inline-start: auto;
+}
+.section-nav li:last-child {
+  margin-inline-end: auto;
+}
+.section-nav[data-dragging] ul {
+  cursor: grabbing;
+  user-select: none;
+}
+.section-nav[data-dragging] a {
+  pointer-events: none;
+}
+.section-nav {
+  --fade-start: 0px;
+  --fade-end: 0px;
+}
+.section-nav[data-more-start] {
+  --fade-start: 2.5rem;
+}
+.section-nav[data-more-end] {
+  --fade-end: 2.5rem;
+}
+.section-nav[data-fit="scroll"] ul {
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)),
+    transparent
+  );
+  mask-image: linear-gradient(90deg, transparent, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent);
 }
 .section-nav li {
   counter-increment: section;
@@ -1049,7 +1084,7 @@ a:hover {
   font-size: var(--fs-sm);
 }
 .section-nav a::before {
-  content: "0" counter(section);
+  content: counter(section, decimal-leading-zero);
   font-family: var(--font-mono);
   font-size: var(--fs-3xs);
   color: var(--muted);
@@ -1058,6 +1093,13 @@ a:hover {
   border-color: var(--ink-2);
   color: var(--ink);
   background: var(--surface);
+}
+/* Si los textos largos no caben en una línea, los cortos (SectionNav mide). */
+.section-nav:not([data-fit="long"]) .label-long {
+  display: none;
+}
+.section-nav:not([data-fit="long"]) .label-short {
+  display: inline;
 }
 section[id] {
   scroll-margin-top: calc(var(--navbar-h) + 4.5rem);

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { getMatches } from "../api/client";
 import type { Match } from "../api/types";
 import { formatKickoff, formatMatchday } from "../lib/format";
+import { dragToScroll } from "../lib/dragScroll";
 import { CHAMPIONS_LEAGUE_CODE } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 import { ErrorView, LoadingView } from "./StatusView";
@@ -33,13 +34,18 @@ export function MatchdayCarousel({ match }: { match: Match }) {
     if (!el) return;
     setEdges({ start: el.scrollLeft <= 2, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 2 });
   }, []);
-  // Tambien al cambiar de tamaño (giro del movil, ventana) o al llegar los partidos.
+  // Tambien al cambiar de tamaño (giro del movil, ventana) o al llegar los
+  // partidos. Con raton, la fila tambien se arrastra.
   useEffect(() => {
     const el = track.current;
     if (!el) return;
     const observer = new ResizeObserver(measure);
     observer.observe(el);
-    return () => observer.disconnect();
+    const undrag = dragToScroll(el);
+    return () => {
+      observer.disconnect();
+      undrag();
+    };
   }, [measure, others.length]);
 
   const scroll = (direction: 1 | -1) => {
@@ -108,6 +114,7 @@ function CarouselCard({ match }: { match: Match }) {
     <Link
       to={`/matches/${match.id}`}
       className="carousel-card"
+      draggable={false}
       aria-label={
         played
           ? t("matches:carousel.cardPlayed", { home: match.home_team, away: match.away_team, homeGoals: match.home_goals, awayGoals: match.away_goals })
