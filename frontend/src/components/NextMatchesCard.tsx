@@ -30,8 +30,8 @@ export function NextMatchesCard({ league }: { league: League | undefined }) {
       <div className="hero-card side-card" aria-hidden="true">
         <span className="sk" style={{ width: "55%", height: 14 }} />
         <span className="sk" style={{ height: 96, borderRadius: 14 }} />
-        <span className="sk" style={{ height: 44, borderRadius: 12 }} />
-        <span className="sk" style={{ height: 44, borderRadius: 12 }} />
+        <span className="sk" style={{ height: 66, borderRadius: 12 }} />
+        <span className="sk" style={{ height: 66, borderRadius: 12 }} />
       </div>
     );
   }
@@ -56,14 +56,18 @@ export function NextMatchesCard({ league }: { league: League | undefined }) {
         </span>
       </Link>
       {rest.map((match) => (
-        <Link key={match.id} to={`/matches/${match.id}`} className="side-card-row">
+        <Link key={match.id} to={`/matches/${match.id}`} className="side-card-row side-card-match">
           <span className="num side-card-row-date">{formatDateTime(match.date)}</span>
           <span className="side-card-row-teams">
-            <TeamCrest team={match.home_team} league={match.league_code} />
-            <span>{match.home_team}</span>
+            <span className="side-card-match-team">
+              <TeamCrest team={match.home_team} league={match.league_code} />
+              <span className="side-card-match-name">{match.home_team}</span>
+            </span>
             <em className="serif-accent">vs</em>
-            <span>{match.away_team}</span>
-            <TeamCrest team={match.away_team} league={match.league_code} />
+            <span className="side-card-match-team is-away">
+              <span className="side-card-match-name">{match.away_team}</span>
+              <TeamCrest team={match.away_team} league={match.league_code} />
+            </span>
           </span>
         </Link>
       ))}

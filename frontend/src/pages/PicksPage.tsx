@@ -76,12 +76,17 @@ export function PicksPage() {
         </button>
       </div>
 
-      {tab === "upcoming" ? <UpcomingPicks league={leagueCode ?? undefined} /> : <PicksHistoryView league={leagueCode ?? undefined} />}
+      {tab === "upcoming" ? (
+        <UpcomingPicks league={leagueCode ?? undefined} onShowHistory={() => setTab("history")} />
+      ) : (
+        <PicksHistoryView league={leagueCode ?? undefined} />
+      )}
     </div>
   );
 }
 
-function UpcomingPicks({ league }: { league: string | undefined }) {
+/** Sin picks todavía, el aviso lleva al histórico. */
+function UpcomingPicks({ league, onShowHistory }: { league: string | undefined; onShowHistory: () => void }) {
   const { t } = useTranslation();
   const { data, loading, error } = useApi(() => getPicks(league), [league]);
   const tiers = data?.combos.filter((c) => c.kind !== "mismo_partido") ?? [];
@@ -91,7 +96,16 @@ function UpcomingPicks({ league }: { league: string | undefined }) {
     <>
       {loading && <LoadingView label={t("picks:page.loading")} />}
       {error && <ErrorView message={t("common:error.api", { error })} />}
-      {!loading && !error && data && data.combos.length === 0 && <EmptyView message={t("picks:page.empty")} />}
+      {!loading && !error && data && data.combos.length === 0 && (
+        <EmptyView
+          message={t("picks:page.empty")}
+          action={
+            <button type="button" className="link-button" onClick={onShowHistory}>
+              {t("picks:page.seeHistory")}
+            </button>
+          }
+        />
+      )}
 
       {!loading && !error && data && data.combos.length > 0 && (
         <>

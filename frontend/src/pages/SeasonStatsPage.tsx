@@ -320,8 +320,10 @@ export function SeasonStatsPage() {
     const range = heatRange.get(col.key);
     const value = col.value(s);
     if (!range || value === null || range.max === range.min || isLowSample(s)) return undefined;
+    // Verde de la web, de casi blanco (el valor más bajo) a intenso (el más
+    // alto). Hasta el 40 %: el texto sigue con contraste AA en los dos temas.
     const intensity = (value - range.min) / (range.max - range.min);
-    return { background: `color-mix(in srgb, var(--primary) ${Math.round(intensity * 32)}%, transparent)` };
+    return { background: `color-mix(in srgb, var(--green-fill) ${Math.round(4 + intensity * 36)}%, transparent)` };
   }
 
   const noCornersYet =

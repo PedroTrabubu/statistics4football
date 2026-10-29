@@ -327,25 +327,35 @@ export function MyBetsPage() {
           rows={5}
           aria-label={t("mybets:import.textareaLabel")}
         />
-        <div className="filters">
-          <button type="button" className="tab-button tab-button-active" disabled={!pasted.trim()} onClick={() => importHtml(pasted)}>
-            {t("mybets:import.analyze")}
-          </button>
-          <label className="tab-button bets-file">
-            {t("mybets:import.upload")}
-            <input type="file" accept=".html,.htm,.txt,text/html" onChange={onFile} />
-          </label>
-          {bets.length > 0 && (
-            <button type="button" className="tab-button" onClick={onDownloadBackup}>
-              {t("mybets:import.download", { n: bets.length })}
+        {/* Importar | copia de seguridad | borrar (aparte: es destructivo). */}
+        <div className="bets-actions">
+          <div className="bets-actions-group">
+            <button
+              type="button"
+              className="action-button action-button-primary"
+              disabled={!pasted.trim()}
+              onClick={() => importHtml(pasted)}
+            >
+              {t("mybets:import.analyze")}
             </button>
-          )}
-          <label className="tab-button bets-file">
-            {t("mybets:import.restore")}
-            <input type="file" accept=".json,application/json" onChange={onRestore} />
-          </label>
+            <label className="action-button bets-file">
+              {t("mybets:import.upload")}
+              <input type="file" accept=".html,.htm,.txt,text/html" onChange={onFile} />
+            </label>
+          </div>
+          <div className="bets-actions-group">
+            {bets.length > 0 && (
+              <button type="button" className="action-button" onClick={onDownloadBackup}>
+                {t("mybets:import.download", { n: bets.length })}
+              </button>
+            )}
+            <label className="action-button bets-file">
+              {t("mybets:import.restore")}
+              <input type="file" accept=".json,application/json" onChange={onRestore} />
+            </label>
+          </div>
           {bets.length > 0 && (
-            <button type="button" className="tab-button" onClick={onClear}>
+            <button type="button" className="action-button action-button-danger bets-actions-clear" onClick={onClear}>
               {t("mybets:import.clear")}
             </button>
           )}
