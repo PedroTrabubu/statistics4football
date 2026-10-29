@@ -63,6 +63,8 @@ export interface TeamMatchStats {
   fouls: number | null;
   shots: number | null;
   shots_on_target: number | null;
+  /** Understat: solo las cinco grandes ligas. */
+  xg?: number | null;
 }
 
 export type RefereeScope = "season" | "all";
@@ -240,6 +242,24 @@ export interface MatchFeatures {
   away_discipline: DisciplineForm;
   home_elo: number | null;
   away_elo: number | null;
+  elo: MatchElo;
+}
+
+/** Elo propio de un equipo antes del partido; `elo` null cuando se muestra "—". */
+export interface EloSide {
+  elo: number | null;
+  matches_rated: number | null;
+  missing: "champions" | "insufficient_history" | "not_generated" | null;
+}
+
+export interface MatchElo {
+  match_id: number;
+  /** Partidos previos necesarios para mostrarlo. */
+  min_matches: number;
+  home: EloSide;
+  away: EloSide;
+  /** Último resultado que entra en el rating ("Elo calculado hasta"). */
+  computed_until: string | null;
 }
 
 export interface Prediction {
@@ -433,4 +453,69 @@ export interface PickKindSummary {
 export interface PicksHistory {
   summary: PickKindSummary[];
   combos: PickCombo[];
+}
+
+/** Porcentajes de resultado guardados de un partido (Elo propio calibrado, sin mercado). */
+export interface ResultProbabilities {
+  match_id: number;
+  status: "ok" | "insufficient_history" | "champions" | "not_available" | "not_generated";
+  version: string;
+  /** "reconstructed": reconstruida con datos anteriores; "frozen": congelada antes del partido. */
+  kind: "reconstructed" | "frozen" | null;
+  kickoff: string | null;
+  generated_at: string | null;
+  p_home: number | null;
+  p_draw: number | null;
+  p_away: number | null;
+}
+
+export interface Rate {
+  n: number;
+  hits: number;
+  rate: number | null;
+  /** IC 95 % de Wilson. */
+  low: number | null;
+  high: number | null;
+}
+
+export interface CalibrationBin {
+  low: number;
+  high: number;
+  n: number;
+  mean_p: number;
+  observed: number;
+  ci_low: number;
+  ci_high: number;
+}
+
+export interface HighConfidence {
+  coverage: number | null;
+  n_matches: number;
+  bin_80_85: Rate;
+  bin_85: Rate;
+}
+
+export interface ResultSummary {
+  version: string;
+  generated_at: string;
+  dev_seasons: string[];
+  current_season: string | null;
+  /** Tramos de calibración con menos probabilidades: "pocas muestras". */
+  low_sample_bin: number;
+  calibration_dev: CalibrationBin[];
+  calibration_current: CalibrationBin[];
+  high_confidence_dev: HighConfidence;
+  high_confidence_current: HighConfidence | null;
+  league: { league: string; seasons: string[]; top: Rate; double: Rate; always_1x: Rate } | null;
+}
+
+export interface MatchResultProbabilities {
+  prediction: ResultProbabilities;
+  summary: ResultSummary | null;
+}
+
+/** Los porcentajes de resultado de todos los partidos de una liga y temporada. */
+export interface LeagueResultProbabilities {
+  summary: ResultSummary | null;
+  predictions: ResultProbabilities[];
 }

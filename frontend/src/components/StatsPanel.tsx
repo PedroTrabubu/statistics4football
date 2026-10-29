@@ -1,66 +1,9 @@
-import { useTranslation } from "react-i18next";
-import type { MatchFeatures } from "../api/types";
-import { formatFixed } from "../lib/format";
-import { TeamName } from "./TeamCrest";
-
-type Seg = { value: number; kind: "hit" | "neutral" | "miss" };
-
-/** Barra de una fila: proporcional a la mayor de las dos cifras (`width`), o
- * partida en tramos (`segs`: victorias/empates/derrotas, a favor/en contra).
- * La del local crece hacia el centro desde la derecha. */
-function Bar({ side, width, segs }: { side: "home" | "away"; width?: number; segs?: Seg[] }) {
-  const total = segs?.reduce((a, s) => a + s.value, 0) ?? 0;
-  return (
-    <span className={`compare-bar compare-bar-${side}`} aria-hidden="true">
-      {segs && total > 0
-        ? segs.map((seg, i) =>
-            seg.value > 0 ? (
-              <span key={i} className={`compare-seg is-${seg.kind}`} style={{ width: `${(seg.value / total) * 100}%` }} />
-            ) : null,
-          )
-        : width !== undefined && <span className="compare-fill" style={{ width: `${width}%` }} />}
-    </span>
-  );
-}
-
-function FormRow({
-  label,
-  home,
-  away,
-  values,
-  homeSegs,
-  awaySegs,
-}: {
-  label: string;
-  home: string | number;
-  away: string | number;
-  /** Cifras para la barra proporcional (null: sin barra). */
-  values?: [number | null | undefined, number | null | undefined];
-  homeSegs?: Seg[];
-  awaySegs?: Seg[];
-}) {
-  const [h, a] = values ?? [null, null];
-  const max = Math.max(h ?? 0, a ?? 0);
-  const pct = (v: number | null | undefined) => (v == null || max <= 0 ? 0 : (v / max) * 100);
-  const bars = values !== undefined || homeSegs !== undefined;
-  return (
-    <tr>
-      <td className="stats-value">
-        <span className="compare-cell compare-cell-home">
-          <span className="compare-num">{home}</span>
-          {bars && <Bar side="home" width={values ? pct(h) : undefined} segs={homeSegs} />}
-        </span>
-      </td>
-      <td className="stats-label">{label}</td>
-      <td className="stats-value">
-        <span className="compare-cell compare-cell-away">
-          {bars && <Bar side="away" width={values ? pct(a) : undefined} segs={awaySegs} />}
-          <span className="compare-num">{away}</span>
-        </span>
-      </td>
-    </tr>
-  );
-}
+import { Trans, useTranslation } from "react-i18next";
+import type { EloSide, MatchElo, MatchFeatures } from "../api/types";
+import { formatDate, formatFixed, withPercent } from "../lib/format";
+import { CompareRow, CompareTable, type Seg } from "./CompareRows";
+import { InfoTip } from "./InfoTip";
+import { TeamCrest } from "./TeamCrest";
 
 const wdl = (f: { wins: number; draws: number; losses: number }): Seg[] => [
   { value: f.wins, kind: "hit" },
@@ -71,6 +14,104 @@ const goalsSegs = (f: { goals_for: number; goals_against: number }): Seg[] => [
   { value: f.goals_for, kind: "hit" },
   { value: f.goals_against, kind: "miss" },
 ];
+
+const eloValue = (side: EloSide) => (side.elo !== null ? formatFixed(side.elo, 0) : "—");
+
+/** Barra del rating en la nota: de 1250 a 1850, el rango habitual. */
+const eloBar = (value: number) => Math.min(100, Math.max(4, ((value - 1250) / 600) * 100));
+
+/** Expectativa clásica del Elo para el de más rating (ganar 1, empatar ½), en %. */
+const expectedPct = (diff: number) => Math.round(100 / (1 + 10 ** (-diff / 400)));
+
+/** Etiqueta de la fila de Elo: nota con qué es (y por qué falta, si falta) y,
+ * debajo, la diferencia entre los dos ratings mostrados. */
+function EloLabel({
+  elo,
+  homeTeam,
+  awayTeam,
+  league,
+}: {
+  elo: MatchElo;
+  homeTeam: string;
+  awayTeam: string;
+  league?: string;
+}) {
+  const { t } = useTranslation();
+  const { home, away } = elo;
+  const diff = home.elo !== null && away.elo !== null ? Math.round(home.elo) - Math.round(away.elo) : null;
+  const champions = home.missing === "champions";
+  const reasons = champions
+    ? [t("matches:statsPanel.eloMissing.champions")]
+    : ([
+        [homeTeam, home],
+        [awayTeam, away],
+      ] as const)
+        .filter(([, side]) => side.missing !== null)
+        .map(([team, side]) =>
+          side.missing === "insufficient_history"
+            ? t("matches:statsPanel.eloMissing.insufficient_history", { team, count: side.matches_rated ?? 0, min: elo.min_matches })
+            : t("matches:statsPanel.eloMissing.not_generated", { team }),
+        );
+  return (
+    <>
+      <span className="elo-label">
+        {t("matches:statsPanel.elo")}
+        <InfoTip label={t("matches:statsPanel.eloInfoLabel")} popoverClassName="elo-tip">
+          <span className="elo-tip-head">
+            <strong>{t("matches:statsPanel.elo")}</strong>
+            {elo.computed_until && (
+              <span>{t("matches:statsPanel.eloTip.updated", { date: formatDate(elo.computed_until) })}</span>
+            )}
+          </span>
+          {(
+            [
+              [homeTeam, home, "is-home"],
+              [awayTeam, away, "is-away"],
+            ] as const
+          ).map(([team, side, cls]) => (
+            <span key={cls} className={`elo-tip-team ${cls}`}>
+              {league && <TeamCrest team={team} league={league} />}
+              <span className="elo-tip-name">{team}</span>
+              <span className="elo-tip-value">{eloValue(side)}</span>
+              <span className="elo-tip-track">
+                {side.elo !== null && <i style={{ width: `${eloBar(side.elo)}%` }} />}
+              </span>
+            </span>
+          ))}
+          {diff !== null && diff !== 0 && (
+            <span className="elo-tip-verdict">
+              <span className="elo-tip-chip">+{formatFixed(Math.abs(diff), 0)}</span>
+              <span>
+                <Trans
+                  i18nKey="matches:statsPanel.eloTip.expected"
+                  values={{ team: diff > 0 ? homeTeam : awayTeam, pct: withPercent(String(expectedPct(Math.abs(diff)))) }}
+                  components={{ bold: <strong /> }}
+                />
+              </span>
+            </span>
+          )}
+          {reasons.map((reason) => (
+            <span key={reason} className="elo-tip-missing">
+              {reason}
+            </span>
+          ))}
+          <span className="elo-tip-notes">
+            <span>{t("matches:statsPanel.eloTip.source")}</span>
+            <span>{t("matches:statsPanel.eloTip.comparable")}</span>
+            {!champions && <span>{t("matches:statsPanel.eloPromoted")}</span>}
+          </span>
+        </InfoTip>
+      </span>
+      {diff !== null && (
+        <span className="elo-diff">
+          {diff === 0
+            ? t("matches:statsPanel.eloEqual")
+            : t("matches:statsPanel.eloDiff", { diff: formatFixed(Math.abs(diff), 0), team: diff > 0 ? homeTeam : awayTeam })}
+        </span>
+      )}
+    </>
+  );
+}
 
 export function StatsPanel({
   features,
@@ -90,8 +131,7 @@ export function StatsPanel({
     away_xg_form,
     home_discipline,
     away_discipline,
-    home_elo,
-    away_elo,
+    elo,
   } = features;
   const { t } = useTranslation();
   const disciplineMatches = home_discipline.matches_with_data || away_discipline.matches_with_data;
@@ -100,78 +140,70 @@ export function StatsPanel({
   return (
     <div className="stats-panel compare-panel">
       <h3>{t("matches:statsPanel.title", { count: home_form.matches_played || away_form.matches_played })}</h3>
-      <table className="stats-table compare-table">
-        <thead>
-          <tr>
-            <th>
-              <TeamName team={homeTeam} league={league} />
-            </th>
-            <th></th>
-            <th>
-              <TeamName team={awayTeam} league={league} />
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <FormRow label={t("matches:statsPanel.points")} home={home_form.points} away={away_form.points} values={[home_form.points, away_form.points]} />
-          <FormRow
-            label={t("matches:statsPanel.wdl")}
-            home={`${home_form.wins}-${home_form.draws}-${home_form.losses}`}
-            away={`${away_form.wins}-${away_form.draws}-${away_form.losses}`}
-            homeSegs={wdl(home_form)}
-            awaySegs={wdl(away_form)}
-          />
-          <FormRow
-            label={t("matches:statsPanel.goals")}
-            home={`${home_form.goals_for}/${home_form.goals_against}`}
-            away={`${away_form.goals_for}/${away_form.goals_against}`}
-            homeSegs={goalsSegs(home_form)}
-            awaySegs={goalsSegs(away_form)}
-          />
-          <FormRow
-            label={t("matches:statsPanel.xgFor")}
-            home={fixed(home_xg_form.avg_xg_for, 2)}
-            away={fixed(away_xg_form.avg_xg_for, 2)}
-            values={[home_xg_form.avg_xg_for, away_xg_form.avg_xg_for]}
-          />
-          <FormRow
-            label={t("matches:statsPanel.xgAgainst")}
-            home={fixed(home_xg_form.avg_xg_against, 2)}
-            away={fixed(away_xg_form.avg_xg_against, 2)}
-            values={[home_xg_form.avg_xg_against, away_xg_form.avg_xg_against]}
-          />
-          <FormRow
-            label={t("matches:statsPanel.cornersFor")}
-            home={fixed(home_discipline.avg_corners_for, 1)}
-            away={fixed(away_discipline.avg_corners_for, 1)}
-            values={[home_discipline.avg_corners_for, away_discipline.avg_corners_for]}
-          />
-          <FormRow
-            label={t("matches:statsPanel.cornersAgainst")}
-            home={fixed(home_discipline.avg_corners_against, 1)}
-            away={fixed(away_discipline.avg_corners_against, 1)}
-            values={[home_discipline.avg_corners_against, away_discipline.avg_corners_against]}
-          />
-          <FormRow
-            label={t("matches:statsPanel.yellowCards")}
-            home={fixed(home_discipline.avg_yellow_cards, 1)}
-            away={fixed(away_discipline.avg_yellow_cards, 1)}
-            values={[home_discipline.avg_yellow_cards, away_discipline.avg_yellow_cards]}
-          />
-          <FormRow
-            label={t("matches:statsPanel.redCards")}
-            home={fixed(home_discipline.avg_red_cards, 2)}
-            away={fixed(away_discipline.avg_red_cards, 2)}
-            values={[home_discipline.avg_red_cards, away_discipline.avg_red_cards]}
-          />
-          <FormRow
-            label={t("matches:statsPanel.elo")}
-            home={home_elo !== null ? formatFixed(home_elo, 0) : "—"}
-            away={away_elo !== null ? formatFixed(away_elo, 0) : "—"}
-            values={[home_elo, away_elo]}
-          />
-        </tbody>
-      </table>
+      <CompareTable
+        homeTeam={homeTeam}
+        awayTeam={awayTeam}
+        league={league}
+        caption={t("matches:statsPanel.caption", { home: homeTeam, away: awayTeam })}
+      >
+        <CompareRow label={t("matches:statsPanel.points")} home={home_form.points} away={away_form.points} values={[home_form.points, away_form.points]} />
+        <CompareRow
+          label={t("matches:statsPanel.wdl")}
+          home={`${home_form.wins}-${home_form.draws}-${home_form.losses}`}
+          away={`${away_form.wins}-${away_form.draws}-${away_form.losses}`}
+          homeSegs={wdl(home_form)}
+          awaySegs={wdl(away_form)}
+        />
+        <CompareRow
+          label={t("matches:statsPanel.goals")}
+          home={`${home_form.goals_for}/${home_form.goals_against}`}
+          away={`${away_form.goals_for}/${away_form.goals_against}`}
+          homeSegs={goalsSegs(home_form)}
+          awaySegs={goalsSegs(away_form)}
+        />
+        <CompareRow
+          label={t("matches:statsPanel.xgFor")}
+          home={fixed(home_xg_form.avg_xg_for, 2)}
+          away={fixed(away_xg_form.avg_xg_for, 2)}
+          values={[home_xg_form.avg_xg_for, away_xg_form.avg_xg_for]}
+        />
+        <CompareRow
+          label={t("matches:statsPanel.xgAgainst")}
+          home={fixed(home_xg_form.avg_xg_against, 2)}
+          away={fixed(away_xg_form.avg_xg_against, 2)}
+          values={[home_xg_form.avg_xg_against, away_xg_form.avg_xg_against]}
+        />
+        <CompareRow
+          label={t("matches:statsPanel.cornersFor")}
+          home={fixed(home_discipline.avg_corners_for, 1)}
+          away={fixed(away_discipline.avg_corners_for, 1)}
+          values={[home_discipline.avg_corners_for, away_discipline.avg_corners_for]}
+        />
+        <CompareRow
+          label={t("matches:statsPanel.cornersAgainst")}
+          home={fixed(home_discipline.avg_corners_against, 1)}
+          away={fixed(away_discipline.avg_corners_against, 1)}
+          values={[home_discipline.avg_corners_against, away_discipline.avg_corners_against]}
+        />
+        <CompareRow
+          label={t("matches:statsPanel.yellowCards")}
+          home={fixed(home_discipline.avg_yellow_cards, 1)}
+          away={fixed(away_discipline.avg_yellow_cards, 1)}
+          values={[home_discipline.avg_yellow_cards, away_discipline.avg_yellow_cards]}
+        />
+        <CompareRow
+          label={t("matches:statsPanel.redCards")}
+          home={fixed(home_discipline.avg_red_cards, 2)}
+          away={fixed(away_discipline.avg_red_cards, 2)}
+          values={[home_discipline.avg_red_cards, away_discipline.avg_red_cards]}
+        />
+        <CompareRow
+          label={<EloLabel elo={elo} homeTeam={homeTeam} awayTeam={awayTeam} league={league} />}
+          home={eloValue(elo.home)}
+          away={eloValue(elo.away)}
+          values={[elo.home.elo, elo.away.elo]}
+        />
+      </CompareTable>
       {disciplineMatches === 0 && (
         <p className="small muted">{t("matches:statsPanel.noDiscipline")}</p>
       )}

@@ -9,6 +9,14 @@
     "season": "Saison {{season}}",
     "sectionsLabel": "Sections du match",
     "section": {
+      "probabilities": {
+        "label": "Pourcentages du résultat",
+        "short": "Pourcentages"
+      },
+      "stats": {
+        "label": "Statistiques du match",
+        "short": "Statistiques"
+      },
       "form": {
         "label": "Forme récente",
         "short": "Forme"
@@ -24,14 +32,6 @@
       "picks": {
         "label": "Sélections très probables",
         "short": "Sélections"
-      },
-      "probabilities": {
-        "label": "Probabilités et valeur attendue",
-        "short": "Probas et EV"
-      },
-      "probabilitiesOnly": {
-        "label": "Probabilités",
-        "short": "Probabilités"
       },
       "otherMatches": {
         "label": "Autres matchs",
@@ -51,12 +51,77 @@
     "refereeNamed": "Arbitre : <link>{{name}}</link>",
     "refereeLinkTitle": "Voir ses statistiques dans Arbitres",
     "picksTitle": "Sélections très probables",
-    "probabilitiesTitle": "Probabilités et valeur attendue (EV)",
-    "probabilitiesNote": "L'EV n'est jamais affiché seul : il est toujours accompagné d'un niveau de confiance et de risque.",
-    "probabilitiesOnlyTitle": "Probabilités",
-    "probabilitiesOnlyNote": "Il n'y a pas de cotes du marché pour cette compétition : la valeur attendue n'est donc pas calculée et aucune sélection n'est marquée « Valeur ». Avec votre propre cote, « Votre EV » est bien calculé.",
-    "predictionsLoading": "Calcul des prédictions...",
-    "predictionsError": "Impossible de calculer les prédictions : {{error}}"
+    "matchStatsTitle": "Statistiques du match"
+  },
+  "winProb": {
+    "title": "Pourcentages du résultat",
+    "titlePlayed": "Pourcentages du résultat avant le match",
+    "sourceEloDc": "Modèle · Elo + Dixon-Coles",
+    "sourceElo": "Modèle · Elo maison calibré",
+    "win": "Victoire {{team}}",
+    "draw": "Nul",
+    "actual": "Résultat",
+    "loading": "Chargement des pourcentages…",
+    "error": "Impossible de charger les pourcentages.",
+    "status": {
+      "insufficient_history": "Données insuffisantes : l'une des deux équipes a encore peu d'historique dans le championnat.",
+      "champions": "Pas de pourcentages en Ligue des champions : le modèle n'est pas calibré pour cette compétition.",
+      "not_available": "Pas de pourcentages pour ce championnat.",
+      "not_generated": "Pas encore calculé pour ce match."
+    },
+    "doubleTitle": "Double chance",
+    "dc1X": "{{home}} ou nul",
+    "dcX2": "Nul ou {{away}}",
+    "dc12": "{{home}} ou {{away}}",
+    "hit": "Réussi",
+    "miss": "Raté",
+    "highConfidence": "Confiance élevée",
+    "highConfidenceLabel": "Ce que signifie Confiance élevée",
+    "highConfidenceTip": "Double chance à 80 % ou plus. Sur {{seasons}}, elle a vu juste ~{{low}} des fois entre 80 et 85 %, et ~{{high}} à partir de 85 %.",
+    "highConfidenceCurrent": "En {{season}} : ~{{pct}} à partir de 85 %.",
+    "highConfidenceCoverage": "Concerne ~{{min}}–{{max}} des matchs ; ce sont souvent des favoris nets.",
+    "historyTitle": "Réussite historique en {{league}} ({{seasons}})",
+    "historyTop": "Résultat le plus probable",
+    "historyDouble": "Meilleure double chance",
+    "historyRate_one": "{{hits}} sur {{n}} match · IC 95 % : {{low}}–{{high}}",
+    "historyRate_many": "{{hits}} sur {{n}} matchs · IC 95 % : {{low}}–{{high}}",
+    "historyRate_other": "{{hits}} sur {{n}} matchs · IC 95 % : {{low}}–{{high}}",
+    "historyRef": "Référence : choisir toujours 1X aurait vu juste {{pct}} des fois. La meilleure double chance n'est jamais estimée sous 66,7 % (elle n'écarte que le résultat le moins probable).",
+    "calibrationTitle": "Calibration par tranche (les 6 championnats)",
+    "calibrationIntro": "Chaque match apporte ses trois probabilités (domicile, nul et extérieur). Chaque tranche compare la probabilité moyenne annoncée avec ce qui s'est passé.",
+    "calibrationBin": "Tranche",
+    "calibrationAnnounced": "Annoncé",
+    "calibrationObserved": "Observé (IC 95 %)",
+    "calibrationN": "n",
+    "calibrationDev": "Saisons {{seasons}}",
+    "calibrationCurrent": "Saison {{season}} (en cours)",
+    "lowSample": "peu d'échantillons",
+    "note": "Estimation statistique avec les données d'avant le match ; le marché est souvent un peu plus précis. Ce n'est pas un conseil de pari.",
+    "historyButton": "Réussite historique dans la ligue",
+    "tableButton": "Tableau de réussite",
+    "table": {
+      "title": "Réussite par équipe · {{league}} {{season}}",
+      "note": "Matchs joués cette saison, avec les pourcentages calculés avant chaque match. Chaque match compte pour les deux équipes. En gris, les équipes avec moins de {{n}} matchs : à prendre comme une indication.",
+      "team": "Équipe",
+      "top": "Résultat le plus probable",
+      "topShort": "1N2",
+      "double": "Meilleure double chance",
+      "doubleShort": "Double",
+      "league": "Toute la ligue",
+      "hitsOf": "{{hits}} sur {{n}}",
+      "interval": "IC 95 % : {{low}}–{{high}}",
+      "loading": "Chargement du tableau de réussite…",
+      "error": "Le tableau de réussite n'a pas pu être chargé.",
+      "empty": "Aucun match avec pourcentages n'a encore été joué cette saison."
+    },
+    "historySelect": "Saison de la réussite",
+    "historySeason": "Saison {{season}}",
+    "historySeasonCurrent": "Saison {{season}} (en cours)",
+    "historyAll": "Historique ({{seasons}})",
+    "historySeasonTitle": "Réussite en {{league}} · saison {{season}}",
+    "historyLoading": "Chargement de la réussite de la saison…",
+    "historyError": "La réussite de la saison n'a pas pu être chargée.",
+    "historyEmpty": "Aucun match avec pourcentages n'a encore été joué cette saison."
   },
   "recent": {
     "title": "Derniers matchs",
@@ -125,25 +190,6 @@
     },
     "halfTime": "À la mi-temps",
     "legend": "Corners et cartons : domicile-extérieur de chaque match. Entre parenthèses, à la mi-temps."
-  },
-  "predictions": {
-    "empty": "Pas assez de statistiques pour calculer des prédictions sur ce match.",
-    "column": {
-      "selection": "Sélection",
-      "marketProb": "Proba marché",
-      "modelProb": "Proba modèle",
-      "fairOdds": "Cote juste",
-      "marketEv": "EV marché",
-      "sample": "Échantillon",
-      "risk": "Risque",
-      "yourOdds": "Votre cote",
-      "yourEv": "Votre EV"
-    },
-    "valueTag": "VALEUR",
-    "oddsPlaceholder": "ex. 1,80",
-    "oddsLabel": "Votre cote pour {{selection}}",
-    "implied": "implicite {{value}}",
-    "disclaimer": "« Cote juste » et « Votre EV » sont des estimations fondées sur la fréquence historique du modèle, pas une garantie de résultat. La cote que vous saisissez n'est ni enregistrée ni envoyée nulle part."
   },
   "referee": {
     "notDesignated": "Arbitre pas encore désigné. Il est généralement annoncé 2 ou 3 jours avant le match ; il apparaîtra ici dès que les matchs seront synchronisés.",
@@ -216,8 +262,80 @@
     "cornersAgainst": "Corners contre (moy.)",
     "yellowCards": "Cartons jaunes (moy.)",
     "redCards": "Cartons rouges (moy.)",
-    "elo": "Classement Elo",
-    "noDiscipline": "Pas encore de données de corners ni de cartons pour ces équipes sur la période analysée."
+    "elo": "Elo maison",
+    "eloInfoLabel": "À propos de l'Elo maison",
+    "eloInfo": "Calculé avec les résultats précédents du championnat ; non comparable entre championnats ni avec celui d'autres sites.",
+    "eloUntil": "Elo calculé jusqu'au {{date}}.",
+    "eloPromoted": "Les équipes promues peuvent être surévaluées en début de saison.",
+    "eloDiff": "+{{diff}} en faveur de {{team}}",
+    "eloEqual": "Même Elo",
+    "eloTip": {
+      "updated": "Mis à jour au {{date}}",
+      "expected": "Selon l'Elo, {{team}} prendrait en moyenne <bold>{{pct}}</bold> des points d'un duel comme celui-ci (victoire = 1, nul = ½).",
+      "source": "Calculé avec les résultats précédents de ce championnat.",
+      "comparable": "Non comparable entre championnats ni avec celui d'autres sites."
+    },
+    "eloMissing": {
+      "champions": "Match de Ligue des champions : l'Elo maison n'est calculé qu'avec les matchs de championnat.",
+      "insufficient_history_one": "{{team}} : historique insuffisant ({{count}} match précédent ; il en faut {{min}}).",
+      "insufficient_history_many": "{{team}} : historique insuffisant ({{count}} matchs précédents ; il en faut {{min}}).",
+      "insufficient_history_other": "{{team}} : historique insuffisant ({{count}} matchs précédents ; il en faut {{min}}).",
+      "not_generated": "{{team}} : pas encore calculé pour ce match."
+    },
+    "noDiscipline": "Pas encore de données de corners ni de cartons pour ces équipes sur la période analysée.",
+    "caption": "Forme récente de {{home}} et {{away}}"
+  },
+  "matchStats": {
+    "caption": "Statistiques de {{home}} et {{away}} dans le match",
+    "stat": {
+      "xg": "xG",
+      "shots": "Tirs",
+      "shots_on_target": "Tirs cadrés",
+      "corners": "Corners",
+      "fouls": "Fautes",
+      "yellow_cards": "Cartons jaunes",
+      "red_cards": "Cartons rouges"
+    },
+    "statInline": {
+      "xg": "xG",
+      "shots": "tirs",
+      "shots_on_target": "tirs cadrés",
+      "corners": "corners",
+      "fouls": "fautes",
+      "yellow_cards": "cartons jaunes",
+      "red_cards": "cartons rouges"
+    },
+    "none": "Aucune statistique pour ce match.",
+    "source": "Tirs, corners, fautes et cartons : Football-Data.co.uk et ESPN. xG : Understat, uniquement dans les cinq grands championnats.",
+    "loading": "Chargement des statistiques du match...",
+    "error": "Impossible de charger les statistiques du match : {{error}}",
+    "compareButton": "Voir les statistiques du prédicteur",
+    "compareIntro": "Sous chaque chiffre, en gris, ce qu'estimait le prédicteur avant le match, uniquement avec les matchs antérieurs. À côté de chaque statistique, son erreur moyenne par équipe sur l'historique (±).",
+    "predictedLabel": "Estimation du prédicteur :",
+    "noPrediction": "Aucun match antérieur du championnat pour l'estimer."
+  },
+  "predictor": {
+    "notPlayed": "Le match n'a pas encore été joué.",
+    "button": "Prédicteur de statistiques",
+    "loading": "Calcul en cours...",
+    "loadError": "Impossible de le calculer : {{error}}",
+    "noData": "Aucun match antérieur du championnat pour l'estimer.",
+    "intro": "Ce qu'on peut attendre de chaque équipe d'après ses matchs précédents du championnat (cette saison et la précédente) : ce qu'elle fait d'habitude et ce que l'adversaire concède, en tenant compte du domicile ou de l'extérieur et avec plus de poids aux matchs récents. Pour les cartons jaunes, l'arbitre aussi. C'est une estimation, pas ce qui va se passer.",
+    "caption": "Statistiques attendues de {{home}} et {{away}}",
+    "errorValue": "±{{value}}",
+    "errorTitle": "Erreur moyenne par équipe lors du test du prédicteur sur des matchs déjà joués",
+    "sample": "Base : {{home}} matchs de {{homeTeam}} à domicile et {{away}} de {{awayTeam}} à l'extérieur.",
+    "sampleAll": "Base : {{home}} matchs de {{homeTeam}} et {{away}} de {{awayTeam}} (domicile et extérieur), cette saison et la précédente.",
+    "lowSample": "Avec si peu de matchs, l'estimation reste proche de la moyenne du championnat.",
+    "refereeBase": "Cartons jaunes avec l'arbitre {{name}} : {{matches}} de ses matchs du championnat, cette saison et la précédente.",
+    "needsReferee": "Les cartons jaunes ne sont estimés qu'avec un arbitre désigné : sans lui, ils ne battent pas la moyenne du championnat.",
+    "errorNote": "± : erreur moyenne par équipe lors du test sur les {{matches}} matchs de {{from}} et {{to}}, chacun avec uniquement ses matchs antérieurs. Elle a entre {{min}} et {{max}} d'erreur en moins que la moyenne du championnat.",
+    "excluded": "Sans estimation : {{stats}}. Lors de ce test, elles n'ont pas eu moins d'erreur que la moyenne du championnat et celle de l'équipe.",
+    "excludedReferee": "Ils ne s'améliorent pas non plus en tenant compte de l'arbitre désigné.",
+    "total": "{{stat}} · total prévu",
+    "how": "Comment c'est calculé",
+    "badge": "Prédiction",
+    "notReal": "Estimation du modèle avant le match, pas des données réelles. Une fois le match joué, vous verrez ici les chiffres réels comparés à cette prédiction."
   },
   "seasonSummary": {
     "noData": "Aucune des deux équipes n'a encore de match joué enregistré (saison qui vient de commencer ou équipe tout juste promue).",

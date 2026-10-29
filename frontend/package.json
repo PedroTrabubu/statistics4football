@@ -11,6 +11,10 @@
     "preview": "vite preview",
     "export:picks": "rolldown scripts/export-picks.ts --file node_modules/.cache/export-picks.mjs --platform node --format esm --log-level warn && node node_modules/.cache/export-picks.mjs",
     "export:predictability": "rolldown scripts/export-predictability.ts --file node_modules/.cache/export-predictability.mjs --platform node --format esm --log-level warn && node node_modules/.cache/export-predictability.mjs",
+    "backtest:stats": "rolldown scripts/backtest-stats-predictor.ts --file node_modules/.cache/backtest-stats-predictor.mjs --platform node --format esm --log-level warn && node node_modules/.cache/backtest-stats-predictor.mjs",
+    "backtest:cards": "rolldown scripts/backtest-cards-referee.ts --file node_modules/.cache/backtest-cards-referee.mjs --platform node --format esm --log-level warn && node node_modules/.cache/backtest-cards-referee.mjs",
+    "backtest:search": "rolldown scripts/backtest-model-search.ts --file node_modules/.cache/backtest-model-search.mjs --platform node --format esm --log-level warn && node node_modules/.cache/backtest-model-search.mjs",
+    "prospective:stats": "rolldown scripts/prospective-stats-predictor.ts --file node_modules/.cache/prospective-stats-predictor.mjs --platform node --format esm --log-level warn && node node_modules/.cache/prospective-stats-predictor.mjs",
     "check:i18n": "node scripts/check-i18n.mjs"
   },
   "dependencies": {

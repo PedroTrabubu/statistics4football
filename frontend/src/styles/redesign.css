@@ -1101,39 +1101,51 @@ section[id] {
 .compare-table thead th:last-child .team-name {
   flex-direction: row-reverse;
 }
+/* Cada estadística en dos filas: arriba las cifras con su nombre en medio,
+   debajo las dos barras a todo el ancho, juntas en el centro. */
+.compare-table {
+  table-layout: fixed;
+}
+.compare-col-num {
+  width: 20%;
+}
 .compare-table td {
-  padding: var(--space-2) var(--space-1);
+  padding: var(--space-3) var(--space-1) var(--space-2);
+  border-bottom: 0;
 }
-.compare-table .stats-value {
-  width: 38%;
+.compare-table .compare-stat:not(:last-child) > tr:last-child > td {
+  border-bottom: 1px solid var(--border-soft);
 }
-.compare-cell {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
+.compare-table tbody tr:hover {
+  background: none;
 }
-.compare-num {
-  flex: none;
-  min-width: 3.4rem;
-  font-family: var(--font-mono);
-  font-weight: var(--fw-semibold);
+.compare-table .compare-stat:hover {
+  background: var(--tint);
 }
-.compare-cell-home .compare-num {
+.compare-home {
   text-align: left;
 }
-.compare-cell-away .compare-num {
+.compare-away {
   text-align: right;
 }
+.compare-table td.compare-bars {
+  padding: 0 var(--space-1) var(--space-3);
+}
+.compare-bars-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2-5);
+}
 .compare-bar {
-  flex: 1;
   display: flex;
+  gap: 2px;
   height: 6px;
   border-radius: var(--radius-full);
   background: var(--border-soft);
   overflow: hidden;
 }
 .compare-bar-home {
-  justify-content: flex-end;
+  flex-direction: row-reverse;
 }
 .compare-fill {
   display: block;
@@ -1152,9 +1164,6 @@ section[id] {
   display: block;
   height: 100%;
 }
-.compare-bar .compare-seg + .compare-seg {
-  margin-left: 2px;
-}
 .compare-seg.is-hit {
   background: var(--green-fill);
 }
@@ -1172,19 +1181,6 @@ section[id] {
     animation-range: entry 10% entry 60%;
   }
 }
-@media (max-width: 640px) {
-  .compare-bar {
-    display: none;
-  }
-  .compare-num {
-    min-width: 0;
-  }
-  .compare-cell-home,
-  .compare-cell-away {
-    justify-content: center;
-  }
-}
-
 /* ---- Últimos partidos: cada equipo en su tarjeta, con su racha ---- */
 .recent-team {
   padding: var(--space-4) var(--space-4) var(--space-3);
@@ -1947,4 +1943,688 @@ section[id] {
     padding-left: var(--space-2);
     gap: var(--space-2-5);
   }
+}
+
+/* ---- Anillos verde/rojo (logo y porcentajes): nítidos a cualquier tamaño ----
+   El anillo va en ::before, recortado con una máscara de borde suavizado
+   (0,75 px), en vez de con una parada dura de radial-gradient, que dejaba el
+   borde dentado y, además, medía desde la esquina (anillo muy fino). El grosor
+   es --ring-w. La unión verde/rojo también va suavizada. */
+@property --pct {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+.app-mark,
+.market-ring {
+  --ring-aa: 0.75px;
+  position: relative;
+  isolation: isolate;
+  background: none;
+}
+.app-mark::before,
+.market-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--ring-w) - var(--ring-aa)),
+    #000 calc(100% - var(--ring-w)),
+    #000 calc(100% - var(--ring-aa)),
+    transparent 100%
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--ring-w) - var(--ring-aa)),
+    #000 calc(100% - var(--ring-w)),
+    #000 calc(100% - var(--ring-aa)),
+    transparent 100%
+  );
+}
+
+/* Logo: al pasar el ratón gira solo el anillo; las siglas quedan quietas. */
+.app-mark {
+  --ring-w: 3px;
+  font-weight: var(--fw-bold);
+  transition: none;
+}
+.app-mark::before {
+  background: conic-gradient(var(--green-fill) 0 77.6%, var(--red-fill) 78.4% 100%);
+  transition: transform 0.9s var(--ease-out);
+}
+.app-brand:hover .app-mark {
+  transform: none;
+}
+.app-brand:hover .app-mark::before {
+  transform: rotate(-140deg);
+}
+
+/* Porcentaje de un equipo: anillo más grueso, que se llena al aparecer y
+   al cambiar de opción. */
+.market-ring {
+  --ring-w: 4px;
+  transition: none;
+}
+.market-ring::before {
+  background: conic-gradient(
+    var(--green-fill) 0 calc(var(--pct) * 1% - 0.4%),
+    var(--red-fill) calc(var(--pct) * 1% + 0.4%) 100%
+  );
+  transition: --pct 0.8s var(--ease-out);
+  animation: s4b-ring-fill 1.1s var(--ease-out) 0.15s backwards;
+}
+.market-ring.side-card-ring {
+  --ring-w: 6px;
+}
+@keyframes s4b-ring-fill {
+  from {
+    --pct: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-mark::before,
+  .market-ring::before {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Escudo dentro del anillo: el cuadrado del escudo cabe entero en el hueco
+   interior (su diagonal = diámetro interior menos un margen de 3 px por lado),
+   así ninguna esquina toca el anillo, y va centrado. */
+.market-ring:has(.team-crest) {
+  width: 3.75rem;
+  height: 3.75rem;
+}
+.market-ring .team-crest {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc((100% - 2 * var(--ring-w) - 6px) * 0.7071);
+  height: auto;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: 0;
+}
+.market-ring .team-crest img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* ---- Ficha de partido: probabilidad de resultado (1X2 del modelo) ----
+   Tres cifras y una barra de local a visitante. Sin verde ni rojo (en la web
+   significan acierto/fallo): local en tinta, empate en gris claro y
+   visitante en gris oscuro; el favorito, en negrita. */
+.win-prob {
+  background-color: var(--tint);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.win-prob-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.detail-section h2.win-prob-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.win-prob-source {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
+}
+.win-prob-nums {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2-5);
+}
+.win-prob-num {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.win-prob-num.is-draw {
+  align-items: center;
+  text-align: center;
+}
+.win-prob-num.is-away {
+  align-items: flex-end;
+  text-align: right;
+}
+.win-prob-pct {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.win-prob-pct small {
+  margin-left: 2px;
+  font-size: 0.5em;
+  letter-spacing: 0;
+}
+.win-prob-num.is-top .win-prob-pct {
+  font-weight: var(--fw-display);
+  color: var(--ink);
+}
+.win-prob-label {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1-5);
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+.win-prob-num.is-top .win-prob-label {
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+.win-prob-actual {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  line-height: 1.6;
+}
+.win-prob-bar {
+  display: grid;
+  gap: 3px;
+  height: 10px;
+}
+.win-prob-seg {
+  border-radius: var(--radius-full);
+  transform-origin: left center;
+  animation: s4b-grow 0.5s var(--ease-out) 0.1s backwards;
+}
+.win-prob-seg.is-home {
+  background: var(--ink);
+}
+.win-prob-seg.is-draw {
+  background: color-mix(in srgb, var(--ink) 32%, var(--tint));
+}
+.win-prob-seg.is-away {
+  background: color-mix(in srgb, var(--ink) 66%, var(--tint));
+}
+@media (max-width: 520px) {
+  .win-prob-label {
+    font-size: var(--fs-xs);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .win-prob-seg,
+  .win-prob-dc-fill {
+    animation: none;
+  }
+}
+
+/* ---- Porcentajes de resultado: doble oportunidad, acierto/fallo, histórico
+   y calibración. Neutros; verde/rojo solo para acierto/fallo ---- */
+.detail-section .win-prob-subtitle {
+  margin: var(--space-5) 0 var(--space-2-5);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+}
+.win-prob-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.3rem;
+  height: 1.3rem;
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-display);
+  line-height: 1;
+}
+.win-prob-mark.is-hit {
+  background: var(--green-bg);
+  color: var(--green);
+}
+.win-prob-mark.is-miss {
+  background: var(--red-bg);
+  color: var(--red);
+}
+.win-prob-dc {
+  display: grid;
+  gap: var(--space-2-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.win-prob-dc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 16rem) minmax(4rem, 1fr) 3.5em;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+.win-prob-dc-label {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1-5);
+  min-width: 0;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.win-prob-dc-label b {
+  font-family: var(--font-mono);
+  color: var(--ink-2);
+}
+.win-prob-dc-track {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--ink) 10%, var(--tint));
+  overflow: hidden;
+}
+.win-prob-dc-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--ink) 40%, var(--tint));
+  transform-origin: left center;
+  animation: s4b-grow 0.5s var(--ease-out) 0.1s backwards;
+}
+.win-prob-dc-pct {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--ink-2);
+}
+.win-prob-dc-row.is-best .win-prob-dc-label {
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+.win-prob-dc-row.is-best .win-prob-dc-fill {
+  background: var(--ink);
+}
+.win-prob-dc-row.is-best .win-prob-dc-pct {
+  color: var(--ink);
+  font-weight: var(--fw-display);
+}
+/* Acierto histórico y tabla de aciertos: dos botones y su panel. */
+.win-prob-panels {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-soft);
+}
+.win-prob-panels .win-prob-history {
+  margin-top: var(--space-4);
+  padding-top: 0;
+  border-top: 0;
+}
+/* Título del acierto de la liga y, a su lado, la temporada (o el histórico). */
+.win-prob-history-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-2-5);
+}
+.detail-section .win-prob-history-head .win-prob-subtitle {
+  margin: 0;
+}
+.win-prob-season {
+  min-height: 2.4rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background-color: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+.win-prob-season:hover {
+  border-color: var(--ink-2);
+}
+.win-prob-season:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.win-prob-table {
+  margin-top: var(--space-4);
+}
+.detail-section .win-prob-table .win-prob-subtitle {
+  margin-top: 0;
+  margin-bottom: var(--space-1);
+}
+.win-prob-table .table-scroll {
+  margin-top: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+/* Los dos equipos del partido, marcados en la tabla. */
+.win-prob-table tr.is-current td {
+  background: color-mix(in srgb, var(--green-fill) 8%, transparent);
+}
+.win-prob-table tr.is-current td:first-child {
+  box-shadow: inset 3px 0 0 var(--green-fill);
+}
+.win-prob-table tr.is-current .team-name-text {
+  font-weight: var(--fw-semibold);
+}
+.win-prob-table-league td {
+  border-top: 1px solid var(--border);
+  font-weight: var(--fw-semibold);
+}
+.win-prob-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: 0 var(--space-1) 0 var(--space-2-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  line-height: 1.6;
+  color: var(--ink);
+}
+.win-prob-chip .pick-info-button {
+  width: 1.15rem;
+  height: 1.15rem;
+  font-size: var(--fs-2xs);
+}
+.win-prob-chip .pick-info-popover {
+  font-weight: var(--fw-regular);
+  line-height: 1.45;
+}
+.win-prob-empty {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.win-prob-history {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-soft);
+}
+.detail-section .win-prob-history .win-prob-subtitle {
+  margin-top: 0;
+}
+.win-prob-rates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-3) var(--space-5);
+  margin: 0;
+}
+.win-prob-rates dt {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-regular);
+  color: var(--muted);
+}
+.win-prob-rates dd {
+  margin: var(--space-0-5) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.win-prob-rates dd b {
+  margin-right: var(--space-1-5);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-display);
+  color: var(--ink);
+}
+.win-prob-ref,
+.win-prob-note {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.win-prob-cal {
+  margin-top: var(--space-3);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.win-prob-cal summary {
+  cursor: pointer;
+  font-weight: var(--fw-medium);
+  color: var(--ink-2);
+}
+.win-prob-cal summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.win-prob-cal p {
+  margin: var(--space-2) 0 0;
+}
+.win-prob-cal-tables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+.win-prob-cal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.win-prob-cal-table caption {
+  padding-bottom: var(--space-1);
+  text-align: left;
+  font-weight: var(--fw-semibold);
+  color: var(--ink-2);
+}
+.win-prob-cal-table th,
+.win-prob-cal-table td {
+  padding: var(--space-1) var(--space-1-5);
+  border-bottom: 1px solid var(--border-soft);
+  text-align: right;
+  vertical-align: top;
+}
+.win-prob-cal-table th:first-child {
+  text-align: left;
+  font-weight: var(--fw-regular);
+}
+.win-prob-cal-table thead th {
+  font-weight: var(--fw-medium);
+  color: var(--muted);
+}
+.win-prob-cal-table td {
+  color: var(--ink-2);
+}
+.win-prob-ci,
+.win-prob-low {
+  color: var(--muted);
+}
+.win-prob-low {
+  display: block;
+  font-style: italic;
+}
+@media (max-width: 520px) {
+  .win-prob-dc-row {
+    grid-template-columns: minmax(0, 1fr) 3.5em;
+  }
+  .win-prob-dc-track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+/* ---- Nota del Elo propio: tarjeta con los dos ratings, la diferencia
+   explicada y los avisos ---- */
+.pick-info-popover.elo-tip {
+  gap: var(--space-2-5);
+  width: min(21rem, 86vw);
+  max-width: none;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  letter-spacing: normal;
+  text-transform: none;
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.55);
+}
+.elo-tip-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.elo-tip-head strong {
+  font-family: var(--font-display);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-display);
+}
+.elo-tip-head span,
+.elo-tip-notes,
+.elo-tip-missing {
+  color: #a1a1aa;
+  font-size: var(--fs-xs);
+}
+.elo-tip-team {
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--space-2);
+  row-gap: var(--space-1);
+}
+.elo-tip-team .team-crest {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.elo-tip-name {
+  grid-column: 2;
+  font-weight: var(--fw-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.elo-tip-value {
+  grid-column: 3;
+  font-family: var(--font-display);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-display);
+  font-variant-numeric: tabular-nums;
+}
+.elo-tip-track {
+  grid-column: 2 / -1;
+  position: relative;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.12);
+}
+.elo-tip-track i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: #fafafa;
+}
+.elo-tip-team.is-away .elo-tip-track i {
+  background: #71717a;
+}
+.elo-tip-verdict {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2-5);
+  padding: var(--space-2-5) var(--space-3);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.07);
+  color: #d4d4d8;
+  font-size: var(--fs-xs);
+}
+.elo-tip-verdict strong {
+  color: #fff;
+}
+.elo-tip-chip {
+  flex: none;
+  padding: var(--space-0-5) var(--space-2);
+  border-radius: var(--radius-full);
+  background: #fafafa;
+  color: #111215;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-variant-numeric: tabular-nums;
+}
+.elo-tip-notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.elo-tip-notes span::before {
+  content: "·";
+  margin-right: var(--space-1-5);
+}
+/* La nota del Elo se centra bajo la etiqueta de la fila (no bajo la "i"),
+   así no se sale de la pantalla en móvil; y con la letra normal, no la
+   monoespaciada de la tabla. */
+.stats-label:has(.elo-label) {
+  position: relative;
+}
+.elo-label .info-tip {
+  position: static;
+}
+.pick-info-popover.elo-tip {
+  top: calc(100% - 0.25rem);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  font-family: var(--font-body);
+  font-variant-numeric: normal;
+}
+.pick-info-popover.elo-tip::before {
+  display: none;
+}
+
+/* Estadísticas del partido: totales arriba, como las tarjetas del H2H. */
+.stat-tiles.predictor-totals {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  margin-bottom: var(--space-5);
+}
+.predictor-totals .stat-tile-value {
+  font-size: var(--fs-2xl);
+}
+.predictor-how {
+  margin-top: var(--space-4);
+}
+.predictor-how > summary {
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+}
+.predictor-how > p:first-of-type {
+  margin-top: var(--space-2-5);
+}
+/* Predicción, no datos reales: la línea bajo el título con su etiqueta,
+   como los chips de la cabecera de la ficha. */
+.predictor-lead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-2-5);
+  margin: var(--space-1-5) 0 var(--space-4);
+}
+.predictor-chip {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-ink);
+  font-weight: var(--fw-semibold);
 }
