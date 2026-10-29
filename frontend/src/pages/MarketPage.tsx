@@ -24,7 +24,7 @@ import {
   type MatchGroup,
   type TeamMatchView,
 } from "../lib/markets";
-import { CHAMPIONS_LEAGUE_CODE, DEFAULT_LEAGUE_CODE, leagueName, useSelectedLeagueCode } from "../lib/leagues";
+import { CHAMPIONS_LEAGUE_CODE, defaultLeagueCode, leagueName, useSelectedLeagueCode } from "../lib/leagues";
 import { wilsonLower, wilsonUpper } from "../lib/patterns";
 import { matchesSearch } from "../lib/teamSearch";
 import { useApi } from "../lib/useApi";
@@ -120,9 +120,9 @@ function MarketView({
 
   const { data: leagues } = useApi(() => getLeagues(), []);
 
-  // Sin "todas las ligas" en esta pagina: si venia de "Ambas", LaLiga.
+  // Sin "todas las ligas" en esta pagina: si venia de "Todas", la del idioma.
   const [selectedCode, setLeagueCode] = useSelectedLeagueCode();
-  const leagueCode = selectedCode ?? DEFAULT_LEAGUE_CODE;
+  const leagueCode = selectedCode ?? defaultLeagueCode();
   const leagueId = leagues?.find((l) => l.code === leagueCode)?.id;
 
   const { data: seasons } = useApi(

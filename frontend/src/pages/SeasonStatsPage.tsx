@@ -8,7 +8,7 @@ import { LeagueSwitch } from "../components/LeagueSwitch";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
 import { TeamName } from "../components/TeamCrest";
 import { formatFixed, formatPct } from "../lib/format";
-import { DEFAULT_LEAGUE_CODE, useSelectedLeagueCode, leagueName } from "../lib/leagues";
+import { defaultLeagueCode, useSelectedLeagueCode, leagueName } from "../lib/leagues";
 import { useApi } from "../lib/useApi";
 
 type SplitKey = "overall" | "home" | "away" | "last5";
@@ -244,9 +244,9 @@ export function SeasonStatsPage() {
 
   const { data: leagues } = useApi(() => getLeagues(), []);
 
-  // Sin "todas las ligas" en esta pagina: si venia de "Ambas", LaLiga.
+  // Sin "todas las ligas" en esta pagina: si venia de "Todas", la del idioma.
   const [selectedCode, setLeagueCode] = useSelectedLeagueCode();
-  const leagueCode = selectedCode ?? DEFAULT_LEAGUE_CODE;
+  const leagueCode = selectedCode ?? defaultLeagueCode();
   const leagueId = leagues?.find((l) => l.code === leagueCode)?.id;
 
   // Enlace desde la ficha de partido (?league=<id>): preselecciona esa liga.

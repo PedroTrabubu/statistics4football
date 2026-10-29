@@ -1,9 +1,21 @@
 import { useSyncExternalStore } from "react";
 import type { League } from "../api/types";
-import { t } from "../i18n";
+import { type Language, currentLanguage, i18n, t } from "../i18n";
 
-/** LaLiga siempre primero y seleccionada por defecto. */
+/** LaLiga siempre primero; es la liga por defecto en español y la de reserva. */
 export const DEFAULT_LEAGUE_CODE = "ESP-La Liga";
+
+/** Liga por defecto de cada idioma de la web: la de su país. */
+const LANGUAGE_LEAGUES: Record<Language, string> = {
+  es: DEFAULT_LEAGUE_CODE,
+  en: "ENG-Premier League",
+  fr: "FRA-Ligue 1",
+};
+
+/** La liga que se ve mientras no se elige otra: la del idioma de la web. */
+export function defaultLeagueCode(language: Language = currentLanguage()): string {
+  return LANGUAGE_LEAGUES[language] ?? DEFAULT_LEAGUE_CODE;
+}
 
 /** Equipos de ligas distintas, fase de liga y eliminatorias, y sin cuotas de
  * mercado (ver backend/app/ingestion/champions.py). */
@@ -102,22 +114,33 @@ export function parseLeagueParam(value: string | null, leagues: League[]): strin
   return leagues.find((l) => String(l.id) === clean)?.code;
 }
 
-// Liga elegida, compartida entre paginas mientras dura la sesion (al
-// recargar vuelve a LaLiga). null = todas las ligas (solo donde se ofrece).
-let selectedCode: string | null = DEFAULT_LEAGUE_CODE;
+// Liga elegida, compartida entre paginas mientras dura la sesion. Hasta que
+// se elige una (o llega en un ?liga=) es la del idioma, y cambia con el; la
+// elegida se queda aunque cambie el idioma. Al recargar se vuelve a la del
+// idioma. null = todas las ligas (solo donde se ofrece).
+let chosenCode: string | null | undefined = undefined;
 const listeners = new Set<() => void>();
+const notify = () => listeners.forEach((listener) => listener());
+
+i18n.on("languageChanged", () => {
+  if (chosenCode === undefined) notify();
+});
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
 
+export function getSelectedLeagueCode(): string | null {
+  return chosenCode === undefined ? defaultLeagueCode() : chosenCode;
+}
+
 export function setSelectedLeagueCode(code: string | null): void {
-  selectedCode = code;
-  listeners.forEach((listener) => listener());
+  chosenCode = code;
+  notify();
 }
 
 export function useSelectedLeagueCode(): [string | null, (code: string | null) => void] {
-  const code = useSyncExternalStore(subscribe, () => selectedCode);
+  const code = useSyncExternalStore(subscribe, getSelectedLeagueCode);
   return [code, setSelectedLeagueCode];
 }
