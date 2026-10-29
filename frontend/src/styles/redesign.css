@@ -2985,6 +2985,56 @@ button.hp-hero-link {
     transition: none;
   }
 }
+
+/* ---- Selector de idioma: pastilla de texto (globo · código · flecha),
+   distinta del botón redondo del tema ---- */
+.lang-switch .theme-switch-button {
+  width: auto;
+  min-width: 0;
+  height: 2.5rem;
+  padding: 0 var(--space-2-5) 0 var(--space-3);
+}
+.lang-switch-content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+.lang-switch-globe {
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.lang-switch-chevron {
+  width: 14px;
+  height: 14px;
+  margin-left: -1px;
+  color: var(--muted);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.lang-switch .theme-switch-button:hover .lang-switch-globe {
+  color: var(--ink);
+}
+.lang-switch .theme-switch-button[aria-expanded="true"] .lang-switch-chevron {
+  transform: rotate(180deg);
+}
+.lang-switch .theme-menu {
+  min-width: 11rem;
+}
+@media (max-width: 640px) {
+  .lang-switch-globe {
+    display: none;
+  }
+  .lang-switch .theme-switch-button {
+    padding: 0 var(--space-2) 0 var(--space-3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lang-switch-chevron {
+    transition: none;
+  }
+}
+
 /* ---- Ficha de partido: probabilidad de resultado (1X2 del modelo) ----
    Tres cifras y una barra de local a visitante. Sin verde ni rojo (en la web
    significan acierto/fallo): local en tinta, empate en gris claro y
