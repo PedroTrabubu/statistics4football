@@ -99,6 +99,9 @@ export function bookingPoints(stats: TeamMatchStats | null): number | null {
   return yellow === null || red === null ? null : yellow * 10 + red * 25;
 }
 
+/** Rojas del partido, de los dos equipos. */
+export const matchRedCards = (v: TeamMatchView) => add(stat(v.statsFor, "red_cards"), stat(v.statsAgainst, "red_cards"));
+
 const htTotal = (v: TeamMatchView) => add(v.htFor, v.htAgainst);
 const secondHalfFor = (v: TeamMatchView) => (v.htFor === null ? null : v.goalsFor - v.htFor);
 const secondHalfAgainst = (v: TeamMatchView) => (v.htAgainst === null ? null : v.goalsAgainst - v.htAgainst);
@@ -392,8 +395,9 @@ function option(textKey: string, key: string, optionKey: string, hit: MarketOpti
   };
 }
 
-/** Un mercado suelto: los textos de marketTexts como getters del objeto. */
-function single(textKey: string, def: Omit<MarketDef, "label" | "title" | "description">): MarketDef {
+/** Un mercado suelto: los textos de marketTexts como getters del objeto.
+ * `withNote`: tiene nota (markets:market.<textKey>.note). */
+function single(textKey: string, def: Omit<MarketDef, "label" | "title" | "description" | "note">, withNote = false): MarketDef {
   const texts = marketTexts(textKey);
   return {
     ...def,
@@ -406,6 +410,31 @@ function single(textKey: string, def: Omit<MarketDef, "label" | "title" | "descr
     get description() {
       return texts.description;
     },
+    get note() {
+      return withNote ? t(`markets:market.${textKey}.note`) : undefined;
+    },
+  };
+}
+
+/** Cifra y media de un mercado suelto, con sus textos en markets:market.<textKey>. */
+function singleDetail(textKey: string, value: NonNullable<MarketDef["detail"]>["value"]): MarketDef["detail"] {
+  return {
+    get label() {
+      return t(`markets:market.${textKey}.detail`);
+    },
+    get inlineLabel() {
+      return t(`markets:market.${textKey}.detailInline`);
+    },
+    value,
+  };
+}
+
+function singleAverage(textKey: string, value: Value): MarketDef["average"] {
+  return {
+    get label() {
+      return t(`markets:market.${textKey}.average`);
+    },
+    value,
   };
 }
 
@@ -533,6 +562,26 @@ export const MARKETS: MarketDef[] = [
     detail: statDetail(bookingPoints, true),
     note: true,
   }),
+  single(
+    "redCards",
+    {
+      slug: "expulsiones",
+      group: "stats",
+      options: [
+        option("redCards", "si", "yes", (v) => gt(matchRedCards(v), 0.5)),
+        option("redCards", "no", "no", (v) => {
+          const reds = matchRedCards(v);
+          return reds === null ? null : reds === 0;
+        }),
+        option("redCards", "dos", "twoOrMore", (v) => gt(matchRedCards(v), 1.5)),
+      ],
+      defaultOption: "si",
+      matchLevel: true,
+      detail: singleDetail("redCards", statDetail((s) => stat(s, "red_cards"))),
+      average: singleAverage("redCards", matchRedCards),
+    },
+    true,
+  ),
   ...statFamily({
     key: "tiros",
     textKey: "shots",

@@ -204,7 +204,8 @@
       "bookingPoints": "Points de cartons",
       "for": "Pour",
       "against": "Contre",
-      "cards": "Cartons"
+      "cards": "Cartons",
+      "redCards": "Rouges"
     },
     "summary": {
       "season_one": "<bold>{{count}}</bold> match précédent de {{name}} sur la saison {{season}}.",
@@ -234,7 +235,8 @@
       "pointsMatch": "Points de cartons du match",
       "pointsEach": "Points de cartons de chaque équipe",
       "cardsMatch": "Cartons du match",
-      "cardsEach": "Cartons de chaque équipe"
+      "cardsEach": "Cartons de chaque équipe",
+      "redsMatch": "Cartons rouges du match"
     },
     "footnote": "Uniquement les matchs antérieurs à celui-ci. Les équipes : saison {{season}}. Points de cartons : jaune = 10, rouge = 25 (approximatif : la source ne distingue pas un rouge direct d'un second jaune). « Chaque équipe » = les deux équipes dépassent la ligne. Série = matchs consécutifs, en partant du plus récent, où la ligne a été dépassée.",
     "factsTitle": "Avec ces équipes",
@@ -247,7 +249,13 @@
     "lineTitle_one": "{{hits}} sur {{count}} match",
     "lineTitle_many": "{{hits}} sur {{count}} matchs",
     "lineTitle_other": "{{hits}} sur {{count}} matchs",
-    "streak": "série de {{n}}"
+    "streak": "série de {{n}}",
+    "extras": {
+      "reds_one": "Matchs avec au moins une expulsion : <bold>{{hits}} sur {{count}}</bold> ({{pct}})",
+      "reds_many": "Matchs avec au moins une expulsion : <bold>{{hits}} sur {{count}}</bold> ({{pct}})",
+      "reds_other": "Matchs avec au moins une expulsion : <bold>{{hits}} sur {{count}}</bold> ({{pct}})",
+      "league": "championnat {{value}}"
+    }
   },
   "statsPanel": {
     "title_one": "Forme récente ({{count}} dernier match)",

@@ -228,11 +228,25 @@
         "draw": "Autant de corners",
         "winOrDraw": "Au moins autant de corners"
       }
+    },
+    "redCards": {
+      "label": "Expulsions",
+      "title": "Expulsions dans le match",
+      "description": "Matchs avec au moins un carton rouge (pour l'une ou l'autre équipe), sans aucun, ou avec deux ou plus.",
+      "option": {
+        "yes": "Au moins une",
+        "no": "Aucune",
+        "twoOrMore": "2 ou plus"
+      },
+      "detail": "Rouges",
+      "detailInline": "cartons rouges",
+      "average": "cartons rouges par match",
+      "note": "La source ne distingue pas un rouge direct d'un second jaune : les deux comptent."
     }
   },
   "page": {
     "thisSeason": "cette saison",
-    "refereesLead": "Comment se déroulent les matchs de chaque arbitre : cartons, points de cartons, corners ou buts. Uniquement des marchés sur le match entier, qui ne dépendent pas de l'équipe qui reçoit.",
+    "refereesLead": "Comment se déroulent les matchs de chaque arbitre : cartons, points de cartons, expulsions, corners ou buts. Uniquement des marchés sur le match entier, qui ne dépendent pas de l'équipe qui reçoit.",
     "search": {
       "team": "Rechercher une équipe",
       "referee": "Rechercher un arbitre"
@@ -317,6 +331,12 @@
     "rateLabel": "{{pct}} : {{summary}}",
     "redCards_one": "Expulsion",
     "redCards_many": "{{count}} expulsions",
-    "redCards_other": "{{count}} expulsions"
+    "redCards_other": "{{count}} expulsions",
+    "allSeasons": "Toutes les saisons",
+    "interval": "Intervalle à 95 % : {{low}}–{{high}}",
+    "vsLeague": {
+      "above": "au-dessus du championnat ({{pct}})",
+      "below": "en dessous du championnat ({{pct}})"
+    }
   }
 }

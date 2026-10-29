@@ -199,7 +199,8 @@
       "bookingPoints": "Booking points",
       "for": "For",
       "against": "Against",
-      "cards": "Cards"
+      "cards": "Cards",
+      "redCards": "Red cards"
     },
     "summary": {
       "season_one": "<bold>{{count}}</bold> previous match for {{name}} in the {{season}} season.",
@@ -226,7 +227,8 @@
       "pointsMatch": "Match booking points",
       "pointsEach": "Booking points for each team",
       "cardsMatch": "Match cards",
-      "cardsEach": "Cards for each team"
+      "cardsEach": "Cards for each team",
+      "redsMatch": "Match red cards"
     },
     "footnote": "Only matches before this one. Teams: {{season}} season. Booking points: yellow = 10, red = 25 (approximate: the source doesn't distinguish a straight red from a second yellow). ‘Each team’ = both teams go over the line. Streak = consecutive matches, from the most recent, in which the line was beaten.",
     "factsTitle": "With these teams",
@@ -237,7 +239,12 @@
     "refereeAverage_other": "Referee's average across their {{count}} matches: {{value}} {{label}}.",
     "lineTitle_one": "{{hits}} of {{count}} match",
     "lineTitle_other": "{{hits}} of {{count}} matches",
-    "streak": "streak of {{n}}"
+    "streak": "streak of {{n}}",
+    "extras": {
+      "reds_one": "Matches with a red card: <bold>{{hits}} of {{count}}</bold> ({{pct}})",
+      "reds_other": "Matches with a red card: <bold>{{hits}} of {{count}}</bold> ({{pct}})",
+      "league": "league {{value}}"
+    }
   },
   "statsPanel": {
     "title_one": "Recent form (last match)",

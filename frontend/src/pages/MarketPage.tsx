@@ -25,6 +25,7 @@ import {
   type TeamMatchView,
 } from "../lib/markets";
 import { CHAMPIONS_LEAGUE_CODE, DEFAULT_LEAGUE_CODE, leagueName, useSelectedLeagueCode } from "../lib/leagues";
+import { wilsonLower, wilsonUpper } from "../lib/patterns";
 import { matchesSearch } from "../lib/teamSearch";
 import { useApi } from "../lib/useApi";
 
@@ -34,6 +35,9 @@ type SortMode = "pct" | "name";
 
 /** Por debajo de esto el porcentaje es poco fiable: se muestra atenuado. */
 const LOW_SAMPLE = 5;
+
+/** Valor del selector de temporada para "todas" (solo por árbitro). */
+const ALL_SEASONS = "all";
 
 /** Partidos que se cuentan: toda la temporada o los últimos N. */
 const LAST_N_OPTIONS: (number | null)[] = [null, 10, 5];
@@ -131,18 +135,21 @@ function MarketView({
   }, [leagueId]);
 
   const effectiveSeason = season ?? seasons?.[0];
+  // Por árbitro, también todas las temporadas juntas: en una sola, un
+  // árbitro pita unos 20 partidos y los sucesos raros (rojas) no dan para
+  // mucho.
+  const allSeasons = mode === "referee" && effectiveSeason === ALL_SEASONS;
 
   const {
     data: results,
     loading,
     error,
-  } = useApi(
-    () =>
-      leagueId !== undefined && effectiveSeason !== undefined
-        ? getLeagueResults(leagueId, effectiveSeason)
-        : Promise.resolve([]),
-    [leagueId, effectiveSeason],
-  );
+  } = useApi(() => {
+    if (leagueId === undefined || effectiveSeason === undefined) return Promise.resolve([]);
+    if (!allSeasons) return getLeagueResults(leagueId, effectiveSeason);
+    // Cada temporada viene de la más reciente a la más antigua, y ellas también.
+    return Promise.all((seasons ?? []).map((s) => getLeagueResults(leagueId, s))).then((lists) => lists.flat());
+  }, [leagueId, effectiveSeason, allSeasons, seasons?.join()]);
 
   // Champions: cada equipo, tambien en su liga. Se pide la primera vez que
   // se abre el bloque de un equipo.
@@ -192,7 +199,12 @@ function MarketView({
   const leagueViews = results && lastN === null ? groupByTeam(results).flatMap((t) => t.home) : null;
   const leagueRate = market.matchLevel && leagueViews ? hitRate(leagueViews, option) : null;
 
-  const seasonLabel = effectiveSeason ? formatSeason(effectiveSeason) : t("markets:page.thisSeason");
+  const seasonLabel =
+    allSeasons && seasons?.length
+      ? `${formatSeason(seasons[seasons.length - 1])}–${formatSeason(seasons[0])}`
+      : effectiveSeason
+        ? formatSeason(effectiveSeason)
+        : t("markets:page.thisSeason");
   // Partidos jugados sin arbitro en ninguna fuente: no cuentan para nadie.
   const withoutReferee = mode === "referee" && results ? results.filter((r) => !r.referee).length : 0;
   const hasMissing = rows.some((r) => r.overall.missing > 0);
@@ -253,6 +265,9 @@ function MarketView({
               {formatSeason(s)}
             </option>
           ))}
+          {mode === "referee" && seasons && seasons.length > 1 && (
+            <option value={ALL_SEASONS}>{t("markets:page.allSeasons")}</option>
+          )}
         </select>
 
         <select
@@ -419,6 +434,7 @@ function MarketView({
               view={view}
               take={take}
               league={leagueCode}
+              interval={mode === "referee" ? { leaguePct: leagueRate?.pct ?? null } : undefined}
               checked={picked.includes(group.key)}
               onToggle={() => toggle(group.key)}
               domestic={
@@ -552,6 +568,7 @@ function GroupCard({
   view,
   take,
   league,
+  interval,
   checked,
   onToggle,
   domestic,
@@ -563,6 +580,8 @@ function GroupCard({
   view: ViewMode;
   take: (views: TeamMatchView[]) => TeamMatchView[];
   league: string;
+  /** Por árbitro: el intervalo del 95 % y si se separa de la liga. */
+  interval?: { leaguePct: number | null };
   checked: boolean;
   onToggle: () => void;
   domestic?: DomesticState;
@@ -596,6 +615,7 @@ function GroupCard({
                 {t("markets:page.average", { value: formatFixed(avg, 1), label: market.average.label })}
               </p>
             )}
+            {interval && overall.total > 0 && <IntervalNote rate={overall} leaguePct={interval.leaguePct} />}
           </div>
         </div>
         <RateBar rate={overall} />
@@ -605,6 +625,29 @@ function GroupCard({
 
       {domestic && <DomesticMatches state={domestic} market={market} option={option} view={view} take={take} />}
     </section>
+  );
+}
+
+/** Intervalo del 95 % (Wilson) del porcentaje de un árbitro y, solo si queda
+ * entero por encima o por debajo de la media de la liga, la marca de que se
+ * separa de ella. Con sucesos raros (rojas) y ~20 partidos por
+ * temporada, la mayoría no se separa: así no se lee ruido como tendencia. */
+function IntervalNote({ rate, leaguePct }: { rate: HitRate; leaguePct: number | null }) {
+  const { t } = useTranslation();
+  const low = wilsonLower(rate.hits, rate.total);
+  const high = wilsonUpper(rate.hits, rate.total);
+  const pct = (x: number) => withPercent(String(Math.round(x * 100)));
+  const side = leaguePct === null ? null : low > leaguePct ? "above" : high < leaguePct ? "below" : null;
+  return (
+    <p className="small muted market-interval">
+      {t("markets:page.interval", { low: pct(low), high: pct(high) })}
+      {side && (
+        <span className={side === "above" ? "edge-up" : "edge-down"}>
+          {" · "}
+          {t(`markets:page.vsLeague.${side}`, { pct: pct(leaguePct!) })}
+        </span>
+      )}
+    </p>
   );
 }
 

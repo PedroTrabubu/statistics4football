@@ -72,7 +72,11 @@ export function categoryOf(market: MarketDef): string {
   return CATEGORY_ALIAS[market.slug] ?? market.family?.key ?? market.slug;
 }
 
-export const STREAK_TYPES: StreakType[] = MARKETS.flatMap((market) =>
+/** Mercados sin rachas (aún sin frases propias): expulsiones, pensado para la
+ * página de Árbitros. */
+const WITHOUT_STREAKS = new Set(["expulsiones"]);
+
+export const STREAK_TYPES: StreakType[] = MARKETS.filter((market) => !WITHOUT_STREAKS.has(market.slug)).flatMap((market) =>
   [...market.options, ...(EXTRA_OPTIONS[market.slug] ?? [])].map((option) => ({
     market,
     option,

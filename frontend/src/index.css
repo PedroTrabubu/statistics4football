@@ -4429,6 +4429,16 @@ section[id] {
   scroll-margin-top: 6rem;
 }
 
+/* Árbitros: intervalo del 95 % bajo la media de cada árbitro. */
+.market-interval {
+  margin: var(--space-0-5) 0 0;
+}
+
+/* Ficha: expulsiones con el árbitro designado. */
+.referee-extras {
+  margin: 0 0 var(--space-4);
+}
+
 /* Mercados: comparar los partidos de la siguiente jornada. Un botón discreto
    junto a la vista; al abrirlo, los partidos en tarjetas pequeñas (en fila
    deslizable en el móvil). La tarjeta del partido comparado, marcada. */

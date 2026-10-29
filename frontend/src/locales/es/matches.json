@@ -204,7 +204,8 @@
       "bookingPoints": "Puntos de tarjeta",
       "for": "A favor",
       "against": "En contra",
-      "cards": "Tarjetas"
+      "cards": "Tarjetas",
+      "redCards": "Rojas"
     },
     "summary": {
       "season_one": "<bold>{{count}}</bold> partido anterior de {{name}} en la temporada {{season}}.",
@@ -234,7 +235,8 @@
       "pointsMatch": "Puntos de tarjeta del partido",
       "pointsEach": "Puntos de tarjeta de cada equipo",
       "cardsMatch": "Tarjetas del partido",
-      "cardsEach": "Tarjetas de cada equipo"
+      "cardsEach": "Tarjetas de cada equipo",
+      "redsMatch": "Rojas del partido"
     },
     "footnote": "Solo partidos anteriores a este. Los equipos, en la temporada {{season}}. Puntos de tarjeta: amarilla = 10, roja = 25 (aproximado: la fuente no distingue una roja directa de una segunda amarilla). «Cada equipo» = los dos equipos superan la línea. Racha = partidos seguidos, desde el más reciente, en los que se superó.",
     "factsTitle": "Con estos equipos",
@@ -247,7 +249,13 @@
     "lineTitle_one": "{{hits}} de {{count}} partido",
     "lineTitle_many": "{{hits}} de {{count}} partidos",
     "lineTitle_other": "{{hits}} de {{count}} partidos",
-    "streak": "racha de {{n}}"
+    "streak": "racha de {{n}}",
+    "extras": {
+      "reds_one": "Partidos con alguna expulsión: <bold>{{hits}} de {{count}}</bold> ({{pct}})",
+      "reds_many": "Partidos con alguna expulsión: <bold>{{hits}} de {{count}}</bold> ({{pct}})",
+      "reds_other": "Partidos con alguna expulsión: <bold>{{hits}} de {{count}}</bold> ({{pct}})",
+      "league": "liga {{value}}"
+    }
   },
   "statsPanel": {
     "title_one": "Forma reciente (último partido)",
