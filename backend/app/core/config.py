@@ -19,9 +19,12 @@ class Settings(BaseSettings):
     database_url: str = f"sqlite:///{PROJECT_ROOT / 'data' / 'stadistics4bet.db'}"
 
     active_leagues: str = "ENG-Premier League,ESP-La Liga,ESP-La Liga 2,FRA-Ligue 1,GER-Bundesliga,ITA-Serie A,INT-Champions League"
-    # Ligas en las que Picks y Recomendaciones están validados. Una liga nueva
+    # Ligas en las que Picks está validado. Una liga nueva
     # se carga y se ve en la web, pero no entra aquí hasta pasar su backtest.
     validated_leagues: str = "ENG-Premier League,ESP-La Liga,ESP-La Liga 2"
+    # Ligas de Alta probabilidad: las validadas y las que solo pasaron la
+    # prueba de ese modelo (ampliacion de docs/LIGAS_NUEVAS.md). Picks no las usa.
+    high_probability_leagues: str = "ENG-Premier League,ESP-La Liga,ESP-La Liga 2,ITA-Serie A"
     # Ligas de contexto: solo sus resultados y estadísticas (Football-Data), para
     # el historial de los equipos de Champions. No salen en la web ni en los
     # picks, ni tienen calendario, árbitros, xG ni cuotas de Pinnacle.
@@ -47,6 +50,10 @@ class Settings(BaseSettings):
     @property
     def model_leagues(self) -> list[str]:
         return [league.strip() for league in self.validated_leagues.split(",") if league.strip()]
+
+    @property
+    def pattern_leagues(self) -> list[str]:
+        return [league.strip() for league in self.high_probability_leagues.split(",") if league.strip()]
 
     @property
     def context(self) -> list[str]:

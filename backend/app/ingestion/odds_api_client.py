@@ -24,6 +24,7 @@ LEAGUE_SPORT_KEY_MAP: dict[str, str] = {
     "ESP-La Liga": "soccer_spain_la_liga",
     "ESP-La Liga 2": "soccer_spain_segunda_division",
     "FRA-Ligue 1": "soccer_france_ligue_one",
+    "ITA-Serie A": "soccer_italy_serie_a",
 }
 
 MARKETS = "h2h,totals"

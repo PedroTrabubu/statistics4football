@@ -74,7 +74,7 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
 
     def fixtures() -> str:
         odds_api_leagues = (
-            {code for code in settings.model_leagues if code in LEAGUE_SPORT_KEY_MAP}
+            {code for code in settings.pattern_leagues if code in LEAGUE_SPORT_KEY_MAP}
             if settings.the_odds_api_key
             else set()
         )
