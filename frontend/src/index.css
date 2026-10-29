@@ -4166,6 +4166,15 @@ a.hero-card:hover {
   scrollbar-width: thin;
   list-style: none;
 }
+/* Arrastrando con el raton: sin seleccionar texto ni encajar hasta soltar. */
+.carousel-track[data-dragging] {
+  cursor: grabbing;
+  user-select: none;
+  scroll-snap-type: none;
+}
+.carousel-track[data-dragging] a {
+  pointer-events: none;
+}
 .carousel-track > li {
   flex: 0 0 min(14rem, 74%);
   scroll-snap-align: start;
