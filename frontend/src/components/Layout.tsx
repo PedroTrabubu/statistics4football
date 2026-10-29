@@ -24,7 +24,7 @@ const NAV_ITEMS = [
   { to: "/picks", label: "nav:picks", end: false, icon: IconTicket },
   { to: "/picks-probables", label: "nav:probablePicks", end: false, icon: IconCheck },
   { to: "/rachas", label: "nav:streaks", end: false, icon: IconStreak },
-  { to: "/recommendations", label: "nav:recommendations", end: false, icon: IconTarget },
+  { to: "/alta-probabilidad", label: "nav:highProbability", end: false, icon: IconTarget },
   { to: "/mis-apuestas", label: "nav:myBets", end: false, icon: IconWallet },
   { to: "/glosario", label: "nav:glossary", end: false, icon: IconBook },
 ];

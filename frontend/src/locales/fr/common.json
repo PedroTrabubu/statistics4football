@@ -38,10 +38,6 @@
     "all": "Tous",
     "noMatches": "Aucun match ce jour-là"
   },
-  "evFlag": {
-    "label": "à vérifier",
-    "title": "Un EV aussi élevé signifie presque toujours que le modèle s'écarte nettement du marché (échantillon réduit, équipe avec peu d'historique...), et non une occasion sûre. Vérifiez l'échantillon avant de vous fier à ce chiffre."
-  },
   "outcome": {
     "won": "Gagnant",
     "lost": "Perdant",

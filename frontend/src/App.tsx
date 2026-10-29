@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { GlossaryPage } from "./pages/GlossaryPage";
 import { LandingPage } from "./pages/LandingPage";
@@ -31,7 +31,9 @@ function App() {
         <Route path="picks" element={<PicksPage />} />
         <Route path="picks-probables" element={<PicksHistoryPage />} />
         <Route path="rachas" element={<StreaksPage />} />
-        <Route path="recommendations" element={<RecommendationsPage />} />
+        <Route path="alta-probabilidad" element={<RecommendationsPage />} />
+        {/* Antes se llamaba Recomendaciones: los enlaces viejos siguen valiendo. */}
+        <Route path="recommendations" element={<Navigate to="/alta-probabilidad" replace />} />
         <Route path="mis-apuestas" element={<MyBetsPage />} />
         <Route path="glosario" element={<GlossaryPage />} />
       </Route>

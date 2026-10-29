@@ -1260,6 +1260,149 @@ section[id] {
   font-weight: var(--fw-display);
   letter-spacing: var(--tracking-tighter);
 }
+.stat-tile-sub {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+/* ---- Alta probabilidad: arriba, el margen sobre el mercado de antes y de
+   ahora, y el aviso fijo ---- */
+.hp-callout {
+  margin: 0 0 var(--space-6);
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.hp-callout-title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hp-callout-caption {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-md);
+  color: var(--ink-2);
+}
+/* Una fila por liga: el margen de cada periodo, con su intervalo debajo. */
+.hp-callout-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.hp-callout-table th,
+.hp-callout-table td {
+  padding: var(--space-2-5) var(--space-3) var(--space-2-5) 0;
+  border-bottom: 1px solid var(--border-soft);
+  text-align: left;
+  vertical-align: top;
+}
+.hp-callout-table thead th {
+  padding-top: 0;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hp-callout-league {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+.hp-callout-league .league-logo {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.hp-callout-figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+.hp-callout-value {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-display);
+  letter-spacing: var(--tracking-tight);
+  white-space: nowrap;
+}
+.hp-callout-detail {
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+}
+.hp-callout-method {
+  margin: var(--space-3) 0 0;
+}
+/* Tabla de aciertos: la fila de un equipo se despliega con sus mercados, y
+   "Margen" ordena. */
+.hp-break-sort {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.hp-break-sort:hover,
+.hp-break-sort[aria-pressed="true"] {
+  color: var(--ink);
+}
+.hp-break-toggle {
+  width: 100%;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.hp-break-toggle:hover {
+  background: var(--tint);
+}
+.hp-break-sub {
+  background: var(--tint);
+}
+.hp-break-count {
+  width: auto;
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+}
+.hp-break-hits {
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  background: var(--tint);
+}
+.hp-break-sub .hp-break-label {
+  padding-left: var(--space-5);
+  font-weight: var(--fw-medium);
+  color: var(--ink-2);
+}
+@media (max-width: 640px) {
+  .hp-callout {
+    padding: var(--space-4);
+  }
+  .hp-callout-table th,
+  .hp-callout-table td {
+    padding-right: var(--space-2);
+  }
+  .hp-callout-value {
+    font-size: var(--fs-lg);
+  }
+}
+.hp-callout-notice {
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-soft);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+}
 
 /* ---- Estadísticas de temporada: una tarjeta por cifra ---- */
 .season-legend {
@@ -1943,6 +2086,582 @@ section[id] {
     padding-left: var(--space-2);
     gap: var(--space-2-5);
   }
+}
+
+/* ---- Alta probabilidad (rediseño): reglas en chips, tarjetas por
+   selección con la barra modelo/mercado, resumen y gráfico de intervalos ---- */
+.hp-rules {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2-5);
+}
+.hp-rule-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hp-rule-chips li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1-5);
+  padding: var(--space-1-5) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.hp-rule-chips strong {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  color: var(--ink);
+}
+.hp-rule-more summary {
+  cursor: pointer;
+  width: fit-content;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+}
+.hp-rule-more p {
+  max-width: 36rem;
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-base);
+  color: var(--muted);
+}
+
+/* Tarjeta del hero */
+.hp-hero-figures {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+.hp-hero-figures strong {
+  color: var(--ink);
+}
+.hp-hero-margin {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.hp-pill-lg {
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+}
+button.hp-hero-link {
+  width: 100%;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.hp-won {
+  color: var(--green);
+}
+.hp-lost {
+  color: var(--red);
+}
+
+/* Barra de probabilidad con la marca del mercado */
+.hp-duel {
+  position: relative;
+  display: block;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-alt);
+}
+.hp-duel-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  transform-origin: left center;
+  animation: s4b-grow 1s var(--ease-out) 0.25s both;
+}
+.hp-duel-fill.is-good {
+  background: var(--green-fill);
+}
+.hp-duel-fill.is-bad {
+  background: var(--red-fill);
+}
+.hp-duel-mark {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+.hp-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: var(--space-5) 0 var(--space-4);
+}
+
+/* Próximas: una tarjeta por selección */
+.hp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+.hp-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3-5);
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  animation: s4b-appear 0.5s var(--ease-out) backwards;
+}
+.hp-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 18px 40px -30px rgba(0, 0, 0, 0.45);
+}
+.hp-card-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--ink);
+}
+.hp-card-head:hover {
+  color: var(--ink);
+  text-decoration: none;
+}
+.hp-card-head .match-teams {
+  font-weight: var(--fw-semibold);
+}
+.hp-card-date {
+  padding: var(--space-0-5) var(--space-2-5);
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+}
+.hp-card-pick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-soft);
+}
+.hp-card-selection {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-display);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.15;
+}
+.hp-card-figures {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.hp-figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+.hp-figure strong {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-display);
+}
+.hp-figure-edge {
+  align-items: flex-end;
+}
+.hp-card-foot {
+  margin-top: auto;
+}
+
+/* Histórico: resumen */
+.hp-summary-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.hp-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--tint);
+}
+.hp-tile.is-strong {
+  background: var(--primary);
+  color: var(--primary-ink);
+}
+.hp-tile.is-strong .hp-tile-label {
+  color: inherit;
+  opacity: 0.7;
+}
+.hp-tile-label {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hp-tile-value {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-display);
+  letter-spacing: var(--tracking-tight);
+}
+.hp-wl-bar {
+  display: block;
+  height: 6px;
+  margin-top: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--red-fill);
+  overflow: hidden;
+}
+.hp-wl-won {
+  display: block;
+  height: 100%;
+  background: var(--green-fill);
+  box-shadow: 2px 0 0 var(--tint);
+}
+
+/* Histórico: por liga y por mercado */
+.hp-break-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) 4.5rem minmax(0, 1.6fr) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.hp-break-row:last-child {
+  border-bottom: 0;
+}
+.hp-break-head {
+  padding-top: 0;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hp-break-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  font-weight: var(--fw-semibold);
+}
+.hp-break-origin {
+  font-weight: 400;
+}
+.hp-break-n {
+  color: var(--ink-2);
+}
+.hp-break-rate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+.hp-break-margin {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+@media (max-width: 760px) {
+  .hp-break-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2) var(--space-3);
+  }
+  .hp-break-head > :nth-child(n + 2) {
+    display: none;
+  }
+  .hp-break-n {
+    text-align: right;
+  }
+  .hp-break-rate,
+  .hp-break-margin {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Histórico: cada selección ya jugada */
+.hp-result-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hp-result {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1.5fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.hp-result:last-child {
+  border-bottom: 0;
+}
+.hp-result-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--surface-alt);
+  font-weight: var(--fw-bold);
+  color: var(--muted);
+}
+.hp-result.is-won .hp-result-mark {
+  background: var(--green-bg);
+  color: var(--green);
+}
+.hp-result.is-lost .hp-result-mark {
+  background: var(--red-bg);
+  color: var(--red);
+}
+.hp-result-main,
+.hp-result-pick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  min-width: 0;
+}
+.hp-result-match {
+  color: var(--ink);
+  font-weight: var(--fw-semibold);
+}
+.hp-result-match:hover {
+  color: var(--ink);
+}
+.hp-result-probs {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+@media (max-width: 760px) {
+  .hp-result {
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    gap: var(--space-1) var(--space-3);
+  }
+  .hp-result-main {
+    grid-column: 2 / -1;
+  }
+  .hp-result-pick {
+    grid-column: 2;
+  }
+}
+
+/* Margen sobre el mercado: gráfico de intervalos */
+.hp-page .hp-callout {
+  margin: var(--space-8) 0 var(--space-6);
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+}
+.hp-legend {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  color: var(--muted);
+}
+.hp-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+.hp-legend-swatch {
+  width: 1.1rem;
+  height: 6px;
+  border-radius: var(--radius-full);
+}
+.hp-legend-swatch.is-before {
+  background: var(--border-strong);
+  opacity: 0.55;
+}
+.hp-legend-swatch.is-now {
+  background: var(--ink);
+}
+.hp-forest-row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) minmax(0, 2.2fr) minmax(9rem, 1fr);
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.hp-forest-head {
+  padding-top: 0;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hp-forest-axis {
+  position: relative;
+  height: 1rem;
+}
+.hp-forest-axis > span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+.hp-forest-plot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  min-height: 2.25rem;
+}
+.hp-forest-zero {
+  position: absolute;
+  top: -0.75rem;
+  bottom: -0.75rem;
+  border-left: 1px dashed var(--border-strong);
+}
+.hp-forest-bar {
+  position: relative;
+  display: block;
+  height: 10px;
+}
+.hp-forest-ci {
+  position: absolute;
+  top: 3px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+}
+.hp-forest-dot {
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.hp-forest-bar.is-up {
+  color: var(--green-fill);
+}
+.hp-forest-bar.is-down {
+  color: var(--red-fill);
+}
+.hp-forest-bar.is-neutral {
+  color: var(--ink);
+}
+.hp-forest-bar.is-before {
+  opacity: 0.4;
+}
+.hp-forest-values,
+.hp-forest-values-head {
+  text-align: right;
+}
+.hp-forest-values {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-4);
+}
+.hp-forest-value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  white-space: nowrap;
+}
+.hp-forest-value strong {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+}
+@media (max-width: 760px) {
+  .hp-page .hp-callout {
+    padding: var(--space-4);
+  }
+  .hp-forest-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2) var(--space-3);
+  }
+  .hp-forest-head > :nth-child(2) {
+    display: none;
+  }
+  .hp-forest-plot {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hp-card,
+  .hp-duel-fill {
+    animation: none !important;
+  }
+}
+.hp-page .hp-hero-figures .num,
+.hp-page .hp-figure .num,
+.hp-page .edge-pill.num,
+.hp-page .hp-tile-value.num,
+.hp-page .hp-break-rate .num,
+.hp-page .hp-result-probs.num,
+.hp-page .hp-forest-value .num {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.hp-figure > .small {
+  font-size: var(--fs-2xs);
+  white-space: nowrap;
+}
+.hp-card-figures {
+  grid-template-columns: auto auto 1fr;
+  justify-content: stretch;
+  column-gap: var(--space-4);
+}
+.hp-summary-tiles {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+}
+.hp-page .hp-tile-sub.num,
+.hp-page .hp-break-margin .num,
+.hp-page .hp-hero-margin .num {
+  font-family: var(--font-display);
+}
+.hp-result-probs {
+  gap: var(--space-0-5);
+}
+.hp-result-probs > span {
+  display: inline-flex;
+  gap: var(--space-1);
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .hp-tile {
+    padding: var(--space-3);
+  }
+  .hp-tile-value {
+    font-size: var(--fs-xl);
+  }
+}
+.hp-page .hp-hero-link .num {
+  font-family: var(--font-display);
 }
 
 /* ---- Anillos verde/rojo (logo y porcentajes): nítidos a cualquier tamaño ----

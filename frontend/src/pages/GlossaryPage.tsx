@@ -18,9 +18,6 @@ export function GlossaryPage() {
 
           <dt>{t("glossary:basics.modelProbability.term")}</dt>
           <dd>{t("glossary:basics.modelProbability.def")}</dd>
-
-          <dt>{t("glossary:basics.value.term")}</dt>
-          <dd>{t("glossary:basics.value.def")}</dd>
         </dl>
       </div>
 
@@ -57,9 +54,6 @@ export function GlossaryPage() {
 
           <dt>{t("glossary:odds.fair.term")}</dt>
           <dd>{t("glossary:odds.fair.def")}</dd>
-
-          <dt>{t("glossary:odds.yourEv.term")}</dt>
-          <dd>{t("glossary:odds.yourEv.def")}</dd>
         </dl>
       </div>
 

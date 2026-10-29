@@ -1,7 +1,7 @@
 {
   "intro": "What each term you'll see on the match pages means, without assuming you already know.",
   "basics": {
-    "title": "Frequency, probability and value are not the same thing",
+    "title": "Frequency and probability are not the same thing",
     "frequency": {
       "term": "Historical frequency",
       "def": "How many times something has happened over a specific number of past matches. It's a count, not a prediction: ‘over 2.5 happened in 13 of the last 20 matches’ is frequency."
@@ -9,10 +9,6 @@
     "modelProbability": {
       "term": "Model probability",
       "def": "An estimate, calculated with a statistical model (Dixon-Coles) that takes into account each team's attacking and defensive strength, not just a simple count. It's still an estimate, not a fact."
-    },
-    "value": {
-      "term": "Value (EV)",
-      "def": "Compares that estimated probability with specific odds. A positive EV describes an expected long-term edge under the model's assumptions — it doesn't guarantee winning the next bet, and a losing run with positive EV is perfectly normal."
     }
   },
   "markets": {
@@ -58,10 +54,6 @@
     "fair": {
       "term": "Fair odds",
       "def": "The odds that would correspond exactly to the model's probability, with no bookmaker margin: 1 ÷ model probability. They're a reference for comparison, not odds you'll necessarily find anywhere."
-    },
-    "yourEv": {
-      "term": "Your EV",
-      "def": "When you enter the odds your bookmaker offers alongside the model's probability, the expected value of that specific combination is calculated. They're never saved or sent anywhere."
     }
   },
   "risk": {
@@ -72,7 +64,7 @@
     },
     "level": {
       "term": "Low / medium / high risk",
-      "def": "It rises when confidence is low or when the odds are very high (greater variance), even if the point EV is positive. It's not a quality score for the data; it signals how much the actual result can vary."
+      "def": "It rises when confidence is low or when the odds are very high (greater variance). It's not a quality score for the data; it signals how much the actual result can vary."
     }
   }
 }
