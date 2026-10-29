@@ -1681,6 +1681,131 @@ section[id] {
   background: var(--border-strong);
 }
 
+/* ---- Menú en el móvil: a pantalla completa bajo la barra superior (que
+   queda encima, con la X para cerrarlo), enlaces grandes y los mercados en
+   pastillas. En tablet sigue el cajón lateral. ---- */
+@media (max-width: 640px) {
+  .app-sidebar {
+    inset: 0;
+    z-index: 19;
+    width: 100%;
+    height: 100dvh;
+    padding: calc(var(--navbar-h) + var(--space-5)) var(--space-4) calc(var(--space-8) + env(safe-area-inset-bottom));
+    border-right: 0;
+    box-shadow: none;
+    background:
+      radial-gradient(90% 45% at 50% 0%, color-mix(in srgb, var(--green-fill) 12%, transparent), transparent),
+      var(--bg);
+    transform: none;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--dur-base) var(--ease-out),
+      visibility 0s linear var(--dur-base);
+  }
+  .app-sidebar.open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+  /* El contenido entra escalonado; "backwards" no deja el transform puesto. */
+  .app-sidebar.open > * {
+    animation: s4b-fade 0.4s var(--ease-out) backwards;
+  }
+  .app-sidebar.open > :nth-child(2) {
+    animation-delay: 50ms;
+  }
+  .app-sidebar.open > :nth-child(3) {
+    animation-delay: 100ms;
+  }
+  .app-sidebar.open > :nth-child(n + 4) {
+    animation-delay: 150ms;
+  }
+  /* Con el menú abierto, la página de detrás no se desplaza. */
+  html:has(.app-sidebar.open) {
+    overflow: hidden;
+  }
+  .sidebar-backdrop {
+    display: none;
+  }
+
+  .sidebar-nav {
+    gap: var(--space-1-5);
+  }
+  .sidebar-link {
+    min-height: 3.5rem;
+    gap: var(--space-3-5);
+    padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2);
+    border-radius: var(--radius-md);
+    color: var(--ink-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-display);
+    letter-spacing: var(--tracking-tight);
+  }
+  .sidebar-link::after {
+    content: "";
+    width: 0.45rem;
+    height: 0.45rem;
+    margin: 0 var(--space-1) 0 auto;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    transform: rotate(45deg);
+    opacity: 0.3;
+  }
+  .sidebar-icon {
+    box-sizing: content-box;
+    padding: 0.6rem;
+    border-radius: var(--radius-sm);
+    background: var(--tint);
+    box-shadow: inset 0 0 0 1px var(--border);
+    opacity: 1;
+  }
+  .sidebar-link.active {
+    background: var(--surface);
+  }
+  .sidebar-link.active .sidebar-icon {
+    background: var(--primary);
+    color: var(--primary-ink);
+    box-shadow: none;
+  }
+
+  .sidebar-section {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+    padding-top: var(--space-5);
+  }
+  .sidebar-heading {
+    flex-basis: 100%;
+    margin-bottom: var(--space-1);
+    padding: 0 var(--space-1);
+  }
+  .sidebar-sublink {
+    min-height: var(--tap);
+    gap: var(--space-2);
+    padding: 0 var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    font-family: inherit;
+    font-size: var(--fs-md);
+    font-weight: var(--fw-medium);
+    letter-spacing: normal;
+  }
+  .sidebar-sublink::after {
+    content: none;
+  }
+  .sidebar-sublink.active {
+    border-color: var(--primary);
+    box-shadow: none;
+  }
+  .sidebar-footer {
+    margin-top: var(--space-8);
+    padding: var(--space-5) var(--space-1) 0;
+  }
+}
+
 /* Escudos sin placa blanca en ningún tema: el escudo ocupa toda su caja, así
    se ve más grande. */
 :root[data-theme="dark"] .team-crest:has(> img) {
@@ -2813,6 +2938,53 @@ button.hp-hero-link {
   object-position: center;
 }
 
+/* ---- Logo en SVG: sustituye al anillo con máscara (borroso en pantallas
+   de densidad 1 y al girar). Tamaño entero en px para que no caiga entre
+   píxeles. ---- */
+.app-mark {
+  width: 34px;
+  height: 34px;
+  background: none;
+}
+.app-mark::before {
+  content: none;
+}
+.app-mark-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform: rotate(-90deg);
+  transition: transform 0.9s var(--ease-out);
+}
+.app-mark-ring circle {
+  fill: none;
+  stroke-width: 3;
+  shape-rendering: geometricPrecision;
+}
+.app-mark-hit {
+  stroke: var(--green-fill);
+  stroke-dasharray: 78 22;
+}
+.app-mark-miss {
+  stroke: var(--red-fill);
+  stroke-dasharray: 22 78;
+  stroke-dashoffset: -78;
+}
+.app-mark-text {
+  position: relative;
+  font-size: 0.5rem;
+  line-height: 1;
+}
+.app-brand:hover .app-mark-ring {
+  transform: rotate(-230deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-mark-ring {
+    transition: none;
+  }
+}
 /* ---- Ficha de partido: probabilidad de resultado (1X2 del modelo) ----
    Tres cifras y una barra de local a visitante. Sin verde ni rojo (en la web
    significan acierto/fallo): local en tinta, empate en gris claro y

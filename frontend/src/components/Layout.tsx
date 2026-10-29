@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { AppMark } from "./AppMark";
 import { useTranslation } from "react-i18next";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { MARKET_GROUPS, SIDEBAR_MARKETS, findMarket, marketGroupLabel } from "../lib/markets";
 import {
   IconBook,
   IconCheck,
+  IconClose,
   IconMatches,
   IconMenu,
   IconStats,
@@ -39,6 +41,16 @@ export function Layout() {
     setNavOpen(false);
   }, [location.pathname]);
 
+  // En el móvil el menú ocupa toda la pantalla: Escape también lo cierra.
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setNavOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [navOpen]);
+
   return (
     <div className="app-shell">
       {/* index.html lleva el titulo de la portada; React 19 sube este a <head>. */}
@@ -52,10 +64,10 @@ export function Layout() {
             aria-expanded={navOpen}
             onClick={() => setNavOpen((v) => !v)}
           >
-            <IconMenu />
+            {navOpen ? <IconClose /> : <IconMenu />}
           </button>
           <NavLink to="/" className="app-brand" end>
-            <span className="app-mark">S4B</span>
+            <AppMark />
             <span className="app-title">Statistics 4 Bets</span>
           </NavLink>
           <div className="header-switches">
@@ -67,7 +79,14 @@ export function Layout() {
       </header>
 
       <div className="app-body">
-        <aside className={navOpen ? "app-sidebar open" : "app-sidebar"}>
+        {/* Cualquier enlace lo cierra, también el de la página en la que ya
+            estás (la ruta no cambia y el menú se quedaba abierto). */}
+        <aside
+          className={navOpen ? "app-sidebar open" : "app-sidebar"}
+          onClick={(e) => {
+            if ((e.target as HTMLElement).closest("a")) setNavOpen(false);
+          }}
+        >
           <nav className="sidebar-nav">
             {NAV_ITEMS.map(({ to, label, end, icon: Icon }) => (
               <NavLink key={to} to={to} end={end} className="sidebar-link">

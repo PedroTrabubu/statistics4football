@@ -1,4 +1,5 @@
 import { type MouseEvent, Suspense, lazy, useState } from "react";
+import { AppMark } from "../components/AppMark";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { getLeagues, getUpcomingMatches } from "../api/client";
@@ -78,7 +79,7 @@ export function LandingPage() {
       <header className="landing-navbar">
         <div className="landing-navbar-inner">
           <Link to="/" className="app-brand" aria-label={t("landing:brandHome")}>
-            <span className="app-mark">S4B</span>
+            <AppMark />
             <span className="app-title">Statistics 4 Bets</span>
           </Link>
           <div className="landing-navbar-actions">
