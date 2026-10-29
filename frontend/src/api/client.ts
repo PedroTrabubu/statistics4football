@@ -115,12 +115,20 @@ export interface MatchFilters {
   status?: MatchStatus;
   team_id?: number;
   matchday?: number;
+  /** ISO; los partidos desde esa fecha (incluida). */
+  date_from?: string;
   limit?: number;
   offset?: number;
 }
 
 export function getMatches(filters: MatchFilters = {}): Promise<Match[]> {
   return request("/matches", { ...filters });
+}
+
+/** Partidos por jugar, los más cercanos primero. Desde ahora: un partido
+ * aplazado sigue como programado con su fecha antigua hasta que se juega. */
+export function getUpcomingMatches(filters: Omit<MatchFilters, "status" | "date_from"> = {}): Promise<Match[]> {
+  return getMatches({ ...filters, status: "scheduled", date_from: new Date().toISOString() });
 }
 
 export function getMatch(matchId: number): Promise<Match> {

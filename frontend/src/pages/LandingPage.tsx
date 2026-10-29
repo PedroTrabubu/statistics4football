@@ -1,7 +1,7 @@
 import { type MouseEvent, Suspense, lazy, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
-import { getLeagues, getMatches } from "../api/client";
+import { getLeagues, getUpcomingMatches } from "../api/client";
 import type { League } from "../api/types";
 import type { AccordionGalleryItem } from "../components/AccordionGallery";
 import { Accent } from "../components/Accent";
@@ -397,7 +397,7 @@ function UpcomingPreview({
   const upcoming = useApi(
     () =>
       league
-        ? getMatches({ league_id: league.id, status: "scheduled", limit: PREVIEW_SIZE }).then((matches) => ({
+        ? getUpcomingMatches({ league_id: league.id, limit: PREVIEW_SIZE }).then((matches) => ({
             code: league.code,
             matches: [...matches].sort((a, b) => a.date.localeCompare(b.date)),
           }))
