@@ -127,7 +127,7 @@ capturas de Pinnacle, y ya dependen de que el PC esté encendido con la sesión 
 
 | Dónde | Variables | ¿Secreto? |
 |---|---|---|
-| `.env` (raíz, backend) | `DATABASE_URL`, `ACTIVE_LEAGUES`, `VALIDATED_LEAGUES`, `CONTEXT_LEAGUES`, `SOCCERDATA_DIR`, `EV_THRESHOLD`, `LOG_LEVEL` | No |
+| `.env` (raíz, backend) | `DATABASE_URL`, `ACTIVE_LEAGUES`, `VALIDATED_LEAGUES`, `HIGH_PROBABILITY_LEAGUES`, `CONTEXT_LEAGUES`, `SOCCERDATA_DIR`, `EV_THRESHOLD`, `ENABLE_EV` (false: modelo de valor retirado), `LOG_LEVEL` | No |
 | `.env` (raíz, backend) | `FOOTBALL_DATA_ORG_API_KEY`, `THE_ODDS_API_KEY`, `API_FOOTBALL_RAPIDAPI_KEY` (sin uso) | **Sí** |
 | `.env` (raíz, backend) | `LALIGA_SUBSCRIPTION_KEY` (respaldo de una clave pública de laliga.com) | Tratarla como secreto |
 | `frontend/.env` | `VITE_API_BASE_URL`, `VITE_SITE_URL` | No. Todo `VITE_*` acaba dentro del bundle público: nunca un secreto ahí |

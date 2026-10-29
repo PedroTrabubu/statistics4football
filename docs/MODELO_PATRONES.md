@@ -150,3 +150,21 @@ entrenando cada vez solo con las temporadas anteriores, con τ = 0.62 y δ = 0.0
 - La estrategia acierta alrededor de un 69% porque elige selecciones que el mercado ya da como probables.
 - Ninguna alternativa da un margen apreciable.
 - Pinnacle es la probabilidad más precisa (mejor log-loss), pero tampoco produce margen al elegir.
+
+## Nota posterior (26 de octubre de 2026)
+
+- **Modelo de valor retirado el 2026-10-26: ROI −6,5 % en 2.039 selecciones.** Es el de las recomendaciones por EV
+  de Dixon-Coles (las que se citan como referencia en los resultados), no la estrategia B de este protocolo, que es la
+  que la web muestra como "Alta probabilidad" y no cambia. Queda apagado con `ENABLE_EV=false`: no se generan ni se
+  sirven sus selecciones, ni el EV, el PnL o el ROI de ninguna. El código y las predicciones guardadas se conservan.
+- **Margen por liga** (la web lo muestra liga a liga, no la media). En 22/23–24/25, con
+  `scripts/report_pattern_by_league.py`: Premier y LaLiga con la validación cruzada de arriba, que en total da las
+  mismas 1009 selecciones con +0.0 puntos; Hypermotion y Serie A con el modelo de la web, que no vio esas ligas.
+  Intervalo al 95 %, remuestreando partidos.
+
+  | Liga | Selecciones | Margen | Intervalo |
+  |---|---:|---:|---|
+  | Premier | 491 | −2.4 | [−6.5, +1.8] |
+  | LaLiga | 518 | +2.3 | [−1.5, +6.0] |
+  | LaLiga Hypermotion | 510 | +1.7 | [−2.0, +5.5] |
+  | Serie A | 272 | −1.0 | [−6.5, +4.1] |

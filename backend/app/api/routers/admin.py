@@ -21,7 +21,10 @@ def generate_predictions(
 ) -> dict:
     """Genera/actualiza predicciones para todos los partidos de una liga en
     un rango de fechas. Util para partidos futuros en cuanto haya ingesta de
-    football-data.org/API-Football, o para recalcular tras cambiar el motor."""
+    football-data.org/API-Football, o para recalcular tras cambiar el motor.
+    Son las del modelo de valor: con ENABLE_EV=false responde 404."""
+    if not settings.enable_ev:
+        raise HTTPException(status_code=404, detail="Modelo de valor retirado (ENABLE_EV=false)")
     matches = (
         db.query(Match)
         .filter(Match.league_id == league_id, Match.date >= date_from, Match.date <= date_to)

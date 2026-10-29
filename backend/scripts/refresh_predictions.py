@@ -1,4 +1,5 @@
-"""Genera y persiste predicciones/EV para los partidos programados (aun no
+"""Genera y persiste las predicciones de alta probabilidad (y las de valor,
+solo con ENABLE_EV=true: modelo retirado) para los partidos programados (aun no
 jugados) de las ligas activas, para que GET /recommendations tenga contenido
 real sin depender de que alguien visite cada partido individualmente en
 /matches/{id}/predictions.
@@ -31,12 +32,20 @@ def main() -> None:
     settings = get_settings()
     pattern_params = load_params()
     if pattern_params is None:
-        print("Sin pattern_model_params.json: solo se generan predicciones de valor (Dixon-Coles).")
+        print("Sin pattern_model_params.json: no se generan las de alta probabilidad.")
+    if not settings.enable_ev:
+        # Dixon-Coles se sigue ajustando: es una de las entradas del modelo de patrones.
+        print("Modelo de valor retirado (ENABLE_EV=false): no se generan sus predicciones.")
     db = SessionLocal()
     try:
-        leagues = db.query(League).filter(League.code.in_(settings.model_leagues)).all()
+        # Alta probabilidad, en sus ligas; las de valor, solo con el flag y en las validadas.
+        value_leagues = settings.model_leagues if settings.enable_ev else []
+        codes = set(settings.pattern_leagues) | set(value_leagues)
+        leagues = db.query(League).filter(League.code.in_(codes)).all()
         total = 0
         for league in leagues:
+            with_value = league.code in value_leagues
+            with_pattern = pattern_params is not None and league.code in settings.pattern_leagues
             matches = (
                 db.query(Match)
                 .filter(Match.league_id == league.id, Match.status == MatchStatus.SCHEDULED)
@@ -48,12 +57,13 @@ def main() -> None:
                 continue
 
             # Patrones: todo lo jugado hasta ahora (se predice con la informacion de hoy).
-            tracker = build_tracker(db, league.id, before=datetime.utcnow()) if pattern_params else None
+            tracker = build_tracker(db, league.id, before=datetime.utcnow()) if with_pattern else None
             with_patterns = 0
             for match in matches:
                 model = get_cached_league_model(db, league.id, as_of_date=match.date)
-                generate_predictions_for_match(db, match, model, settings.ev_threshold)
-                if pattern_params is not None and generate_pattern_predictions_for_match(
+                if with_value:
+                    generate_predictions_for_match(db, match, model, settings.ev_threshold)
+                if with_pattern and generate_pattern_predictions_for_match(
                     db, match, model, tracker, pattern_params
                 ):
                     with_patterns += 1

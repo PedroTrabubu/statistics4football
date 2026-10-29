@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     laliga_subscription_key: str = ""
 
     ev_threshold: float = 0.05
+    # Modelo de valor (EV de Dixon-Coles) retirado el 2026-10-26: ROI −6,5 %
+    # en 2.039 selecciones. Apagado no se generan ni se sirven sus
+    # selecciones, ni el EV, el PnL o el ROI de ninguna; el código y las
+    # tablas se conservan para investigar.
+    enable_ev: bool = False
 
     log_level: str = "INFO"
 

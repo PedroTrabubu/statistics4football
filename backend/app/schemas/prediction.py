@@ -95,6 +95,10 @@ class RecommendationHistoryBreakdown(BaseModel):
     with_odds: int
     pnl_units: float
     roi: float | None
+    # Intervalo al 95 % del margen sobre el mercado (acierto − lo esperado,
+    # en puntos), remuestreando partidos. None con menos de dos partidos.
+    margin_ci_low: float | None = None
+    margin_ci_high: float | None = None
 
 
 class RecommendationHistorySummary(BaseModel):
@@ -109,11 +113,19 @@ class RecommendationHistorySummary(BaseModel):
     with_odds: int
     pnl_units: float
     roi: float | None
+    margin_ci_low: float | None = None
+    margin_ci_high: float | None = None
 
 
 class RecommendationHistoryListOut(BaseModel):
     summary: RecommendationHistorySummary
     by_market: list[RecommendationHistoryBreakdown]
+    # Cada liga por separado (key = codigo de la liga).
+    by_league: list[RecommendationHistoryBreakdown] = []
+    # Cada equipo (key = su nombre): las selecciones de sus partidos.
+    by_team: list[RecommendationHistoryBreakdown] = []
+    # Los mercados de cada equipo (clave = su nombre), para desplegar su fila.
+    by_team_market: dict[str, list[RecommendationHistoryBreakdown]] = {}
     items: list[RecommendationHistoryOut]
 
 

@@ -85,6 +85,10 @@ def test_get_match_stats_shape() -> None:
 def test_get_match_predictions_include_confidence_and_risk() -> None:
     match_id = _first_historical_match_id()
     response = client.get(f"/matches/{match_id}/predictions")
+    if not get_settings().enable_ev:
+        # Modelo de valor retirado: la ficha ya no las pide.
+        assert response.status_code == 404
+        return
     assert response.status_code == 200
     predictions = response.json()
     for pred in predictions:
@@ -99,8 +103,16 @@ def test_list_recommendations_shape() -> None:
     for rec in response.json():
         assert "confidence" in rec
         assert "risk_level" in rec
-        assert "ev" in rec
+        assert ("ev" in rec) == get_settings().enable_ev
         assert "matches_used" in rec
+
+
+def test_value_strategy_retired_without_flag() -> None:
+    if get_settings().enable_ev:
+        return
+    assert client.get("/recommendations", params={"strategy": "valor"}).status_code == 404
+    assert client.get("/recommendations/history", params={"strategy": "valor"}).status_code == 404
+    assert client.get("/recommendations", params={"min_ev": 0.05}).status_code == 400
 
 
 def test_list_recommendations_excludes_played_matches() -> None:
@@ -131,6 +143,12 @@ def test_recommendation_history_shape_and_never_hides_losses() -> None:
         assert any(item["outcome"] == "lost" for item in body["items"])
     for item in body["items"]:
         assert item["outcome"] in ("won", "lost", "pending")
+    # Sin el modelo de valor no se sirve ni EV, ni PnL, ni ROI.
+    if not get_settings().enable_ev:
+        assert not {"roi", "pnl_units", "with_odds"} & summary.keys()
+        assert all(not {"ev", "pnl_units"} & item.keys() for item in body["items"])
+    if summary["margin_ci_low"] is not None:
+        assert summary["margin_ci_low"] <= summary["margin_ci_high"]
 
 
 def test_league_season_stats_shape() -> None:
