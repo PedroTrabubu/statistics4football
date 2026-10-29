@@ -1,6 +1,6 @@
 {
   "page": {
-    "intro": "Les pourcentages affichés ici sont une <bold>fréquence historique</bold>, pas une promesse de ce qui va arriver : ils comptent combien de fois quelque chose s'est produit, toujours avec le nombre de matchs utilisés. Ce n'est pas une probabilité garantie. <link>En savoir plus sur leur lecture →</link>"
+    "intro": "Les pourcentages affichés ici sont une <bold>fréquence historique</bold>, pas une promesse de ce qui va arriver : ils comptent combien de fois quelque chose s'est produit, toujours avec le nombre de matchs utilisés. Ce n'est pas une probabilité garantie. <anchor>En savoir plus sur leur lecture →</anchor>"
   },
   "detail": {
     "loading": "Chargement du match...",
@@ -48,7 +48,7 @@
     "seasonTitle": "Statistiques de la saison",
     "seasonLoading": "Chargement des statistiques de la saison...",
     "referee": "Arbitre",
-    "refereeNamed": "Arbitre : <link>{{name}}</link>",
+    "refereeNamed": "Arbitre : <anchor>{{name}}</anchor>",
     "refereeLinkTitle": "Voir ses statistiques dans Arbitres",
     "picksTitle": "Sélections très probables",
     "matchStatsTitle": "Statistiques du match"

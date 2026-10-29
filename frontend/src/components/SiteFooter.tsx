@@ -11,7 +11,7 @@ export function SiteFooter() {
         <p className="small muted">
           <Trans
             i18nKey="legal:footer.responsibleGambling"
-            components={{ link: <a href="https://www.jugarbien.es" target="_blank" rel="noreferrer" /> }}
+            components={{ anchor: <a href="https://www.jugarbien.es" target="_blank" rel="noreferrer" /> }}
           />
         </p>
       </div>

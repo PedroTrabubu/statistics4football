@@ -1,6 +1,6 @@
 {
   "page": {
-    "intro": "The percentages you see here are <bold>historical frequency</bold>, not a promise of what will happen: they count how often something happened before, always alongside the number of matches used. That's not the same as a guaranteed probability. <link>More on how to read them →</link>"
+    "intro": "The percentages you see here are <bold>historical frequency</bold>, not a promise of what will happen: they count how often something happened before, always alongside the number of matches used. That's not the same as a guaranteed probability. <anchor>More on how to read them →</anchor>"
   },
   "detail": {
     "loading": "Loading match...",
@@ -48,7 +48,7 @@
     "seasonTitle": "Season statistics",
     "seasonLoading": "Loading season statistics...",
     "referee": "Referee",
-    "refereeNamed": "Referee: <link>{{name}}</link>",
+    "refereeNamed": "Referee: <anchor>{{name}}</anchor>",
     "refereeLinkTitle": "See their stats in Referees",
     "picksTitle": "Very likely picks",
     "matchStatsTitle": "Match stats"

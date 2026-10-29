@@ -418,7 +418,7 @@ function RarityHelp() {
       </ul>
       <p>{t("streaks:rarity.order")}</p>
       <p>
-        <Trans i18nKey="streaks:rarity.notSay" components={{ bold: <strong />, link: <Link to="/glosario" /> }} />
+        <Trans i18nKey="streaks:rarity.notSay" components={{ bold: <strong />, anchor: <Link to="/glosario" /> }} />
       </p>
     </details>
   );

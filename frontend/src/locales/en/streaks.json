@@ -65,7 +65,7 @@
     "example2": "9 in a row of something that happens 90% of the time: 0.90<sup>9</sup> ≈ 1 in 3. That's normal, so it doesn't appear in the table.",
     "example3": "6 in a row of something that happens half the time: 0.50<sup>6</sup> ≈ 1 in 64. It's shorter than the previous one but much rarer: that's why it comes first.",
     "order": "That's why ‘Rarest first’ doesn't sort by length: that way, long streaks of things that almost always happen don't rise to the top.",
-    "notSay": "<bold>What it doesn't say:</bold> it isn't the probability of the streak continuing. It assumes the team is an average one and that each match is independent, which isn't always the case: a team that shoots a lot almost always does, and its streak can come out extremely rare without being any surprise. If you want to know whether streaks continue, see ‘Do streaks continue?’ at the bottom of the page. <link>More in the glossary →</link>"
+    "notSay": "<bold>What it doesn't say:</bold> it isn't the probability of the streak continuing. It assumes the team is an average one and that each match is independent, which isn't always the case: a team that shoots a lot almost always does, and its streak can come out extremely rare without being any surprise. If you want to know whether streaks continue, see ‘Do streaks continue?’ at the bottom of the page. <anchor>More in the glossary →</anchor>"
   },
   "row": {
     "normal": {
