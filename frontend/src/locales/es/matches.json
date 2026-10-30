@@ -320,7 +320,9 @@
     "compareButton": "Ver estadísticas del predictor",
     "compareIntro": "Debajo de cada cifra, en gris, lo que estimaba el predictor antes del partido, solo con los partidos anteriores a este. Junto a cada estadística, su error medio por equipo en el histórico (±).",
     "predictedLabel": "Estimación del predictor:",
-    "noPrediction": "No había partidos anteriores en la liga para estimarlo."
+    "noPrediction": "No había partidos anteriores en la liga para estimarlo.",
+    "total": "{{stat}} · total del partido",
+    "totalPredicted": "Previsto: {{value}} · diferencia {{diff}}"
   },
   "predictor": {
     "notPlayed": "El partido aún no se ha jugado.",

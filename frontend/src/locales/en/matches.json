@@ -307,7 +307,9 @@
     "compareButton": "See the predictor's stats",
     "compareIntro": "Below each figure, in grey, what the predictor estimated before the match, using only earlier matches. Next to each stat, its average error per team in past matches (±).",
     "predictedLabel": "Predictor estimate:",
-    "noPrediction": "There were no earlier league matches to estimate it from."
+    "noPrediction": "There were no earlier league matches to estimate it from.",
+    "total": "{{stat}} · match total",
+    "totalPredicted": "Predicted: {{value}} · difference {{diff}}"
   },
   "predictor": {
     "notPlayed": "The match hasn't been played yet.",

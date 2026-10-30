@@ -33,6 +33,9 @@ const DIGITS: Record<StatKey, number> = {
 
 type Forecasts = Record<StatKey, Forecast | null>;
 
+/** Totales del partido (los dos equipos sumados): lo que se mira para más/menos. Sin el xG ni las rojas. */
+const isTotal = (key: StatKey) => key !== "xg" && key !== "red_cards";
+
 /** Las estadísticas que da el predictor: las que pasaron su evaluación y tienen estimación. */
 const predicted = (forecasts: Forecasts | null) => STAT_KEYS.filter((key) => EVALUATION[key].shown && forecasts?.[key]);
 
@@ -124,14 +127,17 @@ function PredictorNotes({ match, forecasts }: { match: Match; forecasts: Forecas
 
 /** Lo que hizo cada equipo en el partido ya jugado, en espejo: solo las
  * estadísticas que hay de los dos (el xG, solo en las cinco grandes ligas).
- * `prior`: los partidos de la liga anteriores a este; con ellos, el botón pone
- * debajo de cada cifra lo que estimaba el predictor antes del partido. null:
- * sin predictor (la Champions). */
+ * Arriba, los totales del partido con el total que preveía el predictor y la
+ * diferencia. `prior`: los partidos de la liga anteriores a este; con ellos,
+ * además, el botón pone debajo de cada cifra lo que estimaba el predictor
+ * antes del partido. null: sin predictor (la Champions). */
 export function MatchStatsTable({ match, played, prior }: { match: Match; played: MatchResult; prior: MatchResult[] | null }) {
   const { t } = useTranslation();
   const [compare, setCompare] = useState(false);
   const tableId = useId();
-  const forecasts = useMemo(() => (compare && prior ? predictStats(match, prior) : null), [compare, prior, match]);
+  // Lo estimado antes del partido: los totales lo comparan siempre; por equipo, al abrir el botón.
+  const estimates = useMemo(() => (prior ? predictStats(match, prior) : null), [prior, match]);
+  const forecasts = compare ? estimates : null;
   const rows = STAT_KEYS.map((key) => ({
     key,
     home: statValue(played.home_stats, key),
@@ -152,9 +158,34 @@ export function MatchStatsTable({ match, played, prior }: { match: Match; played
       </>
     );
 
+  const totals = rows.filter((r) => isTotal(r.key));
+  const signed = (x: number) => `${x > 0 ? "+" : x < 0 ? "−" : "±"}${formatFixed(Math.abs(x), 1)}`;
+
   if (rows.length === 0) return <p className="muted">{t("matches:matchStats.none")}</p>;
   return (
     <>
+      {totals.length > 0 && (
+        <div className="stat-tiles predictor-totals">
+          {totals.map((r) => {
+            const real = r.home! + r.away!;
+            const f = estimates && EVALUATION[r.key].shown ? estimates[r.key] : null;
+            return (
+              <div key={r.key} className="stat-tile">
+                <span className="stat-tile-value">{real}</span>
+                <span className="stat-tile-label">{t("matches:matchStats.total", { stat: t(`matches:matchStats.stat.${r.key}`) })}</span>
+                {f && (
+                  <span className="stat-tile-predicted">
+                    {t("matches:matchStats.totalPredicted", {
+                      value: formatFixed(f.home + f.away, DIGITS[r.key]),
+                      diff: signed(real - (f.home + f.away)),
+                    })}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
       <CompareTable
         id={tableId}
         homeTeam={match.home_team}
@@ -215,8 +246,7 @@ export function StatsPredictor({
   // Abierto siempre, como el resto de bloques de la ficha.
   const forecasts = useMemo(() => (history ? predictStats(match, history.matches) : null), [history, match]);
   const shown = predicted(forecasts);
-  // Totales del partido (los dos equipos sumados): lo que se mira para más/menos. Sin el xG ni las rojas.
-  const totals = shown.filter((key) => key !== "xg" && key !== "red_cards");
+  const totals = shown.filter(isTotal);
 
   return (
     <div className="stats-predictor">

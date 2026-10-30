@@ -3727,6 +3727,13 @@ button.hp-hero-link {
 .predictor-totals .stat-tile-value {
   font-size: var(--fs-2xl);
 }
+/* Partido jugado: bajo el total real, lo que preveía el predictor y la diferencia. */
+.stat-tile-predicted {
+  margin-top: var(--space-1);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
 .predictor-how {
   margin-top: var(--space-4);
 }

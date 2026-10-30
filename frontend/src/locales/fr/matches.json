@@ -320,7 +320,9 @@
     "compareButton": "Voir les statistiques du prédicteur",
     "compareIntro": "Sous chaque chiffre, en gris, ce qu'estimait le prédicteur avant le match, uniquement avec les matchs antérieurs. À côté de chaque statistique, son erreur moyenne par équipe sur l'historique (±).",
     "predictedLabel": "Estimation du prédicteur :",
-    "noPrediction": "Aucun match antérieur du championnat pour l'estimer."
+    "noPrediction": "Aucun match antérieur du championnat pour l'estimer.",
+    "total": "{{stat}} · total du match",
+    "totalPredicted": "Prévu : {{value}} · écart {{diff}}"
   },
   "predictor": {
     "notPlayed": "Le match n'a pas encore été joué.",
