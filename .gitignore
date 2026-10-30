@@ -43,7 +43,9 @@ backend/alembic/*.pyc
 # Datos reales y privados (historiales de apuestas, saldos): solo en local
 data/private/
 
-# Notas de trabajo solo en local: auditorías y referencia de diseño de otra marca
+# Notas de trabajo solo en local: auditorías, revisión de seguridad y
+# referencia de diseño de otra marca
 docs/AUDITORIA.md
 docs/AUDITORIA_FICHA.md
 docs/DESIGN.md
+docs/SEGURIDAD.md
