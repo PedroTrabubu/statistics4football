@@ -18,6 +18,7 @@ import { leagueCountry, leagueName, leagueParam, useSelectedLeagueCode } from ".
 import { leagueLogo } from "../lib/logos";
 import { MARKET_GROUPS, type MarketGroup, marketGroupLabel } from "../lib/markets";
 import { withPercent } from "../lib/format";
+import { QUERY, ROUTES, withQuery } from "../lib/routes";
 import { useApi } from "../lib/useApi";
 
 // La galeria trae gsap: en su propio chunk, para no cargarlo en el resto de
@@ -26,20 +27,16 @@ const AccordionGallery = lazy(() => import("../components/AccordionGallery"));
 
 const PREVIEW_SIZE = 5;
 
-/** /partidos con esa liga en la URL (se mantiene al recargar o abrir otra
- * pestaña). Mientras no han llegado las ligas de la API, sin ?liga=: la
- * pagina abre igualmente la liga elegida aqui. */
-function matchesLink(leagues: League[] | null, code: string): string {
-  const league = leagues?.find((l) => l.code === code);
-  return league ? `/partidos?liga=${leagueParam(league)}` : "/partidos";
-}
+/** Partidos con esa liga en la URL (se mantiene al recargar o abrir otra
+ * pestaña). */
+const matchesLink = (code: string): string => withQuery(ROUTES.matches, { [QUERY.league]: leagueParam({ code }) });
 
-const galleryItems = (leagues: League[] | null): AccordionGalleryItem[] =>
+const galleryItems = (): AccordionGalleryItem[] =>
   LANDING_LEAGUES.map(({ code, glow, logoStyle }) => ({
     image: leagueLogo(code) ?? undefined,
     alt: leagueName(code),
     label: [leagueName(code), leagueCountry(code)].filter(Boolean).join(" · "),
-    link: matchesLink(leagues, code),
+    link: matchesLink(code),
     background: `radial-gradient(circle at 50% 46%, rgba(${glow}, 0.3), transparent 58%), var(--gallery-bg)`,
     imageStyle: logoStyle,
   }));
@@ -48,12 +45,12 @@ const galleryItems = (leagues: League[] | null): AccordionGalleryItem[] =>
 const STEPS = ["chooseMatch", "checkSample", "interpret"];
 
 /** Portada: que es la web, para que sirve y por donde empezar. La
- * herramienta completa (con el sidebar) empieza en /partidos. */
+ * herramienta completa (con el sidebar) empieza en /football/matches. */
 export function LandingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   // La liga de la galeria es la elegida en toda la web: la que se abra aqui
-  // es la que muestra /partidos. "Todas" (null) no tiene tarjeta: LaLiga.
+  // es la que muestra Partidos. "Todas" (null) no tiene tarjeta: LaLiga.
   const [selectedCode, setSelectedCode] = useSelectedLeagueCode();
   const [group, setGroup] = useState<MarketGroup | null>(null);
   const activeIndex = Math.max(
@@ -63,7 +60,7 @@ export function LandingPage() {
   const activeCode = LANDING_LEAGUES[activeIndex].code;
   const leagues = useApi(() => getLeagues(), []);
 
-  // Click en la tarjeta ya abierta: a /partidos sin recargar la pagina (al
+  // Click en la tarjeta ya abierta: a Partidos sin recargar la pagina (al
   // recargar, la liga elegida volveria a LaLiga).
   const openCard = (event: MouseEvent<HTMLElement>, item: AccordionGalleryItem) => {
     if (!item.link || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -78,13 +75,13 @@ export function LandingPage() {
       <title>{t("landing:meta.title")}</title>
       <header className="landing-navbar">
         <div className="landing-navbar-inner">
-          <Link to="/" className="app-brand" aria-label={t("landing:brandHome")}>
+          <Link to={ROUTES.home} className="app-brand" aria-label={t("landing:brandHome")}>
             <AppMark />
             <span className="app-title">Statistics 4 Bets</span>
           </Link>
           <div className="landing-navbar-actions">
             <nav aria-label={t("landing:mainNav")}>
-              <Link to="/partidos" className="landing-nav-link">
+              <Link to={ROUTES.matches} className="landing-nav-link">
                 {t("nav:matches")}
               </Link>
             </nav>
@@ -92,7 +89,7 @@ export function LandingPage() {
               <LanguageSwitch />
               <ThemeSwitch />
             </div>
-            <Link to="/partidos" className="landing-nav-cta">
+            <Link to={ROUTES.matches} className="landing-nav-cta">
               {t("landing:seeMatches")}
             </Link>
           </div>
@@ -116,7 +113,7 @@ export function LandingPage() {
                 {t("landing:hero.lead")}
               </p>
               <div className="landing-actions rise" style={{ animationDelay: "0.4s" }}>
-                <Link to="/partidos" className="landing-cta">
+                <Link to={ROUTES.matches} className="landing-cta">
                   {t("landing:seeMatches")}
                   <IconArrow />
                 </Link>
@@ -163,7 +160,7 @@ export function LandingPage() {
             <AccordionGallery
               className="landing-gallery"
               ariaLabel={t("landing:leagues.galleryLabel")}
-              items={galleryItems(leagues.data)}
+              items={galleryItems()}
               defaultIndex={activeIndex}
               onActiveChange={(index) => setSelectedCode(LANDING_LEAGUES[index].code)}
               onLinkClick={openCard}
@@ -276,7 +273,7 @@ export function LandingPage() {
             <p>
               <Trans i18nKey="landing:trust.text" components={{ bold: <strong /> }} />
             </p>
-            <Link to="/glosario" className="landing-trust-link">
+            <Link to={ROUTES.glossary} className="landing-trust-link">
               {t("landing:trust.link")}
             </Link>
           </div>
@@ -296,7 +293,7 @@ export function LandingPage() {
             <h2 id="final-title">
               <Accent text={t("landing:final.title")} words={2} />
             </h2>
-            <Link to="/partidos" className="landing-cta landing-cta-inverse">
+            <Link to={ROUTES.matches} className="landing-cta landing-cta-inverse">
               {t("landing:seeMatches")}
               <IconArrow />
             </Link>
@@ -384,7 +381,7 @@ function IconArrowUpRight() {
 }
 
 /** Proximos partidos de la liga abierta en la galeria, con la misma fila que
- * /partidos. Mientras carga la nueva liga se queda la lista anterior
+ * Partidos. Mientras carga la nueva liga se queda la lista anterior
  * atenuada, y el hueco mide siempre al menos lo que la lista completa. */
 function UpcomingPreview({
   code,
@@ -435,7 +432,7 @@ function UpcomingPreview({
         ) : null}
       </div>
 
-      <Link to={matchesLink(leagues.data, code)} className="landing-more">
+      <Link to={matchesLink(code)} className="landing-more">
         {t("landing:preview.more")}
       </Link>
     </div>

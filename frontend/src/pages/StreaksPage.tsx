@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 
 import { Trans, useTranslation } from "react-i18next";
 import { PageHero } from "../components/PageHero";
 import { Link, useSearchParams } from "react-router-dom";
+import { QUERY, ROUTES, matchPath } from "../lib/routes";
 import { getLeagueResults, getLeagueSeasons, getLeagueUpcoming, getLeagues } from "../api/client";
 import type { League, MatchResult, UpcomingMatch } from "../api/types";
 import { DayTabs } from "../components/DayTabs";
@@ -140,15 +141,15 @@ function takenText(match: UpcomingMatch): string | null {
 
 // --- Pagina ------------------------------------------------------------------
 
-/** /rachas: rachas activas de los equipos que juegan en los proximos dias. */
+/** Rachas: rachas activas de los equipos que juegan en los proximos dias. */
 export function StreaksPage() {
   const { t, i18n } = useTranslation();
   const [storedCode, setStoredCode] = useSelectedLeagueCode();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: leagues } = useApi(() => getLeagues(), []);
 
-  // ?liga= como en Partidos: la URL manda y refleja siempre la liga que se ve.
-  const param = searchParams.get("liga");
+  // ?league= como en Partidos: la URL manda y refleja siempre la liga que se ve.
+  const param = searchParams.get(QUERY.league);
   const fromUrl = leagues ? parseLeagueParam(param, leagues) : undefined;
   const leagueCode = fromUrl !== undefined ? fromUrl : storedCode;
   const league = leagues?.find((l) => l.code === leagueCode);
@@ -157,7 +158,7 @@ export function StreaksPage() {
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
-        next.set("liga", value);
+        next.set(QUERY.league, value);
         return next;
       },
       { replace: true },
@@ -418,7 +419,7 @@ function RarityHelp() {
       </ul>
       <p>{t("streaks:rarity.order")}</p>
       <p>
-        <Trans i18nKey="streaks:rarity.notSay" components={{ bold: <strong />, anchor: <Link to="/glosario" /> }} />
+        <Trans i18nKey="streaks:rarity.notSay" components={{ bold: <strong />, anchor: <Link to={ROUTES.glossary} /> }} />
       </p>
     </details>
   );
@@ -466,7 +467,7 @@ function NextMatch({ row }: { row: StreakRow }) {
   if (row.kind === "referee") {
     return (
       <div>
-        <Link to={`/matches/${m.id}`} className="streak-next">
+        <Link to={matchPath(m.id)} className="streak-next">
           <MatchTeams home={m.home_team} away={m.away_team} league={row.leagueCode} middle="vs" />
         </Link>
         <div className="small muted">{t("streaks:row.referee", { name: row.entity })}</div>
@@ -475,7 +476,7 @@ function NextMatch({ row }: { row: StreakRow }) {
   }
   const rival = row.side === "home" ? m.away_team : m.home_team;
   return (
-    <Link to={`/matches/${m.id}`} className="streak-next">
+    <Link to={matchPath(m.id)} className="streak-next">
       <span className="streak-venue">{row.side === "home" ? t("streaks:row.home") : t("streaks:row.away")}</span>
       <span className="muted">vs</span>
       <TeamName team={rival} league={row.leagueCode} />

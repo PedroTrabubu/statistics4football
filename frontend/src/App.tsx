@@ -1,6 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import { LegacyRedirect } from "./components/LegacyRedirect";
+import { LEGACY_PATTERNS, LEGACY_ROUTES } from "./lib/legacyRoutes";
+import { ROUTES, ROUTE_PATTERNS } from "./lib/routes";
 import { GlossaryPage } from "./pages/GlossaryPage";
 import { LandingPage } from "./pages/LandingPage";
 import { MarketPage, RefereePage } from "./pages/MarketPage";
@@ -21,22 +24,25 @@ function App() {
     <Routes>
       {/* La portada va sin el sidebar: es un escaparate, no la herramienta. */}
       <Route index element={<LandingPage />} />
+      <Route path={ROUTES.football} element={<Navigate to={ROUTES.matches} replace />} />
       <Route element={<Layout />}>
-        <Route path="partidos" element={<MatchesPage />} />
-        <Route path="matches/:matchId" element={<MatchDetailPage />} />
-        <Route path="stats" element={<SeasonStatsPage />} />
-        <Route path="mercados" element={<MarketPage />} />
-        <Route path="mercados/:slug" element={<MarketPage />} />
-        <Route path="arbitros" element={<RefereePage />} />
-        <Route path="picks" element={<PicksPage />} />
-        <Route path="picks-probables" element={<PicksHistoryPage />} />
-        <Route path="rachas" element={<StreaksPage />} />
-        <Route path="alta-probabilidad" element={<RecommendationsPage />} />
-        {/* Antes se llamaba Recomendaciones: los enlaces viejos siguen valiendo. */}
-        <Route path="recommendations" element={<Navigate to="/alta-probabilidad" replace />} />
-        <Route path="mis-apuestas" element={<MyBetsPage />} />
-        <Route path="glosario" element={<GlossaryPage />} />
+        <Route path={ROUTES.matches} element={<MatchesPage />} />
+        <Route path={ROUTE_PATTERNS.match} element={<MatchDetailPage />} />
+        <Route path={ROUTES.standings} element={<SeasonStatsPage />} />
+        <Route path={ROUTES.stats} element={<MarketPage />} />
+        <Route path={ROUTE_PATTERNS.stat} element={<MarketPage />} />
+        <Route path={ROUTES.referees} element={<RefereePage />} />
+        <Route path={ROUTES.picks} element={<PicksPage />} />
+        <Route path={ROUTES.probablePicks} element={<PicksHistoryPage />} />
+        <Route path={ROUTES.streaks} element={<StreaksPage />} />
+        <Route path={ROUTES.highProbability} element={<RecommendationsPage />} />
+        <Route path={ROUTES.myBets} element={<MyBetsPage />} />
+        <Route path={ROUTES.glossary} element={<GlossaryPage />} />
       </Route>
+      {/* Las rutas antiguas (en español, sin /football) siguen valiendo. */}
+      {[...Object.keys(LEGACY_ROUTES), ...LEGACY_PATTERNS].map((path) => (
+        <Route key={path} path={path} element={<LegacyRedirect />} />
+      ))}
     </Routes>
   );
 }

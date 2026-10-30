@@ -42,6 +42,14 @@ import {
   type TeamRankKey,
 } from "../lib/patterns";
 import { nextPendingMatchday } from "../lib/matchdays";
+import {
+  ALL_PARAM,
+  PROBABLE_PICKS_VIEW_PARAMS,
+  QUERY,
+  STRENGTH_PARAMS,
+  fromParam,
+  matchPath,
+} from "../lib/routes";
 import { useApi } from "../lib/useApi";
 import {
   usePlayedPicks,
@@ -64,8 +72,8 @@ const pct = (x: number | null) =>
 
 type View = "proxima" | "jornadas" | "resumen" | "equipos";
 
-/** ?temporada=todas: el resumen y la tabla por equipo de todas las temporadas. */
-const ALL_SEASONS = "todas";
+/** ?season=all: el resumen y la tabla por equipo de todas las temporadas. */
+const ALL_SEASONS = ALL_PARAM;
 
 /** Sus textos, en picks:probablePage.view.<clave> (label y, en movil, short). */
 const VIEWS: { key: View; text: string }[] = [
@@ -77,7 +85,7 @@ const VIEWS: { key: View; text: string }[] = [
 
 /** Picks muy probables de una liga: los de la proxima jornada (los mismos que
  * en la ficha de cada partido) y, de las jornadas jugadas, si se cumplieron.
- * Liga, temporada, vista y jornada van en la URL (?liga=&temporada=&vista=&jornada=). */
+ * Liga, temporada, vista y jornada van en la URL (?league=&season=&view=&matchday=). */
 export function PicksHistoryPage() {
   const { t } = useTranslation();
   const { data: leagues } = useApi(() => getLeagues(), []);
@@ -100,29 +108,29 @@ export function PicksHistoryPage() {
   // del enlace manda; si no hay, la elegida en el resto de la web (o la del
   // idioma si allí se eligieron todas).
   const fromUrl = leagues
-    ? parseLeagueParam(params.get("liga"), leagues)
+    ? parseLeagueParam(params.get(QUERY.league), leagues)
     : undefined;
   const leagueCode = fromUrl ?? storedCode ?? defaultLeagueCode();
   const league = leagues?.find((l) => l.code === leagueCode);
   useEffect(() => {
     if (!league) return;
     if (storedCode !== league.code) setStoredCode(league.code);
-    if (params.get("liga") !== leagueParam(league))
-      setParam({ liga: leagueParam(league) });
+    if (params.get(QUERY.league) !== leagueParam(league))
+      setParam({ [QUERY.league]: leagueParam(league) });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [league, storedCode, params]);
   const changeLeague = (code: string | null) => {
     const next = leagues?.find((l) => l.code === code);
     if (!next) return;
     setStoredCode(next.code);
-    setParam({ liga: leagueParam(next), temporada: null, jornada: null });
+    setParam({ [QUERY.league]: leagueParam(next), [QUERY.season]: null, [QUERY.matchday]: null });
   };
 
   const { data: seasons } = useApi(
     () => (league ? getLeagueSeasons(league.id) : Promise.resolve(null)),
     [league?.id],
   );
-  const seasonParam = params.get("temporada");
+  const seasonParam = params.get(QUERY.season);
   const wantsAll = seasonParam === ALL_SEASONS;
   // Con "todas", la temporada suelta es la actual (jornadas y proxima jornada).
   const season = seasons?.length
@@ -264,20 +272,20 @@ export function PicksHistoryPage() {
   );
 
   // Vista: la de la URL; sin ella, la proxima jornada (o las jugadas si no hay).
-  const viewParam = params.get("vista");
+  const viewParam = fromParam(PROBABLE_PICKS_VIEW_PARAMS, params.get(QUERY.view));
   const noNext = nextInfo !== null && nextMatchday === null;
   const asked: View = VIEWS.some((v) => v.key === viewParam)
     ? (viewParam as View)
     : "proxima";
   const view: View = asked === "proxima" && noNext ? "jornadas" : asked;
-  const jornada = Number(params.get("jornada")) || null;
-  const fuerzaParam = params.get("fuerza");
+  const jornada = Number(params.get(QUERY.matchday)) || null;
+  const fuerzaParam = fromParam(STRENGTH_PARAMS, params.get(QUERY.strength));
   const strength = STRENGTHS.includes(fuerzaParam as Strength)
     ? (fuerzaParam as Strength)
     : null;
-  // ?dia=2026-10-24: uno de los proximos dias; cualquier otro, todos.
+  // ?day=2026-10-24: uno de los proximos dias; cualquier otro, todos.
   const days = useMemo(() => upcomingDays(), []);
-  const diaParam = params.get("dia");
+  const diaParam = params.get(QUERY.day);
   const day = diaParam && days.includes(diaParam) ? diaParam : null;
 
   // Al cambiar de vista con la pagina bajada, se vuelve al principio del
@@ -285,7 +293,7 @@ export function PicksHistoryPage() {
   // la barra, ya fija, seria la de pegada arriba.
   const anchor = useRef<HTMLDivElement>(null);
   const changeView = (next: View) => {
-    setParam({ vista: next });
+    setParam({ [QUERY.view]: PROBABLE_PICKS_VIEW_PARAMS[next] });
     if (!anchor.current) return;
     const navbar =
       document.querySelector(".app-navbar")?.getBoundingClientRect().height ??
@@ -343,9 +351,9 @@ export function PicksHistoryPage() {
               value={allSeasons ? ALL_SEASONS : season}
               onChange={(e) =>
                 setParam({
-                  temporada:
+                  [QUERY.season]:
                     e.target.value === seasons[0] ? null : e.target.value,
-                  jornada: null,
+                  [QUERY.matchday]: null,
                 })
               }
             >
@@ -373,10 +381,10 @@ export function PicksHistoryPage() {
           league={leagueCode}
           history={nextHistory}
           strength={strength}
-          onStrength={(level) => setParam({ fuerza: level })}
+          onStrength={(level) => setParam({ [QUERY.strength]: level && STRENGTH_PARAMS[level] })}
           days={days}
           day={day}
-          onDay={(d) => setParam({ dia: d })}
+          onDay={(d) => setParam({ [QUERY.day]: d })}
         />
       )}
       {view === "proxima" && nextInfo === null && (
@@ -412,9 +420,9 @@ export function PicksHistoryPage() {
                 results={check.results}
                 league={leagueCode}
                 matchday={jornada}
-                onMatchday={(m) => setParam({ jornada: String(m) })}
+                onMatchday={(m) => setParam({ [QUERY.matchday]: String(m) })}
                 strength={strength}
-                onStrength={(level) => setParam({ fuerza: level })}
+                onStrength={(level) => setParam({ [QUERY.strength]: level && STRENGTH_PARAMS[level] })}
               />
             )}
             {view === "resumen" && (
@@ -1224,7 +1232,7 @@ function MatchPicksCard({
   const expected = withBase.reduce((sum, r) => sum + r.pick.leagueRate!, 0);
   return (
     <article className="checked-match">
-      <Link to={`/matches/${match.id}`} className="checked-match-head">
+      <Link to={matchPath(match.id)} className="checked-match-head">
         <MatchTeams
           home={match.home_team}
           away={match.away_team}

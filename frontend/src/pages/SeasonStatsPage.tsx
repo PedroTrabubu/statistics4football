@@ -8,7 +8,8 @@ import { LeagueSwitch } from "../components/LeagueSwitch";
 import { EmptyView, ErrorView, LoadingView } from "../components/StatusView";
 import { TeamName } from "../components/TeamCrest";
 import { formatFixed, formatPct } from "../lib/format";
-import { defaultLeagueCode, useSelectedLeagueCode, leagueName } from "../lib/leagues";
+import { defaultLeagueCode, useSelectedLeagueCode, leagueName, parseLeagueParam } from "../lib/leagues";
+import { QUERY } from "../lib/routes";
 import { useApi } from "../lib/useApi";
 
 type SplitKey = "overall" | "home" | "away" | "last5";
@@ -216,7 +217,7 @@ function FormDots({ form }: { form: FormResult[] }) {
 export function SeasonStatsPage() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const leagueFromUrl = searchParams.get("league");
+  const leagueFromUrl = searchParams.get(QUERY.league);
 
   const [season, setSeason] = useState<string | undefined>(undefined);
   const [split, setSplit] = useState<SplitKey>("overall");
@@ -249,10 +250,10 @@ export function SeasonStatsPage() {
   const leagueCode = selectedCode ?? defaultLeagueCode();
   const leagueId = leagues?.find((l) => l.code === leagueCode)?.id;
 
-  // Enlace desde la ficha de partido (?league=<id>): preselecciona esa liga.
+  // Enlace desde la ficha de partido (?league=laliga): preselecciona esa liga.
   useEffect(() => {
-    const fromUrl = leagues?.find((l) => String(l.id) === leagueFromUrl);
-    if (fromUrl) setLeagueCode(fromUrl.code);
+    const fromUrl = leagues ? parseLeagueParam(leagueFromUrl, leagues) : undefined;
+    if (fromUrl) setLeagueCode(fromUrl);
   }, [leagues, leagueFromUrl, setLeagueCode]);
 
   const { data: seasons } = useApi(

@@ -2,6 +2,8 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import type { TeamSeasonStats } from "../api/types";
 import { formatFixed, formatPct, formatSeason } from "../lib/format";
+import { leagueParam } from "../lib/leagues";
+import { QUERY, ROUTES, withQuery } from "../lib/routes";
 import { TeamName } from "./TeamCrest";
 
 /** Una cifra de temporada de los dos equipos: valor y barra de cada uno
@@ -44,15 +46,13 @@ export function SeasonStatsSummary({
   awayStats,
   homeTeam,
   awayTeam,
-  leagueId,
   league,
 }: {
   homeStats: TeamSeasonStats | null;
   awayStats: TeamSeasonStats | null;
   homeTeam: string;
   awayTeam: string;
-  leagueId: number;
-  league?: string;
+  league: string;
 }) {
   const { t } = useTranslation();
   if (homeStats === null && awayStats === null) {
@@ -94,7 +94,7 @@ export function SeasonStatsSummary({
         <Tile label={t("matches:seasonSummary.btts")} home={formatPct(home?.btts_pct ?? null)} away={formatPct(away?.btts_pct ?? null)} values={[home?.btts_pct, away?.btts_pct]} max={100} />
         <Tile label={t("matches:seasonSummary.cleanSheet")} home={formatPct(home?.clean_sheet_pct ?? null)} away={formatPct(away?.clean_sheet_pct ?? null)} values={[home?.clean_sheet_pct, away?.clean_sheet_pct]} max={100} />
       </div>
-      <Link to={`/stats?league=${leagueId}`} className="small">
+      <Link to={withQuery(ROUTES.standings, { [QUERY.league]: leagueParam({ code: league }) })} className="small">
         {t("matches:seasonSummary.fullTable")}
       </Link>
     </div>

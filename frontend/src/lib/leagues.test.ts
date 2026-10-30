@@ -2,12 +2,15 @@ import { afterAll, describe, expect, it } from "vitest";
 import type { League } from "../api/types";
 import { changeLanguage } from "../i18n";
 import {
+  LEAGUE_ORDER,
   defaultLeagueCode,
   getSelectedLeagueCode,
   leagueParam,
+  leagueSlug,
   parseLeagueParam,
   setSelectedLeagueCode,
 } from "./leagues";
+import { ALL_PARAM } from "./routes";
 
 const LEAGUES: League[] = [
   { id: 1, code: "ENG-Premier League", name: "ENG-Premier League", country: null, validated: true, high_probability: true },
@@ -15,29 +18,42 @@ const LEAGUES: League[] = [
 ];
 
 describe("parseLeagueParam", () => {
-  it("devuelve el código de la liga con ese id", () => {
-    expect(parseLeagueParam("1", LEAGUES)).toBe("ENG-Premier League");
-    expect(parseLeagueParam(" 2 ", LEAGUES)).toBe("ESP-La Liga");
+  it("devuelve el código de la liga con ese slug", () => {
+    expect(parseLeagueParam("premier-league", LEAGUES)).toBe("ENG-Premier League");
+    expect(parseLeagueParam(" LaLiga ", LEAGUES)).toBe("ESP-La Liga");
   });
 
-  it("'todas' (en cualquier caja) son todas las ligas", () => {
-    expect(parseLeagueParam("todas", LEAGUES)).toBeNull();
-    expect(parseLeagueParam("Todas", LEAGUES)).toBeNull();
+  it("'all' (en cualquier caja) son todas las ligas", () => {
+    expect(parseLeagueParam(ALL_PARAM, LEAGUES)).toBeNull();
+    expect(parseLeagueParam("All", LEAGUES)).toBeNull();
   });
 
-  it("sin parámetro, o con uno que no existe, no elige nada", () => {
+  it("sin parámetro, o con uno que no existe, no elige nada (la página sigue con la de por defecto)", () => {
     expect(parseLeagueParam(null, LEAGUES)).toBeUndefined();
     expect(parseLeagueParam("", LEAGUES)).toBeUndefined();
-    expect(parseLeagueParam("99", LEAGUES)).toBeUndefined();
-    expect(parseLeagueParam("laliga", LEAGUES)).toBeUndefined();
-    expect(parseLeagueParam("1.0", LEAGUES)).toBeUndefined();
+    expect(parseLeagueParam("serie-a", LEAGUES)).toBeUndefined();
+    expect(parseLeagueParam("2", LEAGUES)).toBeUndefined();
+    expect(parseLeagueParam("todas", LEAGUES)).toBeUndefined();
   });
 });
 
 describe("leagueParam", () => {
-  it("es el id de la liga, o 'todas'", () => {
-    expect(leagueParam(LEAGUES[1])).toBe("2");
-    expect(leagueParam(null)).toBe("todas");
+  it("es el slug legible de la liga, o 'all'", () => {
+    expect(leagueParam(LEAGUES[1])).toBe("laliga");
+    expect(leagueParam(null)).toBe(ALL_PARAM);
+  });
+
+  it("las ligas públicas tienen su slug; otra, su código en minúsculas y con guiones", () => {
+    expect(LEAGUE_ORDER.map(leagueSlug)).toEqual([
+      "laliga",
+      "laliga-hypermotion",
+      "premier-league",
+      "ligue-1",
+      "bundesliga",
+      "serie-a",
+      "champions-league",
+    ]);
+    expect(leagueSlug("TUR-Super Lig")).toBe("tur-super-lig");
   });
 
   it("lo que escribe se lee igual", () => {

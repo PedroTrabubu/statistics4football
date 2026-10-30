@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
+import { QUERY, ROUTES } from "../lib/routes";
 import { getLeagues } from "../api/client";
 import { LeagueSwitch } from "../components/LeagueSwitch";
 import { MatchdayBrowser } from "../components/MatchdayBrowser";
@@ -15,9 +16,9 @@ export function MatchesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: leagues } = useApi(() => getLeagues(), []);
 
-  // La URL manda: con un ?liga= valido se ve esa liga; sin el, o con uno que
+  // La URL manda: con un ?league= valido se ve esa liga; sin el, o con uno que
   // no vale, la elegida en el resto de la web (como antes).
-  const param = searchParams.get("liga");
+  const param = searchParams.get(QUERY.league);
   const fromUrl = leagues ? parseLeagueParam(param, leagues) : undefined;
   const leagueCode = fromUrl !== undefined ? fromUrl : storedCode;
   const league = leagues?.find((l) => l.code === leagueCode);
@@ -26,7 +27,7 @@ export function MatchesPage() {
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
-        next.set("liga", value);
+        next.set(QUERY.league, value);
         return next;
       },
       // Cambiar de liga no deja una entrada nueva en el historial.
@@ -59,7 +60,7 @@ export function MatchesPage() {
           <p>
             <Trans
               i18nKey="matches:page.intro"
-              components={{ bold: <strong />, anchor: <Link to="/glosario" /> }}
+              components={{ bold: <strong />, anchor: <Link to={ROUTES.glossary} /> }}
             />
           </p>
         }

@@ -5,6 +5,7 @@ import type { Match, MatchHistory, MatchResult } from "../api/types";
 import { t } from "../i18n";
 import { formatSeason, withPercent } from "../lib/format";
 import { leagueName } from "../lib/leagues";
+import { ROUTES } from "../lib/routes";
 import { cornerDuelForecast } from "../lib/cornerDuel";
 import { PredictabilityChip } from "./Predictability";
 import { MatchPickBlock } from "./MatchPick";
@@ -154,7 +155,7 @@ export function ProbablePicks({
       </details>
 
       <p className="small muted picks-disclaimer">
-        {t("picks:probable.disclaimer")} <Link to="/picks-probables">{t("picks:probable.historyLink")}</Link>
+        {t("picks:probable.disclaimer")} <Link to={ROUTES.probablePicks}>{t("picks:probable.historyLink")}</Link>
       </p>
     </div>
   );

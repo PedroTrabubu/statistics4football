@@ -1,6 +1,7 @@
 import { type CSSProperties, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { QUERY, marketFromUrl, matchPath, statPath } from "../lib/routes";
 import { getLeagueContextResults, getLeagueResults, getLeagueSeasons, getLeagues } from "../api/client";
 import { LeagueSwitch } from "../components/LeagueSwitch";
 import { NextMatchdayPanel, NextMatchdayToggle } from "../components/NextMatchdayCompare";
@@ -58,17 +59,17 @@ const OPTION_ROWS: { row: MarketOption["row"]; label: string | null }[] = [
 ];
 const DEFAULT_REFEREE_MARKET = "tarjetas";
 
-/** /mercados/:slug: un mercado, una tarjeta por equipo. */
+/** /football/stats/:stat: un mercado, una tarjeta por equipo. */
 export function MarketPage() {
-  const { slug } = useParams();
-  const market = findMarket(slug);
+  const { stat: urlSlug } = useParams();
+  const market = findMarket(marketFromUrl(urlSlug));
   if (!market) {
-    return <Navigate to={`/mercados/${MARKETS[0].slug}`} replace />;
+    return <Navigate to={statPath(MARKETS[0].slug)} replace />;
   }
   return <MarketView mode="team" market={market} />;
 }
 
-/** /arbitros: mercados de partido (tarjetas, corners, goles...), una
+/** /football/stats/referees: mercados de partido (tarjetas, corners, goles...), una
  * tarjeta por arbitro. */
 export function RefereePage() {
   const [slug, setSlug] = useState(DEFAULT_REFEREE_MARKET);
@@ -77,7 +78,7 @@ export function RefereePage() {
 }
 
 // El mismo componente se reutiliza al cambiar de mercado en el sidebar
-// (misma ruta, otro :slug), asi que liga/temporada/vista se conservan al
+// (misma ruta, otro :stat), asi que liga/temporada/vista se conservan al
 // saltar entre mercados. La opcion elegida se guarda por mercado.
 function MarketView({
   mode,
@@ -95,9 +96,9 @@ function MarketView({
   const [lastN, setLastN] = useState<number | null>(null);
   const [sort, setSort] = useState<SortMode>("pct");
   // Se conserva al cambiar de mercado o de liga: así se sigue a un equipo.
-  // ?arbitro=Nombre (enlace desde la ficha de un partido): ya filtrado.
+  // ?referee=Nombre (enlace desde la ficha de un partido): ya filtrado.
   const [params] = useSearchParams();
-  const [query, setQuery] = useState(params.get("arbitro") ?? "");
+  const [query, setQuery] = useState(params.get(QUERY.referee) ?? "");
   // Comparar: dos tarjetas marcadas se quedan solas, una al lado de la otra.
   const [picked, setPicked] = useState<string[]>([]);
   const toggle = (key: string) =>
@@ -292,7 +293,7 @@ function MarketView({
         <div className="filters">
           <label className="market-variant">
             <span className="small muted">{t("markets:page.statistic")}</span>
-            <select value={market.slug} onChange={(e) => navigate(`/mercados/${e.target.value}`)}>
+            <select value={market.slug} onChange={(e) => navigate(statPath(e.target.value))}>
               {variants.map((m) => (
                 <option key={m.slug} value={m.slug}>
                   {m.family?.variant ?? m.title}
@@ -836,7 +837,7 @@ function MatchList({
                 <TeamName team={match.home_team} league={match.league_code} reverse />
               </td>
               <td className="market-score">
-                <Link to={`/matches/${match.id}`}>
+                <Link to={matchPath(match.id)}>
                   {match.home_goals} - {match.away_goals}
                 </Link>
               </td>

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { AppMark } from "./AppMark";
 import { useTranslation } from "react-i18next";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useMatch } from "react-router-dom";
 import { MARKET_GROUPS, SIDEBAR_MARKETS, findMarket, marketGroupLabel } from "../lib/markets";
+import { ROUTES, ROUTE_PATTERNS, marketFromUrl, statPath } from "../lib/routes";
 import {
   IconBook,
   IconCheck,
@@ -21,21 +22,21 @@ import { ThemeSwitch } from "./ThemeSwitch";
 
 /** `label`: clave de su texto en nav. */
 const NAV_ITEMS = [
-  { to: "/partidos", label: "nav:matches", end: false, icon: IconMatches },
-  { to: "/stats", label: "nav:standings", end: false, icon: IconStats },
-  { to: "/picks", label: "nav:picks", end: false, icon: IconTicket },
-  { to: "/picks-probables", label: "nav:probablePicks", end: false, icon: IconCheck },
-  { to: "/rachas", label: "nav:streaks", end: false, icon: IconStreak },
-  { to: "/alta-probabilidad", label: "nav:highProbability", end: false, icon: IconTarget },
-  { to: "/mis-apuestas", label: "nav:myBets", end: false, icon: IconWallet },
-  { to: "/glosario", label: "nav:glossary", end: false, icon: IconBook },
+  { to: ROUTES.matches, label: "nav:matches", end: false, icon: IconMatches },
+  { to: ROUTES.standings, label: "nav:standings", end: false, icon: IconStats },
+  { to: ROUTES.picks, label: "nav:picks", end: false, icon: IconTicket },
+  { to: ROUTES.probablePicks, label: "nav:probablePicks", end: false, icon: IconCheck },
+  { to: ROUTES.streaks, label: "nav:streaks", end: false, icon: IconStreak },
+  { to: ROUTES.highProbability, label: "nav:highProbability", end: false, icon: IconTarget },
+  { to: ROUTES.myBets, label: "nav:myBets", end: false, icon: IconWallet },
+  { to: ROUTES.glossary, label: "nav:glossary", end: false, icon: IconBook },
 ];
 
 export function Layout() {
   const { t } = useTranslation();
   const [navOpen, setNavOpen] = useState(false);
   const location = useLocation();
-  const currentMarket = findMarket(location.pathname.match(/^\/mercados\/([^/]+)/)?.[1]);
+  const currentMarket = findMarket(marketFromUrl(useMatch(ROUTE_PATTERNS.stat)?.params.stat));
 
   useEffect(() => {
     setNavOpen(false);
@@ -66,7 +67,7 @@ export function Layout() {
           >
             {navOpen ? <IconClose /> : <IconMenu />}
           </button>
-          <NavLink to="/" className="app-brand" end>
+          <NavLink to={ROUTES.home} className="app-brand" end>
             <AppMark />
             <span className="app-title">Statistics 4 Bets</span>
           </NavLink>
@@ -112,7 +113,7 @@ export function Layout() {
                 return (
                   <NavLink
                     key={market.slug}
-                    to={`/mercados/${market.slug}`}
+                    to={statPath(market.slug)}
                     className={active ? "sidebar-link sidebar-sublink active" : "sidebar-link sidebar-sublink"}
                   >
                     <span>{market.label}</span>
@@ -120,7 +121,7 @@ export function Layout() {
                 );
               })}
               {group === "stats" && (
-                <NavLink to="/arbitros" className="sidebar-link sidebar-sublink">
+                <NavLink to={ROUTES.referees} className="sidebar-link sidebar-sublink">
                   <span>{t("nav:referees")}</span>
                 </NavLink>
               )}

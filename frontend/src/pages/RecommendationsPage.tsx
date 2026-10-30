@@ -1,6 +1,7 @@
 import { useId, useState, type CSSProperties, type ReactNode } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { matchPath } from "../lib/routes";
 import { getLeagues, getRecommendationHistory, getRecommendations } from "../api/client";
 import type {
   League,
@@ -435,7 +436,7 @@ function UpcomingCard({ rec, index }: { rec: Recommendation; index: number }) {
   const edge = (rec.prob_model - rec.prob_market_implied) * 100;
   return (
     <article className="hp-card" style={{ animationDelay: `${Math.min(index, 8) * 0.05}s` }}>
-      <Link to={`/matches/${rec.match_id}`} className="hp-card-head">
+      <Link to={matchPath(rec.match_id)} className="hp-card-head">
         <span className="num hp-card-date">{formatDateTime(rec.date)}</span>
         <MatchTeams home={rec.home_team} away={rec.away_team} league={rec.league_code} middle="vs" />
         <span className="small muted">{joinParts(leagueName(rec.league_code), formatMatchday(rec.matchday))}</span>
@@ -760,7 +761,7 @@ function ResultRow({ rec }: { rec: RecommendationHistoryItem }) {
         {MARK[rec.outcome]}
       </span>
       <span className="hp-result-main">
-        <Link to={`/matches/${rec.match_id}`} className="hp-result-match">
+        <Link to={matchPath(rec.match_id)} className="hp-result-match">
           <MatchTeams
             home={rec.home_team}
             away={rec.away_team}

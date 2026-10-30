@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { t } from "../i18n";
 import { type MarketGroup, findMarket } from "./markets";
+import { ROUTES, statPath } from "./routes";
 
 /** Una tarjeta de la galeria de ligas de la portada. Nombre y pais salen de
  * leagues.ts y el logo de src/assets/logos/leagues/, asi que para anadir una
@@ -56,7 +57,7 @@ export const STAT_CATEGORIES: StatCategory[] = [
     return market
       ? [
           {
-            to: `/mercados/${slug}`,
+            to: statPath(slug),
             get label() {
               return market.label;
             },
@@ -69,7 +70,7 @@ export const STAT_CATEGORIES: StatCategory[] = [
       : [];
   }),
   {
-    to: "/arbitros",
+    to: ROUTES.referees,
     get label() {
       return t("nav:referees");
     },

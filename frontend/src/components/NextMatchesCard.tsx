@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { matchPath } from "../lib/routes";
 import { getUpcomingMatches } from "../api/client";
 import type { League } from "../api/types";
 import { formatDateTime } from "../lib/format";
@@ -41,7 +42,7 @@ export function NextMatchesCard({ league }: { league: League | undefined }) {
   return (
     <div className="hero-card side-card">
       <span className="hero-card-kicker">{t("landing:preview.title", { league: leagueName(league.code) })}</span>
-      <Link to={`/matches/${first.id}`} className="side-card-feature">
+      <Link to={matchPath(first.id)} className="side-card-feature">
         <span className="num side-card-date">{formatDateTime(first.date)}</span>
         <span className="side-card-teams">
           <span className="side-card-team">
@@ -56,7 +57,7 @@ export function NextMatchesCard({ league }: { league: League | undefined }) {
         </span>
       </Link>
       {rest.map((match) => (
-        <Link key={match.id} to={`/matches/${match.id}`} className="side-card-row side-card-match">
+        <Link key={match.id} to={matchPath(match.id)} className="side-card-row side-card-match">
           <span className="num side-card-row-date">{formatDateTime(match.date)}</span>
           <span className="side-card-row-teams">
             <span className="side-card-match-team">
