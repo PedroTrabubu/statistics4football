@@ -302,6 +302,13 @@ cumple "disponible casi siempre". No verifiqué el precio del túnel.
 - Leer las condiciones de las fuentes de §1.8.
 - Añadir la atribución de fuentes y el aviso +18 y de juego responsable.
 - Decidir el saneado de la Market Average sin las filas de Pinnacle.
+- **Regla de respaldo de la SPA.** La web vive en `/football/...` (rutas en `frontend/src/lib/routes.ts`) y las rutas
+  antiguas (`/partidos?liga=2`, `/mercados/...`) redirigen desde el propio JavaScript (`src/lib/legacyRoutes.ts`). El
+  hosting tiene que servir `index.html` en cualquier ruta que no sea un fichero; sin esa regla, recargar o abrir
+  directamente `/football/matches` o un enlace antiguo da 404. Cloudflare Pages lo hace por defecto si no hay un
+  `404.html` en la raíz; Workers con static assets necesita `not_found_handling = "single-page-application"`; GitHub
+  Pages, una copia de `index.html` como `404.html`. Comprobarlo al configurar el hosting elegido, con una recarga en una
+  ruta nueva y en una antigua.
 
 ---
 

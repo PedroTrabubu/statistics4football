@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { matchPath } from "../lib/routes";
 import { getMatches } from "../api/client";
 import type { Match } from "../api/types";
 import { formatKickoff, formatMatchday } from "../lib/format";
@@ -112,7 +113,7 @@ function CarouselCard({ match }: { match: Match }) {
 
   return (
     <Link
-      to={`/matches/${match.id}`}
+      to={matchPath(match.id)}
       className="carousel-card"
       draggable={false}
       aria-label={

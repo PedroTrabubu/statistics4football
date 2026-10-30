@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { leagueName } from "../lib/leagues";
 import { Link } from "react-router-dom";
+import { matchPath } from "../lib/routes";
 import type { Match } from "../api/types";
 import { formatDateTime } from "../lib/format";
 import { LeagueLogo } from "./LeagueLogo";
@@ -11,7 +12,7 @@ export function MatchRow({ match, eager = false }: { match: Match; eager?: boole
   const { t } = useTranslation();
   const played = match.status === "historical";
   return (
-    <Link to={`/matches/${match.id}`} className="match-row">
+    <Link to={matchPath(match.id)} className="match-row">
       <span className="match-row-when">
         <span className="match-row-date">{formatDateTime(match.date)}</span>
         <span className="match-row-league">

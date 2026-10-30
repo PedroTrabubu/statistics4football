@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
+import { ROUTES, refereePath } from "../lib/routes";
 import {
   getMatch,
   getMatchHistory,
@@ -80,7 +81,7 @@ export function MatchDetailPage() {
 
   return (
     <div>
-      <Link to="/partidos" className="back-link">
+      <Link to={ROUTES.matches} className="back-link">
         {t("matches:detail.back")}
       </Link>
 
@@ -179,7 +180,6 @@ export function MatchDetailPage() {
             awayStats={seasonStats[1]}
             homeTeam={match.home_team}
             awayTeam={match.away_team}
-            leagueId={match.league_id}
             league={match.league_code}
           />
         )}
@@ -195,7 +195,7 @@ export function MatchDetailPage() {
                 anchor: (
                   <Link
                     className="referee-link"
-                    to={`/arbitros?arbitro=${encodeURIComponent(match.referee)}`}
+                    to={refereePath(match.referee)}
                     onClick={() => setLeagueCode(match.league_code)}
                     title={t("matches:detail.refereeLinkTitle")}
                   />

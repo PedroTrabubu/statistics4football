@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import type { League } from "../api/types";
 import { type Language, currentLanguage, i18n, t } from "../i18n";
+import { ALL_PARAM } from "./routes";
 
 /** LaLiga siempre primero; es la liga por defecto en español y la de reserva. */
 export const DEFAULT_LEAGUE_CODE = "ESP-La Liga";
@@ -97,25 +98,47 @@ export function onlyValidated(
   };
 }
 
-/** ?liga= de /partidos: el id de la liga, el mismo que ya usa /stats?league=,
- * o "todas" para ver todas las ligas a la vez. */
-export const ALL_LEAGUES_PARAM = "todas";
+/** Identificador de cada liga en la URL (?league=). Una que no esté aquí
+ * lleva su código en minúsculas y con guiones. */
+const LEAGUE_SLUGS: Record<string, string> = {
+  "ESP-La Liga": "laliga",
+  "ESP-La Liga 2": "laliga-hypermotion",
+  "ENG-Premier League": "premier-league",
+  "FRA-Ligue 1": "ligue-1",
+  "GER-Bundesliga": "bundesliga",
+  "ITA-Serie A": "serie-a",
+  [CHAMPIONS_LEAGUE_CODE]: "champions-league",
+};
 
-export function leagueParam(league: Pick<League, "id"> | null): string {
-  return league === null ? ALL_LEAGUES_PARAM : String(league.id);
+export function leagueSlug(code: string): string {
+  return (
+    LEAGUE_SLUGS[code] ??
+    code
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+  );
 }
 
-/** Liga de un ?liga=: su codigo, null para "todas" y undefined si falta o
+/** ?league= de Partidos, Rachas, Picks probables y Clasificación: el slug de
+ * la liga, o "all" para ver todas las ligas a la vez. */
+export function leagueParam(league: Pick<League, "code"> | null): string {
+  return league === null ? ALL_PARAM : leagueSlug(league.code);
+}
+
+/** Liga de un ?league=: su codigo, null para "all" y undefined si falta o
  * no es valido (la pagina sigue entonces con la liga elegida en la web). */
 export function parseLeagueParam(value: string | null, leagues: League[]): string | null | undefined {
   if (value === null) return undefined;
   const clean = value.trim().toLowerCase();
-  if (clean === ALL_LEAGUES_PARAM) return null;
-  return leagues.find((l) => String(l.id) === clean)?.code;
+  if (clean === ALL_PARAM) return null;
+  return leagues.find((l) => leagueSlug(l.code) === clean)?.code;
 }
 
 // Liga elegida, compartida entre paginas mientras dura la sesion. Hasta que
-// se elige una (o llega en un ?liga=) es la del idioma, y cambia con el; la
+// se elige una (o llega en un ?league=) es la del idioma, y cambia con el; la
 // elegida se queda aunque cambie el idioma. Al recargar se vuelve a la del
 // idioma. null = todas las ligas (solo donde se ofrece).
 let chosenCode: string | null | undefined = undefined;

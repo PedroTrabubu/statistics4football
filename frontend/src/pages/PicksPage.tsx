@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { PageHero } from "../components/PageHero";
 import { Link } from "react-router-dom";
+import { matchPath } from "../lib/routes";
 import { getLeagues, getPicks, getPicksHistory } from "../api/client";
 import type { PickCombo, PickKind, PickLeg } from "../api/types";
 import { LeagueSwitch } from "../components/LeagueSwitch";
@@ -168,7 +169,7 @@ function LegRow({ leg, showMatch, settled }: { leg: PickLeg; showMatch: boolean;
       <div className="pick-leg-main">
         <span className="pick-leg-label">{pickLegLabel(leg)}</span>
         {showMatch && (
-          <Link to={`/matches/${leg.match_id}`} className="pick-leg-match small">
+          <Link to={matchPath(leg.match_id)} className="pick-leg-match small">
             <MatchTeams home={leg.home_team} away={leg.away_team} league={leg.league_code} middle="–" />
             <span>{joinParts(leagueName(leg.league_code), formatMatchday(leg.matchday), formatDateTime(leg.date))}</span>
           </Link>

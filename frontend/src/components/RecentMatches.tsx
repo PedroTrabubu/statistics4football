@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { matchPath } from "../lib/routes";
 import type { Match, MatchRecent } from "../api/types";
 import { formatNumber, formatPercent, formatSeason, formatShortDate } from "../lib/format";
 import { leagueName } from "../lib/leagues";
@@ -151,7 +152,7 @@ function TeamRecentList({
                       </span>
                     </td>
                     <td className="recent-num recent-score">
-                      <Link to={`/matches/${match.id}`} title={t("matches:recent.seeMatch")}>
+                      <Link to={matchPath(match.id)} title={t("matches:recent.seeMatch")}>
                         {pair(v.goalsFor, v.goalsAgainst)}
                       </Link>
                     </td>
@@ -297,7 +298,7 @@ export function HeadToHead({ match, recent }: { match: Match; recent: MatchRecen
                       <TeamName team={m.home_team} league={m.league_code} reverse />
                     </td>
                     <td className="recent-num recent-score">
-                      <Link to={`/matches/${m.id}`} title={t("matches:recent.seeMatch")}>
+                      <Link to={matchPath(m.id)} title={t("matches:recent.seeMatch")}>
                         {m.home_goals}-{m.away_goals}
                       </Link>
                       {ht && (
