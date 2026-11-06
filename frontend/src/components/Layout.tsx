@@ -3,7 +3,7 @@ import { AppMark } from "./AppMark";
 import { useTranslation } from "react-i18next";
 import { NavLink, Outlet, useLocation, useMatch } from "react-router-dom";
 import { MARKET_GROUPS, SIDEBAR_MARKETS, findMarket, marketGroupLabel } from "../lib/markets";
-import { ROUTES, ROUTE_PATTERNS, marketFromUrl, statPath } from "../lib/routes";
+import { ROUTES, ROUTE_PATTERNS, SHOW_BETTING, marketFromUrl, statPath } from "../lib/routes";
 import {
   IconBook,
   IconCheck,
@@ -21,14 +21,15 @@ import { LanguageSwitch } from "./LanguageSwitch";
 import { SiteFooter } from "./SiteFooter";
 import { ThemeSwitch } from "./ThemeSwitch";
 
-/** `label`: clave de su texto en nav. */
+/** `label`: clave de su texto en nav. Plano; debajo, los grupos de
+ * estadísticas. Picks (combinadas), solo con VITE_SHOW_BETTING. */
 const NAV_ITEMS = [
   { to: ROUTES.matches, label: "nav:matches", end: false, icon: IconMatches },
   { to: ROUTES.standings, label: "nav:standings", end: false, icon: IconStats },
-  { to: ROUTES.picks, label: "nav:picks", end: false, icon: IconTicket },
   { to: ROUTES.probablePicks, label: "nav:probablePicks", end: false, icon: IconCheck },
-  { to: ROUTES.streaks, label: "nav:streaks", end: false, icon: IconStreak },
+  ...(SHOW_BETTING ? [{ to: ROUTES.picks, label: "nav:picks", end: false, icon: IconTicket }] : []),
   { to: ROUTES.highProbability, label: "nav:highProbability", end: false, icon: IconTarget },
+  { to: ROUTES.streaks, label: "nav:streaks", end: false, icon: IconStreak },
   { to: ROUTES.myBets, label: "nav:myBets", end: false, icon: IconWallet },
   { to: ROUTES.glossary, label: "nav:glossary", end: false, icon: IconBook },
   { to: ROUTES.hitRate, label: "nav:hitRate", end: false, icon: IconPercent },

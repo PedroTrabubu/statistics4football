@@ -38,6 +38,11 @@ export const ROUTES = {
   hitRate: `${FOOTBALL.base}/hit-rate`,
 } as const;
 
+/** Picks (combinadas) fuera de la web salvo con VITE_SHOW_BETTING=true: sin
+ * ella, ni en el menú ni en su ruta, que lleva a /football. El código y los
+ * datos se conservan. */
+export const SHOW_BETTING = import.meta.env.VITE_SHOW_BETTING === "true";
+
 /** Rutas con parámetro, para el router y para reconocerlas en una URL.
  * /football/stats/referees es una ruta propia: gana a :stat. */
 export const ROUTE_PATTERNS = {

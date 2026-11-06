@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { LegacyRedirect } from "./components/LegacyRedirect";
 import { LEGACY_PATTERNS, LEGACY_ROUTES } from "./lib/legacyRoutes";
-import { ROUTES, ROUTE_PATTERNS } from "./lib/routes";
+import { ROUTES, ROUTE_PATTERNS, SHOW_BETTING } from "./lib/routes";
 import { GlossaryPage } from "./pages/GlossaryPage";
 import { HitRatePage } from "./pages/HitRatePage";
 import { LandingPage } from "./pages/LandingPage";
@@ -33,7 +33,10 @@ function App() {
         <Route path={ROUTES.stats} element={<MarketPage />} />
         <Route path={ROUTE_PATTERNS.stat} element={<MarketPage />} />
         <Route path={ROUTES.referees} element={<RefereePage />} />
-        <Route path={ROUTES.picks} element={<PicksPage />} />
+        <Route
+          path={ROUTES.picks}
+          element={SHOW_BETTING ? <PicksPage /> : <Navigate to={ROUTES.football} replace />}
+        />
         <Route path={ROUTES.probablePicks} element={<PicksHistoryPage />} />
         <Route path={ROUTES.streaks} element={<StreaksPage />} />
         <Route path={ROUTES.highProbability} element={<RecommendationsPage />} />
