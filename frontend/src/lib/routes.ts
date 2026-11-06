@@ -35,6 +35,7 @@ export const ROUTES = {
   highProbability: `${FOOTBALL.base}/high-probability`,
   myBets: `${FOOTBALL.base}/my-bets`,
   glossary: `${FOOTBALL.base}/glossary`,
+  hitRate: `${FOOTBALL.base}/hit-rate`,
 } as const;
 
 /** Rutas con parámetro, para el router y para reconocerlas en una URL.

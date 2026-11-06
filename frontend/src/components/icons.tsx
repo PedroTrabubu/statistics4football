@@ -91,6 +91,17 @@ export function IconBook(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Aciertos: un porcentaje. */
+export function IconPercent(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M18.5 5.5l-13 13" />
+      <circle cx="7" cy="7" r="2.5" />
+      <circle cx="17" cy="17" r="2.5" />
+    </svg>
+  );
+}
+
 export function IconMenu(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base(props)}>

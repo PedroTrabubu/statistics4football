@@ -219,6 +219,15 @@ function optionInfo(option: MarketOption): OptionInfo {
     : { key: option.key, dir: null, line: null };
 }
 
+/** El texto de un pick ya guardado (familia y clave de opción, como en el
+ * export), desde su equipo, y si habla del partido entero en lugar de un
+ * equipo. Para las listas de partidos de Aciertos. null si la familia no existe. */
+export function savedPickText(family: string, optionKey: string): { text: string; matchLevel: boolean } | null {
+  const spec = ALL_FAMILIES.find((f) => f.slug === family);
+  if (!spec) return null;
+  return { text: spec.text(optionInfo({ key: optionKey } as MarketOption), false), matchLevel: spec.side === "match" };
+}
+
 /** Grupos de opciones en las que solo vale la mas informativa: las "más de"
  * de una cifra (de menor a mayor exigencia), las "menos de" (de menor a mayor
  * exigencia: la linea mas baja es la mas exigente) y cada opcion suelta. */

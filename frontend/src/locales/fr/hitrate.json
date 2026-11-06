@@ -1,0 +1,205 @@
+{
+  "lead": "À quel point les modèles du site ont eu raison sur les matchs déjà joués. Seules comptent les prédictions faites avec les données d'avant chaque match.",
+  "loading": "Chargement des taux de réussite…",
+  "error": "Impossible de charger les taux de réussite : {{error}}",
+  "unavailable": "Les taux de réussite n'ont pas encore été précalculés.",
+  "filters": {
+    "season": "Saison",
+    "allSeasons": "Toutes les saisons",
+    "league": "Championnat",
+    "current": "{{season}} (en cours)"
+  },
+  "sectionsLabel": "Sections du taux de réussite",
+  "sections": {
+    "result": {
+      "title": "Pourcentages de résultat",
+      "short": "Résultat",
+      "intro": "Probabilité de victoire à domicile, de nul et de victoire à l'extérieur affichée sur la fiche du match."
+    },
+    "statsPredictor": {
+      "title": "Prédicteur de statistiques",
+      "short": "Prédicteur",
+      "intro": "Ce que chaque équipe devrait obtenir en xG, tirs, tirs cadrés, corners, fautes et cartons jaunes, sur la fiche du match. Ici : s'il trouve quelle équipe en obtient le plus."
+    },
+    "cornerDuel": {
+      "title": "Duel de corners",
+      "short": "Duel",
+      "intro": "Probabilité que chaque équipe obtienne plus de corners que l'autre, sur la fiche du match."
+    },
+    "probablePicks": {
+      "title": "Sélections probables",
+      "short": "Sélections",
+      "intro": "Tendances qu'une équipe a souvent répétées, confrontées à ce que fait l'adversaire, jusqu'à 6 par match."
+    },
+    "highProbability": {
+      "title": "Haute probabilité",
+      "short": "Haute prob.",
+      "intro": "Au plus une sélection par match du modèle de tendances."
+    }
+  },
+  "models": {
+    "result_1x2": {
+      "title": "Résultat le plus probable (1X2)",
+      "what": "S'il trouve qui gagne ou s'il y a match nul.",
+      "reference": "toujours le domicile",
+      "unit": "{{n}} matchs"
+    },
+    "result_double": {
+      "title": "Meilleure double chance",
+      "what": "S'il trouve la double chance la plus probable : 1X, X2 ou 12.",
+      "reference": "toujours domicile ou nul",
+      "unit": "{{n}} matchs",
+      "typeLabel": "Par probabilité"
+    },
+    "probable_picks": {
+      "title": "Sélections probables",
+      "what": "Si les sélections probables de chaque match se réalisent.",
+      "reference": "l'habitude du championnat",
+      "unit": "{{n}} sélections",
+      "typeLabel": "Par marché"
+    },
+    "high_probability": {
+      "title": "Haute probabilité",
+      "what": "Si la sélection haute probabilité du match se réalise.",
+      "reference": "ce que donnait le marché",
+      "unit": "{{n}} sélections",
+      "typeLabel": "Par marché"
+    },
+    "stats_predictor": {
+      "title": "Prédicteur : quelle équipe en obtient le plus",
+      "what": "S'il trouve quelle équipe obtient le plus de tirs, corners, fautes ou cartons jaunes.",
+      "reference": "toujours le même côté",
+      "unit": "{{n}} prédictions",
+      "typeLabel": "Par statistique"
+    },
+    "corner_duel": {
+      "title": "Duel de corners : résultat le plus probable",
+      "what": "S'il trouve quelle équipe obtient le plus de corners.",
+      "reference": "toujours le domicile",
+      "unit": "{{n}} matchs"
+    }
+  },
+  "uncalibrated": "non évaluée",
+  "uncalibratedNote": "La Ligue des champions ne fait pas partie de l'évaluation de ce modèle : ses chiffres sont affichés, mais ne comptent pas dans les totaux.",
+  "caption": {
+    "summary": "{{model}} : réussite totale, de cette saison et selon le moment de la prédiction",
+    "breakdown": "{{model}}, {{breakdown}} : prédictions, réussite, sans modèle et avantage"
+  },
+  "columns": {
+    "group": "Groupe",
+    "n": "Prédictions",
+    "rate": "Réussite",
+    "base": "Sans modèle",
+    "edge": "Avantage",
+    "mae": "Erreur moyenne (plus bas, c'est mieux)",
+    "ci": "Marge"
+  },
+  "rows": {
+    "total": "Total",
+    "currentSeason": "Cette saison ({{season}})"
+  },
+  "origin": {
+    "reconstructed": "Calculé avec les données antérieures",
+    "frozen": "Enregistré avant le match"
+  },
+  "originOnly": {
+    "reconstructed": "Toutes calculées avec les données d'avant chaque match.",
+    "frozen": "Toutes enregistrées avant le match."
+  },
+  "noData": "Pas de données pour ce championnat et cette saison.",
+  "breakdown": {
+    "summary": "{{title}} ({{n}})",
+    "league": "Par championnat",
+    "season": "Par saison",
+    "type": "Par type",
+    "level": "Par force de la sélection",
+    "team": "Équipe"
+  },
+  "levels": {
+    "alta": "Élevée",
+    "media": "Moyenne",
+    "baja": "Faible"
+  },
+  "lowSample": "peu de données",
+  "range": "entre {{low}} et {{high}}",
+  "points": "{{value}} points",
+  "maePair": "{{model}} (championnat {{league}})",
+  "bin": {
+    "atLeast": "≥ {{low}} %",
+    "range": "{{low}}–{{high}} %"
+  },
+  "where": {
+    "title": "Où ils réussissent le plus",
+    "short": "Championnats et équipes",
+    "intro": "Pour la saison choisie ci-dessus. La réussite montre où il est facile d'avoir raison ; l'avantage, où le modèle apporte quelque chose par rapport à ne pas en utiliser.",
+    "noValue": "Qu'un modèle réussisse souvent sur un championnat ou une équipe ne veut pas dire qu'il y a de la valeur à parier : le marché l'intègre déjà.",
+    "model": {
+      "result_1x2": "1X2",
+      "result_double": "Double ch.",
+      "stats_predictor": "Prédicteur",
+      "corner_duel": "Duel",
+      "probable_picks": "Sélections",
+      "high_probability": "Haute prob."
+    },
+    "leagues": {
+      "title": "Championnats",
+      "caption": "Réussite de chaque modèle dans chaque championnat, avec son avantage sur la référence",
+      "best": "le plus",
+      "worst": "le moins",
+      "stability": "Se répète d'une saison à l'autre",
+      "note": "▲ le plus et ▼ le moins pour chaque modèle, sans les championnats avec peu de données. Dernière ligne : si l'ordre des championnats se répète d'une saison à l'autre.",
+      "oneLeague": "Avec un championnat choisi ci-dessus, il n'y a rien à comparer : choisissez « Toutes » dans Championnat."
+    },
+    "repeat": {
+      "none": "presque pas",
+      "low": "peu",
+      "mid": "assez",
+      "high": "beaucoup"
+    }
+  },
+  "overview": {
+    "title": "Taux de réussite de chaque modèle",
+    "intro": "À quel point chaque modèle a eu raison pour le championnat et la saison choisis ci-dessus. Touchez une carte pour voir le détail.",
+    "current": "Cette saison ({{season}}) : {{rate}} sur {{count}}",
+    "reference": "Référence : {{base}} ({{rule}})"
+  },
+  "glossaryLink": "Que signifie chaque chiffre ? Nous l'expliquons dans le <glossary>glossaire</glossary>.",
+  "teams": {
+    "title": "Équipes",
+    "model": "Modèle",
+    "scope": {
+      "current": "Saison en cours ({{season}})",
+      "all": "Toutes les saisons"
+    },
+    "note": "Chaque ligne compte les prédictions des matchs que joue l'équipe, y compris celles sur l'adversaire. « Peu de données » : moins de {{n}}. Touchez une équipe pour voir ses matchs.",
+    "empty": "Aucune équipe avec ce modèle dans ce championnat et cette saison.",
+    "caption": "{{model}} : réussites, matchs et réussite de chaque équipe",
+    "column": {
+      "team": "Équipe",
+      "hits": "Réussites",
+      "matches": "Matchs",
+      "rate": "Réussite"
+    },
+    "loading": "Chargement de ses matchs…",
+    "error": "Impossible de charger ses matchs : {{error}}",
+    "noMatches": "Aucun match avec ce modèle dans ce championnat et cette saison.",
+    "legend": "✓ réalisé · ✗ non réalisé · = égalité sur cette statistique (ne compte pas). Tout a été calculé uniquement avec les données d'avant chaque match ; « enregistré avant » marque ce qui a été enregistré avant le coup d'envoi et n'a pas été modifié.",
+    "frozen": "enregistré avant",
+    "mark": {
+      "hit": "Réalisé",
+      "miss": "Non réalisé",
+      "tie": "Égalité, ne compte pas",
+      "none": "Sans donnée"
+    }
+  },
+  "pick": {
+    "draw": "Match nul",
+    "win": "Victoire de {{team}}",
+    "noDraw": "Pas de nul (12)",
+    "winOrDraw": "{{team}} ou nul",
+    "sameCorners": "Autant de corners",
+    "moreCorners": "{{team}} obtient plus de corners",
+    "more": "{{team}} obtient plus de {{stat}}",
+    "ofTeam": "{{team}} : {{text}}"
+  }
+}

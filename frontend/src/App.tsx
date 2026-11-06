@@ -5,6 +5,7 @@ import { LegacyRedirect } from "./components/LegacyRedirect";
 import { LEGACY_PATTERNS, LEGACY_ROUTES } from "./lib/legacyRoutes";
 import { ROUTES, ROUTE_PATTERNS } from "./lib/routes";
 import { GlossaryPage } from "./pages/GlossaryPage";
+import { HitRatePage } from "./pages/HitRatePage";
 import { LandingPage } from "./pages/LandingPage";
 import { MarketPage, RefereePage } from "./pages/MarketPage";
 import { MatchDetailPage } from "./pages/MatchDetailPage";
@@ -38,6 +39,7 @@ function App() {
         <Route path={ROUTES.highProbability} element={<RecommendationsPage />} />
         <Route path={ROUTES.myBets} element={<MyBetsPage />} />
         <Route path={ROUTES.glossary} element={<GlossaryPage />} />
+        <Route path={ROUTES.hitRate} element={<HitRatePage />} />
       </Route>
       {/* Las rutas antiguas (en español, sin /football) siguen valiendo. */}
       {[...Object.keys(LEGACY_ROUTES), ...LEGACY_PATTERNS].map((path) => (

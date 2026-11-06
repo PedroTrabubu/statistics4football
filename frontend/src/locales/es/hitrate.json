@@ -1,0 +1,205 @@
+{
+  "lead": "Cuánto han acertado los modelos de la web en partidos ya jugados. Solo cuentan predicciones hechas con datos anteriores a cada partido.",
+  "loading": "Cargando aciertos…",
+  "error": "No se pudieron cargar los aciertos: {{error}}",
+  "unavailable": "Los aciertos todavía no se han precalculado.",
+  "filters": {
+    "season": "Temporada",
+    "allSeasons": "Todas las temporadas",
+    "league": "Liga",
+    "current": "{{season}} (en curso)"
+  },
+  "sectionsLabel": "Secciones de Aciertos",
+  "sections": {
+    "result": {
+      "title": "Porcentajes de resultado",
+      "short": "Resultado",
+      "intro": "Probabilidad de local, empate y visitante que da la ficha de partido."
+    },
+    "statsPredictor": {
+      "title": "Predictor de estadísticas",
+      "short": "Predictor",
+      "intro": "Lo que se espera que saque cada equipo en xG, tiros, tiros a puerta, córners, faltas y amarillas, en la ficha de partido. Aquí, si acierta qué equipo saca más."
+    },
+    "cornerDuel": {
+      "title": "Duelo de córners",
+      "short": "Duelo",
+      "intro": "Probabilidad de que cada equipo saque más córners que el otro, en la ficha de partido."
+    },
+    "probablePicks": {
+      "title": "Picks probables",
+      "short": "Picks",
+      "intro": "Patrones que un equipo ha repetido mucho, contrastados con lo que hace el rival, hasta 6 por partido."
+    },
+    "highProbability": {
+      "title": "Alta probabilidad",
+      "short": "Alta prob.",
+      "intro": "Como mucho una selección por partido del modelo de patrones."
+    }
+  },
+  "models": {
+    "result_1x2": {
+      "title": "Resultado más probable (1X2)",
+      "what": "Si acierta quién gana o si hay empate.",
+      "reference": "siempre el local",
+      "unit": "{{n}} partidos"
+    },
+    "result_double": {
+      "title": "Mejor doble oportunidad",
+      "what": "Si acierta con la doble oportunidad más probable: 1X, X2 o 12.",
+      "reference": "siempre local o empate",
+      "unit": "{{n}} partidos",
+      "typeLabel": "Por probabilidad"
+    },
+    "probable_picks": {
+      "title": "Picks probables",
+      "what": "Si se cumplen los picks probables de cada partido.",
+      "reference": "lo habitual en la liga",
+      "unit": "{{n}} picks",
+      "typeLabel": "Por mercado"
+    },
+    "high_probability": {
+      "title": "Alta probabilidad",
+      "what": "Si se cumple la selección de alta probabilidad del partido.",
+      "reference": "lo que daba el mercado",
+      "unit": "{{n}} selecciones",
+      "typeLabel": "Por mercado"
+    },
+    "stats_predictor": {
+      "title": "Predictor: qué equipo saca más",
+      "what": "Si acierta qué equipo saca más tiros, córners, faltas o amarillas.",
+      "reference": "siempre el mismo lado",
+      "unit": "{{n}} predicciones",
+      "typeLabel": "Por estadística"
+    },
+    "corner_duel": {
+      "title": "Duelo de córners: resultado más probable",
+      "what": "Si acierta qué equipo saca más córners.",
+      "reference": "siempre el local",
+      "unit": "{{n}} partidos"
+    }
+  },
+  "uncalibrated": "no evaluada",
+  "uncalibratedNote": "La Champions no entra en la evaluación de este modelo: sus cifras se ven, pero no cuentan en los totales.",
+  "caption": {
+    "summary": "{{model}}: acierto total, de esta temporada y según cuándo se hizo la predicción",
+    "breakdown": "{{model}}, {{breakdown}}: predicciones, acierto, sin modelo y ventaja"
+  },
+  "columns": {
+    "group": "Grupo",
+    "n": "Predicciones",
+    "rate": "Acierto",
+    "base": "Sin modelo",
+    "edge": "Ventaja",
+    "mae": "Error medio (menos es mejor)",
+    "ci": "Margen"
+  },
+  "rows": {
+    "total": "Total",
+    "currentSeason": "Esta temporada ({{season}})"
+  },
+  "origin": {
+    "reconstructed": "Calculado con datos anteriores",
+    "frozen": "Guardado antes del partido"
+  },
+  "originOnly": {
+    "reconstructed": "Todas calculadas con los datos anteriores a cada partido.",
+    "frozen": "Todas guardadas antes del partido."
+  },
+  "noData": "Sin datos en esta liga y temporada.",
+  "breakdown": {
+    "summary": "{{title}} ({{n}})",
+    "league": "Por liga",
+    "season": "Por temporada",
+    "type": "Por tipo",
+    "level": "Por fuerza del pick",
+    "team": "Equipo"
+  },
+  "levels": {
+    "alta": "Alta",
+    "media": "Media",
+    "baja": "Baja"
+  },
+  "lowSample": "pocos datos",
+  "range": "entre {{low}} y {{high}}",
+  "points": "{{value}} puntos",
+  "maePair": "{{model}} (liga {{league}})",
+  "bin": {
+    "atLeast": "≥ {{low}} %",
+    "range": "{{low}}–{{high}} %"
+  },
+  "where": {
+    "title": "Dónde aciertan más",
+    "short": "Ligas y equipos",
+    "intro": "Con la temporada elegida arriba. El acierto dice dónde es fácil acertar; la ventaja, dónde el modelo aporta algo frente a no usarlo.",
+    "noValue": "Que un modelo acierte mucho con una liga o un equipo no quiere decir que haya valor en apostar: el mercado ya lo descuenta.",
+    "model": {
+      "result_1x2": "1X2",
+      "result_double": "Doble op.",
+      "stats_predictor": "Predictor",
+      "corner_duel": "Duelo",
+      "probable_picks": "Picks",
+      "high_probability": "Alta prob."
+    },
+    "leagues": {
+      "title": "Ligas",
+      "caption": "Acierto de cada modelo en cada liga, con su ventaja sobre la base",
+      "best": "la que más",
+      "worst": "la que menos",
+      "stability": "Se repite entre temporadas",
+      "note": "▲ la que más y ▼ la que menos de cada modelo, sin contar las ligas con pocos datos. Última fila: si el orden de las ligas se repite de una temporada a otra.",
+      "oneLeague": "Con una liga elegida arriba no hay ligas que comparar: elige «Todas» en Liga."
+    },
+    "repeat": {
+      "none": "casi nada",
+      "low": "poco",
+      "mid": "bastante",
+      "high": "mucho"
+    }
+  },
+  "overview": {
+    "title": "Acierto de cada modelo",
+    "intro": "Cuánto ha acertado cada modelo con la liga y la temporada elegidas arriba. Pulsa una tarjeta para ver su detalle.",
+    "current": "Esta temporada ({{season}}): {{rate}} en {{count}}",
+    "reference": "Referencia: {{base}} ({{rule}})"
+  },
+  "glossaryLink": "¿Qué significa cada cifra? Lo explicamos en el <glossary>glosario</glossary>.",
+  "teams": {
+    "title": "Equipos",
+    "model": "Modelo",
+    "scope": {
+      "current": "Temporada actual ({{season}})",
+      "all": "Todas las temporadas"
+    },
+    "note": "Cada fila cuenta las predicciones de los partidos en que juega el equipo, también las que tratan del rival. «Pocos datos»: menos de {{n}}. Pulsa un equipo para ver sus partidos.",
+    "empty": "Sin equipos con este modelo en esta liga y temporada.",
+    "caption": "{{model}}: aciertos, partidos y acierto de cada equipo",
+    "column": {
+      "team": "Equipo",
+      "hits": "Aciertos",
+      "matches": "Partidos",
+      "rate": "Acierto"
+    },
+    "loading": "Cargando sus partidos…",
+    "error": "No se pudieron cargar sus partidos: {{error}}",
+    "noMatches": "Sin partidos con este modelo en esta liga y temporada.",
+    "legend": "✓ se cumplió · ✗ no se cumplió · = empate en esa estadística (no cuenta). Todo se calculó solo con datos anteriores a cada partido; «guardado antes» marca lo que se guardó antes de empezar y no se ha tocado.",
+    "frozen": "guardado antes",
+    "mark": {
+      "hit": "Se cumplió",
+      "miss": "No se cumplió",
+      "tie": "Empate, no cuenta",
+      "none": "Sin dato"
+    }
+  },
+  "pick": {
+    "draw": "Empate",
+    "win": "Gana {{team}}",
+    "noDraw": "No hay empate (12)",
+    "winOrDraw": "{{team}} o empate",
+    "sameCorners": "Mismos córners",
+    "moreCorners": "{{team}} saca más córners",
+    "more": "{{team}} saca más {{stat}}",
+    "ofTeam": "{{team}}: {{text}}"
+  }
+}

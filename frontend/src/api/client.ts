@@ -8,6 +8,9 @@ import type {
   MatchRecent,
   MatchRefereeStats,
   MatchResult,
+  HitRateIndex,
+  HitRateSlice,
+  HitRateTeam,
   LeagueDuelOut,
   LeagueResultProbabilities,
   MatchForecastsOut,
@@ -221,6 +224,21 @@ export function getPicksHistory(filters: { league?: string; kind?: string; limit
 /** Indice de predecibilidad precalculado (modelo, indice de cada partido y bandas). */
 export function getPredictability(): Promise<PredictabilityData> {
   return request("/picks/predictability");
+}
+
+/** Página Aciertos: ligas, temporadas y lo que solo está en los protocolos. */
+export function getHitRateIndex(): Promise<HitRateIndex> {
+  return request("/hit-rate");
+}
+
+/** Aciertos de cada modelo en una liga y temporada ("all": todas). */
+export function getHitRateSlice(league: string, season: string): Promise<HitRateSlice> {
+  return request("/hit-rate/slice", { league, season });
+}
+
+/** Los partidos de un equipo con lo que predijo cada modelo y si acertó. */
+export function getHitRateTeam(name: string): Promise<HitRateTeam> {
+  return request("/hit-rate/team", { name });
 }
 
 /** Pick del partido de varios partidos (el de un jugado, el calculado antes de jugarse). */

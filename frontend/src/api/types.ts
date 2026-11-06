@@ -523,6 +523,116 @@ export interface LeagueResultProbabilities {
   predictions: ResultProbabilities[];
 }
 
+// --- Aciertos (backend/app/analysis/hit_rate.py) ------------------------------
+
+/** Modelos con histórico por partido en la página Aciertos. */
+export type HitRateModelKey =
+  | "result_1x2"
+  | "result_double"
+  | "high_probability"
+  | "probable_picks"
+  | "corner_duel"
+  | "stats_predictor";
+
+/** n, acierto con su Wilson, base media y ventaja (acierto − base) con su
+ * intervalo remuestreando partidos. Todo en fracciones 0-1. */
+export interface HitRateCell {
+  n: number;
+  hits: number;
+  matches: number;
+  /** Filas sin resultado o sin base: no cuentan. */
+  no_data: number;
+  rate: number | null;
+  low: number | null;
+  high: number | null;
+  base: number | null;
+  edge: number | null;
+  edge_low: number | null;
+  edge_high: number | null;
+  /** Solo en el predictor de estadísticas, por estadística: error medio del
+   * modelo y de la media de la liga. */
+  mae?: number | null;
+  mae_base?: number | null;
+}
+
+export interface HitRateGroup extends HitRateCell {
+  key: string;
+  /** Solo en el desglose por liga: la Champions va "sin calibrar". */
+  calibrated?: boolean;
+  /** Solo en el desglose por equipo: su liga (la de la mayoría de sus filas). */
+  league?: string;
+}
+
+export interface HitRateModelSlice {
+  available: boolean;
+  calibrated?: boolean;
+  from?: string | null;
+  until?: string | null;
+  total?: HitRateCell;
+  by_origin?: HitRateGroup[];
+  by_type?: HitRateGroup[];
+  by_level?: HitRateGroup[];
+  by_team?: HitRateGroup[];
+  by_league?: HitRateGroup[];
+  by_season?: HitRateGroup[];
+}
+
+/** Un fichero <liga|all>/<temporada|all>.json. */
+export interface HitRateSlice {
+  league: string;
+  season: string;
+  models: Record<HitRateModelKey, HitRateModelSlice>;
+}
+
+export interface HitRateIndex {
+  available: boolean;
+  generated_at: string;
+  seed: number;
+  reps: number;
+  min_team: number;
+  low_sample: number;
+  result_version: string;
+  sources: { picks_csv: string | null };
+  leagues: { code: string; calibrated: boolean; seasons: string[] }[];
+  seasons: string[];
+  models: Record<HitRateModelKey, { doc: string; available: boolean; origins: string[]; until: string | null }>;
+  /** Cuánto se repite el orden de equipos y de ligas entre una temporada y la siguiente. */
+  stability: Record<HitRateModelKey, { teams: HitRateStability | null; leagues: HitRateStability | null }>;
+  /** Equipos con fichero de partidos (GET /hit-rate/team). */
+  teams?: Record<string, string>;
+}
+
+/** Una predicción de un partido: modelo, lo que se predijo (ver COLUMNS en
+ * hit_rate.py), acierto (1/0, "=" empate en esa estadística, null sin dato) y
+ * "f" guardada antes del partido o "r" calculada con datos anteriores. */
+export type HitRatePrediction = [HitRateModelKey, unknown, 1 | 0 | "=" | null, "f" | "r"];
+
+export interface HitRateTeamMatch {
+  id: number;
+  date: string;
+  league: string;
+  season: string;
+  home: string;
+  away: string;
+  score: [number, number] | null;
+  preds: HitRatePrediction[];
+}
+
+/** Los partidos de un equipo con lo que predijo cada modelo, del más antiguo al más reciente. */
+export interface HitRateTeam {
+  team: string;
+  matches: HitRateTeamMatch[];
+}
+
+/** Correlación de Spearman media entre temporadas consecutivas (0: nada; 1: igual). */
+export interface HitRateStability {
+  rate: number;
+  edge: number;
+  /** Pares de temporadas comparados y equipos (o ligas) en común, en total. */
+  pairs: number;
+  rows: number;
+}
+
 // --- Duelo de córners y predictor (backend/app/probability/match_forecasts.py) --
 
 export interface DuelForecastOut {

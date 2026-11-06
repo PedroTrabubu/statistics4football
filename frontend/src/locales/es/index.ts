@@ -2,6 +2,7 @@
  * la web. Un fichero por espacio de nombres (área de la web). */
 import common from "./common.json";
 import glossary from "./glossary.json";
+import hitrate from "./hitrate.json";
 import landing from "./landing.json";
 import legal from "./legal.json";
 import markets from "./markets.json";
@@ -26,4 +27,5 @@ export default {
   standings,
   mybets,
   glossary,
+  hitrate,
 };

@@ -10,6 +10,7 @@ import {
   IconClose,
   IconMatches,
   IconMenu,
+  IconPercent,
   IconStats,
   IconStreak,
   IconTarget,
@@ -30,6 +31,7 @@ const NAV_ITEMS = [
   { to: ROUTES.highProbability, label: "nav:highProbability", end: false, icon: IconTarget },
   { to: ROUTES.myBets, label: "nav:myBets", end: false, icon: IconWallet },
   { to: ROUTES.glossary, label: "nav:glossary", end: false, icon: IconBook },
+  { to: ROUTES.hitRate, label: "nav:hitRate", end: false, icon: IconPercent },
 ];
 
 export function Layout() {

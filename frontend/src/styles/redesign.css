@@ -3759,3 +3759,374 @@ button.hp-hero-link {
   color: var(--primary-ink);
   font-weight: var(--fw-semibold);
 }
+
+/* ---- Aciertos ---- */
+.hr-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+  margin-top: var(--space-5);
+}
+.hr-filters .league-switch {
+  flex: 1 1 100%;
+  margin: 0;
+}
+.hr-season {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2-5);
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+}
+/* Resumen al entrar: una tarjeta por modelo con su acierto en grande. */
+.hr-overview {
+  margin-top: var(--space-6);
+}
+.hr-overview > h2 {
+  margin: 0 0 var(--space-1-5);
+  font-size: var(--fs-3xl);
+  letter-spacing: var(--tracking-tighter);
+}
+.hr-overview > h3 {
+  margin: var(--space-5) 0 var(--space-2-5);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+.hr-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hr-cards > li {
+  display: flex;
+}
+.hr-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+.hr-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+}
+.hr-card:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.hr-card-title {
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+}
+.hr-card-rate {
+  margin-top: var(--space-1);
+  color: var(--green);
+  font-family: var(--font-display);
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-display);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.1;
+}
+.hr-card-sub,
+.hr-card-line {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+.hr-card .hr-tag {
+  margin: 0 0 0 var(--space-1-5);
+}
+/* Qué predice el modelo, en una línea, bajo su nombre. */
+.hr-card-what {
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-snug);
+}
+/* El acierto en una barra de 0 a 100 %. */
+.hr-bar {
+  display: block;
+  width: 100%;
+  height: 0.5rem;
+  border-radius: var(--radius-full);
+  background: var(--tint);
+  overflow: hidden;
+}
+.hr-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--green);
+}
+.hr-card .hr-card-sub {
+  margin-top: auto;
+  padding-top: var(--space-1);
+}
+/* "Referencia: 44,2 % (siempre el local)": neutra, pequeña, bajo la barra. */
+.hr-card-ref {
+  color: var(--muted);
+  font-size: var(--fs-2xs);
+  line-height: var(--lh-normal);
+}
+
+.hr-glossary-link {
+  margin-top: var(--space-4);
+}
+.hr-fold > summary {
+  cursor: pointer;
+  width: fit-content;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+}
+.hr-section > h2 {
+  margin-bottom: var(--space-2);
+}
+.hr-model {
+  margin-top: var(--space-7);
+}
+.hr-model > h3 {
+  margin: 0 0 var(--space-1-5);
+  font-size: var(--fs-xl);
+  letter-spacing: var(--tracking-tight);
+}
+.hr-model > p {
+  max-width: 52rem;
+  margin: 0 0 var(--space-2);
+}
+.hr-table-wrap {
+  /* Contiene los textos ocultos (absolute) de las celdas: sin esto se salían
+     del deslizamiento y ensanchaban la página en el móvil. */
+  position: relative;
+  margin: var(--space-3) 0 var(--space-4);
+  /* Solo desliza en horizontal: con overflow-x, 1 px de más ponía otra barra. */
+  overflow-y: hidden;
+}
+.hr-table th[scope="row"] {
+  padding: var(--space-2) var(--space-2-5);
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-regular);
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: normal;
+}
+.hr-table tbody tr:last-child th {
+  border-bottom: none;
+}
+.hr-table .num {
+  text-align: right;
+  white-space: nowrap;
+}
+/* Intervalo bajo la cifra, más pequeño. */
+.hr-ci {
+  display: block;
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+.hr-tag {
+  display: inline-block;
+  margin-left: var(--space-1-5);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--tint);
+  box-shadow: inset 0 0 0 1px var(--border);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  line-height: 1.6;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.hr-low td {
+  color: var(--muted);
+}
+.hr-league {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+/* El logo no trae tamaño propio: sin caja, se pintaba a tamaño natural. */
+.hr-league .league-logo {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.hr-uncalibrated {
+  padding: var(--space-2-5) var(--space-3-5);
+  border-radius: var(--radius-sm);
+  background: var(--tint);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.hr-empty {
+  color: var(--muted);
+}
+/* Dónde aciertan más: la liga con más acierto de cada modelo, en negrita; sin
+   muestra suficiente, en gris. Al pie, cuánto se repite el orden. */
+.hr-matrix th[scope="row"] {
+  white-space: nowrap;
+}
+.hr-matrix .hr-best {
+  color: var(--ink);
+  font-weight: var(--fw-semibold);
+}
+.hr-mark {
+  margin-left: var(--space-1);
+  font-size: var(--fs-2xs);
+}
+.hr-mark-worst {
+  color: var(--muted);
+}
+/* "muestra baja" bajo la cifra: la celda no se ensancha. */
+.hr-matrix .num .hr-tag {
+  display: block;
+  width: fit-content;
+  margin: var(--space-0-5) 0 0 auto;
+}
+.hr-matrix .hr-low-cell {
+  color: var(--muted);
+}
+.hr-matrix tfoot th[scope="row"],
+.hr-matrix tfoot td {
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+/* El selector de modelo, con nombres largos, no pasa del ancho disponible. */
+.hr-teams .hr-season {
+  max-width: 100%;
+}
+.hr-teams .hr-season select {
+  min-width: 0;
+  max-width: 100%;
+}
+/* Equipos: cabeceras que ordenan y filas que se despliegan con sus partidos
+   (la tabla de partidos es la de las páginas de estadísticas). */
+.hr-sort {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+.hr-sort:hover {
+  color: var(--ink);
+}
+.hr-team-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.hr-team-chevron {
+  flex: none;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.hr-team-toggle[aria-expanded="true"] .hr-team-chevron {
+  transform: rotate(45deg);
+}
+.hr-team-detail > td {
+  padding: var(--space-2) var(--space-2) var(--space-4);
+  white-space: normal;
+}
+.hr-picks-row td {
+  padding-top: 0;
+  background: none;
+  white-space: normal;
+}
+.hr-picks {
+  display: grid;
+  gap: var(--space-0-5);
+  margin: 0 0 var(--space-2);
+  padding: 0 0 0 var(--space-6);
+  list-style: none;
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+}
+.hr-pick-mark {
+  display: inline-block;
+  width: 1.2em;
+  font-weight: var(--fw-bold);
+}
+.hr-pick-mark.is-hit {
+  color: var(--green);
+}
+.hr-pick-mark.is-miss {
+  color: var(--red);
+}
+.hr-pick-mark.is-tie,
+.hr-pick-mark.is-none {
+  color: var(--muted);
+}
+.hr-teams h4 {
+  margin: var(--space-4) 0 0;
+  font-size: var(--fs-md);
+}
+.hr-fold {
+  margin-top: var(--space-2);
+}
+.hr-fold > .small {
+  max-width: 52rem;
+  margin: var(--space-2) 0 0;
+}
+@media (max-width: 640px) {
+  .hr-table {
+    font-size: var(--fs-sm);
+  }
+  .hr-table th,
+  .hr-table td,
+  .hr-table th[scope="row"] {
+    padding: var(--space-1-5) var(--space-2);
+    font-size: var(--fs-sm);
+  }
+  .hr-table th[scope="row"] {
+    min-width: 7.5rem;
+  }
+  /* "muestra baja" bajo la cifra: la columna n no roba sitio al nombre. */
+  .hr-table .num .hr-tag {
+    display: block;
+    width: fit-content;
+    margin: var(--space-0-5) 0 0 auto;
+  }
+}

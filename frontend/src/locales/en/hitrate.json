@@ -1,0 +1,205 @@
+{
+  "lead": "How often the site's models were right in matches already played. Only predictions made with data from before each match count.",
+  "loading": "Loading hit rates…",
+  "error": "Could not load the hit rates: {{error}}",
+  "unavailable": "The hit rates have not been precomputed yet.",
+  "filters": {
+    "season": "Season",
+    "allSeasons": "All seasons",
+    "league": "League",
+    "current": "{{season}} (current)"
+  },
+  "sectionsLabel": "Hit rate sections",
+  "sections": {
+    "result": {
+      "title": "Result percentages",
+      "short": "Result",
+      "intro": "Home, draw and away probabilities shown on the match page."
+    },
+    "statsPredictor": {
+      "title": "Stats predictor",
+      "short": "Predictor",
+      "intro": "What each team is expected to get in xG, shots, shots on target, corners, fouls and yellow cards, on the match page. Here: whether it gets right which team gets more."
+    },
+    "cornerDuel": {
+      "title": "Corner duel",
+      "short": "Duel",
+      "intro": "The probability of each team taking more corners than the other, on the match page."
+    },
+    "probablePicks": {
+      "title": "Likely picks",
+      "short": "Picks",
+      "intro": "Patterns a team has repeated many times, checked against what the opponent does, up to 6 per match."
+    },
+    "highProbability": {
+      "title": "High probability",
+      "short": "High prob.",
+      "intro": "At most one selection per match from the pattern model."
+    }
+  },
+  "models": {
+    "result_1x2": {
+      "title": "Most likely result (1X2)",
+      "what": "Whether it gets right who wins or whether it is a draw.",
+      "reference": "always home",
+      "unit": "{{n}} matches"
+    },
+    "result_double": {
+      "title": "Best double chance",
+      "what": "Whether it gets right the most likely double chance: 1X, X2 or 12.",
+      "reference": "always home or draw",
+      "unit": "{{n}} matches",
+      "typeLabel": "By probability"
+    },
+    "probable_picks": {
+      "title": "Likely picks",
+      "what": "Whether each match's likely picks come true.",
+      "reference": "the league norm",
+      "unit": "{{n}} picks",
+      "typeLabel": "By market"
+    },
+    "high_probability": {
+      "title": "High probability",
+      "what": "Whether the match's high-probability selection comes true.",
+      "reference": "what the market gave",
+      "unit": "{{n}} selections",
+      "typeLabel": "By market"
+    },
+    "stats_predictor": {
+      "title": "Predictor: which team gets more",
+      "what": "Whether it gets right which team gets more shots, corners, fouls or yellow cards.",
+      "reference": "always the same side",
+      "unit": "{{n}} predictions",
+      "typeLabel": "By stat"
+    },
+    "corner_duel": {
+      "title": "Corner duel: most likely result",
+      "what": "Whether it gets right which team takes more corners.",
+      "reference": "always home",
+      "unit": "{{n}} matches"
+    }
+  },
+  "uncalibrated": "not evaluated",
+  "uncalibratedNote": "The Champions League is not part of this model's evaluation: its figures are shown, but they do not count in the totals.",
+  "caption": {
+    "summary": "{{model}}: overall hit rate, this season and by when the prediction was made",
+    "breakdown": "{{model}}, {{breakdown}}: predictions, hit rate, without a model and edge"
+  },
+  "columns": {
+    "group": "Group",
+    "n": "Predictions",
+    "rate": "Hit rate",
+    "base": "Without a model",
+    "edge": "Edge",
+    "mae": "Mean error (lower is better)",
+    "ci": "Range"
+  },
+  "rows": {
+    "total": "Total",
+    "currentSeason": "This season ({{season}})"
+  },
+  "origin": {
+    "reconstructed": "Calculated with earlier data",
+    "frozen": "Saved before the match"
+  },
+  "originOnly": {
+    "reconstructed": "All calculated with the data from before each match.",
+    "frozen": "All saved before the match."
+  },
+  "noData": "No data for this league and season.",
+  "breakdown": {
+    "summary": "{{title}} ({{n}})",
+    "league": "By league",
+    "season": "By season",
+    "type": "By type",
+    "level": "By pick strength",
+    "team": "Team"
+  },
+  "levels": {
+    "alta": "High",
+    "media": "Medium",
+    "baja": "Low"
+  },
+  "lowSample": "little data",
+  "range": "between {{low}} and {{high}}",
+  "points": "{{value}} points",
+  "maePair": "{{model}} (league {{league}})",
+  "bin": {
+    "atLeast": "≥ {{low}}%",
+    "range": "{{low}}–{{high}}%"
+  },
+  "where": {
+    "title": "Where they are right most",
+    "short": "Leagues and teams",
+    "intro": "For the season chosen above. The hit rate shows where it is easy to be right; the edge, where the model adds something over not using one.",
+    "noValue": "A model being right a lot with a league or a team does not mean there is value in betting: the market already prices it in.",
+    "model": {
+      "result_1x2": "1X2",
+      "result_double": "Double ch.",
+      "stats_predictor": "Predictor",
+      "corner_duel": "Duel",
+      "probable_picks": "Picks",
+      "high_probability": "High prob."
+    },
+    "leagues": {
+      "title": "Leagues",
+      "caption": "Hit rate of each model in each league, with its edge over the baseline",
+      "best": "highest",
+      "worst": "lowest",
+      "stability": "Repeats across seasons",
+      "note": "▲ highest and ▼ lowest for each model, leaving out leagues with little data. Last row: whether the order of the leagues repeats from one season to the next.",
+      "oneLeague": "With one league chosen above there are no leagues to compare: choose “All” under League."
+    },
+    "repeat": {
+      "none": "hardly at all",
+      "low": "a little",
+      "mid": "quite a lot",
+      "high": "a lot"
+    }
+  },
+  "overview": {
+    "title": "Hit rate of each model",
+    "intro": "How often each model was right for the league and season chosen above. Tap a card to see its details.",
+    "current": "This season ({{season}}): {{rate}} across {{count}}",
+    "reference": "Reference: {{base}} ({{rule}})"
+  },
+  "glossaryLink": "What does each figure mean? We explain it in the <glossary>glossary</glossary>.",
+  "teams": {
+    "title": "Teams",
+    "model": "Model",
+    "scope": {
+      "current": "Current season ({{season}})",
+      "all": "All seasons"
+    },
+    "note": "Each row counts the predictions from the matches the team plays in, including those about the opponent. “Little data”: fewer than {{n}}. Tap a team to see its matches.",
+    "empty": "No teams with this model in this league and season.",
+    "caption": "{{model}}: hits, matches and hit rate of each team",
+    "column": {
+      "team": "Team",
+      "hits": "Hits",
+      "matches": "Matches",
+      "rate": "Hit rate"
+    },
+    "loading": "Loading its matches…",
+    "error": "Couldn't load its matches: {{error}}",
+    "noMatches": "No matches with this model in this league and season.",
+    "legend": "✓ came true · ✗ did not · = tie in that stat (does not count). Everything was calculated only with data from before each match; “saved before” marks what was saved before kick-off and left untouched.",
+    "frozen": "saved before",
+    "mark": {
+      "hit": "Came true",
+      "miss": "Did not come true",
+      "tie": "Tie, does not count",
+      "none": "No data"
+    }
+  },
+  "pick": {
+    "draw": "Draw",
+    "win": "{{team}} win",
+    "noDraw": "No draw (12)",
+    "winOrDraw": "{{team}} or draw",
+    "sameCorners": "Same number of corners",
+    "moreCorners": "{{team}} take more corners",
+    "more": "{{team}} get more {{stat}}",
+    "ofTeam": "{{team}}: {{text}}"
+  }
+}
