@@ -40,6 +40,7 @@ from app.ingestion.referee_overrides import apply_referee_overrides
 from app.ingestion.soccerdata_client import leagues_with_source
 from app.ingestion.xg_backfill import backfill_understat_xg
 from app.probability.dc_monthly import refresh_dc_monthly
+from app.probability.match_forecasts import refresh_match_forecasts
 from app.probability.result_predictions import LEAGUES as RESULT_LEAGUES
 from app.probability.result_predictions import refresh_result_predictions
 from app.stats.own_elo import refresh_own_elo
@@ -118,6 +119,10 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
         run = refresh_result_predictions(db)
         return f"status={run.status.value} {run.notes}"
 
+    def match_forecasts() -> str:
+        run = refresh_match_forecasts(db)
+        return f"status={run.status.value} {run.notes}"
+
     step("football-data.org", football_data_org)
     step(f"Football-Data.co.uk {season}", match_history)
     step(f"Understat xG {season}", understat)
@@ -137,4 +142,7 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
     # Si Dixon-Coles falla en una liga, el paso sale con aviso y esa liga usa solo Elo.
     step("Dixon-Coles mensual", dc_monthly)
     step("Porcentajes de resultado", result_probabilities)
+    # Con las estadisticas y los arbitros ya al dia: el duelo de corners y el
+    # predictor de los programados hasta su inicio y los jugados que falten.
+    step("Duelo y predictor", match_forecasts)
     return failures

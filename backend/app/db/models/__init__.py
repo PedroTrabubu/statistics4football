@@ -4,6 +4,7 @@ from app.db.models.elo import EloRating
 from app.db.models.ingestion import IngestionRun, IngestionStatus
 from app.db.models.league import League
 from app.db.models.match import Match, MatchStatus
+from app.db.models.match_forecast import MatchForecast
 from app.db.models.odds import MatchOdds
 from app.db.models.own_elo import OwnEloPre
 from app.db.models.pick import PickCombo, PickLeg
@@ -20,6 +21,7 @@ __all__ = [
     "IngestionStatus",
     "League",
     "Match",
+    "MatchForecast",
     "MatchOdds",
     "MatchStatus",
     "ModelPrediction",

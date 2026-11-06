@@ -10,7 +10,9 @@ from app.core.config import Settings, get_settings
 from app.db.models import Match, MatchStatus, Season
 from app.db.session import get_db
 from app.probability.engine import generate_predictions_for_match, get_cached_league_model
+from app.probability.match_forecasts import match_forecasts
 from app.probability.result_predictions import match_result_probabilities
+from app.schemas.forecast import MatchForecastsOut
 from app.schemas.match import (
     MatchHistoryOut,
     MatchOut,
@@ -81,6 +83,14 @@ def get_match_result_probabilities(match_id: int, db: Session = Depends(get_db))
     historico de su liga. Solo lee (scripts/refresh_result_predictions.py los genera)."""
     match = _get_match_or_404(db, match_id)
     return MatchResultProbabilitiesOut.model_validate(match_result_probabilities(db, match))
+
+
+@router.get("/{match_id}/forecasts", response_model=MatchForecastsOut)
+def get_match_forecasts(match_id: int, db: Session = Depends(get_db)) -> MatchForecastsOut:
+    """Duelo de corners y predictor de estadisticas ya guardados del partido.
+    Solo lee (scripts/refresh_match_forecasts.py los genera)."""
+    match = _get_match_or_404(db, match_id)
+    return MatchForecastsOut.model_validate(match_forecasts(db, match))
 
 
 @router.get("/{match_id}/stats", response_model=MatchFeaturesOut)

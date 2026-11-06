@@ -19,8 +19,10 @@ from app.schemas.match import (
     match_to_result_out,
 )
 from app.schemas.season_stats import TeamSeasonStatsOut
+from app.schemas.forecast import LeagueDuelOut
 from app.schemas.result import LeagueResultProbabilitiesOut
 from app.schemas.stats import MatchEloOut
+from app.probability.match_forecasts import league_season_duels
 from app.probability.result_predictions import league_season_result_probabilities
 from app.stats.own_elo import league_season_elo
 from app.stats.season_stats import (
@@ -196,6 +198,13 @@ def list_league_result_probabilities(
             return LeagueResultProbabilitiesOut(summary=None, predictions=[])
         season = latest.name
     return LeagueResultProbabilitiesOut.model_validate(league_season_result_probabilities(db, league_id, season))
+
+
+@router.get("/{league_id}/corner-duels", response_model=list[LeagueDuelOut])
+def list_league_corner_duels(league_id: int, season: str, db: Session = Depends(get_db)) -> list[LeagueDuelOut]:
+    """Duelo de corners ya guardado de cada partido de una temporada que lo
+    tenga (la pagina de Picks probables). Solo lee."""
+    return [LeagueDuelOut.model_validate(d) for d in league_season_duels(db, league_id, season)]
 
 
 @router.get("/{league_id}/context-results", response_model=list[MatchResultOut])

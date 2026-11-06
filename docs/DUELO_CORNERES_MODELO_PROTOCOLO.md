@@ -16,6 +16,11 @@ como nuevos.
 
 ## Modelo (`frontend/src/lib/cornerDuel.ts`)
 
+**2026-11-03:** la web ya no lo calcula en el navegador. Lo calcula el backend (`backend/app/probability/corner_duel.py`,
+un port con las mismas cuentas: mismas cifras que el código de aquí hasta 1e-14 en 57 partidos reales) y lo guarda por
+partido en `match_forecasts`, reconstruido en los jugados y congelado antes del inicio en los programados. El código
+de aquí queda para los scripts de este protocolo.
+
 Solo partidos de la liga anteriores al partido, de su temporada y la anterior (lo que ya carga la web). El resultado
 del partido nunca entra.
 

@@ -18,6 +18,8 @@ anteriores de la competición y no entra en la evaluación.
 
 ## Modelo (`frontend/src/lib/statsPredictor.ts`)
 
+Desde el 2026-11-03 la web usa su port en el backend (ver "Prueba de los partidos futuros").
+
 Es el mismo método que los córners esperados del duelo de córners
 ([DUELO_CORNERES_MODELO_PROTOCOLO.md](DUELO_CORNERES_MODELO_PROTOCOLO.md)), aplicado a cada estadística:
 
@@ -255,6 +257,12 @@ para probar el script del modelo publicado y la 24/25, para elegir la variante d
 
 Las predicciones de los partidos por jugar se guardan con fecha (`data/reports/`) y se comparan cuando se jueguen. Es
 la única prueba sin ninguna mirada previa.
+
+**2026-11-03:** el backend calcula el predictor (`backend/app/probability/stats_predictor.py`, un port de MODEL con las
+mismas cifras que `statsPredictor.ts`) y lo guarda por partido en `match_forecasts`: el programador congela la
+estimación de cada partido por jugar hasta su inicio. Esas filas "congeladas antes del partido" son ya esta prueba,
+partido a partido, y la página Aciertos las separa de las reconstruidas. La web lee de ahí; `prospective:stats` sigue
+sirviendo para la tanda del 2026-10-27.
 
 ### 2026-10-27: validación de la ampliación 2 (22/23, 23/24 y 24/25, 6716 partidos)
 
