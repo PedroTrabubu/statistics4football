@@ -1791,32 +1791,31 @@ section[id] {
   background: var(--border-strong);
 }
 
-/* ---- Menú en el móvil: a pantalla completa bajo la barra superior (que
-   queda encima, con la X para cerrarlo), enlaces grandes y los mercados en
-   pastillas. En tablet sigue el cajón lateral. ---- */
+/* ---- Menú en el móvil: cajón lateral bajo la barra superior (que queda
+   encima, con la X para cerrarlo), enlaces grandes y los mercados en
+   pastillas. Al lado, la página queda velada; tocarla lo cierra. ---- */
 @media (max-width: 640px) {
   .app-sidebar {
-    inset: 0;
+    inset: var(--navbar-h) auto 0 0;
     z-index: 19;
-    width: 100%;
-    height: 100dvh;
-    padding: calc(var(--navbar-h) + var(--space-5)) var(--space-4) calc(var(--space-8) + env(safe-area-inset-bottom));
-    border-right: 0;
-    box-shadow: none;
+    width: min(88vw, 22rem);
+    height: auto;
+    padding: var(--space-5) var(--space-4) calc(var(--space-8) + env(safe-area-inset-bottom));
+    border-right: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
     background:
       radial-gradient(90% 45% at 50% 0%, color-mix(in srgb, var(--green-fill) 12%, transparent), transparent),
       var(--bg);
-    transform: none;
-    opacity: 0;
+    transform: translateX(-100%);
     visibility: hidden;
     transition:
-      opacity var(--dur-base) var(--ease-out),
+      transform var(--dur-base) var(--ease-out),
       visibility 0s linear var(--dur-base);
   }
   .app-sidebar.open {
-    opacity: 1;
+    transform: translateX(0);
     visibility: visible;
-    transition: opacity var(--dur-base) var(--ease-out);
+    transition: transform var(--dur-base) var(--ease-out);
   }
   /* El contenido entra escalonado; "backwards" no deja el transform puesto. */
   .app-sidebar.open > * {
@@ -1836,7 +1835,8 @@ section[id] {
     overflow: hidden;
   }
   .sidebar-backdrop {
-    display: none;
+    top: var(--navbar-h);
+    z-index: 18;
   }
 
   .sidebar-nav {

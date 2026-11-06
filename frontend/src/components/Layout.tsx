@@ -45,7 +45,7 @@ export function Layout() {
     setNavOpen(false);
   }, [location.pathname]);
 
-  // En el móvil el menú ocupa toda la pantalla: Escape también lo cierra.
+  // En el móvil el menú es un cajón sobre la página: Escape también lo cierra.
   useEffect(() => {
     if (!navOpen) return;
     const onKey = (e: KeyboardEvent) => {
