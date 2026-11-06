@@ -13,6 +13,10 @@
         "label": "Pourcentages du résultat",
         "short": "Pourcentages"
       },
+      "standings": {
+        "label": "Classement",
+        "short": "Classement"
+      },
       "stats": {
         "label": "Statistiques du match",
         "short": "Statistiques"
@@ -122,6 +126,20 @@
     "historyLoading": "Chargement de la réussite de la saison…",
     "historyError": "La réussite de la saison n'a pas pu être chargée.",
     "historyEmpty": "Aucun match avec pourcentages n'a encore été joué cette saison."
+  },
+  "standings": {
+    "title": "Classement",
+    "note": "Avant ce match : résultats jusqu'à la journée {{n}}, sans compter ce match ni les suivants.",
+    "caption": "Classement de {{league}} après la journée {{n}}, avant ce match",
+    "loading": "Chargement du classement...",
+    "error": "Impossible de charger le classement : {{error}}",
+    "noneYet": "Pas encore de matchs : le classement commence après la première journée.",
+    "noMatchesYet": "pas encore de match",
+    "thisMatch": "(équipe de ce match)",
+    "omitted_one": "{{count}} équipe non affichée",
+    "omitted_many": "{{count}} équipes non affichées",
+    "omitted_other": "{{count}} équipes non affichées",
+    "full": "Voir le classement complet"
   },
   "recent": {
     "title": "Derniers matchs",

@@ -17,6 +17,7 @@ import { HeadToHead, RecentMatches } from "../components/RecentMatches";
 import { RefereePanel } from "../components/RefereePanel";
 import { SeasonStatsSummary } from "../components/SeasonStatsSummary";
 import { SectionNav } from "../components/SectionNav";
+import { StandingsBefore } from "../components/StandingsBefore";
 import { ErrorView, LoadingView } from "../components/StatusView";
 import { StatsPanel } from "../components/StatsPanel";
 import { TeamCrest } from "../components/TeamCrest";
@@ -30,6 +31,7 @@ import { useApi } from "../lib/useApi";
  * dos filas. */
 const SECTIONS = [
   { id: "porcentajes", key: "probabilities" },
+  { id: "clasificacion", key: "standings" },
   { id: "estadisticas", key: "stats" },
   { id: "forma", key: "form" },
   { id: "h2h", key: "h2h" },
@@ -81,6 +83,8 @@ export function MatchDetailPage() {
   // allí, por jugar no hay nada que enseñar y, jugado, solo lo que pasó.
   const predictor = match.league_code !== CHAMPIONS_LEAGUE_CODE;
   const showStats = played || predictor;
+  // Clasificación solo con una tabla única y jornadas (no en la Champions).
+  const showStandings = match.league_code !== CHAMPIONS_LEAGUE_CODE && match.matchday !== null;
 
   return (
     <div>
@@ -121,7 +125,10 @@ export function MatchDetailPage() {
       <SectionNav
         label={t("matches:detail.sectionsLabel")}
         sections={SECTIONS.filter(
-          (s) => (s.id !== "otros-partidos" || match.matchday !== null) && (s.id !== "estadisticas" || showStats),
+          (s) =>
+            (s.id !== "otros-partidos" || match.matchday !== null) &&
+            (s.id !== "estadisticas" || showStats) &&
+            (s.id !== "clasificacion" || showStandings),
         ).map((s) => ({
           id: s.id,
           label: t(`matches:detail.section.${s.key}.label`),
@@ -130,6 +137,8 @@ export function MatchDetailPage() {
       />
 
       <WinProbability match={match} />
+
+      {showStandings && <StandingsBefore match={match} />}
 
       {/* Jugado: lo que hizo cada equipo. Por jugar: el predictor, cerrado. */}
       {showStats && (

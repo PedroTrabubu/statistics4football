@@ -13,6 +13,10 @@
         "label": "Porcentajes de resultado",
         "short": "Porcentajes"
       },
+      "standings": {
+        "label": "Clasificación",
+        "short": "Clasificación"
+      },
       "stats": {
         "label": "Estadísticas del partido",
         "short": "Estadísticas"
@@ -122,6 +126,20 @@
     "historyLoading": "Cargando el acierto de la temporada…",
     "historyError": "No se ha podido cargar el acierto de la temporada.",
     "historyEmpty": "Todavía no hay partidos jugados con porcentajes en esta temporada."
+  },
+  "standings": {
+    "title": "Clasificación",
+    "note": "Antes del partido: con los resultados hasta la jornada {{n}}, sin contar este partido ni los posteriores.",
+    "caption": "Clasificación de {{league}} tras la jornada {{n}}, antes de este partido",
+    "loading": "Cargando la clasificación...",
+    "error": "No se pudo cargar la clasificación: {{error}}",
+    "noneYet": "Sin partidos aún: la clasificación empieza tras la primera jornada.",
+    "noMatchesYet": "sin partidos aún",
+    "thisMatch": "(equipo de este partido)",
+    "omitted_one": "{{count}} equipo sin mostrar",
+    "omitted_many": "{{count}} equipos sin mostrar",
+    "omitted_other": "{{count}} equipos sin mostrar",
+    "full": "Ver clasificación completa"
   },
   "recent": {
     "title": "Últimos partidos",

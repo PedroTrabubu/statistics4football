@@ -13,6 +13,10 @@
         "label": "Result percentages",
         "short": "Percentages"
       },
+      "standings": {
+        "label": "Standings",
+        "short": "Standings"
+      },
       "stats": {
         "label": "Match stats",
         "short": "Stats"
@@ -121,6 +125,19 @@
     "historyLoading": "Loading the season's accuracy…",
     "historyError": "The season's accuracy could not be loaded.",
     "historyEmpty": "No matches with percentages have been played this season yet."
+  },
+  "standings": {
+    "title": "Standings",
+    "note": "Before this match: results up to matchday {{n}}, not counting this match or later ones.",
+    "caption": "{{league}} standings after matchday {{n}}, before this match",
+    "loading": "Loading standings...",
+    "error": "Could not load the standings: {{error}}",
+    "noneYet": "No matches yet: the table starts after the first matchday.",
+    "noMatchesYet": "no matches yet",
+    "thisMatch": "(team in this match)",
+    "omitted_one": "{{count}} team not shown",
+    "omitted_other": "{{count}} teams not shown",
+    "full": "See full standings"
   },
   "recent": {
     "title": "Recent matches",

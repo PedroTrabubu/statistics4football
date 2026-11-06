@@ -10,6 +10,7 @@ import { TeamName } from "../components/TeamCrest";
 import { formatFixed, formatPct } from "../lib/format";
 import { defaultLeagueCode, useSelectedLeagueCode, leagueName, parseLeagueParam } from "../lib/leagues";
 import { QUERY } from "../lib/routes";
+import { compareStandings } from "../lib/standings";
 import { useApi } from "../lib/useApi";
 
 type SplitKey = "overall" | "home" | "away" | "last5";
@@ -189,15 +190,6 @@ const LOW_SAMPLE = 5;
 
 /** Claves de la letra y del texto de cada resultado (standings:form). */
 const FORM_KEYS: Record<FormResult, string> = { W: "win", D: "draw", L: "loss" };
-
-/** Orden de clasificacion: puntos, diferencia de goles y goles a favor. */
-function compareStandings(a: SplitStats, b: SplitStats): number {
-  return (
-    b.points - a.points ||
-    b.goals_for - b.goals_against - (a.goals_for - a.goals_against) ||
-    b.goals_for - a.goals_for
-  );
-}
 
 function FormDots({ form }: { form: FormResult[] }) {
   const { t } = useTranslation();
