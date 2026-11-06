@@ -27,6 +27,7 @@ from datetime import date
 
 from sqlalchemy.orm import Session
 
+from app.analysis.hit_rate import build as build_hit_rate
 from app.core.config import Settings
 from app.ingestion.champions import LEAGUE_CODE as CHAMPIONS, sync_champions
 from app.ingestion.designations import sync_designations
@@ -123,6 +124,10 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
         run = refresh_match_forecasts(db)
         return f"status={run.status.value} {run.notes}"
 
+    def hit_rate() -> str:
+        summary = build_hit_rate(db, settings)
+        return f"{summary.written} ficheros escritos, {summary.kept} sin cambios, {summary.teams} equipos reescritos"
+
     step("football-data.org", football_data_org)
     step(f"Football-Data.co.uk {season}", match_history)
     step(f"Understat xG {season}", understat)
@@ -145,4 +150,7 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
     # Con las estadisticas y los arbitros ya al dia: el duelo de corners y el
     # predictor de los programados hasta su inicio y los jugados que falten.
     step("Duelo y predictor", match_forecasts)
+    # Con las predicciones ya al dia: la pagina Aciertos (solo lee la BD y
+    # reescribe los JSON que han cambiado).
+    step("Aciertos", hit_rate)
     return failures

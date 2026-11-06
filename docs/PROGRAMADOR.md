@@ -8,8 +8,10 @@
    actual de los programados ([ELO_PROPIO.md](ELO_PROPIO.md)). Después, **Dixon-Coles mensual** (si falla en una liga, esa liga usa solo Elo) y **Porcentajes de resultado**, que reconstruye los
    jugados que falten y escribe la predicción de los programados hasta su inicio, cuando queda congelada
    ([RESULTADOS_PROTOCOLO.md](RESULTADOS_PROTOCOLO.md)). Luego, **Duelo y predictor** hace lo mismo con el duelo de
-   córners y el predictor de estadísticas de la ficha (`match_forecasts`, `scripts/refresh_match_forecasts.py`). Si
-   alguno falla, la actualización queda con aviso.
+   córners y el predictor de estadísticas de la ficha (`match_forecasts`, `scripts/refresh_match_forecasts.py`). Por
+   último, **Aciertos**: reescribe los JSON de la página
+   Aciertos que hayan cambiado (`data/model_cache/hit_rate/`, `scripts/report_hit_rate.py`). Si alguno falla, la
+   actualización queda con aviso.
 2. **Captura las cuotas de Pinnacle** de la apertura al cierre ([PINNACLE.md](PINNACLE.md)).
 
 ## Cuándo actualiza
