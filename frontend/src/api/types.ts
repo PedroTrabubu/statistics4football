@@ -522,3 +522,39 @@ export interface LeagueResultProbabilities {
   summary: ResultSummary | null;
   predictions: ResultProbabilities[];
 }
+
+// --- Duelo de córners y predictor (backend/app/probability/match_forecasts.py) --
+
+export interface DuelForecastOut {
+  home_expected: number;
+  away_expected: number;
+  home: number;
+  draw: number;
+  away: number;
+  home_matches: number;
+  away_matches: number;
+}
+
+export interface StatForecastOut {
+  home: number;
+  away: number;
+  home_matches: number;
+  away_matches: number;
+  scope: "venue" | "all";
+  referee: { factor: number; matches: number } | null;
+}
+
+/** Lo guardado de un partido. `stats` null: sin predictor (la Champions) o aún
+ * sin calcular; dentro, null por estadística sin datos. */
+export interface MatchForecastsOut {
+  match_id: number;
+  status: "ok" | "not_generated";
+  kind: "reconstructed" | "frozen" | null;
+  generated_at: string | null;
+  duel: DuelForecastOut | null;
+  stats: Record<string, StatForecastOut | null> | null;
+}
+
+export interface LeagueDuelOut extends DuelForecastOut {
+  match_id: number;
+}

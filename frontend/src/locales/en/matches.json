@@ -314,9 +314,10 @@
   "predictor": {
     "notPlayed": "The match hasn't been played yet.",
     "button": "Stats predictor",
-    "loading": "Calculating...",
-    "loadError": "Couldn't calculate it: {{error}}",
+    "loading": "Loading the estimate...",
+    "loadError": "Couldn't load it: {{error}}",
     "noData": "There are no earlier league matches to estimate it from.",
+    "notGenerated": "Not calculated yet: it comes with the next data update.",
     "intro": "What to expect from each team based on their earlier league matches (this season and last): what they usually do and what the opponent usually concedes, allowing for home and away and with more weight on recent games. For yellow cards, the referee too. It's an estimate, not what will happen.",
     "caption": "Expected stats for {{home}} and {{away}}",
     "errorValue": "±{{value}}",

@@ -4,7 +4,6 @@
  * partidos que se les pasan y solo cuentan los anteriores al partido. */
 
 import type { Match, MatchResult } from "../api/types";
-import { cornerDuelForecast, type DuelForecast } from "./cornerDuel";
 import { t } from "../i18n";
 import { formatLine, formatSeason } from "./format";
 import {
@@ -785,9 +784,9 @@ export interface PickResult {
 export interface MatchPicksResult {
   match: MatchResult;
   picks: PickResult[];
-  /** Nuevo: picks del duelo de córners y su pronóstico, aparte de los demás. */
+  /** Nuevo: picks del duelo de córners, aparte de los demás (su pronóstico lo
+   * guarda el backend: getLeagueCornerDuels). */
   duelPicks: PickResult[];
-  duel: DuelForecast | null;
 }
 
 /** Frecuencias de la liga que crecen partido a partido: dan lo mismo que
@@ -827,9 +826,9 @@ function growingLeagueRates() {
  * partidos de la liga de los que sacar los patrones (los jugados incluidos). */
 export function* checkPlayedPicksSteps(played: MatchResult[], history: MatchResult[]): Generator<MatchPicksResult> {
   const targets = played.filter((m) => m.status === "historical");
-  for (const { match, picks, duelPicks, duel } of picksInOrder(targets, history)) {
+  for (const { match, picks, duelPicks } of picksInOrder(targets, history)) {
     const outcome = (pick: ProbablePick) => ({ pick, hit: pickOutcome(pick, match) });
-    yield { match, picks: picks.map(outcome), duelPicks: duelPicks.map(outcome), duel };
+    yield { match, picks: picks.map(outcome), duelPicks: duelPicks.map(outcome) };
   }
 }
 
@@ -840,7 +839,6 @@ interface InOrder<T> {
   match: T;
   picks: ProbablePick[];
   duelPicks: ProbablePick[];
-  duel: DuelForecast | null;
 }
 
 function* picksInOrder<T extends Match>(targets: T[], history: MatchResult[]): Generator<InOrder<T>> {
@@ -856,7 +854,6 @@ function* picksInOrder<T extends Match>(targets: T[], history: MatchResult[]): G
       match,
       picks: picksFromPrior(match, prior, league.rates, MAX_PICKS),
       duelPicks: teamPicks(match, prior, league.rates, DUEL_FAMILIES),
-      duel: cornerDuelForecast(match, prior),
     };
   }
 }

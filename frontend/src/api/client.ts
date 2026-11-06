@@ -8,7 +8,9 @@ import type {
   MatchRecent,
   MatchRefereeStats,
   MatchResult,
+  LeagueDuelOut,
   LeagueResultProbabilities,
+  MatchForecastsOut,
   MatchResultProbabilities,
   MatchStatus,
   PicksHistory,
@@ -24,6 +26,8 @@ import type {
   TeamSeasonStats,
   UpcomingMatch,
 } from "./types";
+import type { DuelForecast } from "../lib/cornerDuel";
+import { toDuel, toMatchForecasts, type MatchForecasts } from "../lib/forecasts";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -161,6 +165,17 @@ export function getMatchPredictions(matchId: number): Promise<Prediction[]> {
 /** Porcentajes de resultado ya guardados (solo lectura) y el acierto histórico de la liga. */
 export function getMatchResultProbabilities(matchId: number): Promise<MatchResultProbabilities> {
   return request(`/matches/${matchId}/result-probabilities`);
+}
+
+/** Duelo de córners y predictor de estadísticas ya guardados del partido (solo lectura). */
+export async function getMatchForecasts(matchId: number): Promise<MatchForecasts> {
+  return toMatchForecasts(await request<MatchForecastsOut>(`/matches/${matchId}/forecasts`));
+}
+
+/** El duelo de córners guardado de cada partido de una temporada, por partido. */
+export async function getLeagueCornerDuels(leagueId: number, season: string): Promise<Map<number, DuelForecast>> {
+  const rows = await request<LeagueDuelOut[]>(`/leagues/${leagueId}/corner-duels`, { season });
+  return new Map(rows.map((d) => [d.match_id, toDuel(d)]));
 }
 
 /** Porcentajes de resultado de cada partido de una liga y temporada (la última jugada si no se indica). */

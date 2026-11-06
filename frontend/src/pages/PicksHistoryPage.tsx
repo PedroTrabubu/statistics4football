@@ -3,6 +3,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { PageHero } from "../components/PageHero";
 import { Link, useSearchParams } from "react-router-dom";
 import {
+  getLeagueCornerDuels,
   getLeagueMatchdays,
   getLeagueResults,
   getLeagueSeasons,
@@ -270,6 +271,20 @@ export function PicksHistoryPage() {
       nextList && nextHistory ? upcomingPicks(nextList, nextHistory) : null,
     [nextList, nextHistory],
   );
+  // Duelo de córners de cada partido, ya guardado en el backend: el de la
+  // temporada elegida (jornadas) y el de la de la próxima jornada.
+  const seasonDuels = useApi(
+    () => (league && season ? getLeagueCornerDuels(league.id, season) : Promise.resolve(null)),
+    [league?.id, season],
+  );
+  const nextDuelsApi = useApi(
+    () =>
+      league && nextSeason && nextSeason !== season
+        ? getLeagueCornerDuels(league.id, nextSeason)
+        : Promise.resolve(null),
+    [league?.id, nextSeason, season],
+  );
+  const nextDuels = nextSeason === season ? seasonDuels.data : nextDuelsApi.data;
 
   // Vista: la de la URL; sin ella, la proxima jornada (o las jugadas si no hay).
   const viewParam = fromParam(PROBABLE_PICKS_VIEW_PARAMS, params.get(QUERY.view));
@@ -377,6 +392,7 @@ export function PicksHistoryPage() {
             nextInfo?.matchdays.find((m) => m.matchday === nextMatchday) ?? null
           }
           upcoming={upcoming}
+          duels={nextDuels}
           error={nextMatches.error ?? nextHistoryApi.error}
           league={leagueCode}
           history={nextHistory}
@@ -418,6 +434,7 @@ export function PicksHistoryPage() {
               <MatchdayResults
                 key={current.key}
                 results={check.results}
+                duels={seasonDuels.data}
                 league={leagueCode}
                 matchday={jornada}
                 onMatchday={(m) => setParam({ [QUERY.matchday]: String(m) })}
@@ -458,6 +475,7 @@ function NextMatchday({
   matchday,
   info,
   upcoming,
+  duels,
   error,
   league,
   history,
@@ -474,9 +492,10 @@ function NextMatchday({
         match: Match;
         picks: ProbablePick[];
         duelPicks: ProbablePick[];
-        duel: DuelForecast | null;
       }[]
     | null;
+  /** El duelo de córners guardado de cada partido (null mientras carga). */
+  duels: Map<number, DuelForecast> | null;
   error: string | null;
   league: string;
   history: MatchResult[] | null;
@@ -584,13 +603,13 @@ function NextMatchday({
             </p>
           )}
           <div className="checked-matches">
-            {visible.map(({ match, picks: matchPicks, duelPicks, duel }) => (
+            {visible.map(({ match, picks: matchPicks, duelPicks }) => (
               <MatchPicksCard
                 key={match.id}
                 match={match}
                 results={matchPicks.map((pick) => ({ pick }))}
                 league={league}
-                duel={duel}
+                duel={duels?.get(match.id) ?? null}
                 duelPicks={duelPicks.map((pick) => ({ pick }))}
                 history={history}
                 strength={strength}
@@ -942,6 +961,7 @@ function RateCell({ summary }: { summary: PicksSummary }) {
  * ultima jugada. */
 function MatchdayResults({
   results,
+  duels,
   league,
   matchday: choice,
   onMatchday: setChoice,
@@ -949,6 +969,8 @@ function MatchdayResults({
   onStrength,
 }: {
   results: MatchPicksResult[];
+  /** El duelo de córners guardado de cada partido (null mientras carga). */
+  duels: Map<number, DuelForecast> | null;
   league: string;
   /** La de la URL; sin ella (o si no existe), la ultima jugada. */
   matchday: number | null;
@@ -1045,19 +1067,20 @@ function MatchdayResults({
       <MatchdaySummary
         matchday={matchday}
         league={league}
+        duels={duels}
         picks={rows.flatMap((r) => r.picks)}
         rows={rows}
       />
       <div className="checked-matches">
         {all
           .filter((r) => visibleIds.has(r.match.id))
-          .map(({ match, picks, duelPicks, duel }) => (
+          .map(({ match, picks, duelPicks }) => (
             <MatchPicksCard
               key={match.id}
               match={match}
               results={picks}
               league={league}
-              duel={duel}
+              duel={duels?.get(match.id) ?? null}
               duelPicks={duelPicks}
               strength={strength}
               matchPicks={pickOfMatch}
@@ -1072,18 +1095,21 @@ function MatchdayResults({
 function MatchdaySummary({
   matchday,
   league,
+  duels: forecasts,
   picks,
   rows,
 }: {
   matchday: number;
   league: string;
+  duels: Map<number, DuelForecast> | null;
   picks: PickResult[];
   rows: MatchPicksResult[];
 }) {
   const { t } = useTranslation();
   const total = summarizePicks(picks);
   // Duelo de córners: el resultado más probable del modelo y los picks del duelo.
-  const duels = rows.flatMap(({ match, duel }) => {
+  const duels = rows.flatMap(({ match }) => {
+    const duel = forecasts?.get(match.id);
     const h = match.home_stats?.corners;
     const a = match.away_stats?.corners;
     if (!duel || h == null || a == null) return [];

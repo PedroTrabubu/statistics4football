@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { ROUTES, refereePath } from "../lib/routes";
 import {
   getMatch,
+  getMatchForecasts,
   getMatchHistory,
   getMatchRecent,
   getMatchStats,
@@ -57,6 +58,8 @@ export function MatchDetailPage() {
   // Partidos de la liga anteriores a este: patrones de los equipos y lo
   // habitual en la liga (picks muy probables y hechos del arbitro).
   const history = useApi(() => getMatchHistory(id), [id]);
+  // Duelo de córners y predictor de estadísticas, ya guardados en el backend.
+  const forecasts = useApi(() => getMatchForecasts(id), [id]);
   // Los partidos de la forma y los enfrentamientos directos, uno a uno.
   const recent = useApi(() => getMatchRecent(id), [id]);
   const { data: seasonStats, loading: loadingSeasonStats } = useApi(
@@ -133,12 +136,12 @@ export function MatchDetailPage() {
         <section className="detail-section" id="estadisticas">
           <h2>{t("matches:detail.matchStatsTitle")}</h2>
           {!played ? (
-            <StatsPredictor match={match} history={history.data} loading={history.loading} error={history.error} />
+            <StatsPredictor match={match} data={forecasts.data} loading={forecasts.loading} error={forecasts.error} />
           ) : history.data?.played ? (
             <MatchStatsTable
               match={match}
               played={history.data.played}
-              prior={predictor ? history.data.matches : null}
+              estimates={predictor ? (forecasts.data?.stats ?? null) : null}
             />
           ) : history.error ? (
             <ErrorView message={t("matches:matchStats.error", { error: history.error })} />
@@ -212,7 +215,13 @@ export function MatchDetailPage() {
       {/* Lo que se ha repetido en los partidos de los dos equipos. */}
       <section className="detail-section" id="picks">
         <h2>{t("matches:detail.picksTitle")}</h2>
-        <ProbablePicks match={match} history={history.data} loading={history.loading} error={history.error} />
+        <ProbablePicks
+          match={match}
+          history={history.data}
+          loading={history.loading}
+          error={history.error}
+          forecasts={forecasts.data}
+        />
       </section>
 
       <MatchdayCarousel key={match.id} match={match} />

@@ -1,7 +1,8 @@
-import { useId, useMemo, useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Match, MatchHistory, MatchResult } from "../api/types";
+import type { Match, MatchResult } from "../api/types";
 import { currentLocale } from "../i18n";
+import type { MatchForecasts } from "../lib/forecasts";
 import { formatFixed, formatSeason, withPercent } from "../lib/format";
 import { sampleTier } from "../lib/sampleLevel";
 import {
@@ -10,7 +11,6 @@ import {
   EVALUATION_MATCHES,
   EVALUATION_SEASONS,
   MODEL,
-  predictStats,
   STAT_KEYS,
   statValue,
   type CardKey,
@@ -128,15 +128,14 @@ function PredictorNotes({ match, forecasts }: { match: Match; forecasts: Forecas
 /** Lo que hizo cada equipo en el partido ya jugado, en espejo: solo las
  * estadísticas que hay de los dos (el xG, solo en las cinco grandes ligas).
  * Arriba, los totales del partido con el total que preveía el predictor y la
- * diferencia. `prior`: los partidos de la liga anteriores a este; con ellos,
- * además, el botón pone debajo de cada cifra lo que estimaba el predictor
- * antes del partido. null: sin predictor (la Champions). */
-export function MatchStatsTable({ match, played, prior }: { match: Match; played: MatchResult; prior: MatchResult[] | null }) {
+ * diferencia. `estimates`: lo que estimaba el predictor antes del partido
+ * (guardado en el backend); con ello, además, el botón lo pone debajo de cada
+ * cifra. null: sin predictor (la Champions) o aún sin calcular. */
+export function MatchStatsTable({ match, played, estimates }: { match: Match; played: MatchResult; estimates: Forecasts | null }) {
   const { t } = useTranslation();
   const [compare, setCompare] = useState(false);
   const tableId = useId();
-  // Lo estimado antes del partido: los totales lo comparan siempre; por equipo, al abrir el botón.
-  const estimates = useMemo(() => (prior ? predictStats(match, prior) : null), [prior, match]);
+  // Los totales lo comparan siempre; por equipo, al abrir el botón.
   const forecasts = compare ? estimates : null;
   const rows = STAT_KEYS.map((key) => ({
     key,
@@ -203,7 +202,7 @@ export function MatchStatsTable({ match, played, prior }: { match: Match; played
           />
         ))}
       </CompareTable>
-      {prior && (
+      {estimates && (
         <div className="stats-predictor">
           <PredictorToggle
             open={compare}
@@ -227,24 +226,22 @@ export function MatchStatsTable({ match, played, prior }: { match: Match; played
   );
 }
 
-/** Partido por jugar: nada de entrada; el botón abre lo que estima el
- * predictor (lib/statsPredictor.ts), solo con las estadísticas que pasaron su
- * evaluación y cada una con su error medio. `history`: los partidos de la liga
- * anteriores a este. */
+/** Partido por jugar: lo que estima el predictor (guardado en el backend), solo
+ * con las estadísticas que pasaron su evaluación y cada una con su error medio. */
 export function StatsPredictor({
   match,
-  history,
+  data,
   loading,
   error,
 }: {
   match: Match;
-  history: MatchHistory | null;
+  data: MatchForecasts | null;
   loading: boolean;
   error: string | null;
 }) {
   const { t } = useTranslation();
   // Abierto siempre, como el resto de bloques de la ficha.
-  const forecasts = useMemo(() => (history ? predictStats(match, history.matches) : null), [history, match]);
+  const forecasts = data?.stats ?? null;
   const shown = predicted(forecasts);
   const totals = shown.filter(isTotal);
 
@@ -255,9 +252,11 @@ export function StatsPredictor({
         <span className="match-meta-chip predictor-chip">{t("matches:predictor.badge")}</span>
         {t("matches:predictor.notReal")}
       </p>
-      {loading && !history && <LoadingView label={t("matches:predictor.loading")} />}
+      {loading && !data && <LoadingView label={t("matches:predictor.loading")} />}
       {error && <ErrorView message={t("matches:predictor.loadError", { error })} />}
-      {history && shown.length === 0 && <p className="muted">{t("matches:predictor.noData")}</p>}
+      {data && shown.length === 0 && (
+        <p className="muted">{t(data.status === "not_generated" ? "matches:predictor.notGenerated" : "matches:predictor.noData")}</p>
+      )}
       {forecasts && shown.length > 0 && (
         <>
           {totals.length > 0 && (

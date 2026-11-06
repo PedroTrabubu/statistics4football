@@ -327,9 +327,10 @@
   "predictor": {
     "notPlayed": "El partido aún no se ha jugado.",
     "button": "Predictor de estadísticas",
-    "loading": "Calculando...",
-    "loadError": "No se pudo calcular: {{error}}",
+    "loading": "Cargando la estimación...",
+    "loadError": "No se pudo cargar: {{error}}",
     "noData": "No hay partidos anteriores en la liga para estimarlo.",
+    "notGenerated": "Todavía no está calculado: sale con la próxima actualización de datos.",
     "intro": "Lo que se espera de cada equipo según sus partidos anteriores en la liga (esta temporada y la anterior): lo que suele hacer y lo que suele conceder el rival, teniendo en cuenta si juega en casa o fuera y con más peso a lo reciente. En las amarillas, también el árbitro. Es una estimación, no lo que va a pasar.",
     "caption": "Estadísticas esperadas de {{home}} y {{away}}",
     "errorValue": "±{{value}}",

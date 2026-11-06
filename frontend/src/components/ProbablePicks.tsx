@@ -6,7 +6,7 @@ import { t } from "../i18n";
 import { formatSeason, withPercent } from "../lib/format";
 import { leagueName } from "../lib/leagues";
 import { ROUTES } from "../lib/routes";
-import { cornerDuelForecast } from "../lib/cornerDuel";
+import type { MatchForecasts } from "../lib/forecasts";
 import { PredictabilityChip } from "./Predictability";
 import { MatchPickBlock } from "./MatchPick";
 import {
@@ -15,7 +15,6 @@ import {
   isModelMarket,
   MAX_PICKS,
   pickOutcome,
-  priorMatches,
   probablePicks,
   RIVAL_STATE_LABEL,
   strengthLabel,
@@ -52,20 +51,18 @@ export function ProbablePicks({
   history,
   loading,
   error,
+  forecasts,
 }: {
   match: Match;
   history: MatchHistory | null;
   loading: boolean;
   error: string | null;
+  /** Con el duelo de córners ya guardado en el backend (null mientras carga). */
+  forecasts: MatchForecasts | null;
 }) {
   const { t } = useTranslation();
   const picks = useMemo(() => (history ? probablePicks(match, history.matches, undefined, history.context ?? []) : []), [match, history]);
   const played = history?.played ?? null;
-  // Nuevo: duelo de córners, aparte de los picks y de sus cifras.
-  const duel = useMemo(
-    () => (history ? cornerDuelForecast(match, priorMatches(match, history.matches)) : null),
-    [match, history],
-  );
   const duelPicks = useMemo(
     () =>
       history
@@ -141,7 +138,8 @@ export function ProbablePicks({
         </ol>
       )}
 
-      {history && <CornerDuel match={match} forecast={duel} picks={duelPicks} played={played} />}
+      {/* Nuevo: duelo de córners, aparte de los picks y de sus cifras. */}
+      {history && forecasts && <CornerDuel match={match} forecast={forecasts.duel} picks={duelPicks} played={played} />}
 
       <details className="picks-method">
         <summary>{t("picks:probable.method.title")}</summary>

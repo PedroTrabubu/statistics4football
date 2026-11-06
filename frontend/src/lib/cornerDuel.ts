@@ -5,7 +5,11 @@
  * Solo con los partidos anteriores al partido (los que se le pasan): medias
  * de córners a favor y en contra por campo, con más peso a los recientes y
  * encogidas hacia la liga; córners de cada equipo binomiales negativos e
- * independientes. Funciones puras. */
+ * independientes. Funciones puras.
+ *
+ * La web ya no lo llama: lee lo que guarda el backend, con su port en
+ * backend/app/probability/corner_duel.py (lib/forecasts.ts). Queda para los
+ * scripts del protocolo; un cambio aquí va también allí (tests/test_match_forecasts.py). */
 
 import type { Match, MatchResult } from "../api/types";
 

@@ -5,7 +5,12 @@
  * statForecast): solo con los partidos anteriores al partido, medias a favor y
  * en contra, con más peso a los recientes y encogidas hacia la liga. La web usa
  * la configuración de cada estadística elegida en la ampliación 2 (MODEL,
- * statForecastWith) y, en las amarillas, el árbitro. Funciones puras. */
+ * statForecastWith) y, en las amarillas, el árbitro. Funciones puras.
+ *
+ * La web ya no calcula con él: lee lo que guarda el backend, con su port en
+ * backend/app/probability/stats_predictor.py (lib/forecasts.ts); de aquí usa
+ * solo las constantes (EVALUATION, MODEL...). El resto queda para los scripts
+ * del protocolo; un cambio en MODEL va también allí (tests/test_match_forecasts.py). */
 
 import type { Match, MatchResult, TeamMatchStats } from "../api/types";
 import { CORNER_CAP, DECAY_PER_DAY, SHRINK_MATCHES } from "./cornerDuel";

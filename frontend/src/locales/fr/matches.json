@@ -327,9 +327,10 @@
   "predictor": {
     "notPlayed": "Le match n'a pas encore été joué.",
     "button": "Prédicteur de statistiques",
-    "loading": "Calcul en cours...",
-    "loadError": "Impossible de le calculer : {{error}}",
+    "loading": "Chargement de l'estimation...",
+    "loadError": "Impossible de la charger : {{error}}",
     "noData": "Aucun match antérieur du championnat pour l'estimer.",
+    "notGenerated": "Pas encore calculée : elle arrive avec la prochaine mise à jour des données.",
     "intro": "Ce qu'on peut attendre de chaque équipe d'après ses matchs précédents du championnat (cette saison et la précédente) : ce qu'elle fait d'habitude et ce que l'adversaire concède, en tenant compte du domicile ou de l'extérieur et avec plus de poids aux matchs récents. Pour les cartons jaunes, l'arbitre aussi. C'est une estimation, pas ce qui va se passer.",
     "caption": "Statistiques attendues de {{home}} et {{away}}",
     "errorValue": "±{{value}}",
