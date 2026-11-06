@@ -539,7 +539,7 @@
   },
   "probablePage": {
     "title": "Picks muy probables",
-    "lead": "Los de la próxima jornada, los mismos que salen en la ficha de cada partido. Y, de cada partido ya jugado, los que se mostraban antes de jugarse, calculados solo con los partidos anteriores, y si se cumplieron.",
+    "lead": "Lo que más repite cada equipo, contrastado con su rival: hasta 6 picks por partido. Los de la próxima jornada y, de las ya jugadas, los que había antes de cada partido y si se cumplieron.",
     "viewLabel": "Vista",
     "view": {
       "next": {

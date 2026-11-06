@@ -1,6 +1,6 @@
 {
   "title": "Standings and statistics",
-  "lead": "Real data from matches played: % over/under, both teams to score, clean sheets, half-time, corners and cards, overall, at home, away or over the last 5 matches. Click a column header to sort by that column (click again to reverse the order).",
+  "lead": "The league table and each team's stats (goals, half time, corners and cards), overall, at home, away or over the last 5 matches. Tap a header to sort.",
   "viewsLabel": "Table columns",
   "view": {
     "standings": "Standings",

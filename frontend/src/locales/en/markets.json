@@ -246,7 +246,7 @@
   },
   "page": {
     "thisSeason": "this season",
-    "refereesLead": "How each referee's matches play out: cards, booking points, red cards, corners or goals. Full-match markets only, which don't depend on which team is at home.",
+    "refereesLead": "How each referee's matches usually go: cards, red cards, fouls, corners, shots or goals. Only markets where it does not matter which team plays at home.",
     "search": {
       "team": "Search team",
       "referee": "Search referee"

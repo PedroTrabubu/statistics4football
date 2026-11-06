@@ -1,6 +1,6 @@
 {
   "title": "Classement et statistiques",
-  "lead": "Données réelles des matchs joués : % over/under, les deux équipes marquent, clean sheets, mi-temps, corners et cartons, au total, à domicile, à l'extérieur ou sur les 5 derniers matchs. Cliquez sur un en-tête pour trier par cette colonne (une seconde fois pour inverser l'ordre).",
+  "lead": "Le classement du championnat et les statistiques de chaque équipe (buts, mi-temps, corners et cartons), au total, à domicile, à l'extérieur ou sur les 5 derniers matchs. Touchez un en-tête pour trier.",
   "viewsLabel": "Colonnes du tableau",
   "view": {
     "standings": "Classement",

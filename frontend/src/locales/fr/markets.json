@@ -246,7 +246,7 @@
   },
   "page": {
     "thisSeason": "cette saison",
-    "refereesLead": "Comment se déroulent les matchs de chaque arbitre : cartons, points de cartons, expulsions, corners ou buts. Uniquement des marchés sur le match entier, qui ne dépendent pas de l'équipe qui reçoit.",
+    "refereesLead": "Comment se passent d'habitude les matchs de chaque arbitre : cartons, expulsions, fautes, corners, tirs ou buts. Seulement les marchés où peu importe quelle équipe joue à domicile.",
     "search": {
       "team": "Rechercher une équipe",
       "referee": "Rechercher un arbitre"

@@ -1,6 +1,6 @@
 {
   "page": {
-    "intro": "Les pourcentages affichés ici sont une <bold>fréquence historique</bold>, pas une promesse de ce qui va arriver : ils comptent combien de fois quelque chose s'est produit, toujours avec le nombre de matchs utilisés. Ce n'est pas une probabilité garantie. <anchor>En savoir plus sur leur lecture →</anchor>"
+    "intro": "Calendrier et résultats de chaque journée. Ouvrez un match pour voir sa fiche : pourcentages, forme, arbitre et sélections."
   },
   "detail": {
     "loading": "Chargement du match...",

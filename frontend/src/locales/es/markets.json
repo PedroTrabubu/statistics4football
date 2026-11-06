@@ -246,7 +246,7 @@
   },
   "page": {
     "thisSeason": "esta temporada",
-    "refereesLead": "Cómo se comportan los partidos de cada árbitro: tarjetas, puntos de tarjeta, expulsiones, córners o goles. Solo mercados del partido completo, que no dependen de qué equipo sea local.",
+    "refereesLead": "Cómo suelen ir los partidos de cada árbitro: tarjetas, expulsiones, faltas, córners, tiros o goles. Solo mercados en los que da igual qué equipo juegue en casa.",
     "search": {
       "team": "Buscar equipo",
       "referee": "Buscar árbitro"

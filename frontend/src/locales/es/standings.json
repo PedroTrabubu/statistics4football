@@ -1,6 +1,6 @@
 {
   "title": "Clasificación y estadísticas",
-  "lead": "Datos reales de partidos jugados: % over/under, ambos anotan, porterías a cero, descanso, corners y tarjetas, en total, como local, como visitante o en los últimos 5 partidos. Pulsa en una cabecera para ordenar por esa columna (otra vez para invertir el orden).",
+  "lead": "La tabla de la liga y las estadísticas de cada equipo (goles, descanso, córners y tarjetas), en total, en casa, fuera o en los últimos 5 partidos. Pulsa una cabecera para ordenar.",
   "viewsLabel": "Columnas de la tabla",
   "view": {
     "standings": "Clasificación",

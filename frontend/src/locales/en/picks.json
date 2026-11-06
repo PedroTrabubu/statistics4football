@@ -514,7 +514,7 @@
   },
   "probablePage": {
     "title": "Very likely picks",
-    "lead": "The ones for the next matchday, the same ones shown on each match page. And, for every match already played, the ones shown before kick-off, calculated using earlier matches only, and whether they hit.",
+    "lead": "What each team repeats most, checked against its opponent: up to 6 picks per match. The next matchday's and, for matches already played, the ones shown before each match and whether they came true.",
     "viewLabel": "View",
     "view": {
       "next": {

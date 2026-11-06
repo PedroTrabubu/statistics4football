@@ -539,7 +539,7 @@
   },
   "probablePage": {
     "title": "Sélections très probables",
-    "lead": "Celles de la prochaine journée, les mêmes que sur la page de chaque match. Et, pour chaque match déjà joué, celles affichées avant le coup d'envoi, calculées uniquement avec les matchs précédents, et si elles ont été validées.",
+    "lead": "Ce que chaque équipe répète le plus, confronté à son adversaire : jusqu'à 6 sélections par match. Celles de la prochaine journée et, pour les matchs déjà joués, celles affichées avant chaque match et si elles se sont réalisées.",
     "viewLabel": "Vue",
     "view": {
       "next": {

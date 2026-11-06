@@ -1,6 +1,6 @@
 {
   "page": {
-    "intro": "The percentages you see here are <bold>historical frequency</bold>, not a promise of what will happen: they count how often something happened before, always alongside the number of matches used. That's not the same as a guaranteed probability. <anchor>More on how to read them →</anchor>"
+    "intro": "Fixtures and results for each matchday. Open a match to see its page: percentages, form, referee and picks."
   },
   "detail": {
     "loading": "Loading match...",
