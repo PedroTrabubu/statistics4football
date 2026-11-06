@@ -1,7 +1,7 @@
 import { useId, useState, type CSSProperties, type ReactNode } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { matchPath } from "../lib/routes";
+import { matchPath, ROUTES } from "../lib/routes";
 import { getLeagues, getRecommendationHistory, getRecommendations } from "../api/client";
 import type {
   League,
@@ -323,8 +323,13 @@ function MarginCallout({ leagues }: { leagues: League[] | null }) {
         ))}
       </div>
 
-      <p className="small muted hp-callout-method">{t("recommendations:callout.method")}</p>
-      <p className="hp-callout-notice">{t("recommendations:notice")}</p>
+      {/* Cómo se probó y cómo se calcula el intervalo: en el glosario. */}
+      <p className="small muted hp-callout-method">
+        <Trans
+          i18nKey="recommendations:callout.glossaryLink"
+          components={{ glossary: <Link to={`${ROUTES.glossary}#alta-probabilidad`} /> }}
+        />
+      </p>
     </section>
   );
 }

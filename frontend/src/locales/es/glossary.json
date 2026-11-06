@@ -1,5 +1,24 @@
 {
-  "intro": "Qué significa cada término que verás en las páginas de partido, sin dar por hecho que ya lo sabes.",
+  "intro": "Qué significa cada término que verás en la web, sin dar por hecho que ya lo sabes.",
+  "page": {
+    "eyebrow": "Ayuda",
+    "search": "Buscar en el glosario",
+    "searchPlaceholder": "Buscar un término: cuota, racha, margen…",
+    "clear": "Borrar la búsqueda",
+    "sections": "Secciones",
+    "count_one": "{{count}} término",
+    "count_many": "{{count}} términos",
+    "count_other": "{{count}} términos",
+    "noResults": "Ningún término coincide con «{{query}}». Prueba con otra palabra.",
+    "toc": {
+      "basics": "Lo básico",
+      "markets": "Mercados",
+      "streaks": "Rachas",
+      "odds": "Cuotas",
+      "highProbability": "Alta probabilidad",
+      "hitRate": "Aciertos"
+    }
+  },
   "basics": {
     "title": "Frecuencia y probabilidad no son lo mismo",
     "frequency": {
@@ -8,7 +27,7 @@
     },
     "modelProbability": {
       "term": "Probabilidad del modelo",
-      "def": "Una estimación, calculada con un modelo estadístico (Dixon-Coles) que tiene en cuenta la fuerza de ataque/defensa de cada equipo, no solo el recuento simple. Sigue siendo una estimación, no un hecho."
+      "def": "Una estimación hecha con un modelo estadístico que tiene en cuenta la fuerza de cada equipo, no solo un recuento: en los porcentajes de resultado, la media de un Elo propio y de Dixon-Coles. Sigue siendo una estimación, no un hecho."
     }
   },
   "markets": {
@@ -56,15 +75,62 @@
       "def": "La cuota que correspondería exactamente a la probabilidad del modelo, sin margen del operador: 1 ÷ probabilidad del modelo. Sirve como referencia para comparar, no como una cuota que vayas a encontrar necesariamente en ningún sitio."
     }
   },
-  "risk": {
-    "title": "Confianza y riesgo",
-    "confidence": {
-      "term": "Confianza",
-      "def": "Depende de cuántos partidos respaldan la estimación para esos dos equipos concretos (y, si hay cuotas de varias casas, de cuánto coinciden entre sí). Con pocos partidos disponibles, la confianza es baja aunque el porcentaje calculado parezca contundente."
+  "highProbability": {
+    "title": "Alta probabilidad",
+    "margin": {
+      "term": "Margen sobre el mercado",
+      "def": "Cuántos puntos acierta por encima (+) o por debajo (−) de lo que esperaba el mercado, con su probabilidad sin el margen de la casa. Es lo que cuenta, más que el acierto: elegir siempre lo que el mercado da como más probable también acierta mucho, y pierde dinero. Las barras de cada liga son su margen al 95 %: sale de repetir la cuenta 2000 veces con partidos sacados al azar de los mismos; si una barra cruza el 0, ese margen no se distingue de la suerte."
     },
-    "level": {
-      "term": "Riesgo bajo / medio / alto",
-      "def": "Sube cuando la confianza es baja o cuando la cuota es muy alta (mayor varianza). No es una nota de calidad del dato, es una señal de cuánto puede variar el resultado real."
+    "test": {
+      "term": "Cómo se probó",
+      "def": "22/23 a 24/25: en la Premier y LaLiga, con el modelo reentrenado cada temporada solo con las anteriores; en LaLiga Hypermotion y la Serie A, con el modelo actual, que nunca vio esas ligas. 25/26 y 26/27: las selecciones del histórico, hechas con un modelo entrenado solo con temporadas anteriores y con los umbrales fijados antes de ver esos partidos. Nunca se quitan las falladas de la lista ni de las cifras."
+    }
+  },
+  "hitRate": {
+    "title": "Aciertos",
+    "rate": {
+      "term": "Acierto",
+      "def": "El porcentaje de predicciones que se cumplieron. Solo cuentan las hechas con los datos que había antes de cada partido."
+    },
+    "sample": {
+      "term": "Predicciones",
+      "def": "Cuántas predicciones con resultado hay detrás de cada cifra. Con menos de 100 se avisa de «pocos datos»: unos pocos partidos más pueden mover bastante el acierto."
+    },
+    "interval": {
+      "term": "Margen («entre … y …»)",
+      "def": "Dónde estará, casi con seguridad (95 %), el acierto real del modelo con esa cantidad de predicciones. Cuantas menos predicciones, más ancho. Se calcula con el método de Wilson."
+    },
+    "base": {
+      "term": "Referencia (sin modelo)",
+      "def": "Lo que se acertaría sin modelo, con la regla más simple de cada caso. Quién gana y duelo de córners: elegir siempre al local. Doble oportunidad: siempre local o empate. Predictor: siempre el mismo lado, el local, salvo en faltas y amarillas, donde suele sacar más el visitante. Picks probables: lo habitual en la liga para ese suceso hasta ese partido. Alta probabilidad: la probabilidad que daba el mercado antes del partido, sin su margen."
+    },
+    "edge": {
+      "term": "Ventaja",
+      "def": "El acierto menos el «sin modelo», en puntos: cuánto aporta el modelo frente a la regla simple. Su margen sale de repetir la cuenta 2000 veces con partidos sacados al azar de los mismos; si incluye el 0, la ventaja no se distingue de la suerte."
+    },
+    "side": {
+      "term": "Qué equipo saca más (predictor)",
+      "def": "Si el equipo para el que el predictor esperaba más tiros, córners, faltas... fue el que más sacó. No cuentan los partidos con empate en esa estadística, y las amarillas solo cuentan con árbitro designado."
+    },
+    "mae": {
+      "term": "Error medio (predictor)",
+      "def": "Cuánto se desvía, de media, lo que el predictor esperaba de un equipo de lo que sacó de verdad. Se compara con lo que daría la media de la liga: si el predictor se equivoca menos, aporta algo. Es su medida principal; menos es mejor."
+    },
+    "origin": {
+      "term": "Guardado antes del partido / Calculado con datos anteriores",
+      "def": "Guardado antes del partido: la predicción se guardó antes de empezar y no se ha tocado. Calculado con datos anteriores: se calculó después, pero solo con los partidos jugados antes, como si se hubiera hecho en su momento."
+    },
+    "uncalibrated": {
+      "term": "Liga no evaluada",
+      "def": "La Champions no entró en las pruebas de estos modelos: sus cifras se enseñan, pero no cuentan en los totales."
+    },
+    "repeat": {
+      "term": "Se repite entre temporadas",
+      "def": "Si el orden de equipos o ligas de una temporada se parece al de la siguiente. Se mide con una correlación, de 0 (nada) a 1 (igual): casi nada por debajo de 0,2, poco hasta 0,4, bastante hasta 0,6 y mucho por encima. Si se repite poco, estar arriba esta temporada dice poco de la siguiente."
+    },
+    "ranking": {
+      "term": "Tabla de equipos",
+      "def": "Cada fila cuenta todas las predicciones de los partidos en que juega el equipo, también las que tratan del rival: en un partido con 6 picks, los 6 cuentan para los dos equipos. Va en orden alfabético y cada columna ordena; con menos de 20 predicciones se avisa de «pocos datos». Al desplegar un equipo se ven sus partidos con cada pick: ✓ se cumplió, ✗ no se cumplió."
     }
   }
 }

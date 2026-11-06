@@ -1,5 +1,23 @@
 {
-  "intro": "What each term you'll see on the match pages means, without assuming you already know.",
+  "intro": "What each term you will see on the site means, without assuming you already know.",
+  "page": {
+    "eyebrow": "Help",
+    "search": "Search the glossary",
+    "searchPlaceholder": "Search a term: odds, streak, margin…",
+    "clear": "Clear search",
+    "sections": "Sections",
+    "count_one": "{{count}} term",
+    "count_other": "{{count}} terms",
+    "noResults": "No term matches “{{query}}”. Try another word.",
+    "toc": {
+      "basics": "The basics",
+      "markets": "Markets",
+      "streaks": "Streaks",
+      "odds": "Odds",
+      "highProbability": "High probability",
+      "hitRate": "Hit rate"
+    }
+  },
   "basics": {
     "title": "Frequency and probability are not the same thing",
     "frequency": {
@@ -8,7 +26,7 @@
     },
     "modelProbability": {
       "term": "Model probability",
-      "def": "An estimate, calculated with a statistical model (Dixon-Coles) that takes into account each team's attacking and defensive strength, not just a simple count. It's still an estimate, not a fact."
+      "def": "An estimate made with a statistical model that takes each team's strength into account, not just a count: for the result percentages, the average of our own Elo and Dixon-Coles. It is still an estimate, not a fact."
     }
   },
   "markets": {
@@ -56,15 +74,62 @@
       "def": "The odds that would correspond exactly to the model's probability, with no bookmaker margin: 1 ÷ model probability. They're a reference for comparison, not odds you'll necessarily find anywhere."
     }
   },
-  "risk": {
-    "title": "Confidence and risk",
-    "confidence": {
-      "term": "Confidence",
-      "def": "Depends on how many matches support the estimate for those two specific teams (and, if there are odds from several bookmakers, on how closely they agree). With few matches available, confidence is low even if the calculated percentage looks convincing."
+  "highProbability": {
+    "title": "High probability",
+    "margin": {
+      "term": "Margin over the market",
+      "def": "How many points it is right above (+) or below (−) what the market expected, using its probability without the bookmaker's margin. It matters more than the hit rate: always picking what the market sees as most likely is also right a lot, and loses money. Each league's bars are its 95% range: it comes from repeating the calculation 2000 times with matches drawn at random from the same ones; if a bar crosses 0, that edge cannot be told apart from luck."
     },
-    "level": {
-      "term": "Low / medium / high risk",
-      "def": "It rises when confidence is low or when the odds are very high (greater variance). It's not a quality score for the data; it signals how much the actual result can vary."
+    "test": {
+      "term": "How it was tested",
+      "def": "22/23 to 24/25: in the Premier League and LaLiga, with the model retrained each season using only earlier ones; in LaLiga Hypermotion and Serie A, with the current model, which never saw those leagues. 25/26 and 26/27: the selections in the history, made with a model trained only on earlier seasons and with the thresholds set before seeing those matches. Missed selections are never removed from the list or the figures."
+    }
+  },
+  "hitRate": {
+    "title": "Hit rate",
+    "rate": {
+      "term": "Hit rate",
+      "def": "The share of predictions that came true. Only those made with the data available before each match count."
+    },
+    "sample": {
+      "term": "Predictions",
+      "def": "How many predictions with a result are behind each figure. Below 100 there is a “little data” warning: a few more matches can move the hit rate quite a lot."
+    },
+    "interval": {
+      "term": "Range (“between … and …”)",
+      "def": "Where the model's real hit rate almost certainly (95%) lies, given that number of predictions. The fewer the predictions, the wider it is. It is calculated with the Wilson method."
+    },
+    "base": {
+      "term": "Reference (without a model)",
+      "def": "What you would get right without a model, using the simplest rule in each case. Who wins and corner duel: always pick the home team. Double chance: always home or draw. Predictor: always the same side, the home team, except for fouls and yellow cards, where the away team usually gets more. Likely picks: how often that event happened in the league up to that match. High probability: the probability the market gave before the match, without its margin."
+    },
+    "edge": {
+      "term": "Edge",
+      "def": "The hit rate minus “without a model”, in points: how much the model adds over the simple rule. Its range comes from repeating the calculation 2000 times with matches drawn at random from the same ones; if it includes 0, the edge cannot be told apart from luck."
+    },
+    "side": {
+      "term": "Which team gets more (predictor)",
+      "def": "Whether the team the predictor expected to get more shots, corners, fouls... was the one that got more. Matches with a tie in that stat do not count, and yellow cards only count with an appointed referee."
+    },
+    "mae": {
+      "term": "Mean error (predictor)",
+      "def": "How far, on average, what the predictor expected from a team was from what it really got. It is compared with what the league average would give: if the predictor is wrong by less, it adds something. It is its main measure; lower is better."
+    },
+    "origin": {
+      "term": "Saved before the match / Calculated with earlier data",
+      "def": "Saved before the match: the prediction was saved before kick-off and has not been touched. Calculated with earlier data: it was calculated afterwards, but only with the matches played before, as if it had been made at the time."
+    },
+    "uncalibrated": {
+      "term": "League not evaluated",
+      "def": "The Champions League was not part of these models' tests: its figures are shown, but they do not count in the totals."
+    },
+    "repeat": {
+      "term": "Repeats across seasons",
+      "def": "Whether the order of teams or leagues in one season resembles the next one. It is measured with a correlation, from 0 (not at all) to 1 (the same): hardly at all below 0.2, a little up to 0.4, quite a lot up to 0.6 and a lot above that. If it repeats little, being at the top this season says little about the next."
+    },
+    "ranking": {
+      "term": "Team table",
+      "def": "Each row counts all the predictions from the matches the team plays in, including those about the opponent: in a match with 6 picks, all 6 count for both teams. It is in alphabetical order and every column sorts; below 20 predictions there is a “little data” warning. Opening a team shows its matches with each pick: ✓ came true, ✗ did not."
     }
   }
 }

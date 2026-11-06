@@ -1,14 +1,13 @@
 {
-  "lead": "Esto es una herramienta de análisis, no una promesa de ganancia. Compara siempre el acierto con lo que ya esperaba el mercado: acertar mucho en apuestas que el mercado ya daba como muy probables no es mérito del modelo.",
-  "notice": "Describe sucesos probables; el mercado ya los descuenta. No son recomendaciones de apuesta.",
+  "lead": "Como mucho una selección por partido: la que el modelo ve más probable que el mercado. Abajo, cuánto han acertado frente a lo que esperaba el mercado.",
   "callout": {
     "title": "Margen sobre el mercado",
-    "definition": "Cuántos puntos acierta por encima (+) o por debajo (−) de lo que esperaba el mercado: si el mercado esperaba un 68 % y acierta un 71 %, son +3 pts. Si el intervalo (IC 95 %) incluye el 0, ese margen no se distingue del azar.",
+    "definition": "Cuántos puntos acierta por encima (+) o por debajo (−) de lo que esperaba el mercado: si el mercado esperaba un 68 % y acierta un 71 %, son +3 pts.",
     "before": "22/23–24/25",
     "recent": "25/26–26/27",
     "detail": "IC 95 %: {{low}} a {{high}} · {{n}} selecciones",
     "detailNoCi": "{{n}} selecciones",
-    "method": "22/23–24/25: en Premier y LaLiga, con el modelo reentrenado cada temporada solo con las anteriores; en Hypermotion y Serie A, con el modelo actual, que nunca vio esas ligas. 25/26–26/27: el histórico de abajo."
+    "glossaryLink": "¿Cómo se probó y qué son las barras? Lo explicamos en el <glossary>glosario</glossary>."
   },
   "points": "{{value}} pts",
   "intro": {
@@ -52,7 +51,7 @@
       "wonLost": "Acertadas / falladas"
     },
     "note": {
-      "highProbability": "Selecciones del modelo de alta probabilidad sobre 25/26 y 26/27, calculadas con un modelo entrenado solo con temporadas anteriores y con los umbrales fijados antes de ver estos partidos. <bold>El margen sobre el mercado es la métrica de mérito</bold>, no el acierto: elegir siempre lo que el mercado da como más probable también acierta mucho, y pierde dinero. El intervalo (IC 95 %) sale de remuestrear los partidos con una semilla fija: si incluye el 0, el margen no se distingue del azar. Nunca se excluyen los fallos de esta lista ni de estos cálculos."
+      "highProbability": "Selecciones de 25/26 y 26/27, hechas antes de cada partido con un modelo que no había visto esas temporadas. <bold>Lo que cuenta es el margen sobre el mercado</bold>, no el acierto: elegir siempre lo que el mercado da como más probable también acierta mucho, y pierde dinero. Están todas, también las falladas."
     },
     "column": {
       "selections": "Selecciones",

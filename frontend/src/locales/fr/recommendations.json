@@ -1,14 +1,13 @@
 {
-  "lead": "C'est un outil d'analyse, pas une promesse de gain. Comparez toujours la réussite avec ce que le marché attendait déjà : réussir beaucoup de paris que le marché donnait déjà comme très probables n'est pas un mérite du modèle.",
-  "notice": "Décrit des événements probables ; le marché les intègre déjà. Ce ne sont pas des recommandations de pari.",
+  "lead": "Au plus une sélection par match : celle que le modèle voit plus probable que le marché. En dessous, à quel point elles ont réussi par rapport à ce qu'attendait le marché.",
   "callout": {
     "title": "Marge sur le marché",
-    "definition": "De combien de points il réussit au-dessus (+) ou en dessous (−) de ce qu'attendait le marché : si le marché attendait 68 % et qu'il réussit 71 %, cela fait +3 pts. Si l'intervalle (IC 95 %) inclut 0, la marge ne se distingue pas du hasard.",
+    "definition": "De combien de points il réussit au-dessus (+) ou en dessous (−) de ce qu'attendait le marché : si le marché attendait 68 % et qu'il réussit 71 %, cela fait +3 pts.",
     "before": "22/23–24/25",
     "recent": "25/26–26/27",
     "detail": "IC 95 % : {{low}} à {{high}} · {{n}} sélections",
     "detailNoCi": "{{n}} sélections",
-    "method": "22/23–24/25 : en Premier League et en LaLiga, avec le modèle réentraîné chaque saison uniquement sur les précédentes ; en Hypermotion et en Serie A, avec le modèle actuel, qui n'a jamais vu ces compétitions. 25/26–26/27 : l'historique ci-dessous."
+    "glossaryLink": "Comment a-t-il été testé et que sont les barres ? Nous l'expliquons dans le <glossary>glossaire</glossary>."
   },
   "points": "{{value}} pts",
   "intro": {
@@ -52,7 +51,7 @@
       "wonLost": "Gagnées / perdues"
     },
     "note": {
-      "highProbability": "Sélections du modèle à haute probabilité sur 25/26 et 26/27, calculées avec un modèle entraîné uniquement sur les saisons précédentes et avec des seuils fixés avant de voir ces matchs. <bold>La marge sur le marché est l'indicateur du mérite</bold>, pas la réussite : choisir toujours ce que le marché donne comme le plus probable réussit aussi très souvent, et perd de l'argent. L'intervalle (IC 95 %) vient d'un rééchantillonnage des matchs avec une graine fixe : s'il inclut 0, la marge ne se distingue pas du hasard. Les échecs ne sont jamais exclus de cette liste ni de ces calculs."
+      "highProbability": "Sélections de 25/26 et 26/27, faites avant chaque match avec un modèle qui n'avait pas vu ces saisons. <bold>Ce qui compte, c'est l'avantage sur le marché</bold>, pas la réussite : choisir toujours ce que le marché voit comme le plus probable réussit aussi souvent, et perd de l'argent. Elles y sont toutes, ratées comprises."
     },
     "column": {
       "selections": "Sélections",

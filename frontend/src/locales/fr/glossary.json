@@ -1,5 +1,24 @@
 {
-  "intro": "Ce que signifie chaque terme que vous verrez sur les pages de match, sans supposer que vous le savez déjà.",
+  "intro": "Ce que signifie chaque terme que vous verrez sur le site, sans supposer que vous le savez déjà.",
+  "page": {
+    "eyebrow": "Aide",
+    "search": "Rechercher dans le glossaire",
+    "searchPlaceholder": "Rechercher un terme : cote, série, marge…",
+    "clear": "Effacer la recherche",
+    "sections": "Sections",
+    "count_one": "{{count}} terme",
+    "count_many": "{{count}} termes",
+    "count_other": "{{count}} termes",
+    "noResults": "Aucun terme ne correspond à « {{query}} ». Essayez un autre mot.",
+    "toc": {
+      "basics": "Les bases",
+      "markets": "Marchés",
+      "streaks": "Séries",
+      "odds": "Cotes",
+      "highProbability": "Haute probabilité",
+      "hitRate": "Réussite"
+    }
+  },
   "basics": {
     "title": "Fréquence et probabilité, ce n'est pas la même chose",
     "frequency": {
@@ -8,7 +27,7 @@
     },
     "modelProbability": {
       "term": "Probabilité du modèle",
-      "def": "Une estimation, calculée avec un modèle statistique (Dixon-Coles) qui tient compte de la force offensive et défensive de chaque équipe, pas seulement d'un simple décompte. Cela reste une estimation, pas un fait."
+      "def": "Une estimation faite avec un modèle statistique qui tient compte de la force de chaque équipe, pas seulement un décompte : pour les pourcentages de résultat, la moyenne de notre propre Elo et de Dixon-Coles. Cela reste une estimation, pas un fait."
     }
   },
   "markets": {
@@ -56,15 +75,62 @@
       "def": "La cote qui correspondrait exactement à la probabilité du modèle, sans marge de l'opérateur : 1 ÷ probabilité du modèle. Elle sert de référence pour comparer, pas de cote que vous trouverez forcément quelque part."
     }
   },
-  "risk": {
-    "title": "Confiance et risque",
-    "confidence": {
-      "term": "Confiance",
-      "def": "Dépend du nombre de matchs sur lesquels repose l'estimation pour ces deux équipes précises (et, s'il y a des cotes de plusieurs bookmakers, de leur degré d'accord). Avec peu de matchs disponibles, la confiance est faible même si le pourcentage calculé paraît net."
+  "highProbability": {
+    "title": "Haute probabilité",
+    "margin": {
+      "term": "Marge sur le marché",
+      "def": "De combien de points il réussit au-dessus (+) ou en dessous (−) de ce qu'attendait le marché, avec sa probabilité sans la marge du bookmaker. C'est ce qui compte, plus que la réussite : choisir toujours ce que le marché voit comme le plus probable réussit aussi souvent, et perd de l'argent. Les barres de chaque championnat sont sa marge à 95 % : elle vient de refaire le calcul 2000 fois avec des matchs tirés au hasard parmi les mêmes ; si une barre traverse le 0, cet avantage ne se distingue pas de la chance."
     },
-    "level": {
-      "term": "Risque faible / moyen / élevé",
-      "def": "Il augmente quand la confiance est faible ou quand la cote est très élevée (variance plus forte). Ce n'est pas une note de qualité de la donnée : c'est un signal de la variabilité possible du résultat réel."
+    "test": {
+      "term": "Comment il a été testé",
+      "def": "De 22/23 à 24/25 : en Premier League et en LaLiga, avec le modèle réentraîné chaque saison uniquement avec les précédentes ; en LaLiga Hypermotion et en Serie A, avec le modèle actuel, qui n'a jamais vu ces championnats. 25/26 et 26/27 : les sélections de l'historique, faites avec un modèle entraîné uniquement sur les saisons précédentes et avec les seuils fixés avant de voir ces matchs. Les sélections ratées ne sont jamais retirées de la liste ni des chiffres."
+    }
+  },
+  "hitRate": {
+    "title": "Taux de réussite",
+    "rate": {
+      "term": "Réussite",
+      "def": "La part des prédictions qui se sont réalisées. Seules comptent celles faites avec les données disponibles avant chaque match."
+    },
+    "sample": {
+      "term": "Prédictions",
+      "def": "Combien de prédictions avec un résultat il y a derrière chaque chiffre. En dessous de 100, un avertissement « peu de données » : quelques matchs de plus peuvent beaucoup faire varier la réussite."
+    },
+    "interval": {
+      "term": "Marge (« entre … et … »)",
+      "def": "Où se trouve, presque à coup sûr (95 %), la vraie réussite du modèle avec ce nombre de prédictions. Moins il y a de prédictions, plus elle est large. Elle est calculée avec la méthode de Wilson."
+    },
+    "base": {
+      "term": "Référence (sans modèle)",
+      "def": "Ce qu'on réussirait sans modèle, avec la règle la plus simple dans chaque cas. Qui gagne et duel de corners : choisir toujours le domicile. Double chance : toujours domicile ou nul. Prédicteur : toujours le même côté, le domicile, sauf pour les fautes et les cartons jaunes, où l'extérieur en obtient d'habitude plus. Sélections probables : la fréquence de cet événement dans le championnat jusqu'à ce match. Haute probabilité : la probabilité que donnait le marché avant le match, sans sa marge."
+    },
+    "edge": {
+      "term": "Avantage",
+      "def": "La réussite moins le « sans modèle », en points : ce que le modèle apporte par rapport à la règle simple. Sa marge vient de refaire le calcul 2000 fois avec des matchs tirés au hasard parmi les mêmes ; si elle contient 0, l'avantage ne se distingue pas de la chance."
+    },
+    "side": {
+      "term": "Quelle équipe en obtient le plus (prédicteur)",
+      "def": "Si l'équipe pour laquelle le prédicteur attendait le plus de tirs, corners, fautes... est celle qui en a obtenu le plus. Les matchs avec une égalité sur cette statistique ne comptent pas, et les cartons jaunes ne comptent qu'avec un arbitre désigné."
+    },
+    "mae": {
+      "term": "Erreur moyenne (prédicteur)",
+      "def": "L'écart moyen entre ce que le prédicteur attendait d'une équipe et ce qu'elle a vraiment obtenu. On le compare à ce que donnerait la moyenne du championnat : si le prédicteur se trompe moins, il apporte quelque chose. C'est sa mesure principale ; plus bas, c'est mieux."
+    },
+    "origin": {
+      "term": "Enregistré avant le match / Calculé avec les données antérieures",
+      "def": "Enregistré avant le match : la prédiction a été enregistrée avant le coup d'envoi et n'a pas été modifiée. Calculé avec les données antérieures : elle a été calculée après coup, mais seulement avec les matchs joués avant, comme si elle avait été faite à ce moment-là."
+    },
+    "uncalibrated": {
+      "term": "Championnat non évalué",
+      "def": "La Ligue des champions n'a pas fait partie des tests de ces modèles : ses chiffres sont affichés, mais ne comptent pas dans les totaux."
+    },
+    "repeat": {
+      "term": "Se répète d'une saison à l'autre",
+      "def": "Si l'ordre des équipes ou des championnats d'une saison ressemble à celui de la suivante. On le mesure avec une corrélation, de 0 (pas du tout) à 1 (identique) : presque pas en dessous de 0,2, peu jusqu'à 0,4, assez jusqu'à 0,6 et beaucoup au-dessus. S'il se répète peu, être en haut cette saison dit peu de chose de la suivante."
+    },
+    "ranking": {
+      "term": "Tableau des équipes",
+      "def": "Chaque ligne compte toutes les prédictions des matchs que joue l'équipe, y compris celles sur l'adversaire : dans un match avec 6 sélections, les 6 comptent pour les deux équipes. Il est trié par ordre alphabétique et chaque colonne trie ; en dessous de 20 prédictions, un avertissement « peu de données ». En ouvrant une équipe, on voit ses matchs avec chaque sélection : ✓ réalisée, ✗ non réalisée."
     }
   }
 }

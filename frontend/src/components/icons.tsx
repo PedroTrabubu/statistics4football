@@ -183,3 +183,12 @@ export function IconChevronDown(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function IconSearch(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.6-3.6" />
+    </svg>
+  );
+}
