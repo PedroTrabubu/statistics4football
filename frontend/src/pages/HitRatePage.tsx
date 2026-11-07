@@ -206,8 +206,7 @@ function GlossaryLink() {
   );
 }
 
-/** El acierto en una barra de 0 a 100 %. Decorativa: la cifra va encima.
- * Debajo, en pequeño, la referencia sin modelo de ese modelo. */
+/** El acierto en una barra de 0 a 100 %. Decorativa: la cifra va encima. */
 function Bar({ value }: { value: number }) {
   return (
     <span className="hr-bar" aria-hidden="true">
@@ -216,9 +215,9 @@ function Bar({ value }: { value: number }) {
   );
 }
 
-/** Nada más entrar: todos los modelos y el acierto de cada uno, de un
- * vistazo, y cuánto más acierta que la regla más simple, con el filtro de
- * liga y temporada. Cada tarjeta lleva a su detalle. */
+/** Nada más entrar: todos los modelos y el acierto de cada uno, con el filtro
+ * de liga y temporada. Cada tarjeta, en tres capas (qué mide, acierto frente a
+ * su referencia y muestra) lleva a su detalle; aparte, "Cómo funciona". */
 function Overview({ index, slice, current }: { index: HitRateIndex; slice: HitRateSlice; current: string | null }) {
   const { t } = useTranslation();
   const models = SECTIONS.flatMap((s) => s.models.map((model) => ({ model, section: s.key })));
@@ -234,39 +233,56 @@ function Overview({ index, slice, current }: { index: HitRateIndex; slice: HitRa
           const thisSeason = currentSeasonOf(m, current);
           return (
             <li key={model}>
-              <a className="hr-card" href={`#hr-${section}`}>
-                <span className="hr-card-title">{t(`hitrate:models.${model}.title`)}</span>
-                <span className="hr-card-what">{t(`hitrate:models.${model}.what`)}</span>
-                {total && total.rate !== null ? (
-                  <>
-                    <span className="hr-card-rate num">{formatPercent(total.rate)}</span>
-                    <Bar value={total.rate} />
-                    {total.base !== null && (
-                      <span className="hr-card-ref">
-                        {t("hitrate:overview.reference", {
-                          base: formatPercent(total.base),
-                          rule: t(`hitrate:models.${model}.reference`),
-                        })}
+              <div className="hr-card">
+                <a className="hr-card-link" href={`#hr-${section}`}>
+                  <span className="hr-card-head">
+                    <span className="hr-card-title">{t(`hitrate:models.${model}.title`)}</span>
+                    <span className="hr-card-what">{t(`hitrate:models.${model}.what`)}</span>
+                  </span>
+                  {total && total.rate !== null ? (
+                    <>
+                      <span className="hr-card-main">
+                        <span className="hr-card-rate num">{formatPercent(total.rate)}</span>
+                        <Bar value={total.rate} />
+                        {total.base !== null && (
+                          <span className="hr-card-ref">
+                            {t("hitrate:overview.reference", {
+                              label: t(`hitrate:models.${model}.refShort`),
+                              base: formatPercent(total.base),
+                            })}
+                            {total.edge !== null && ` · ${t("hitrate:points", { value: formatSignedPoints(total.edge) })}`}
+                          </span>
+                        )}
                       </span>
-                    )}
-                    {thisSeason && thisSeason.rate !== null && (
-                      <span className="hr-card-line">
-                        {t("hitrate:overview.current", {
-                          season: formatSeason(thisSeason.key),
-                          rate: formatPercent(thisSeason.rate),
-                          count: t(`hitrate:models.${model}.unit`, { n: formatLocaleNumber(thisSeason.n) }),
-                        })}
+                      <span className="hr-card-foot">
+                        <span>
+                          {t("hitrate:overview.matches", { n: formatLocaleNumber(total.matches) })}
+                          {total.n < index.low_sample && <span className="hr-tag">{t("hitrate:lowSample")}</span>}
+                        </span>
+                        {thisSeason && thisSeason.rate !== null && (
+                          <span>
+                            {t("hitrate:overview.current", {
+                              season: formatSeason(thisSeason.key),
+                              rate: formatPercent(thisSeason.rate),
+                            })}
+                          </span>
+                        )}
                       </span>
-                    )}
-                    <span className="hr-card-sub">
-                      {t(`hitrate:models.${model}.unit`, { n: formatLocaleNumber(total.n) })}
-                      {total.n < index.low_sample && <span className="hr-tag">{t("hitrate:lowSample")}</span>}
-                    </span>
-                  </>
-                ) : (
-                  <span className="hr-card-line">{t("hitrate:noData")}</span>
-                )}
-              </a>
+                    </>
+                  ) : (
+                    <span className="hr-card-line">{t("hitrate:noData")}</span>
+                  )}
+                </a>
+                <details className="hr-card-how">
+                  <summary>{t("hitrate:overview.how")}</summary>
+                  <p>
+                    {t(`hitrate:models.${model}.how`)} {t(`hitrate:models.${model}.versus`)}{" "}
+                    <Link to={`${ROUTES.glossary}#${model === "high_probability" ? "alta-probabilidad" : GLOSSARY_ID}`}>
+                      {t("hitrate:overview.moreInGlossary")}
+                    </Link>
+                  </p>
+                </details>
+              </div>
             </li>
           );
         })}

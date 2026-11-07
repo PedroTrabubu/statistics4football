@@ -3807,14 +3807,11 @@ button.hp-hero-link {
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-1);
   padding: var(--space-4) var(--space-5);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--surface);
   color: var(--ink);
-  text-decoration: none;
   transition:
     border-color var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out);
@@ -3822,39 +3819,49 @@ button.hp-hero-link {
 .hr-card:hover {
   border-color: var(--border-strong);
   box-shadow: var(--shadow);
+}
+/* Tres capas: qué mide, el acierto frente a su referencia y la muestra. */
+.hr-card-link {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  text-decoration: none;
+}
+.hr-card-link:hover {
   color: var(--ink);
 }
-.hr-card:focus-visible {
+.hr-card-link:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
-.hr-card-title {
-  font-weight: var(--fw-semibold);
+.hr-card-head,
+.hr-card-main,
+.hr-card-foot {
+  display: flex;
+  flex-direction: column;
+}
+.hr-card-head {
+  gap: var(--space-1);
+}
+/* Dos líneas fijas: así el acierto queda a la misma altura en toda la fila. */
+.hr-card-title,
+.hr-card-what {
   line-height: var(--lh-snug);
 }
-.hr-card-rate {
-  margin-top: var(--space-1);
-  color: var(--green);
-  font-family: var(--font-display);
-  font-size: var(--fs-3xl);
-  font-weight: var(--fw-display);
-  letter-spacing: var(--tracking-tight);
-  line-height: 1.1;
+.hr-card-title {
+  min-height: calc(2em * var(--lh-snug));
+  font-weight: var(--fw-semibold);
 }
-.hr-card-sub,
-.hr-card-line {
-  color: var(--muted);
-  font-size: var(--fs-xs);
-  line-height: var(--lh-normal);
-}
-.hr-card .hr-tag {
-  margin: 0 0 0 var(--space-1-5);
-}
-/* Qué predice el modelo, en una línea, bajo su nombre. */
 .hr-card-what {
+  min-height: calc(2em * var(--lh-snug));
   color: var(--ink-2);
   font-size: var(--fs-sm);
-  line-height: var(--lh-snug);
+}
+.hr-card-main {
+  gap: var(--space-1);
 }
 /* El acierto en una barra de 0 a 100 %. */
 .hr-bar {
@@ -3871,15 +3878,49 @@ button.hp-hero-link {
   border-radius: inherit;
   background: var(--green);
 }
-.hr-card .hr-card-sub {
-  margin-top: auto;
-  padding-top: var(--space-1);
+.hr-card-rate {
+  color: var(--green);
+  font-family: var(--font-display);
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-display);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.1;
 }
-/* "Referencia: 44,2 % (siempre el local)": neutra, pequeña, bajo la barra. */
-.hr-card-ref {
+.hr-card-ref,
+.hr-card-line {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+.hr-card-foot {
+  gap: var(--space-0-5);
+  margin-top: auto;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
   color: var(--muted);
   font-size: var(--fs-2xs);
   line-height: var(--lh-normal);
+}
+.hr-card .hr-tag {
+  margin: 0 0 0 var(--space-1-5);
+}
+/* Cómo funciona: fuera del enlace, cerrado al entrar. */
+.hr-card-how {
+  margin-top: var(--space-2);
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+.hr-card-how > summary {
+  width: fit-content;
+  color: var(--muted);
+  cursor: pointer;
+}
+.hr-card-how > summary:hover {
+  color: var(--ink);
+}
+.hr-card-how > p {
+  margin: var(--space-1-5) 0 0;
 }
 
 .hr-glossary-link {
@@ -4104,6 +4145,10 @@ button.hp-hero-link {
   margin: var(--space-2) 0 0;
 }
 @media (max-width: 640px) {
+  .hr-card-title,
+  .hr-card-what {
+    min-height: 0;
+  }
   .hr-table {
     font-size: var(--fs-sm);
   }

@@ -40,56 +40,62 @@
   "models": {
     "result_1x2": {
       "title": "Resultado más probable (1X2)",
-      "what": "Si acierta quién gana o si hay empate.",
-      "reference": "siempre el local",
-      "unit": "{{n}} partidos"
+      "what": "Quién gana o si hay empate.",
+      "refShort": "Favorito del mercado",
+      "how": "Media de un Elo propio calibrado y de Dixon-Coles mensual. No usa el mercado.",
+      "versus": "Se compara con: favorito del mercado, solo en partidos con cuota."
     },
     "result_double": {
       "title": "Mejor doble oportunidad",
-      "what": "Si acierta con la doble oportunidad más probable: 1X, X2 o 12.",
-      "reference": "siempre local o empate",
-      "unit": "{{n}} partidos",
+      "what": "La doble oportunidad más probable.",
+      "refShort": "Doble oportunidad del mercado",
+      "how": "La más probable según el 1X2 de arriba, así que tampoco usa el mercado.",
+      "versus": "Se compara con: doble oportunidad más probable según el mercado, solo en partidos con cuota.",
       "typeLabel": "Por probabilidad"
     },
     "probable_picks": {
       "title": "Picks probables",
-      "what": "Si se cumplen los picks probables de cada partido.",
-      "reference": "lo habitual en la liga",
-      "unit": "{{n}} picks",
+      "what": "Si se cumplen los picks de cada partido.",
+      "refShort": "Frecuencia del suceso en la liga",
+      "how": "Patrones cumplidos en al menos el 80 % de los partidos del equipo, contrastados con el rival.",
+      "versus": "Se compara con: frecuencia del suceso en la liga.",
       "typeLabel": "Por mercado"
     },
     "high_probability": {
       "title": "Alta probabilidad",
-      "what": "Si se cumple la selección de alta probabilidad del partido.",
-      "reference": "lo que daba el mercado",
-      "unit": "{{n}} selecciones",
+      "what": "Si se cumple la selección del partido.",
+      "refShort": "Probabilidad que daba el mercado",
+      "how": "Combina el mercado sin margen, Dixon-Coles y los patrones: a diferencia del 1X2, sí usa el mercado como entrada. Solo con al menos un 62 % y 3 puntos sobre el mercado, y como máximo una por partido.",
+      "versus": "Se compara con: probabilidad que daba el mercado.",
       "typeLabel": "Por mercado"
     },
     "stats_predictor": {
       "title": "Predictor: qué equipo saca más",
-      "what": "Si acierta qué equipo saca más tiros, córners, faltas o amarillas.",
-      "reference": "siempre el mismo lado",
-      "unit": "{{n}} predicciones",
+      "what": "Qué equipo saca más en cada estadística.",
+      "refShort": "Más media en sus últimos 10",
+      "how": "Modelo propio: da más peso a lo reciente y acerca cada equipo a la media de la liga. En las amarillas, también cuenta el árbitro.",
+      "versus": "Se compara con: equipo con más media en sus últimos 10 partidos.",
       "typeLabel": "Por estadística"
     },
     "corner_duel": {
       "title": "Duelo de córners: resultado más probable",
-      "what": "Si acierta qué equipo saca más córners.",
-      "reference": "siempre el local",
-      "unit": "{{n}} partidos"
+      "what": "Qué equipo saca más córners.",
+      "refShort": "Más córners de media en sus últimos 10",
+      "how": "Modelo propio: da más peso a lo reciente y acerca cada equipo a la media de la liga, con lo que saca en su campo y lo que concede el rival en el suyo.",
+      "versus": "Se compara con: equipo con más córners de media en sus últimos 10 partidos."
     }
   },
   "uncalibrated": "no evaluada",
   "uncalibratedNote": "La Champions no entra en la evaluación de este modelo: sus cifras se ven, pero no cuentan en los totales.",
   "caption": {
     "summary": "{{model}}: acierto total, de esta temporada y según cuándo se hizo la predicción",
-    "breakdown": "{{model}}, {{breakdown}}: predicciones, acierto, sin modelo y ventaja"
+    "breakdown": "{{model}}, {{breakdown}}: predicciones, acierto, referencia y ventaja"
   },
   "columns": {
     "group": "Grupo",
     "n": "Predicciones",
     "rate": "Acierto",
-    "base": "Sin modelo",
+    "base": "Referencia",
     "edge": "Ventaja",
     "mae": "Error medio (menos es mejor)",
     "ci": "Margen"
@@ -131,7 +137,7 @@
   "where": {
     "title": "Dónde aciertan más",
     "short": "Ligas y equipos",
-    "intro": "Con la temporada elegida arriba. El acierto dice dónde es fácil acertar; la ventaja, dónde el modelo aporta algo frente a no usarlo.",
+    "intro": "Con la temporada elegida arriba. El acierto dice dónde es fácil acertar; la ventaja, dónde el modelo aporta algo frente a su referencia.",
     "noValue": "Que un modelo acierte mucho con una liga o un equipo no quiere decir que haya valor en apostar: el mercado ya lo descuenta.",
     "model": {
       "result_1x2": "1X2",
@@ -160,8 +166,11 @@
   "overview": {
     "title": "Acierto de cada modelo",
     "intro": "Cuánto ha acertado cada modelo con la liga y la temporada elegidas arriba. Pulsa una tarjeta para ver su detalle.",
-    "current": "Esta temporada ({{season}}): {{rate}} en {{count}}",
-    "reference": "Referencia: {{base}} ({{rule}})"
+    "current": "Esta temporada ({{season}}): {{rate}}",
+    "matches": "{{n}} partidos",
+    "how": "Cómo funciona",
+    "moreInGlossary": "Más en el glosario",
+    "reference": "{{label}}: {{base}}"
   },
   "glossaryLink": "¿Qué significa cada cifra? Lo explicamos en el <glossary>glosario</glossary>.",
   "teams": {
@@ -183,7 +192,7 @@
     "loading": "Cargando sus partidos…",
     "error": "No se pudieron cargar sus partidos: {{error}}",
     "noMatches": "Sin partidos con este modelo en esta liga y temporada.",
-    "legend": "✓ se cumplió · ✗ no se cumplió · = empate en esa estadística (no cuenta). Todo se calculó solo con datos anteriores a cada partido; «guardado antes» marca lo que se guardó antes de empezar y no se ha tocado.",
+    "legend": "✓ se cumplió · ✗ no se cumplió · = no cuenta (empate en la estadística o en la referencia). Todo se calculó solo con datos anteriores a cada partido; «guardado antes» marca lo que se guardó antes de empezar y no se ha tocado.",
     "frozen": "guardado antes",
     "mark": {
       "hit": "Se cumplió",

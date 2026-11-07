@@ -40,56 +40,62 @@
   "models": {
     "result_1x2": {
       "title": "Most likely result (1X2)",
-      "what": "Whether it gets right who wins or whether it is a draw.",
-      "reference": "always home",
-      "unit": "{{n}} matches"
+      "what": "Who wins or whether it is a draw.",
+      "refShort": "Market favourite",
+      "how": "The average of our own calibrated Elo and a monthly Dixon-Coles. It does not use the market.",
+      "versus": "Compared with: the market favourite, only in matches with odds."
     },
     "result_double": {
       "title": "Best double chance",
-      "what": "Whether it gets right the most likely double chance: 1X, X2 or 12.",
-      "reference": "always home or draw",
-      "unit": "{{n}} matches",
+      "what": "The most likely double chance.",
+      "refShort": "Market double chance",
+      "how": "The most likely one according to the 1X2 above, so it does not use the market either.",
+      "versus": "Compared with: the most likely double chance according to the market, only in matches with odds.",
       "typeLabel": "By probability"
     },
     "probable_picks": {
       "title": "Likely picks",
-      "what": "Whether each match's likely picks come true.",
-      "reference": "the league norm",
-      "unit": "{{n}} picks",
+      "what": "Whether each match's picks come true.",
+      "refShort": "Event frequency in the league",
+      "how": "Patterns met in at least 80% of the team's matches, checked against the opponent.",
+      "versus": "Compared with: the event's frequency in the league.",
       "typeLabel": "By market"
     },
     "high_probability": {
       "title": "High probability",
-      "what": "Whether the match's high-probability selection comes true.",
-      "reference": "what the market gave",
-      "unit": "{{n}} selections",
+      "what": "Whether the match's selection comes true.",
+      "refShort": "Probability the market gave",
+      "how": "It combines the market without margin, Dixon-Coles and the patterns: unlike the 1X2, it does use the market as an input. Only at 62% or more and 3 points above the market, and at most one per match.",
+      "versus": "Compared with: the probability the market gave.",
       "typeLabel": "By market"
     },
     "stats_predictor": {
       "title": "Predictor: which team gets more",
-      "what": "Whether it gets right which team gets more shots, corners, fouls or yellow cards.",
-      "reference": "always the same side",
-      "unit": "{{n}} predictions",
+      "what": "Which team gets more of each stat.",
+      "refShort": "Higher average, last 10",
+      "how": "Our own model: it gives more weight to recent matches and pulls each team towards the league average. For yellow cards, the referee also counts.",
+      "versus": "Compared with: the team with the higher average over its last 10 matches.",
       "typeLabel": "By stat"
     },
     "corner_duel": {
       "title": "Corner duel: most likely result",
-      "what": "Whether it gets right which team takes more corners.",
-      "reference": "always home",
-      "unit": "{{n}} matches"
+      "what": "Which team takes more corners.",
+      "refShort": "More corners on average, last 10",
+      "how": "Our own model: it gives more weight to recent matches and pulls each team towards the league average, using what it takes at its venue and what the opponent concedes at its own.",
+      "versus": "Compared with: the team with more corners on average over its last 10 matches."
     }
   },
   "uncalibrated": "not evaluated",
   "uncalibratedNote": "The Champions League is not part of this model's evaluation: its figures are shown, but they do not count in the totals.",
   "caption": {
     "summary": "{{model}}: overall hit rate, this season and by when the prediction was made",
-    "breakdown": "{{model}}, {{breakdown}}: predictions, hit rate, without a model and edge"
+    "breakdown": "{{model}}, {{breakdown}}: predictions, hit rate, reference and edge"
   },
   "columns": {
     "group": "Group",
     "n": "Predictions",
     "rate": "Hit rate",
-    "base": "Without a model",
+    "base": "Reference",
     "edge": "Edge",
     "mae": "Mean error (lower is better)",
     "ci": "Range"
@@ -131,7 +137,7 @@
   "where": {
     "title": "Where they are right most",
     "short": "Leagues and teams",
-    "intro": "For the season chosen above. The hit rate shows where it is easy to be right; the edge, where the model adds something over not using one.",
+    "intro": "For the season chosen above. The hit rate shows where it is easy to be right; the edge, where the model adds something over its reference.",
     "noValue": "A model being right a lot with a league or a team does not mean there is value in betting: the market already prices it in.",
     "model": {
       "result_1x2": "1X2",
@@ -160,8 +166,11 @@
   "overview": {
     "title": "Hit rate of each model",
     "intro": "How often each model was right for the league and season chosen above. Tap a card to see its details.",
-    "current": "This season ({{season}}): {{rate}} across {{count}}",
-    "reference": "Reference: {{base}} ({{rule}})"
+    "current": "This season ({{season}}): {{rate}}",
+    "matches": "{{n}} matches",
+    "how": "How it works",
+    "moreInGlossary": "More in the glossary",
+    "reference": "{{label}}: {{base}}"
   },
   "glossaryLink": "What does each figure mean? We explain it in the <glossary>glossary</glossary>.",
   "teams": {
@@ -183,7 +192,7 @@
     "loading": "Loading its matches…",
     "error": "Couldn't load its matches: {{error}}",
     "noMatches": "No matches with this model in this league and season.",
-    "legend": "✓ came true · ✗ did not · = tie in that stat (does not count). Everything was calculated only with data from before each match; “saved before” marks what was saved before kick-off and left untouched.",
+    "legend": "✓ came true · ✗ did not · = does not count (tie in the stat or in the reference). Everything was calculated only with data from before each match; “saved before” marks what was saved before kick-off and left untouched.",
     "frozen": "saved before",
     "mark": {
       "hit": "Came true",

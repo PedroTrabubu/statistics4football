@@ -101,12 +101,12 @@
       "def": "Où se trouve, presque à coup sûr (95 %), la vraie réussite du modèle avec ce nombre de prédictions. Moins il y a de prédictions, plus elle est large. Elle est calculée avec la méthode de Wilson."
     },
     "base": {
-      "term": "Référence (sans modèle)",
-      "def": "Ce qu'on réussirait sans modèle, avec la règle la plus simple dans chaque cas. Qui gagne et duel de corners : choisir toujours le domicile. Double chance : toujours domicile ou nul. Prédicteur : toujours le même côté, le domicile, sauf pour les fautes et les cartons jaunes, où l'extérieur en obtient d'habitude plus. Sélections probables : la fréquence de cet événement dans le championnat jusqu'à ce match. Haute probabilité : la probabilité que donnait le marché avant le match, sans sa marge."
+      "term": "Référence",
+      "def": "Ce à quoi chaque modèle est comparé : le marché (qui gagne, double chance, Haute probabilité) ou une règle simple sans modèle (prédicteur, duel, sélections). Chaque carte indique la règle exacte. Qui gagne : toujours le favori du marché, le résultat avec la cote la plus basse, sans marge. Double chance : la plus probable selon le marché. Dans ces deux cas, les matchs sans cote enregistrée ne comptent pas, ni pour le modèle ni pour la référence. Duel de corners et prédicteur : l'équipe avec la moyenne la plus élevée de cette statistique sur ses 10 derniers matchs de cette compétition (ou ceux qu'elle a, s'il y en a moins), uniquement avec les matchs antérieurs. Si les deux moyennes sont égales ou s'il manque l'historique d'une équipe, le match n'entre pas dans la comparaison. Sélections probables : la fréquence générale de chaque événement dans le championnat, c'est-à-dire combien de fois il s'est produit dans les matchs joués avant celui-ci, cette saison et la précédente. Si la sélection repose sur les matchs à domicile ou à l'extérieur d'une équipe, seul ce terrain compte. Haute probabilité : la probabilité que donnait le marché avant le match, sans sa marge."
     },
     "edge": {
       "term": "Avantage",
-      "def": "La réussite moins le « sans modèle », en points : ce que le modèle apporte par rapport à la règle simple. Sa marge vient de refaire le calcul 2000 fois avec des matchs tirés au hasard parmi les mêmes ; si elle contient 0, l'avantage ne se distingue pas de la chance."
+      "def": "La réussite moins la référence, en points : ce que le modèle apporte par rapport à elle. Sa marge vient de refaire le calcul 2000 fois avec des matchs tirés au hasard parmi les mêmes ; si elle contient 0, l'avantage ne se distingue pas de la chance."
     },
     "side": {
       "term": "Quelle équipe en obtient le plus (prédicteur)",

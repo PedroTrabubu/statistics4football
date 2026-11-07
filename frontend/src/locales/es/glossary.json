@@ -101,12 +101,12 @@
       "def": "Dónde estará, casi con seguridad (95 %), el acierto real del modelo con esa cantidad de predicciones. Cuantas menos predicciones, más ancho. Se calcula con el método de Wilson."
     },
     "base": {
-      "term": "Referencia (sin modelo)",
-      "def": "Lo que se acertaría sin modelo, con la regla más simple de cada caso. Quién gana y duelo de córners: elegir siempre al local. Doble oportunidad: siempre local o empate. Predictor: siempre el mismo lado, el local, salvo en faltas y amarillas, donde suele sacar más el visitante. Picks probables: lo habitual en la liga para ese suceso hasta ese partido. Alta probabilidad: la probabilidad que daba el mercado antes del partido, sin su margen."
+      "term": "Referencia",
+      "def": "Con qué se compara cada modelo: el mercado (quién gana, doble oportunidad, Alta probabilidad) o una regla simple sin modelo (predictor, duelo, picks). Cada tarjeta dice la regla concreta. Quién gana: siempre el favorito del mercado, el resultado con la cuota más baja, sin margen. Doble oportunidad: la más probable según el mercado. En estas dos, los partidos sin cuota guardada no cuentan, ni para el modelo ni para la referencia. Duelo de córners y predictor: el equipo con más media de esa estadística en sus últimos 10 partidos de esa competición (o los que tenga, si son menos), solo con partidos anteriores. Si las dos medias empatan o a un equipo le falta historial, el partido no entra en la comparación. Picks probables: la frecuencia general de cada suceso en la liga, es decir, cuántas veces se ha dado en los partidos jugados antes de ese, de esa temporada y la anterior. Si el pick se basa en los partidos en casa o fuera de un equipo, se cuenta solo en ese campo. Alta probabilidad: la probabilidad que daba el mercado antes del partido, sin su margen."
     },
     "edge": {
       "term": "Ventaja",
-      "def": "El acierto menos el «sin modelo», en puntos: cuánto aporta el modelo frente a la regla simple. Su margen sale de repetir la cuenta 2000 veces con partidos sacados al azar de los mismos; si incluye el 0, la ventaja no se distingue de la suerte."
+      "def": "El acierto menos la referencia, en puntos: cuánto aporta el modelo frente a ella. Su margen sale de repetir la cuenta 2000 veces con partidos sacados al azar de los mismos; si incluye el 0, la ventaja no se distingue de la suerte."
     },
     "side": {
       "term": "Qué equipo saca más (predictor)",

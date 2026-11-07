@@ -100,12 +100,12 @@
       "def": "Where the model's real hit rate almost certainly (95%) lies, given that number of predictions. The fewer the predictions, the wider it is. It is calculated with the Wilson method."
     },
     "base": {
-      "term": "Reference (without a model)",
-      "def": "What you would get right without a model, using the simplest rule in each case. Who wins and corner duel: always pick the home team. Double chance: always home or draw. Predictor: always the same side, the home team, except for fouls and yellow cards, where the away team usually gets more. Likely picks: how often that event happened in the league up to that match. High probability: the probability the market gave before the match, without its margin."
+      "term": "Reference",
+      "def": "What each model is compared with: the market (who wins, double chance, High probability) or a simple rule without a model (predictor, duel, picks). Each card names the exact rule. Who wins: always the market favourite, the result with the lowest odds, without margin. Double chance: the most likely one according to the market. In these two, matches without stored odds do not count, for the model or for the baseline. Corner duel and predictor: the team with the higher average of that stat over its last 10 matches in that competition (or as many as it has, if fewer), using earlier matches only. If the two averages tie or a team has no history, the match stays out of the comparison. Likely picks: how often each event happens across the league, that is, how many times it happened in the matches played before that one, in that season and the previous one. If the pick is based on a team's home or away matches, only that venue counts. High probability: the probability the market gave before the match, without its margin."
     },
     "edge": {
       "term": "Edge",
-      "def": "The hit rate minus “without a model”, in points: how much the model adds over the simple rule. Its range comes from repeating the calculation 2000 times with matches drawn at random from the same ones; if it includes 0, the edge cannot be told apart from luck."
+      "def": "The hit rate minus the reference, in points: how much the model adds over it. Its range comes from repeating the calculation 2000 times with matches drawn at random from the same ones; if it includes 0, the edge cannot be told apart from luck."
     },
     "side": {
       "term": "Which team gets more (predictor)",
