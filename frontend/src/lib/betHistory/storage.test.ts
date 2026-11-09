@@ -78,6 +78,13 @@ describe("copia de seguridad", () => {
     expect(realMoney).toBeNull();
   });
 
+  it("acepta copias con otro prefijo de marca y rechaza otros tipos", async () => {
+    const { parseBackup } = await import("./storage");
+    const raw = (kind: string) => JSON.stringify({ kind, bets: [{ id: "9", status: "won" }] });
+    expect(parseBackup(raw("otra-marca/mis-apuestas")).bets).toHaveLength(1);
+    expect(() => parseBackup(raw("otra-marca/otra-cosa"))).toThrow();
+  });
+
   it("resultado real del año = saldo final - saldo inicial - ingresado + retirado", async () => {
     const { realResult } = await import("./storage");
     // Un extracto de ejemplo: 7,25 - 12,60 - 30 + 0.

@@ -5,8 +5,26 @@ import type { Bookmaker, ParsedBet } from "./types";
 
 const KEY = "s4f:mis-apuestas:v1";
 
+/**
+ * Las claves llevaban antes otro prefijo de marca. Si la actual está vacía y hay
+ * otra con el mismo sufijo, se mueve (no se copia, para que «Borrar» no la recupere).
+ */
+function adoptOldPrefix(key: string): void {
+  if (localStorage.getItem(key) !== null) return;
+  const suffix = key.slice(key.indexOf(":"));
+  for (let i = 0; i < localStorage.length; i++) {
+    const old = localStorage.key(i);
+    if (old && old !== key && old.endsWith(suffix)) {
+      localStorage.setItem(key, localStorage.getItem(old) ?? "");
+      localStorage.removeItem(old);
+      return;
+    }
+  }
+}
+
 export function loadBets(): ParsedBet[] {
   try {
+    adoptOldPrefix(KEY);
     const raw = localStorage.getItem(KEY);
     const data = raw ? (JSON.parse(raw) as { bets?: ParsedBet[] }) : null;
     return Array.isArray(data?.bets) ? data.bets : [];
@@ -121,6 +139,8 @@ function cleanRealMoneyByBook(raw: unknown): RealMoneyByBook {
 
 export function loadRealMoney(): RealMoneyByBook {
   try {
+    adoptOldPrefix(REAL_MONEY_KEY);
+    adoptOldPrefix(LEGACY_REAL_MONEY_KEY);
     const raw = localStorage.getItem(REAL_MONEY_KEY) ?? localStorage.getItem(LEGACY_REAL_MONEY_KEY);
     return raw ? cleanRealMoneyByBook(JSON.parse(raw)) : {};
   } catch {
@@ -189,6 +209,9 @@ export function describeUpdate({ before, after }: BetUpdate): string {
 // --- Copia de seguridad -------------------------------------------------------
 
 const BACKUP_KIND = "stats4football/mis-apuestas";
+/** Las copias exportadas con el prefijo de marca anterior también valen: se mira solo el sufijo. */
+const isBackupKind = (kind: unknown): boolean =>
+  typeof kind === "string" && kind.endsWith(BACKUP_KIND.slice(BACKUP_KIND.indexOf("/")));
 
 /** Contenido del archivo .json de copia de seguridad. */
 export function exportBackup(bets: ParsedBet[], realMoney: RealMoneyByBook | null = null, now: Date = new Date()): string {
@@ -230,7 +253,7 @@ export function parseBackup(raw: string): Backup {
     throw new BackupError("notJson");
   }
   const bets = Array.isArray(data) ? data : (data as { kind?: string; bets?: unknown })?.bets;
-  if (!Array.isArray(data) && (data as { kind?: string })?.kind !== BACKUP_KIND) {
+  if (!Array.isArray(data) && !isBackupKind((data as { kind?: unknown })?.kind)) {
     throw new BackupError("notBackup");
   }
   if (!Array.isArray(bets)) throw new BackupError("noBets");
