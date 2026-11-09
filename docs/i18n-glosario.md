@@ -8,7 +8,7 @@ usado para elegir terminología: no se ha copiado ningún texto.
 Criterios generales:
 
 - Inglés británico y de tú a tú ("you"); francés con "vous" y tono neutro.
-- Nombres propios sin traducir (equipos, árbitros, stats4football, casas de
+- Nombres propios sin traducir (equipos, árbitros, Stats4Football, casas de
   apuestas, Premier League, LaLiga...), salvo "Champions League", que en
   francés es "Ligue des champions". Los países sí se traducen.
 - Números con el formato de cada idioma (Intl): `1,5` / `1.5` / `1,5`;

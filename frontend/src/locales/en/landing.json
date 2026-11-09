@@ -1,9 +1,9 @@
 {
   "meta": {
-    "title": "stats4football · Football statistics to understand every match",
+    "title": "Stats4Football · Football statistics to understand every match",
     "description": "Goals, corners, cards, shots, fouls and referees by team and league, with the historical frequency behind every percentage. Not a bookmaker."
   },
-  "brandHome": "stats4football, home",
+  "brandHome": "Stats4Football, home",
   "mainNav": "Main",
   "seeMatches": "View matches",
   "hero": {
@@ -63,7 +63,7 @@
   },
   "trust": {
     "title": "How to read the percentages",
-    "text": "The percentages on stats4football are <bold>historical frequency</bold>, not a promise of what will happen: they count how often something happened before and should be read alongside the number of matches used. A high percentage from a few matches says much less than the same percentage from many.",
+    "text": "The percentages on Stats4Football are <bold>historical frequency</bold>, not a promise of what will happen: they count how often something happened before and should be read alongside the number of matches used. A high percentage from a few matches says much less than the same percentage from many.",
     "link": "More on how to read them →"
   },
   "final": {

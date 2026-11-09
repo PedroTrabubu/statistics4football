@@ -1,9 +1,9 @@
 {
   "meta": {
-    "title": "stats4football · Des statistiques de football pour comprendre chaque match",
+    "title": "Stats4Football · Des statistiques de football pour comprendre chaque match",
     "description": "Buts, corners, cartons, tirs, fautes et arbitres par équipe et par compétition, avec la fréquence historique derrière chaque pourcentage. Ce n'est pas un bookmaker."
   },
-  "brandHome": "stats4football, accueil",
+  "brandHome": "Stats4Football, accueil",
   "mainNav": "Principale",
   "seeMatches": "Voir les matchs",
   "hero": {
@@ -63,7 +63,7 @@
   },
   "trust": {
     "title": "Comment lire les pourcentages",
-    "text": "Les pourcentages de stats4football sont une <bold>fréquence historique</bold>, pas une promesse de ce qui va arriver : ils comptent combien de fois quelque chose s'est produit et doivent se lire avec le nombre de matchs utilisés. Un pourcentage élevé sur peu de matchs en dit beaucoup moins que le même pourcentage sur beaucoup de matchs.",
+    "text": "Les pourcentages de Stats4Football sont une <bold>fréquence historique</bold>, pas une promesse de ce qui va arriver : ils comptent combien de fois quelque chose s'est produit et doivent se lire avec le nombre de matchs utilisés. Un pourcentage élevé sur peu de matchs en dit beaucoup moins que le même pourcentage sur beaucoup de matchs.",
     "link": "En savoir plus sur leur lecture →"
   },
   "final": {

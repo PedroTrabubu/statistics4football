@@ -1,9 +1,9 @@
 {
   "meta": {
-    "title": "stats4football · Estadísticas de fútbol para entender cada partido",
+    "title": "Stats4Football · Estadísticas de fútbol para entender cada partido",
     "description": "Goles, córners, tarjetas, tiros, faltas y árbitros por equipo y liga, con la frecuencia histórica detrás de cada porcentaje. No es una casa de apuestas."
   },
-  "brandHome": "stats4football, portada",
+  "brandHome": "Stats4Football, portada",
   "mainNav": "Principal",
   "seeMatches": "Ver partidos",
   "hero": {
@@ -63,7 +63,7 @@
   },
   "trust": {
     "title": "Cómo leer los porcentajes",
-    "text": "Los porcentajes de stats4football son <bold>frecuencia histórica</bold>, no una promesa de lo que va a pasar: cuentan cuántas veces ocurrió algo antes y deben leerse junto al número de partidos usado. Un porcentaje alto sobre pocos partidos dice mucho menos que el mismo porcentaje sobre muchos.",
+    "text": "Los porcentajes de Stats4Football son <bold>frecuencia histórica</bold>, no una promesa de lo que va a pasar: cuentan cuántas veces ocurrió algo antes y deben leerse junto al número de partidos usado. Un porcentaje alto sobre pocos partidos dice mucho menos que el mismo porcentaje sobre muchos.",
     "link": "Más sobre cómo leerlos →"
   },
   "final": {

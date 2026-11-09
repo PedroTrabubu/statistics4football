@@ -77,7 +77,7 @@ export function LandingPage() {
         <div className="landing-navbar-inner">
           <Link to={ROUTES.home} className="app-brand" aria-label={t("landing:brandHome")}>
             <AppMark />
-            <span className="app-title">stats4football</span>
+            <span className="app-title">Stats4Football</span>
           </Link>
           <div className="landing-navbar-actions">
             <nav aria-label={t("landing:mainNav")}>

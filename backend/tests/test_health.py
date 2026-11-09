@@ -15,5 +15,5 @@ def test_root() -> None:
     response = client.get("/")
     assert response.status_code == 200
     body = response.json()
-    assert body["name"] == "stats4football"
+    assert body["name"] == "Stats4Football"
     assert "ENG-Premier League" in body["leagues"]

@@ -2,7 +2,7 @@
 
 > Registro fase a fase de cómo se construyó el proyecto, con los bugs reales encontrados y las decisiones de diseño que explican. Para una presentación del proyecto, ver el [README](../README.es.md).
 
-## stats4football
+## Stats4Football
 
 Plataforma de estadisticas de futbol: cruza historico + cuotas de mercado para
 estimar la probabilidad real de eventos de un partido (1X2, over/under, BTTS,

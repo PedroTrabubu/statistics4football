@@ -56,7 +56,7 @@ partidos actualizados, árbitros nuevos, discrepancias, equipos sin resolver y e
 
 ## Puesta en marcha
 
-Está registrado en el Programador de tareas de Windows como **"stats4football programador"**:
+Está registrado en el Programador de tareas de Windows como **"Stats4Football programador"**:
 
 - **Arranque:** al iniciar sesión y cada 5 minutos. Si ya está en marcha, el Programador no abre otro, y el propio
   script tampoco (bloqueo en `data/scheduler.lock`). Si se cae, vuelve a arrancar en menos de 5 minutos.
@@ -79,9 +79,9 @@ python scripts/scheduler.py --loop         # lanzarlo a mano (si la tarea no est
 Para pararlo o quitarlo, en PowerShell:
 
 ```powershell
-Stop-ScheduledTask -TaskName "stats4football programador"         # parar ahora (vuelve a arrancar en 5 min)
-Disable-ScheduledTask -TaskName "stats4football programador"      # desactivarlo
-Unregister-ScheduledTask -TaskName "stats4football programador"   # quitarlo
+Stop-ScheduledTask -TaskName "Stats4Football programador"         # parar ahora (vuelve a arrancar en 5 min)
+Disable-ScheduledTask -TaskName "Stats4Football programador"      # desactivarlo
+Unregister-ScheduledTask -TaskName "Stats4Football programador"   # quitarlo
 ```
 
 Las predicciones del modelo (`refresh_predictions.py`) y las combinadas (`refresh_picks.py`) no están en el programador:

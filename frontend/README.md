@@ -1,4 +1,4 @@
-# stats4football — frontend
+# Stats4Football — frontend
 
 React + TypeScript (Vite). Consume la API de `../backend`.
 

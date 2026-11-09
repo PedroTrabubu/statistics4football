@@ -10,7 +10,7 @@ configure_logging()
 settings = get_settings()
 
 app = FastAPI(
-    title="stats4football API",
+    title="Stats4Football API",
     description="Probabilidades reales y EV frente a cuotas de mercado para futbol.",
     version="0.1.0",
 )
@@ -40,6 +40,6 @@ app.include_router(admin.router)
 @app.get("/")
 def root() -> dict:
     return {
-        "name": "stats4football",
+        "name": "Stats4Football",
         "leagues": settings.leagues,
     }

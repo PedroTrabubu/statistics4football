@@ -58,7 +58,7 @@ export function Layout() {
   return (
     <div className="app-shell">
       {/* index.html lleva el titulo de la portada; React 19 sube este a <head>. */}
-      <title>stats4football</title>
+      <title>Stats4Football</title>
       <header className="app-navbar">
         <div className="app-navbar-inner">
           <button
@@ -72,7 +72,7 @@ export function Layout() {
           </button>
           <NavLink to={ROUTES.home} className="app-brand" end>
             <AppMark />
-            <span className="app-title">stats4football</span>
+            <span className="app-title">Stats4Football</span>
           </NavLink>
           <div className="header-switches">
             <LanguageSwitch />
