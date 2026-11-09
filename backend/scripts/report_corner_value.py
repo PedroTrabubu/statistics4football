@@ -14,19 +14,20 @@ from datetime import datetime
 from pathlib import Path
 
 import numpy as np
+from sqlalchemy.engine import make_url
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import experiments_corner_duel as duel_model  # noqa: E402
 from app.analysis.stats import bootstrap_mean_diff  # noqa: E402
-from app.core.config import PROJECT_ROOT  # noqa: E402
+from app.core.config import settings  # noqa: E402
 from app.probability.devig import devig  # noqa: E402
 
 START = datetime(2026, 10, 14)
 TARGET = 400
 EDGE = 0.05
-DB = PROJECT_ROOT / "data" / "stats4football.db"
+DB = make_url(settings.database_url).database  # la misma BD que usa la app (.env incluido)
 
 
 def eligible(c: sqlite3.Connection) -> tuple[dict, dict]:
