@@ -148,7 +148,7 @@
   },
   "year": {
     "title": "Year by year",
-    "note": "By calendar year, from 1 January to 31 December: that's the period over which gambling winnings are declared for income tax in Spain. Each bet counts in the year you placed it; one from late December that was settled in January could go into the following year. Profit includes winnings from free bets. Click a year to see only that year."
+    "note": "By calendar year, from 1 January to 31 December. Each bet counts in the year you placed it; one from late December that was settled in January could go into the following year. Profit includes winnings from free bets. Click a year to see only that year."
   },
   "sections": {
     "label": "My bets sections",
@@ -158,8 +158,8 @@
     "monthShort": "By month",
     "evolution": "Over time",
     "realMoney": "Real money",
-    "leaks": "Where you lose most",
-    "leaksShort": "Where you lose",
+    "leaks": "Where you win and lose",
+    "leaksShort": "Win and lose",
     "categories": "Odds, stake, sport…",
     "categoriesShort": "Categories",
     "promotions": "Promotions",
@@ -167,7 +167,8 @@
     "teams": "Teams and tennis players",
     "teamsShort": "Teams",
     "bets": "Imported bets",
-    "betsShort": "Bets"
+    "betsShort": "Bets",
+    "more": "More detail"
   },
   "fewBets_one": "There's only {{count}} settled bet: with so few, the percentages change a lot with each bet. Treat them as a rough guide.",
   "fewBets_other": "There are only {{count}} settled bets: with so few, the percentages change a lot with each bet. Treat them as a rough guide.",
@@ -175,16 +176,12 @@
     "title": "Month by month",
     "titleYear": "Month by month · {{year}}",
     "note": "By the date you placed the bet. Click a month (on the chart or in the table) to see only that month in the rest of the page; click it again, or ‘Month ✕’ at the top, to clear the filter.",
-    "lowSample": "With fewer than {{n}} bets (in grey) the month is unreliable."
+    "lowSample": "With fewer than {{n}} bets (in grey) the month is unreliable.",
+    "current": "in progress"
   },
   "evolution": {
     "title": "Profit over time",
     "titleYear": "Profit over time · {{year}}"
-  },
-  "leaks": {
-    "title": "Where you lose most",
-    "item": "<bold>{{dimension}}: {{group}}</bold> — <loss>{{profit}}</loss> over {{bets}} bets.",
-    "itemRates": "<bold>{{dimension}}: {{group}}</bold> — <loss>{{profit}}</loss> over {{bets}} bets (you win {{hitRate}} and their odds implied {{implied}})."
   },
   "breakdown": {
     "odds": {
@@ -199,7 +196,8 @@
       "note": "Winamax Supercuotas and promotions (Bang to the Moon, missions...) and bet365 boosts (odds and winnings). A bet with two promotions counts in both."
     },
     "sport": {
-      "title": "By sport"
+      "title": "By sport",
+      "otherNote": "‘Other and unclassified’ groups skialpin, specialodds, boxing, multiple and unknown: sports with very few bets or no clear sport."
     },
     "market": {
       "title": "By market (single bets)",
@@ -368,7 +366,8 @@
     "tableTennis": "Table tennis",
     "motor": "Motorsport",
     "unknown": "Unknown",
-    "several": "Multiple"
+    "several": "Multiple",
+    "otherGroup": "Other and unclassified"
   },
   "dimension": {
     "odds": "Odds",
@@ -434,7 +433,11 @@
     "implied": "The odds implied {{pct}} <gap>({{gap}})</gap>",
     "profit": "Profit <bold>{{profit}}</bold>",
     "roi": " · ROI {{roi}}",
-    "showAll": "Show all {{n}}"
+    "showAll": "Show all {{n}}",
+    "order": "From most to fewest bets; those with fewer than {{n}} are folded away at the end.",
+    "noneMain": "None with {{n}} bets or more.",
+    "few_one": "{{count}} more with fewer than {{n}} bets",
+    "few_other": "{{count}} more with fewer than {{n}} bets"
   },
   "realMoney": {
     "title": "Real money",
@@ -511,5 +514,41 @@
     "tooltipWithout": "Without promotion: {{value}}",
     "tooltipWith": "With promotion: {{value}}",
     "tooltipLow": "Unreliable: fewer than {{n}} bets"
+  },
+  "winloss": {
+    "title": "Where you win and where you lose",
+    "note": "The three market (single bets), stake and odds groups that have made you the most money and the three that have cost you the most, with at least {{n}} bets. ‘Clear signal’: your hit rate differs from what the odds implied by more than chance would explain (95 % Wilson interval). ‘Could be noise’: with that many bets, the difference could still be down to chance.",
+    "wins": "Where you win",
+    "losses": "Where you lose",
+    "item": "{{dimension}}: {{group}}",
+    "bets_one": "{{count}} bet",
+    "bets_other": "{{count}} bets",
+    "rates": "you win {{hit}} · the odds implied {{implied}}",
+    "clear": "Clear signal",
+    "noise": "Could be noise",
+    "emptyWins": "No group with at least {{n}} bets has made you money.",
+    "emptyLosses": "No group with at least {{n}} bets has lost you money."
+  },
+  "supercuota": {
+    "without": "Without {{promo}}",
+    "carries": "Your profit comes from {{promo}}: the rest of your bets don't make money.",
+    "promoRow_one": "{{promo}} · {{count}} bet",
+    "promoRow_other": "{{promo}} · {{count}} bets",
+    "restRow_one": "Everything else · {{count}} bet",
+    "restRow_other": "Everything else · {{count}} bets",
+    "total": "Total",
+    "splitTitle": "{{label}} · {{n}}",
+    "roi": "ROI {{roi}}",
+    "evidenceClear": "{{promo}} wins {{hit}} (95 % interval: {{low}}–{{high}}) and only needs {{need}} to break even: that edge stands out from chance.",
+    "evidenceNoise": "{{promo}} wins {{hit}} (95 % interval: {{low}}–{{high}}) and needs {{need}} to break even: with these bets, it doesn't yet stand out from chance."
+  },
+  "example": {
+    "show": "See it with sample data",
+    "badge": "Sample data",
+    "note": "{{n}} made-up bets to show how the page works: they aren't yours and aren't saved.",
+    "exit": "Leave the sample"
+  },
+  "more": {
+    "title": "More detail"
   }
 }

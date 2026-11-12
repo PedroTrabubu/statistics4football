@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { currentLocale } from "../i18n";
+import { axisEuro, noNegativeZero } from "../lib/betHistory/format";
 import { niceTicks } from "../lib/chartTicks";
 
 export interface ProfitPoint {
@@ -11,7 +12,8 @@ export interface ProfitPoint {
 const HEIGHT = 220;
 const PAD = { top: 16, right: 64, bottom: 28, left: 52 };
 
-function euro(n: number, signed = false): string {
+function euro(value: number, signed = false): string {
+  const n = noNegativeZero(value);
   const s = n.toLocaleString(currentLocale(), { style: "currency", currency: "EUR", maximumFractionDigits: 2 });
   return signed && n > 0 ? `+${s}` : s;
 }
@@ -79,7 +81,7 @@ export function ProfitChart({ points }: { points: ProfitPoint[] }) {
           <g key={t}>
             <line className={t === 0 ? "chart-zero" : "chart-grid"} x1={PAD.left} x2={PAD.left + plotW} y1={y(t)} y2={y(t)} />
             <text className="chart-axis" x={PAD.left - 8} y={y(t)} dy="0.32em" textAnchor="end">
-              {euro(t)}
+              {axisEuro(t)}
             </text>
           </g>
         ))}

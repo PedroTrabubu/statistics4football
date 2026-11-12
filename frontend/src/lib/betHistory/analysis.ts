@@ -1,7 +1,7 @@
 /** Análisis de un historial de apuestas: dinero, acierto frente a la cuota, y en qué se gana y se pierde. */
 
 import { currentLocale, t } from "../../i18n";
-import { formatFixed, withPercent } from "../format";
+import { roiPct } from "./format";
 import { groupLabel } from "./labels";
 import type { BetLeg, ParsedBet } from "./types";
 import { inferSport } from "./winamax";
@@ -417,7 +417,7 @@ function eur(n: number): string {
 
 function roiText(g: GroupStats): string {
   if (g.roi === null) return t("mybets:insight.noRoi");
-  return t("mybets:insight.roi", { value: withPercent(`${g.roi > 0 ? "+" : ""}${formatFixed(g.roi * 100, 0)}`) });
+  return t("mybets:insight.roi", { value: roiPct(g.roi) });
 }
 
 /** `dimension`: "sport" o "market" (mybets:insight.bestWorst.<dimension>). */
@@ -450,14 +450,16 @@ export const PROMO_GAP_ROI = 0.15;
  * 2. si una promoción aporta más de la mitad del beneficio (o hay pérdidas y ella gana);
  * 3. el deporte con mejor y peor resultado;
  * 4. el mercado (apuestas simples) con mejor y peor resultado.
+ * Con `promotions: false` se saltan 1 y 2 (cuando ya los muestra el recuadro de la Supercuota).
  */
-export function insights(settled: SettledBet[], max = 2): string[] {
+export function insights(settled: SettledBet[], max = 2, { promotions = true }: { promotions?: boolean } = {}): string[] {
   const out: string[] = [];
   const total = stats("total", settled);
 
   const withPromo = stats("con", settled.filter((r) => hasPromotion(r.bet)));
   const withoutPromo = stats("sin", settled.filter((r) => !hasPromotion(r.bet)));
   if (
+    promotions &&
     withPromo.bets >= PROMO_INSIGHT_MIN_BETS &&
     withoutPromo.bets >= 10 &&
     withPromo.roi !== null &&
@@ -479,7 +481,7 @@ export function insights(settled: SettledBet[], max = 2): string[] {
   const promo = promotionGroups(settled)
     .filter((g) => g.key !== NO_PROMOTION && g.bets >= PROMO_INSIGHT_MIN_BETS && g.profit > 0)
     .sort((a, b) => b.profit - a.profit)[0];
-  if (promo && (total.profit <= 0 || promo.profit > 0.5 * total.profit)) {
+  if (promotions && promo && (total.profit <= 0 || promo.profit > 0.5 * total.profit)) {
     const rest = stats("rest", settled.filter((r) => !(r.bet.promotions ?? []).includes(promo.key)));
     const values = { promo: promo.key, profit: eur(promo.profit), bets: promo.bets, total: eur(total.profit) };
     const share =

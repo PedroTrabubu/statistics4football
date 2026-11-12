@@ -2,11 +2,18 @@ import { useId, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { currentLocale } from "../i18n";
 import { formatFixed } from "../lib/format";
-import type { GroupStats, Habits, MoneyHistory } from "../lib/betHistory/analysis";
+import { stats, type GroupStats, type Habits, type MoneyHistory, type SettledBet } from "../lib/betHistory/analysis";
 import { LOW_SAMPLE, euro, moneyClass, pct, roiPct, signedPp } from "../lib/betHistory/format";
+import { dimensionLabel, groupLabel } from "../lib/betHistory/labels";
 import type { TeamGroup } from "../lib/betHistory/teams";
 import { TeamCrest } from "./TeamCrest";
-import type { PromoEvidence, PromoSplit } from "../lib/betHistory/promotions";
+import {
+  excludingPromotions,
+  promoEvidence,
+  wilson,
+  type PromoEvidence,
+  type PromoSplit,
+} from "../lib/betHistory/promotions";
 import {
   EMPTY_REAL_MONEY,
   realResult,
@@ -81,6 +88,159 @@ export function PromoSplitCards({ split }: { split: PromoSplit }) {
           totalProfit: euro(total.profit, true),
         })}
       </p>
+    </section>
+  );
+}
+
+/**
+ * Junto al beneficio: cuánto pesa la Supercuota (`promo`) en el resultado, el
+ * resto de apuestas, con y sin promoción, y si su acierto se distingue del azar.
+ */
+export function SupercuotaPanel({ promo, settled, split }: { promo: string; settled: SettledBet[]; split: PromoSplit }) {
+  const { t } = useTranslation();
+  const own = stats(promo, settled.filter((r) => (r.bet.promotions ?? []).includes(promo)));
+  const rest = stats(promo, excludingPromotions(settled, [promo]));
+  const evidence = promoEvidence(settled, promo);
+  const max = Math.max(Math.abs(own.profit), Math.abs(rest.profit)) || 1;
+  const bar = (label: string, value: number) => (
+    <div>
+      <div className="supercuota-row-head">
+        <span>{label}</span>
+        <strong className={moneyClass(value)}>{euro(value, true)}</strong>
+      </div>
+      <div className="supercuota-track" aria-hidden="true">
+        <span
+          className={`supercuota-fill ${value >= 0 ? "is-pos" : "is-neg"}`}
+          style={{ width: `${Math.max(2, (100 * Math.abs(value)) / max)}%` }}
+        />
+      </div>
+    </div>
+  );
+  const mini = (label: string, g: GroupStats) => (
+    <div className="supercuota-mini">
+      <span className="small muted">{t("mybets:supercuota.splitTitle", { label, n: g.bets })}</span>
+      <strong className={moneyClass(g.profit)}>{euro(g.profit, true)}</strong>
+      <span className="small muted">{t("mybets:supercuota.roi", { roi: roiPct(g.roi) })}</span>
+    </div>
+  );
+  return (
+    <section className="supercuota-panel" aria-label={t("mybets:supercuota.without", { promo })}>
+      <span className="bets-hero-label">{t("mybets:supercuota.without", { promo })}</span>
+      <span className={`supercuota-value ${moneyClass(rest.profit)}`}>{euro(rest.profit, true)}</span>
+      {own.profit > 0 && rest.profit <= 0 && <p className="supercuota-headline">{t("mybets:supercuota.carries", { promo })}</p>}
+      <div className="supercuota-bars">
+        {bar(t("mybets:supercuota.promoRow", { promo, count: own.bets }), own.profit)}
+        {bar(t("mybets:supercuota.restRow", { count: rest.bets }), rest.profit)}
+        <div className="supercuota-total">
+          <span>{t("mybets:supercuota.total")}</span>
+          <strong className={moneyClass(split.total.profit)}>{euro(split.total.profit, true)}</strong>
+        </div>
+      </div>
+      <div className="supercuota-split">
+        {mini(t("mybets:column.withPromo"), split.withPromo)}
+        {mini(t("mybets:column.withoutPromo"), split.withoutPromo)}
+      </div>
+      {evidence?.ci && evidence.breakEven !== null && (
+        <p className="small muted">
+          {t(evidence.supported ? "mybets:supercuota.evidenceClear" : "mybets:supercuota.evidenceNoise", {
+            promo,
+            hit: pct(evidence.hitRate),
+            low: pct(evidence.ci[0]),
+            high: pct(evidence.ci[1]),
+            need: pct(evidence.breakEven, 1),
+          })}{" "}
+          {t("mybets:evidence.past")}
+        </p>
+      )}
+    </section>
+  );
+}
+
+/** Un grupo de mercado, importe o cuota con lo que ganó o perdió y si eso se distingue del azar. */
+export interface Spot {
+  dimension: string;
+  group: GroupStats;
+  clear: boolean;
+}
+
+/** Dimensiones de «Dónde ganas y dónde pierdes». */
+const SPOT_DIMENSIONS = ["Mercado (simples)", "Importe", "Cuota"];
+
+/**
+ * ¿Señal clara? El intervalo de Wilson (95 %) del acierto queda entero por
+ * encima de lo que implicaban las cuotas si el grupo gana, o por debajo si pierde.
+ */
+function clearSignal(g: GroupStats): boolean {
+  const ci = wilson(g.wins, g.decided);
+  if (!ci || g.impliedRate === null) return false;
+  return g.profit > 0 ? ci[0] > g.impliedRate : ci[1] < g.impliedRate;
+}
+
+/** Los `limit` grupos con más beneficio y los `limit` con más pérdida, con al menos LOW_SAMPLE apuestas. */
+export function winLossSpots(dimensions: Record<string, GroupStats[]>, limit = 3): { wins: Spot[]; losses: Spot[] } {
+  const spots = SPOT_DIMENSIONS.flatMap((dimension) =>
+    (dimensions[dimension] ?? [])
+      .filter((g) => g.bets >= LOW_SAMPLE)
+      .map((group) => ({ dimension, group, clear: clearSignal(group) })),
+  );
+  return {
+    wins: spots.filter((s) => s.group.profit > 0).sort((a, b) => b.group.profit - a.group.profit).slice(0, limit),
+    losses: spots.filter((s) => s.group.profit < 0).sort((a, b) => a.group.profit - b.group.profit).slice(0, limit),
+  };
+}
+
+function SpotList({ title, spots, tone, empty }: { title: string; spots: Spot[]; tone: "pos" | "neg"; empty: string }) {
+  const { t } = useTranslation();
+  return (
+    <div className={`winloss-col winloss-${tone}`}>
+      <h3>{title}</h3>
+      {spots.length === 0 ? (
+        <p className="small muted">{empty}</p>
+      ) : (
+        <ul>
+          {spots.map(({ dimension, group: g, clear }) => (
+            <li key={`${dimension}-${g.key}`}>
+              <div className="winloss-head">
+                <strong>{t("mybets:winloss.item", { dimension: dimensionLabel(dimension), group: groupLabel(g.key) })}</strong>
+                <strong className={`winloss-amount ${moneyClass(g.profit)}`}>{euro(g.profit, true)}</strong>
+              </div>
+              <div className="winloss-meta small muted">
+                <span>{t("mybets:winloss.bets", { count: g.bets })}</span>
+                <span>{t("mybets:winloss.rates", { hit: pct(g.hitRate), implied: pct(g.impliedRate) })}</span>
+                <span className={`signal-badge ${clear ? "is-clear" : "is-noise"}`}>
+                  {clear ? t("mybets:winloss.clear") : t("mybets:winloss.noise")}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** Dónde ganas y dónde pierdes: lo de más beneficio y lo de más pérdida, con su insignia. */
+export function WinLossBlock({ wins, losses }: { wins: Spot[]; losses: Spot[] }) {
+  const { t } = useTranslation();
+  if (wins.length === 0 && losses.length === 0) return null;
+  return (
+    <section id="donde-ganas">
+      <h2>{t("mybets:winloss.title")}</h2>
+      <p className="small muted">{t("mybets:winloss.note", { n: LOW_SAMPLE })}</p>
+      <div className="winloss-cols">
+        <SpotList
+          title={t("mybets:winloss.wins")}
+          spots={wins}
+          tone="pos"
+          empty={t("mybets:winloss.emptyWins", { n: LOW_SAMPLE })}
+        />
+        <SpotList
+          title={t("mybets:winloss.losses")}
+          spots={losses}
+          tone="neg"
+          empty={t("mybets:winloss.emptyLosses", { n: LOW_SAMPLE })}
+        />
+      </div>
     </section>
   );
 }
@@ -264,36 +424,59 @@ function TeamCard({ g }: { g: TeamGroup }) {
   );
 }
 
+/** De más a menos apuestas; los de menos de LOW_SAMPLE, plegados al final con su aviso. */
 function TeamCards({ title, groups }: { title: string; groups: TeamGroup[] }) {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
   if (groups.length === 0) return null;
-  const shown = showAll ? groups : groups.slice(0, TEAM_CARDS);
+  const sorted = [...groups].sort((a, b) => b.bets - a.bets || a.name.localeCompare(b.name, currentLocale()));
+  const main = sorted.filter((g) => g.bets >= LOW_SAMPLE);
+  const few = sorted.filter((g) => g.bets < LOW_SAMPLE);
+  const shown = showAll ? main : main.slice(0, TEAM_CARDS);
   return (
     <>
       <h3>{title}</h3>
-      <div className="team-cards">
-        {shown.map((g) => (
-          <TeamCard key={g.name} g={g} />
-        ))}
-      </div>
-      {groups.length > shown.length && (
+      {main.length > 0 ? (
+        <div className="team-cards">
+          {shown.map((g) => (
+            <TeamCard key={g.name} g={g} />
+          ))}
+        </div>
+      ) : (
+        <p className="small muted">{t("mybets:teams.noneMain", { n: LOW_SAMPLE })}</p>
+      )}
+      {main.length > shown.length && (
         <button type="button" className="tab-button" onClick={() => setShowAll(true)}>
-          {t("mybets:teams.showAll", { n: groups.length })}
+          {t("mybets:teams.showAll", { n: main.length })}
         </button>
+      )}
+      {few.length > 0 && (
+        <details className="team-few">
+          <summary>
+            {t("mybets:teams.few", { count: few.length, n: LOW_SAMPLE })}{" "}
+            <span className="low-tag">{t("mybets:lowSample.label")}</span>
+          </summary>
+          <div className="team-cards">
+            {few.map((g) => (
+              <TeamCard key={g.name} g={g} />
+            ))}
+          </div>
+        </details>
       )}
     </>
   );
 }
 
-/** Con qué equipos y con qué tenistas aciertas más, de más a menos acierto. */
+/** Equipos y tenistas, de más a menos apuestas, con cuánto aciertas en cada uno. */
 export function TeamsSection({ groups }: { groups: TeamGroup[] }) {
   const { t } = useTranslation();
   if (groups.length === 0) return null;
   return (
     <section id="equipos">
       <h2>{t("mybets:teams.title")}</h2>
-      <p className="small muted">{t("mybets:teams.note")}</p>
+      <p className="small muted">
+        {t("mybets:teams.note")} {t("mybets:teams.order", { n: LOW_SAMPLE })}
+      </p>
       <TeamCards title={t("mybets:teams.teams")} groups={groups.filter((g) => g.sport === "Fútbol")} />
       <TeamCards title={t("mybets:teams.players")} groups={groups.filter((g) => g.sport === "Tenis")} />
     </section>
@@ -499,7 +682,11 @@ export function RealMoneySection({
     .filter((r) => r.any);
   const total = round2(rows.reduce((s, r) => s + r.real, 0));
   const totalCalc = round2(rows.reduce((s, r) => s + r.calc, 0));
-  const wholeAccounts = books.filter((book) => realMoney[book]?.[WHOLE_ACCOUNT]);
+  // Lo apuntado antes de separar por años, solo en las casas que aún no tienen ningún año apuntado.
+  const wholeAccounts = books.filter(
+    (book) =>
+      realMoney[book]?.[WHOLE_ACCOUNT] && !Object.keys(realMoney[book] ?? {}).some((period) => period !== WHOLE_ACCOUNT),
+  );
   const byBook = books.length > 1;
   const bookNames = books.map((b) => BOOKMAKER_LABELS[b]).join(" + ");
   const selectedRow = rows.find((r) => r.year === year) ?? null;

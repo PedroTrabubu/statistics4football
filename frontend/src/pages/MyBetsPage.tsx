@@ -11,6 +11,9 @@ import {
   PromoEvidenceCard,
   PromoSplitCards,
   RealMoneySection,
+  SupercuotaPanel,
+  WinLossBlock,
+  winLossSpots,
 } from "../components/MyBetsSections";
 import { ProfitChart } from "../components/ProfitChart";
 import { SectionNav } from "../components/SectionNav";
@@ -21,7 +24,6 @@ import {
   TYPE_ORDER,
   WEEKDAYS,
   betType,
-  biggestLeaks,
   builderSelections,
   cumulativeProfit,
   dayPart,
@@ -53,8 +55,9 @@ import {
   type Summary,
 } from "../lib/betHistory/analysis";
 import { looksLikeBet365, parseBet365History } from "../lib/betHistory/bet365";
+import { exampleBets } from "../lib/betHistory/example";
 import { LOW_SAMPLE, euro, moneyClass, pct, roiPct, roiPer100, signedPp } from "../lib/betHistory/format";
-import { dimensionLabel, groupLabel, warningLabel } from "../lib/betHistory/labels";
+import { groupLabel, warningLabel } from "../lib/betHistory/labels";
 import { teamGroups } from "../lib/betHistory/teams";
 import { getTeamCrest } from "../lib/logos";
 import { excludingPromotions, fixedStakePromotions, promoEvidence, promoSplit } from "../lib/betHistory/promotions";
@@ -81,6 +84,24 @@ import { BOOKMAKER_LABELS, type Bookmaker, type ParsedBet } from "../lib/betHist
 import { parseWinamaxHistory } from "../lib/betHistory/winamax";
 
 const BOOKMAKERS = Object.keys(BOOKMAKER_LABELS) as Bookmaker[];
+
+/** Deportes sueltos (sin clasificar o con muy pocas apuestas) que en «Por deporte» van en una sola fila. */
+const OTHER_SPORTS = new Set(["skialpin", "specialodds", "boxeo", "varios", "desconocido"]);
+const OTHER_SPORTS_KEY = "Otros y sin clasificar";
+
+function sportGroup(bet: ParsedBet): string {
+  const sport = sportOf(bet);
+  return OTHER_SPORTS.has(sport.toLowerCase()) ? OTHER_SPORTS_KEY : sport;
+}
+
+function sportGroupLabel(key: string): string {
+  return key === OTHER_SPORTS_KEY ? t("mybets:sport.otherGroup") : groupLabel(key);
+}
+
+/** Mes en curso ("2026-11"), en hora local. */
+function currentMonthKey(now = new Date()): string {
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
 
 /** Un año ("2026") o toda la cuenta (WHOLE_ACCOUNT) de una casa. */
 type MoneyPeriod = { book: Bookmaker; period: string };
@@ -141,21 +162,44 @@ export function MyBetsPage() {
   /** Mes elegido en la vista mensual ("2026-10"); tiene prioridad sobre el año. */
   const [month, setMonth] = useState<string | null>(null);
   const [realMoney, setRealMoney] = useState<RealMoneyByBook>(() => loadRealMoney());
+  /** Datos de ejemplo: solo en memoria, nunca se guardan; null = las apuestas del usuario. */
+  const [example, setExample] = useState<ParsedBet[] | null>(null);
+  const shownBets = example ?? bets;
 
-  /** Guarda (o, con null, borra) el dinero real de una casa en un año o en toda la cuenta. */
+  function resetFilters() {
+    setYearChoice(null);
+    setBook("");
+    setSport("");
+    setMonth(null);
+  }
+
+  function enterExample() {
+    setExample(exampleBets());
+    resetFilters();
+  }
+
+  /** Vuelve a las apuestas del usuario y descarta lo apuntado en el ejemplo. */
+  function exitExample() {
+    setExample(null);
+    setRealMoney(loadRealMoney());
+    resetFilters();
+  }
+
+  /** Guarda (o, con null, borra) el dinero real de una casa en un año o en toda la cuenta. En el ejemplo, solo en memoria. */
   function onSaveRealMoney({ book: k, period }: MoneyPeriod, m: RealMoney | null) {
     const periods = { ...realMoney[k] };
     if (m) periods[period] = m;
     else delete periods[period];
     const next = { ...realMoney, [k]: periods };
     setRealMoney(next);
-    saveRealMoney(next);
+    if (!example) saveRealMoney(next);
   }
 
   /** Restaura una copia: une las apuestas y, en cada casa y año sin dinero real apuntado aquí, toma el de la copia. */
   function restoreBackup(backup: Backup) {
+    // Lo apuntado en el ejemplo no se mezcla con la copia.
+    let next = example ? loadRealMoney() : realMoney;
     applyIncoming(backup.bets, 0, "backup");
-    let next = realMoney;
     for (const k of BOOKMAKERS) {
       for (const [period, m] of Object.entries(backup.realMoney?.[k] ?? {})) {
         if (!hasRealMoney(next[k]?.[period])) next = { ...next, [k]: { ...next[k], [period]: m } };
@@ -189,6 +233,8 @@ export function MyBetsPage() {
 
   /** Une apuestas nuevas (de un HTML o de una copia) con las guardadas y muestra el resultado. */
   function applyIncoming(parsed: ParsedBet[], failed: number, source: "html" | "backup") {
+    // Al importar de verdad se sale del ejemplo.
+    if (example) exitExample();
     const { bets: merged, added, updated, unchanged } = mergeBets(bets, parsed);
     setBets(merged);
     setLastImport(
@@ -267,21 +313,24 @@ export function MyBetsPage() {
     setReport({ kind: "cleared" });
   }
 
-  const sports = useMemo(() => [...new Set(bets.map(sportOf))].sort((a, b) => a.localeCompare(b, "es")), [bets]);
+  const sports = useMemo(
+    () => [...new Set(shownBets.map(sportOf))].sort((a, b) => a.localeCompare(b, "es")),
+    [shownBets],
+  );
 
-  const books = useMemo(() => BOOKMAKERS.filter((k) => bets.some((b) => b.bookmaker === k)), [bets]);
+  const books = useMemo(() => BOOKMAKERS.filter((k) => shownBets.some((b) => b.bookmaker === k)), [shownBets]);
   // Años naturales con apuestas, del más reciente al más antiguo.
   const allYears = useMemo(
-    () => [...new Set(bets.map(yearKey).filter((y): y is string => y !== null))].sort().reverse(),
-    [bets],
+    () => [...new Set(shownBets.map(yearKey).filter((y): y is string => y !== null))].sort().reverse(),
+    [shownBets],
   );
   const year =
     yearChoice === "all" ? null : yearChoice && allYears.includes(yearChoice) ? yearChoice : (allYears[0] ?? null);
 
   // La casa y el deporte se aplican a todo, también a las vistas por año y por mes.
   const base = useMemo(
-    () => bets.filter((b) => (!book || b.bookmaker === book) && (!sport || sportOf(b) === sport)),
-    [bets, book, sport],
+    () => shownBets.filter((b) => (!book || b.bookmaker === book) && (!sport || sportOf(b) === sport)),
+    [shownBets, book, sport],
   );
   // El mes elegido (o, si no hay, el año) filtra el resto de la página.
   const filtered = useMemo(() => {
@@ -300,12 +349,12 @@ export function MyBetsPage() {
     return ({ book: k, period }: MoneyPeriod): MoneyHistory => {
       const id = `${k}|${period}`;
       if (!cache.has(id)) {
-        const rows = bets.filter((b) => b.bookmaker === k && (period === WHOLE_ACCOUNT || yearKey(b) === period));
+        const rows = shownBets.filter((b) => b.bookmaker === k && (period === WHOLE_ACCOUNT || yearKey(b) === period));
         cache.set(id, moneyHistory(rows));
       }
       return cache.get(id) as MoneyHistory;
     };
-  }, [bets]);
+  }, [shownBets]);
 
   function selectYear(key: string | null) {
     setYearChoice(key ?? "all");
@@ -425,10 +474,24 @@ export function MyBetsPage() {
         </details>
       </section>
 
-      {bets.length === 0 ? (
-        <p className="muted">{t("mybets:page.empty")}</p>
+      {shownBets.length === 0 ? (
+        <div className="bets-empty">
+          <p className="muted">{t("mybets:page.empty")}</p>
+          <button type="button" className="action-button" onClick={enterExample}>
+            {t("mybets:example.show")}
+          </button>
+        </div>
       ) : (
         <>
+          {example && (
+            <div className="example-banner" role="status">
+              <span className="example-badge">{t("mybets:example.badge")}</span>
+              <span className="small">{t("mybets:example.note", { n: example.length })}</span>
+              <button type="button" className="action-button" onClick={exitExample}>
+                {t("mybets:example.exit")}
+              </button>
+            </div>
+          )}
           <div className="filters">
             <select
               aria-label={t("mybets:filter.year")}
@@ -653,35 +716,31 @@ function Headline({ s, period }: { s: Summary; period: string }) {
   );
 }
 
+/** Tabla compacta junto al gráfico: mes, apuestas, beneficio y ROI, con «poco fiable» y «en curso». */
 function MonthlyTable({
   months,
   selected,
   onSelect,
-  unit = "month",
 }: {
   months: MonthSplit[];
   selected: string | null;
   onSelect: (key: string | null) => void;
-  unit?: "month" | "year";
 }) {
   const { t } = useTranslation();
+  const current = currentMonthKey();
   return (
     <div className="table-scroll">
-      <table className="predictions-table">
+      <table className="predictions-table bets-month-table">
         <thead>
           <tr>
-            <th>{t(`mybets:column.${unit}`)}</th>
+            <th>{t("mybets:column.month")}</th>
             <th className="num">{t("mybets:column.bets")}</th>
-            <th className="num">{t("mybets:column.hitRate")}</th>
-            <th className="num">{t("mybets:column.staked")}</th>
             <th className="num">{t("mybets:column.profit")}</th>
-            <th className="num">{t("mybets:column.withoutPromo")}</th>
-            <th className="num">{t("mybets:column.withPromo")}</th>
             <th className="num">{t("mybets:column.roi")}</th>
           </tr>
         </thead>
         <tbody>
-          {[...months].reverse().map(({ key, total: m, withPromo, withoutPromo }) => {
+          {[...months].reverse().map(({ key, total: m }) => {
             const classes = [m.bets < LOW_SAMPLE ? "low-sample-row" : "", selected === key ? "month-row-selected" : ""];
             return (
               <tr key={key} className={classes.join(" ").trim() || undefined}>
@@ -690,21 +749,16 @@ function MonthlyTable({
                     type="button"
                     className="month-link"
                     aria-pressed={selected === key}
+                    title={monthLabel(key)}
                     onClick={() => onSelect(selected === key ? null : key)}
                   >
-                    {monthLabel(key)}
+                    {monthLabel(key, "short")}
                   </button>{" "}
                   <LowSampleTag n={m.bets} />
+                  {key === current && <span className="month-current-tag">{t("mybets:month.current")}</span>}
                 </td>
                 <td className="num">{m.bets}</td>
-                <td className="num">
-                  {pct(m.hitRate)}
-                  <span className="muted small"> ({m.wins}/{m.decided})</span>
-                </td>
-                <td className="num">{euro(m.ownStaked)}</td>
                 <td className={`num ${moneyClass(m.profit)}`}>{euro(m.profit, true)}</td>
-                <td className={`num ${moneyClass(withoutPromo.profit)}`}>{euro(withoutPromo.profit, true)}</td>
-                <td className={`num ${moneyClass(withPromo.profit)}`}>{euro(withPromo.profit, true)}</td>
                 <td className={`num ${moneyClass(m.roi)}`}>{roiPct(m.roi)}</td>
               </tr>
             );
@@ -715,7 +769,7 @@ function MonthlyTable({
   );
 }
 
-/** Resultado de cada año natural, el periodo con el que se declaran las ganancias del juego. */
+/** Resultado de cada año natural. */
 function YearSection({
   years,
   settled,
@@ -824,7 +878,6 @@ function Analysis({
 }) {
   const { t } = useTranslation();
   const s = summarize(bets, settled);
-  const sentences = insights(settled);
   const shownMonths = year ? months.filter((m) => m.key.startsWith(year)) : months;
   const period = selectedMonth
     ? t("mybets:period.in", { period: monthLabel(selectedMonth) })
@@ -834,7 +887,10 @@ function Analysis({
   const dimensions = {
     "Cuota": groupBy(settled, (r) => oddsBucket(r.bet.odds), ODDS_BUCKETS.map((b) => b[2])),
     "Tipo de apuesta": groupBy(settled, (r) => betType(r.bet), TYPE_ORDER),
-    "Deporte": groupBy(settled, (r) => sportOf(r.bet)),
+    // «Otros y sin clasificar», al final.
+    "Deporte": groupBy(settled, (r) => sportGroup(r.bet)).sort(
+      (a, b) => Number(a.key === OTHER_SPORTS_KEY) - Number(b.key === OTHER_SPORTS_KEY),
+    ),
     "Mercado (simples)": groupBy(settled, singleMarket),
     "Importe": groupBy(settled, stakeBucket, STAKE_BUCKETS.map((b) => b[2])),
     "Día": groupBy(settled, weekday, WEEKDAYS),
@@ -842,6 +898,10 @@ function Analysis({
     "Promoción": promotionGroups(settled),
   };
   const promos = dimensions["Promoción"].filter((g) => g.key !== NO_PROMOTION);
+  // La Supercuota con más apuestas (promos va de más a menos); sin ella, no hay recuadro junto al beneficio.
+  const supercuota = promos.find((g) => /supercuota/i.test(g.key))?.key ?? null;
+  // Con el recuadro de la Supercuota, sin las frases de promociones: dirían lo mismo que él.
+  const sentences = insights(settled, 2, { promotions: !supercuota });
   const split = promoSplit(settled);
   const withoutPromoRows = settled.filter((r) => !hasPromotion(r.bet));
   const fixedPromos = fixedStakePromotions(settled);
@@ -856,7 +916,8 @@ function Analysis({
     .filter((e) => e !== null);
   // Una sencilla de bet365 sin partido cuenta para el equipo elegido si tiene escudo (no "Empate" ni un jugador).
   const teams = teamGroups(settled, (name) => getTeamCrest(null, name) !== undefined);
-  const leaks = biggestLeaks(dimensions);
+  const spots = winLossSpots(dimensions);
+  const hasSpots = spots.wins.length > 0 || spots.losses.length > 0;
   const h = habits(settled);
   const builder = builderSelections(settled);
 
@@ -868,12 +929,13 @@ function Analysis({
           { id: "anual", label: t("mybets:sections.year"), short: t("mybets:sections.yearShort") },
           { id: "mensual", label: t("mybets:sections.month"), short: t("mybets:sections.monthShort") },
           { id: "evolucion", label: t("mybets:sections.evolution") },
-          { id: "dinero-real", label: t("mybets:sections.realMoney") },
-          ...(leaks.length > 0
-            ? [{ id: "donde-pierdes", label: t("mybets:sections.leaks"), short: t("mybets:sections.leaksShort") }]
+          ...(hasSpots
+            ? [{ id: "donde-ganas", label: t("mybets:sections.leaks"), short: t("mybets:sections.leaksShort") }]
             : []),
+          { id: "dinero-real", label: t("mybets:sections.realMoney") },
           { id: "por-categoria", label: t("mybets:sections.categories"), short: t("mybets:sections.categoriesShort") },
           ...(promos.length > 0 ? [{ id: "promociones", label: t("mybets:sections.promotions") }] : []),
+          { id: "mas-detalle", label: t("mybets:sections.more") },
           { id: "habitos", label: t("mybets:sections.habits") },
           ...(teams.length > 0
             ? [{ id: "equipos", label: t("mybets:sections.teams"), short: t("mybets:sections.teamsShort") }]
@@ -881,8 +943,12 @@ function Analysis({
           { id: "apuestas", label: t("mybets:sections.bets"), short: t("mybets:sections.betsShort") },
         ]}
       />
-      <Headline s={s} period={period} />
-      <PromoSplitCards split={split} />
+      <div className="bets-hero-row">
+        <Headline s={s} period={period} />
+        {supercuota && <SupercuotaPanel promo={supercuota} settled={settled} split={split} />}
+      </div>
+      {/* Con Supercuota, el con / sin promoción ya va en su recuadro. */}
+      {!supercuota && <PromoSplitCards split={split} />}
 
       {settled.length < 30 && (
         <p className="small muted intro-note">{t("mybets:fewBets", { count: settled.length })}</p>
@@ -901,8 +967,10 @@ function Analysis({
       <section id="mensual">
         <h2>{year ? t("mybets:month.titleYear", { year }) : t("mybets:month.title")}</h2>
         <p className="small muted">{t("mybets:month.note")}</p>
-        <MonthlyChart months={shownMonths} selected={selectedMonth} onSelect={onSelectMonth} />
-        <MonthlyTable months={shownMonths} selected={selectedMonth} onSelect={onSelectMonth} />
+        <div className="bets-month-grid">
+          <MonthlyChart months={shownMonths} selected={selectedMonth} onSelect={onSelectMonth} />
+          <MonthlyTable months={shownMonths} selected={selectedMonth} onSelect={onSelectMonth} />
+        </div>
         <p className="small muted">{t("mybets:month.lowSample", { n: LOW_SAMPLE })}</p>
       </section>
 
@@ -911,6 +979,8 @@ function Analysis({
         <ProfitChart points={cumulativeProfit(settled)} />
       </section>
 
+      <WinLossBlock wins={spots.wins} losses={spots.losses} />
+
       <RealMoneySection
         books={books}
         year={year}
@@ -918,32 +988,6 @@ function Analysis({
         history={moneyHistoryOf}
         onSave={onSaveRealMoney}
       />
-
-      {leaks.length > 0 && (
-        <section className="bets-leaks" id="donde-pierdes">
-          <h2>{t("mybets:leaks.title")}</h2>
-          <ul>
-            {leaks.map(({ dimension, group }) => (
-              <li key={`${dimension}-${group.key}`}>
-                <Trans
-                  i18nKey={
-                    group.hitRate !== null && group.impliedRate !== null ? "mybets:leaks.itemRates" : "mybets:leaks.item"
-                  }
-                  values={{
-                    dimension: dimensionLabel(dimension),
-                    group: groupLabel(group.key),
-                    profit: euro(group.profit, true),
-                    bets: group.bets,
-                    hitRate: pct(group.hitRate),
-                    implied: pct(group.impliedRate),
-                  }}
-                  components={{ bold: <strong />, loss: <span className="ev-negative" /> }}
-                />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       <Breakdown
         id="por-categoria"
@@ -981,54 +1025,64 @@ function Analysis({
           />
         </section>
       )}
-      <Breakdown title={t("mybets:breakdown.sport.title")} rows={dimensions["Deporte"]} />
+      <Breakdown
+        title={t("mybets:breakdown.sport.title")}
+        rows={dimensions["Deporte"]}
+        labelOf={sportGroupLabel}
+        note={dimensions["Deporte"].some((g) => g.key === OTHER_SPORTS_KEY) ? t("mybets:breakdown.sport.otherNote") : undefined}
+      />
       <Breakdown
         title={t("mybets:breakdown.market.title")}
         rows={dimensions["Mercado (simples)"]}
         note={t("mybets:breakdown.market.note")}
       />
-      {builder.length > 0 && (
-        <section>
-          <h2>{t("mybets:builder.title")}</h2>
-          <p className="small muted">{t("mybets:builder.note")}</p>
-          <div className="table-scroll">
-            <table className="predictions-table">
-              <thead>
-                <tr>
-                  <th>{t("mybets:column.market")}</th>
-                  <th className="num">{t("mybets:column.selections")}</th>
-                  <th className="num">{t("mybets:column.won")}</th>
-                  <th className="num">{t("mybets:column.hitRate")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {builder.map((b) => (
-                  <tr key={b.family} className={b.selections < LOW_SAMPLE ? "low-sample-row" : undefined}>
-                    <td className="rec-match">{groupLabel(b.family)}</td>
-                    <td className="num">{b.selections}</td>
-                    <td className="num">{b.won}</td>
-                    <td className="num">{pct(b.hitRate)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
       <Breakdown
         title={t("mybets:breakdown.stake.title")}
         rows={dimensions["Importe"]}
         note={t("mybets:breakdown.stake.note")}
       />
-      {fixedPromos.length > 0 && (
-        <Breakdown
-          title={t("mybets:breakdown.stakeWithoutFixed.title", { promotions: fixedPromos.join(", ") })}
-          rows={stakeWithoutFixed}
-          note={t("mybets:breakdown.stakeWithoutFixed.note")}
-        />
-      )}
-      <Breakdown title={t("mybets:breakdown.weekday.title")} rows={dimensions["Día"]} />
-      <Breakdown title={t("mybets:breakdown.hour.title")} rows={dimensions["Hora"]} />
+
+      {/* Lo de consulta ocasional, plegado. */}
+      <details className="bets-more" id="mas-detalle">
+        <summary>{t("mybets:more.title")}</summary>
+        {builder.length > 0 && (
+          <section>
+            <h2>{t("mybets:builder.title")}</h2>
+            <p className="small muted">{t("mybets:builder.note")}</p>
+            <div className="table-scroll">
+              <table className="predictions-table">
+                <thead>
+                  <tr>
+                    <th>{t("mybets:column.market")}</th>
+                    <th className="num">{t("mybets:column.selections")}</th>
+                    <th className="num">{t("mybets:column.won")}</th>
+                    <th className="num">{t("mybets:column.hitRate")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {builder.map((b) => (
+                    <tr key={b.family} className={b.selections < LOW_SAMPLE ? "low-sample-row" : undefined}>
+                      <td className="rec-match">{groupLabel(b.family)}</td>
+                      <td className="num">{b.selections}</td>
+                      <td className="num">{b.won}</td>
+                      <td className="num">{pct(b.hitRate)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+        {fixedPromos.length > 0 && (
+          <Breakdown
+            title={t("mybets:breakdown.stakeWithoutFixed.title", { promotions: fixedPromos.join(", ") })}
+            rows={stakeWithoutFixed}
+            note={t("mybets:breakdown.stakeWithoutFixed.note")}
+          />
+        )}
+        <Breakdown title={t("mybets:breakdown.weekday.title")} rows={dimensions["Día"]} />
+        <Breakdown title={t("mybets:breakdown.hour.title")} rows={dimensions["Hora"]} />
+      </details>
 
       <HabitsBlock
         all={h}
@@ -1046,7 +1100,19 @@ function Analysis({
   );
 }
 
-function Breakdown({ id, title, rows, note }: { id?: string; title: string; rows: GroupStats[]; note?: string }) {
+function Breakdown({
+  id,
+  title,
+  rows,
+  note,
+  labelOf = groupLabel,
+}: {
+  id?: string;
+  title: string;
+  rows: GroupStats[];
+  note?: string;
+  labelOf?: (key: string) => string;
+}) {
   const { t } = useTranslation();
   if (rows.length === 0) return null;
   return (
@@ -1073,7 +1139,7 @@ function Breakdown({ id, title, rows, note }: { id?: string; title: string; rows
               return (
                 <tr key={g.key} className={g.bets < LOW_SAMPLE ? "low-sample-row" : undefined}>
                   <td className="rec-match">
-                    {groupLabel(g.key)} <LowSampleTag n={g.bets} />
+                    {labelOf(g.key)} <LowSampleTag n={g.bets} />
                   </td>
                   <td className="num">{g.bets}</td>
                   <td className="num">

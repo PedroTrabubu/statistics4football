@@ -1941,17 +1941,10 @@ td.recent-away {
 .bets-message-error {
   color: var(--red);
 }
-.bets-leaks {
-  border-left: 3px solid var(--red);
-  padding: var(--space-1) 0 var(--space-1) var(--space-3-5);
-  margin: var(--space-6) 0;
-}
-.bets-leaks ul,
 .bets-habits {
   margin: 0;
   padding-left: var(--space-4);
 }
-.bets-leaks li,
 .bets-habits li {
   margin: var(--space-1) 0;
 }
@@ -2267,6 +2260,239 @@ td.recent-away {
 }
 .bets-insights p {
   margin: var(--space-1) 0;
+}
+
+/* Mis apuestas: el beneficio y, a su lado, lo que pesa la Supercuota */
+.bets-hero-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: stretch;
+  margin: 0 0 var(--space-4);
+}
+.bets-hero-row > .bets-hero {
+  flex: 1 1 34rem;
+  min-width: 0;
+  margin: 0;
+}
+.supercuota-panel {
+  flex: 1 1 22rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+}
+.supercuota-panel p {
+  margin: 0;
+}
+.supercuota-value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-none);
+}
+.supercuota-headline {
+  font-weight: var(--fw-semibold);
+}
+.supercuota-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.supercuota-row-head,
+.supercuota-total {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--fs-sm);
+}
+.supercuota-row-head strong,
+.supercuota-total strong,
+.supercuota-mini strong {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.supercuota-track {
+  height: 8px;
+  margin-top: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--surface-alt);
+  overflow: hidden;
+}
+.supercuota-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+.supercuota-fill.is-pos {
+  background: var(--green-fill);
+}
+.supercuota-fill.is-neg {
+  background: var(--red-fill);
+}
+.supercuota-total {
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+.supercuota-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2-5);
+}
+.supercuota-mini {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+}
+
+/* Mes a mes: gráfico y tabla compacta lado a lado; apilados en pantallas estrechas */
+.bets-month-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+@media (max-width: 960px) {
+  .bets-month-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.month-current-tag {
+  display: inline-block;
+  margin-left: var(--space-1);
+  padding: var(--space-0-5) var(--space-1-5);
+  border-radius: var(--radius-xs);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* Dónde ganas y dónde pierdes */
+.winloss-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--space-4);
+}
+.winloss-col {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+}
+.winloss-col h3 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+.winloss-pos h3 {
+  color: var(--green);
+}
+.winloss-neg h3 {
+  color: var(--red);
+}
+.winloss-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.winloss-col li {
+  padding: var(--space-2-5) 0;
+  border-bottom: 1px solid var(--border);
+}
+.winloss-col li:last-child {
+  border-bottom: none;
+}
+.winloss-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.winloss-amount {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.winloss-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  margin-top: var(--space-1);
+}
+.signal-badge {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+.signal-badge.is-clear {
+  border-color: currentColor;
+  color: var(--green);
+}
+
+/* Tablas de consulta ocasional, plegadas bajo «Más detalle» */
+.bets-more {
+  margin: var(--space-6) 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  scroll-margin-top: calc(var(--navbar-h) + 4.5rem);
+}
+.bets-more > summary {
+  cursor: pointer;
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+}
+
+/* Sin apuestas: el botón del ejemplo; con el ejemplo, su aviso */
+.bets-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+.example-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-2-5) var(--space-4);
+  border: 1px solid var(--amber);
+  border-radius: var(--radius-md);
+  background: var(--amber-bg);
+}
+.example-banner .action-button {
+  margin-left: auto;
+}
+.example-badge {
+  font-weight: var(--fw-bold);
+  color: var(--amber);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  font-size: var(--fs-xs);
+}
+
+/* Equipos con pocas apuestas, plegados */
+.team-few {
+  margin: var(--space-3) 0 0;
+}
+.team-few > summary {
+  cursor: pointer;
+}
+.team-few .team-cards {
+  margin-top: var(--space-3);
 }
 
 /* Filtro de mes */

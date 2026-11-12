@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { monthLabel, type MonthSplit } from "../lib/betHistory/analysis";
-import { LOW_SAMPLE } from "../lib/betHistory/format";
+import { LOW_SAMPLE, axisEuro, noNegativeZero } from "../lib/betHistory/format";
 import { useTranslation } from "react-i18next";
 import { currentLocale } from "../i18n";
 import { niceTicks } from "../lib/chartTicks";
@@ -11,7 +11,8 @@ const PAD = { top: 24, right: 12, bottom: 40, left: 60 };
 /** Con más meses que esto no se rotula el total encima de cada barra (queda en el recuadro y la tabla). */
 const MAX_TOTAL_LABELS = 12;
 
-function euro(n: number, signed = true): string {
+function euro(value: number, signed = true): string {
+  const n = noNegativeZero(value);
   const s = n.toLocaleString(currentLocale(), { style: "currency", currency: "EUR" });
   return signed && n > 0 ? `+${s}` : s;
 }
@@ -141,7 +142,7 @@ export function MonthlyChart({
           <g key={t}>
             <line className={t === 0 ? "chart-zero-solid" : "chart-grid"} x1={PAD.left} x2={PAD.left + plotW} y1={y(t)} y2={y(t)} />
             <text className="chart-axis" x={PAD.left - 8} y={y(t)} dy="0.32em" textAnchor="end">
-              {euro(t, false)}
+              {axisEuro(t)}
             </text>
           </g>
         ))}

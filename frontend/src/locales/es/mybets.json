@@ -166,7 +166,7 @@
   },
   "year": {
     "title": "Año a año",
-    "note": "Por año natural, del 1 de enero al 31 de diciembre: es el periodo con el que se declaran las ganancias del juego en la renta. Cada apuesta cuenta en el año en que la hiciste; una de finales de diciembre que se resolvió en enero podría ir al año siguiente. El beneficio incluye lo ganado con freebets. Pulsa un año para ver solo ese año."
+    "note": "Por año natural, del 1 de enero al 31 de diciembre. Cada apuesta cuenta en el año en que la hiciste; una de finales de diciembre que se resolvió en enero podría ir al año siguiente. El beneficio incluye lo ganado con freebets. Pulsa un año para ver solo ese año."
   },
   "sections": {
     "label": "Secciones de mis apuestas",
@@ -176,8 +176,8 @@
     "monthShort": "Por mes",
     "evolution": "Evolución",
     "realMoney": "Dinero real",
-    "leaks": "Dónde pierdes más",
-    "leaksShort": "Dónde pierdes",
+    "leaks": "Dónde ganas y pierdes",
+    "leaksShort": "Ganas y pierdes",
     "categories": "Cuota, importe, deporte…",
     "categoriesShort": "Categorías",
     "promotions": "Promociones",
@@ -185,7 +185,8 @@
     "teams": "Equipos y tenistas",
     "teamsShort": "Equipos",
     "bets": "Apuestas importadas",
-    "betsShort": "Apuestas"
+    "betsShort": "Apuestas",
+    "more": "Más detalle"
   },
   "fewBets_one": "Solo hay {{count}} apuesta resuelta: con tan pocas, los porcentajes cambian mucho con cada apuesta. Tómalos como orientativos.",
   "fewBets_many": "Solo hay {{count}} apuestas resueltas: con tan pocas, los porcentajes cambian mucho con cada apuesta. Tómalos como orientativos.",
@@ -194,16 +195,12 @@
     "title": "Mes a mes",
     "titleYear": "Mes a mes · {{year}}",
     "note": "Por la fecha en que hiciste la apuesta. Pulsa un mes (en el gráfico o en la tabla) para ver solo ese mes en el resto de la página; púlsalo otra vez, o «Mes ✕» arriba, para quitar el filtro.",
-    "lowSample": "Con menos de {{n}} apuestas (en gris) el mes es poco fiable."
+    "lowSample": "Con menos de {{n}} apuestas (en gris) el mes es poco fiable.",
+    "current": "en curso"
   },
   "evolution": {
     "title": "Evolución del beneficio",
     "titleYear": "Evolución del beneficio · {{year}}"
-  },
-  "leaks": {
-    "title": "Dónde pierdes más",
-    "item": "<bold>{{dimension}}: {{group}}</bold> — <loss>{{profit}}</loss> en {{bets}} apuestas.",
-    "itemRates": "<bold>{{dimension}}: {{group}}</bold> — <loss>{{profit}}</loss> en {{bets}} apuestas (aciertas un {{hitRate}} y sus cuotas implicaban un {{implied}})."
   },
   "breakdown": {
     "odds": {
@@ -218,7 +215,8 @@
       "note": "Supercuotas y operaciones de Winamax (Bang to the Moon, misiones...) y aumentos de bet365 (de cuota y de ganancias). Una apuesta con dos promociones cuenta en las dos."
     },
     "sport": {
-      "title": "Por deporte"
+      "title": "Por deporte",
+      "otherNote": "«Otros y sin clasificar» junta skialpin, specialodds, boxeo, varios y desconocido: deportes con muy pocas apuestas o sin un deporte claro."
     },
     "market": {
       "title": "Por mercado (apuestas simples)",
@@ -388,7 +386,8 @@
     "tableTennis": "Tenis de mesa",
     "motor": "Motor",
     "unknown": "Desconocido",
-    "several": "Varios"
+    "several": "Varios",
+    "otherGroup": "Otros y sin clasificar"
   },
   "dimension": {
     "odds": "Cuota",
@@ -458,7 +457,12 @@
     "implied": "La cuota implicaba {{pct}} <gap>({{gap}})</gap>",
     "profit": "Beneficio <bold>{{profit}}</bold>",
     "roi": " · ROI {{roi}}",
-    "showAll": "Ver los {{n}}"
+    "showAll": "Ver los {{n}}",
+    "order": "De más a menos apuestas; los de menos de {{n}}, plegados al final.",
+    "noneMain": "Ninguno con {{n}} apuestas o más.",
+    "few_one": "{{count}} más con menos de {{n}} apuestas",
+    "few_many": "{{count}} más con menos de {{n}} apuestas",
+    "few_other": "{{count}} más con menos de {{n}} apuestas"
   },
   "realMoney": {
     "title": "Dinero real",
@@ -541,5 +545,44 @@
     "tooltipWithout": "Sin promoción: {{value}}",
     "tooltipWith": "Con promoción: {{value}}",
     "tooltipLow": "Poco fiable: menos de {{n}} apuestas"
+  },
+  "winloss": {
+    "title": "Dónde ganas y dónde pierdes",
+    "note": "Los tres grupos de mercado (apuestas simples), importe y cuota que más dinero te han dado y los tres que más te han quitado, con al menos {{n}} apuestas. «Señal clara»: tu acierto se separa de lo que implicaban las cuotas más de lo que explicaría el azar (intervalo de Wilson al 95 %). «Puede ser ruido»: con esas apuestas, la diferencia aún podría deberse al azar.",
+    "wins": "Dónde ganas",
+    "losses": "Dónde pierdes",
+    "item": "{{dimension}}: {{group}}",
+    "bets_one": "{{count}} apuesta",
+    "bets_many": "{{count}} apuestas",
+    "bets_other": "{{count}} apuestas",
+    "rates": "aciertas {{hit}} · la cuota implicaba {{implied}}",
+    "clear": "Señal clara",
+    "noise": "Puede ser ruido",
+    "emptyWins": "Ningún grupo con al menos {{n}} apuestas te ha dado beneficio.",
+    "emptyLosses": "Ningún grupo con al menos {{n}} apuestas te ha hecho perder dinero."
+  },
+  "supercuota": {
+    "without": "Sin {{promo}}",
+    "carries": "Tu beneficio viene de {{promo}}: el resto de tus apuestas no gana dinero.",
+    "promoRow_one": "{{promo}} · {{count}} apuesta",
+    "promoRow_many": "{{promo}} · {{count}} apuestas",
+    "promoRow_other": "{{promo}} · {{count}} apuestas",
+    "restRow_one": "Todo lo demás · {{count}} apuesta",
+    "restRow_many": "Todo lo demás · {{count}} apuestas",
+    "restRow_other": "Todo lo demás · {{count}} apuestas",
+    "total": "Total",
+    "splitTitle": "{{label}} · {{n}}",
+    "roi": "ROI {{roi}}",
+    "evidenceClear": "{{promo}} acierta el {{hit}} (intervalo del 95 %: {{low}}–{{high}}) y solo necesita el {{need}} para no perder: esa ventaja se distingue del azar.",
+    "evidenceNoise": "{{promo}} acierta el {{hit}} (intervalo del 95 %: {{low}}–{{high}}) y necesita el {{need}} para no perder: con estas apuestas, aún no se distingue del azar."
+  },
+  "example": {
+    "show": "Ver con datos de ejemplo",
+    "badge": "Datos de ejemplo",
+    "note": "{{n}} apuestas inventadas para ver cómo funciona la página: no son tuyas y no se guardan.",
+    "exit": "Salir del ejemplo"
+  },
+  "more": {
+    "title": "Más detalle"
   }
 }

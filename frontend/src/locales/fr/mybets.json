@@ -166,7 +166,7 @@
   },
   "year": {
     "title": "Année par année",
-    "note": "Par année civile, du 1er janvier au 31 décembre : c'est la période sur laquelle les gains de jeu sont déclarés à l'impôt sur le revenu en Espagne. Chaque pari compte dans l'année où vous l'avez placé ; un pari de fin décembre réglé en janvier pourrait aller à l'année suivante. Le bénéfice inclut les gains obtenus avec des freebets. Cliquez sur une année pour ne voir qu'elle."
+    "note": "Par année civile, du 1er janvier au 31 décembre. Chaque pari compte dans l'année où vous l'avez placé ; un pari de fin décembre réglé en janvier pourrait aller à l'année suivante. Le bénéfice inclut les gains obtenus avec des freebets. Cliquez sur une année pour ne voir qu'elle."
   },
   "sections": {
     "label": "Sections de mes paris",
@@ -176,8 +176,8 @@
     "monthShort": "Par mois",
     "evolution": "Évolution",
     "realMoney": "Argent réel",
-    "leaks": "Où vous perdez le plus",
-    "leaksShort": "Où vous perdez",
+    "leaks": "Où vous gagnez et perdez",
+    "leaksShort": "Gains et pertes",
     "categories": "Cote, mise, sport…",
     "categoriesShort": "Catégories",
     "promotions": "Promotions",
@@ -185,7 +185,8 @@
     "teams": "Équipes et joueurs de tennis",
     "teamsShort": "Équipes",
     "bets": "Paris importés",
-    "betsShort": "Paris"
+    "betsShort": "Paris",
+    "more": "Plus de détails"
   },
   "fewBets_one": "Il n'y a que {{count}} pari réglé : avec si peu, les pourcentages varient beaucoup à chaque pari. Prenez-les comme une simple indication.",
   "fewBets_many": "Il n'y a que {{count}} paris réglés : avec si peu, les pourcentages varient beaucoup à chaque pari. Prenez-les comme une simple indication.",
@@ -194,16 +195,12 @@
     "title": "Mois par mois",
     "titleYear": "Mois par mois · {{year}}",
     "note": "Selon la date à laquelle vous avez placé le pari. Cliquez sur un mois (sur le graphique ou dans le tableau) pour ne voir que ce mois dans le reste de la page ; cliquez à nouveau, ou sur « Mois ✕ » en haut, pour retirer le filtre.",
-    "lowSample": "Avec moins de {{n}} paris (en gris), le mois est peu fiable."
+    "lowSample": "Avec moins de {{n}} paris (en gris), le mois est peu fiable.",
+    "current": "en cours"
   },
   "evolution": {
     "title": "Évolution du bénéfice",
     "titleYear": "Évolution du bénéfice · {{year}}"
-  },
-  "leaks": {
-    "title": "Où vous perdez le plus",
-    "item": "<bold>{{dimension}} : {{group}}</bold> — <loss>{{profit}}</loss> sur {{bets}} paris.",
-    "itemRates": "<bold>{{dimension}} : {{group}}</bold> — <loss>{{profit}}</loss> sur {{bets}} paris (vous en gagnez {{hitRate}} et leurs cotes impliquaient {{implied}})."
   },
   "breakdown": {
     "odds": {
@@ -218,7 +215,8 @@
       "note": "Supercuotas et opérations Winamax (Bang to the Moon, missions...) et boosts bet365 (de cote et de gains). Un pari avec deux promotions compte dans les deux."
     },
     "sport": {
-      "title": "Par sport"
+      "title": "Par sport",
+      "otherNote": "« Autres et non classés » regroupe skialpin, specialodds, boxe, plusieurs et inconnu : des sports avec très peu de paris ou sans sport clair."
     },
     "market": {
       "title": "Par marché (paris simples)",
@@ -388,7 +386,8 @@
     "tableTennis": "Tennis de table",
     "motor": "Sports mécaniques",
     "unknown": "Inconnu",
-    "several": "Plusieurs"
+    "several": "Plusieurs",
+    "otherGroup": "Autres et non classés"
   },
   "dimension": {
     "odds": "Cote",
@@ -458,7 +457,12 @@
     "implied": "La cote impliquait {{pct}} <gap>({{gap}})</gap>",
     "profit": "Bénéfice <bold>{{profit}}</bold>",
     "roi": " · ROI {{roi}}",
-    "showAll": "Voir les {{n}}"
+    "showAll": "Voir les {{n}}",
+    "order": "Du plus au moins de paris ; ceux de moins de {{n}}, repliés à la fin.",
+    "noneMain": "Aucun avec {{n}} paris ou plus.",
+    "few_one": "{{count}} de plus avec moins de {{n}} paris",
+    "few_many": "{{count}} de plus avec moins de {{n}} paris",
+    "few_other": "{{count}} de plus avec moins de {{n}} paris"
   },
   "realMoney": {
     "title": "Argent réel",
@@ -541,5 +545,44 @@
     "tooltipWithout": "Sans promotion : {{value}}",
     "tooltipWith": "Avec promotion : {{value}}",
     "tooltipLow": "Peu fiable : moins de {{n}} paris"
+  },
+  "winloss": {
+    "title": "Où vous gagnez et où vous perdez",
+    "note": "Les trois groupes de marché (paris simples), de mise et de cote qui vous ont rapporté le plus et les trois qui vous ont coûté le plus, avec au moins {{n}} paris. « Signal net » : votre réussite s'écarte de ce qu'impliquaient les cotes plus que ne l'expliquerait le hasard (intervalle de Wilson à 95 %). « Peut-être du bruit » : avec ces paris, l'écart pourrait encore être dû au hasard.",
+    "wins": "Où vous gagnez",
+    "losses": "Où vous perdez",
+    "item": "{{dimension}} : {{group}}",
+    "bets_one": "{{count}} pari",
+    "bets_many": "{{count}} paris",
+    "bets_other": "{{count}} paris",
+    "rates": "vous gagnez {{hit}} · la cote impliquait {{implied}}",
+    "clear": "Signal net",
+    "noise": "Peut-être du bruit",
+    "emptyWins": "Aucun groupe d'au moins {{n}} paris ne vous a rapporté de l'argent.",
+    "emptyLosses": "Aucun groupe d'au moins {{n}} paris ne vous a fait perdre de l'argent."
+  },
+  "supercuota": {
+    "without": "Sans {{promo}}",
+    "carries": "Votre bénéfice vient de {{promo}} : le reste de vos paris ne rapporte rien.",
+    "promoRow_one": "{{promo}} · {{count}} pari",
+    "promoRow_many": "{{promo}} · {{count}} paris",
+    "promoRow_other": "{{promo}} · {{count}} paris",
+    "restRow_one": "Tout le reste · {{count}} pari",
+    "restRow_many": "Tout le reste · {{count}} paris",
+    "restRow_other": "Tout le reste · {{count}} paris",
+    "total": "Total",
+    "splitTitle": "{{label}} · {{n}}",
+    "roi": "ROI {{roi}}",
+    "evidenceClear": "{{promo}} réussit {{hit}} (intervalle à 95 % : {{low}}–{{high}}) et n'a besoin que de {{need}} pour ne pas perdre : cet avantage se distingue du hasard.",
+    "evidenceNoise": "{{promo}} réussit {{hit}} (intervalle à 95 % : {{low}}–{{high}}) et a besoin de {{need}} pour ne pas perdre : avec ces paris, il ne se distingue pas encore du hasard."
+  },
+  "example": {
+    "show": "Voir avec des données d'exemple",
+    "badge": "Données d'exemple",
+    "note": "{{n}} paris inventés pour montrer le fonctionnement de la page : ce ne sont pas les vôtres et ils ne sont pas enregistrés.",
+    "exit": "Quitter l'exemple"
+  },
+  "more": {
+    "title": "Plus de détails"
   }
 }
