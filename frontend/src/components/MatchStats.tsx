@@ -127,15 +127,15 @@ function PredictorNotes({ match, forecasts }: { match: Match; forecasts: Forecas
 
 /** Lo que hizo cada equipo en el partido ya jugado, en espejo: solo las
  * estadísticas que hay de los dos (el xG, solo en las cinco grandes ligas).
- * Arriba, los totales del partido con el total que preveía el predictor y la
- * diferencia. `estimates`: lo que estimaba el predictor antes del partido
- * (guardado en el backend); con ello, además, el botón lo pone debajo de cada
- * cifra. null: sin predictor (la Champions) o aún sin calcular. */
+ * Arriba, los totales del partido. `estimates`: lo que estimaba el predictor
+ * antes del partido (guardado en el backend); con ello, el botón lo pone debajo
+ * de cada cifra (en los totales, con la diferencia). null: sin predictor (la
+ * Champions) o aún sin calcular. */
 export function MatchStatsTable({ match, played, estimates }: { match: Match; played: MatchResult; estimates: Forecasts | null }) {
   const { t } = useTranslation();
   const [compare, setCompare] = useState(false);
   const tableId = useId();
-  // Los totales lo comparan siempre; por equipo, al abrir el botón.
+  // Lo previsto, en los totales y por equipo, solo al abrir el botón.
   const forecasts = compare ? estimates : null;
   const rows = STAT_KEYS.map((key) => ({
     key,
@@ -167,7 +167,7 @@ export function MatchStatsTable({ match, played, estimates }: { match: Match; pl
         <div className="stat-tiles predictor-totals">
           {totals.map((r) => {
             const real = r.home! + r.away!;
-            const f = estimates && EVALUATION[r.key].shown ? estimates[r.key] : null;
+            const f = forecasts && EVALUATION[r.key].shown ? forecasts[r.key] : null;
             return (
               <div key={r.key} className="stat-tile">
                 <span className="stat-tile-value">{real}</span>
