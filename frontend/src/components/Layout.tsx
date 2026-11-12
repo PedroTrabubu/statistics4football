@@ -40,6 +40,8 @@ export function Layout() {
   const [navOpen, setNavOpen] = useState(false);
   const location = useLocation();
   const currentMarket = findMarket(marketFromUrl(useMatch(ROUTE_PATTERNS.stat)?.params.stat));
+  // Dentro de /football el logo vuelve al inicio del fútbol; fuera, a la portada.
+  const inFootball = useMatch(`${ROUTES.football}/*`) !== null;
 
   useEffect(() => {
     setNavOpen(false);
@@ -70,7 +72,7 @@ export function Layout() {
           >
             {navOpen ? <IconClose /> : <IconMenu />}
           </button>
-          <NavLink to={ROUTES.home} className="app-brand" end>
+          <NavLink to={inFootball ? ROUTES.football : ROUTES.home} className="app-brand" end>
             <AppMark />
             <span className="app-title">Stats4Football</span>
           </NavLink>
