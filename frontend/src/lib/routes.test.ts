@@ -10,7 +10,6 @@ import {
   marketFromUrl,
   matchPath,
   refereePath,
-  sportRoutes,
   statPath,
   withQuery,
 } from "./routes";
@@ -49,8 +48,7 @@ describe("rutas", () => {
     expect(ROUTES.stats).toBe("/football/stats");
     expect(ROUTES.referees).toBe("/football/stats/referees");
     expect(SPORTS.football.stat("corners")).toBe("/football/stats/corners");
-    expect(sportRoutes("tennis").stat("aces")).toBe("/tennis/stats/aces");
-    expect(sportRoutes("tennis").statPattern).toBe("/tennis/stats/:stat");
+    expect(SPORTS.football.statPattern).toBe("/football/stats/:stat");
   });
 
   it("los slugs de los mercados van en inglés", () => {

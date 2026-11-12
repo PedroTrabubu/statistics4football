@@ -14,8 +14,8 @@ export function sportRoutes(sport: string) {
   return { base, stats, statPattern: `${stats}/:stat`, stat: (slug: string) => `${stats}/${slug}` };
 }
 
-/** Registro por deporte. Hoy solo el fútbol; el tenis, al llegar, entra aquí
- * y hereda la sección de estadísticas (/tennis/stats/aces). */
+/** Registro por deporte. Hoy solo el fútbol; otro deporte entraría aquí y
+ * heredaría la sección de estadísticas (/<deporte>/stats/:stat). */
 export const SPORTS = {
   football: sportRoutes("football"),
 } as const;
