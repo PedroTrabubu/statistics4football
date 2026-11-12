@@ -72,7 +72,7 @@ def list_recommendations(
     risk_level: RiskLevel | None = None,
     min_ev: float | None = None,
     strategy: Strategy = "alta_probabilidad",
-    limit: int = Query(50, le=200),
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> list[RecommendationOut]:
@@ -151,7 +151,7 @@ def list_recommendation_history(
     market: str | None = None,
     strategy: Strategy = "alta_probabilidad",
     team: str | None = None,
-    limit: int = Query(50, le=200),
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> RecommendationHistoryListOut:

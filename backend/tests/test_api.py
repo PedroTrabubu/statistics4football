@@ -2,6 +2,7 @@
 (ingesta historica real). No son hermeticos (comparten BD con el dev), pero
 las escrituras que disparan (predictions) son idempotentes."""
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.core.config import get_settings
@@ -385,3 +386,11 @@ def test_large_responses_are_gzipped() -> None:
         db.close()
     response = client.get(f"/leagues/{league.id}/results", headers={"Accept-Encoding": "gzip"})
     assert response.headers.get("content-encoding") == "gzip"
+
+
+@pytest.mark.parametrize("path", ["/matches", "/picks/history", "/recommendations", "/recommendations/history"])
+@pytest.mark.parametrize("limit", [0, -5])
+def test_limit_must_be_positive(path: str, limit: int) -> None:
+    """SQLite toma un LIMIT negativo como "sin limite": sin la cota inferior,
+    limit=-5 devolvia la tabla entera y se saltaba el tope."""
+    assert client.get(path, params={"limit": limit}).status_code == 422

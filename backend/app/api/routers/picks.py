@@ -119,7 +119,7 @@ def upcoming_picks(league: str | None = None, db: Session = Depends(get_db)) -> 
 def picks_history(
     league: str | None = None,
     kind: str | None = None,
-    limit: int = Query(60, le=500),
+    limit: int = Query(60, ge=1, le=500),
     db: Session = Depends(get_db),
 ) -> PicksHistoryOut:
     """Combinadas pasadas con su resultado real: las del test fuera de muestra
