@@ -61,7 +61,7 @@
     },
     "rarity": {
       "term": "Rareza",
-      "def": "Lo difícil que sería ver esa racha por pura casualidad si el equipo fuera uno cualquiera de la liga: lo habitual en la liga para ese suceso, elevado al número de partidos de la racha. Ganar 8 seguidos donde se gana el 40 % de los partidos: 0,40<sup>8</sup> ≈ 1 de cada 1500, muy rara. Una racha de 9 de algo que pasa el 90 % de las veces: 0,90<sup>9</sup> ≈ 1 de cada 3, nada rara. No es la probabilidad de que la racha siga: supone partidos independientes y un equipo medio, y un equipo con un estilo marcado (que tira mucho, que hace muchas faltas) puede tener rachas rarísimas sin que sean una sorpresa."
+      "def": "Lo difícil que sería ver esa racha si fuese un equipo medio de la liga (en las de árbitro, un árbitro medio), no el propio equipo: lo habitual en la liga para ese suceso, elevado al número de partidos de la racha. Ganar 8 seguidos donde se gana el 40 % de los partidos: 0,40<sup>8</sup> ≈ 1 de cada 1500, muy rara. Una racha de 9 de algo que pasa el 90 % de las veces: 0,90<sup>9</sup> ≈ 1 de cada 3, nada rara. No es la probabilidad de que la racha siga: supone partidos independientes, y los equipos muy dominantes (o muy flojos) tendrán rachas «raras» por su forma habitual de jugar, sin que sean una sorpresa."
     }
   },
   "odds": {

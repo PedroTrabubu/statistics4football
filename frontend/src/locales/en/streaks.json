@@ -6,7 +6,7 @@
     "popular": "Popular"
   },
   "page": {
-    "lead": "Active streaks for the teams playing in the coming days: consecutive matches, counting back from the most recent, in which a market has come in. Sorted by rarity: how unlikely a streak like that would be by pure chance.",
+    "lead": "Active streaks for the teams playing in the coming days: consecutive matches, counting back from the most recent, in which a market has come in. Sorted by rarity: how unlikely a streak like that would be for an average team in the league.",
     "allDays_one": "{{count}} day",
     "allDays_other": "{{count}} days",
     "count_one": "{{count}} streak",
@@ -33,7 +33,6 @@
       "league": "League",
       "streak": "Streak",
       "nextMatch": "Next match",
-      "odds": "Odds",
       "date": "Date"
     },
     "more": "See more ({{n}})"
@@ -42,25 +41,14 @@
     "lessThan": "less than 1 in {{n}}",
     "oneIn": "1 in {{n}}"
   },
-  "odds": {
-    "taken": "Average odds across several bookmakers (‘Market Average’, {{source}}), taken on {{date}}. Not the current odds.",
-    "unknownSource": "unknown source",
-    "note": "{{league}}: {{source}}, taken on {{date}}",
-    "none": "No market average odds for this event: they're not derived or estimated.",
-    "yours": "Your odds",
-    "yoursFor": "Your odds for: {{text}}",
-    "requires": "needs {{pct}}"
-  },
   "notes": {
     "describe": "<bold>Streaks describe what has happened; on their own they won't predict the next match.</bold> There are hundreds of combinations of team, market and line, so some long streaks appear by chance.",
-    "oddsWith": "Odds: the average across several bookmakers (‘Market Average’), the same reference used across the rest of the site, only for Result (win, draw, lose) and over/under 2.5 match goals. In the other markets, ‘—’: they're not derived or estimated. They're the odds from the latest snapshot, not the current ones: {{notes}}.",
-    "oddsNone": "Odds: the average across several bookmakers (‘Market Average’), the same reference used across the rest of the site, only for Result (win, draw, lose) and over/under 2.5 match goals. In the other markets, ‘—’: they're not derived or estimated. They're the odds from the latest snapshot, not the current ones; right now there are none for these matches.",
-    "which": "Only streaks of {{min}} matches or more are shown ({{fallback}} if very few appear) that would happen by chance at most 1 in {{chance}} times, one per team and market (the one with the most demanding line) and at most {{perEntity}} per team and day. Matches from the same competition count, from this season and the previous one. Referee streaks only once the referee has been appointed.",
+    "which": "Only streaks of {{min}} matches or more are shown ({{fallback}} if very few appear) that would happen at most 1 in {{chance}} times for an average team in the league (an average referee, for referee streaks), one per team and market (the one with the most demanding line) and at most {{perEntity}} per team and day. Matches from the same competition count, from this season and the previous one. Referee streaks only once the referee has been appointed.",
     "cards": "Cards and booking points come from our data: cards = yellows + reds; points = yellow 10, red 25 (approximate). A statistic a league doesn't have isn't shown, and a match without the data doesn't break the streak."
   },
   "rarity": {
     "title": "What is rarity?",
-    "what": "Rarity measures how hard it would be to see a streak like that <bold>by pure chance</bold>, if the team were just any side in the league. It's calculated from the league's usual rate for that event, multiplied by itself as many times as there are matches in the streak. It's the ‘By chance’ figure on each row: ‘1 in 1,500’ means that, by pure luck, only 1 team in 1,500 would have a streak like that.",
+    "what": "Rarity compares the streak with <bold>an average team in the league</bold>, not with the team itself (for referee streaks, with an average referee). It's calculated from the league's usual rate for that event, multiplied by itself as many times as there are matches in the streak. It's the ‘If it were an average team in the league’ figure on each row: ‘1 in 1,500’ means that only 1 average team in 1,500 would have a streak like that by pure luck. That's why very dominant (or very weak) teams have ‘rare’ streaks because of the way they usually play, without them being a surprise.",
     "example1": "Winning 8 in a row when 40% of matches in the league are won: 0.40<sup>8</sup> ≈ 1 in 1,500. Very rare.",
     "example2": "9 in a row of something that happens 90% of the time: 0.90<sup>9</sup> ≈ 1 in 3. That's normal, so it doesn't appear in the table.",
     "example3": "6 in a row of something that happens half the time: 0.50<sup>6</sup> ≈ 1 in 64. It's shorter than the previous one but much rarer: that's why it comes first.",
@@ -74,11 +62,11 @@
       "away": "Usual in {{league}}: {{pct}} of away matches"
     },
     "chanceTitle": "{{pct}} multiplied by itself {{n}} times. It assumes each match is independent of the previous one.",
-    "chance": "By chance: {{chance}}",
+    "chance": "If it were an average team in the league: {{chance}}",
+    "chanceReferee": "If it were an average referee in the league: {{chance}}",
     "since": "Since {{date}}",
     "skipped_one": "{{count}} match without data doesn't count",
     "skipped_other": "{{count}} matches without data don't count",
-    "odds": "Odds of {{odds}} need a hit rate of at least {{pct}} to break even",
     "referee": "Referee: {{name}}",
     "home": "Home",
     "away": "Away"
@@ -95,7 +83,12 @@
     "bucket": "{{n}} matches",
     "versus": "vs {{expected}}",
     "diff": "{{diff}} pp ({{low}} to {{high}})",
-    "diffUnclear": "{{diff}} pp ({{low}} to {{high}}) · no clear difference"
+    "diffUnclear": "{{diff}} pp ({{low}} to {{high}}) · no clear difference",
+    "ownNote": "The team's (or referee's) own usual rate: how often that event happened in its earlier matches, in the same context as the streak and including the streak's matches; with fewer than {{min}} matches, it does not count.",
+    "byMarket": "By market",
+    "byLength": "By streak length, against the league",
+    "vsLeague": "Against the league's usual rate",
+    "vsOwn": "Against the team's own usual rate"
   },
   "amount": {
     "goals": {
@@ -245,5 +238,61 @@
       }
     },
     "fallback": "{{name}} have met ‘{{market}}: {{option}}’ in {{own}}"
+  },
+  "tabs": {
+    "label": "View",
+    "next": {
+      "label": "Next matchday",
+      "short": "Next"
+    },
+    "played": {
+      "label": "Matchdays played",
+      "short": "Played"
+    },
+    "summary": {
+      "label": "Summary",
+      "short": "Summary"
+    },
+    "teams": {
+      "label": "Hit rate table",
+      "short": "Teams"
+    }
+  },
+  "played": {
+    "tag": "Calculated with earlier data",
+    "note": "The streaks of {{min}} matches or more that the table would have shown before each match this season, calculated only with earlier matches, and whether they carried on in that match.",
+    "matchdayLabel": "Matchday",
+    "matchday": "Matchday {{n}}",
+    "summary": "{{hits}} of {{count}} carried on ({{pct}})",
+    "caption": "Streaks before the matches of matchday {{n}} and whether they carried on",
+    "column": {
+      "match": "Match",
+      "outcome": "Carried on?"
+    },
+    "continued": "✓ Carried on",
+    "broke": "✗ Broken",
+    "empty": "No streaks in matches played this season yet."
+  },
+  "teams": {
+    "note": "Each row: the team's streaks that the table would have shown before each match and how many carried on. “Little data”: fewer than {{n}} streaks.",
+    "caption": "Each team's streaks and how many carried on",
+    "column": {
+      "team": "Team",
+      "events": "Streaks",
+      "rate": "Carried on",
+      "league": "League's usual rate",
+      "own": "Team's usual rate"
+    },
+    "lowSample": "little data",
+    "empty": "There are no team streaks to measure it."
+  },
+  "search": {
+    "label": "Search team or referee",
+    "placeholder": "Search team or referee…",
+    "teamLabel": "Search team",
+    "teamPlaceholder": "Search team…",
+    "empty": "No streaks for “{{query}}” with these filters.",
+    "emptyPlayed": "No streaks for “{{query}}” in the matches played this season.",
+    "emptyTeams": "No team matches “{{query}}”."
   }
 }

@@ -6,7 +6,7 @@
     "popular": "Populares"
   },
   "page": {
-    "lead": "Rachas activas de los equipos que juegan en los próximos días: partidos seguidos, desde el más reciente, en los que se ha cumplido un mercado. Ordenadas por rareza: lo poco probable que sería una racha así por pura casualidad.",
+    "lead": "Rachas activas de los equipos que juegan en los próximos días: partidos seguidos, desde el más reciente, en los que se ha cumplido un mercado. Ordenadas por rareza: lo poco probable que sería una racha así en un equipo medio de la liga.",
     "allDays_one": "{{count}} día",
     "allDays_many": "{{count}} días",
     "allDays_other": "{{count}} días",
@@ -36,7 +36,6 @@
       "league": "Liga",
       "streak": "Racha",
       "nextMatch": "Próximo partido",
-      "odds": "Cuota",
       "date": "Fecha"
     },
     "more": "Ver más ({{n}})"
@@ -45,25 +44,14 @@
     "lessThan": "menos de 1 de cada {{n}}",
     "oneIn": "1 de cada {{n}}"
   },
-  "odds": {
-    "taken": "Cuota media de varias casas (\"Market Average\", {{source}}), tomada el {{date}}. No es la cuota actual.",
-    "unknownSource": "fuente desconocida",
-    "note": "{{league}}: {{source}}, tomada el {{date}}",
-    "none": "Sin cuota media de mercado para este suceso: no se deriva ni se estima.",
-    "yours": "Tu cuota",
-    "yoursFor": "Tu cuota para: {{text}}",
-    "requires": "exige {{pct}}"
-  },
   "notes": {
     "describe": "<bold>Las rachas describen lo que ha ocurrido; por sí solas no predecirán el siguiente partido.</bold> Hay cientos de combinaciones de equipo, mercado y línea, así que algunas rachas largas aparecen por casualidad.",
-    "oddsWith": "Cuota: la media de varias casas (\"Market Average\"), la misma referencia que usa el resto de la web, solo en Resultado (gana, empata, pierde) y en más/menos de 2,5 goles del partido. En el resto de mercados, \"—\": no se deriva ni se estima. Es la cuota de la última toma, no la actual: {{notes}}.",
-    "oddsNone": "Cuota: la media de varias casas (\"Market Average\"), la misma referencia que usa el resto de la web, solo en Resultado (gana, empata, pierde) y en más/menos de 2,5 goles del partido. En el resto de mercados, \"—\": no se deriva ni se estima. Es la cuota de la última toma, no la actual; ahora mismo no hay ninguna para estos partidos.",
-    "which": "Solo salen las de {{min}} partidos o más ({{fallback}} si salen muy pocas) que por casualidad saldrían como mucho 1 de cada {{chance}}, una por equipo y mercado (la de la línea más exigente) y como mucho {{perEntity}} por equipo y día. Cuentan los partidos de la misma competición, de esta temporada y la anterior. Las de árbitro, solo con el árbitro ya designado.",
+    "which": "Solo salen las de {{min}} partidos o más ({{fallback}} si salen muy pocas) que en un equipo medio de la liga (un árbitro medio, en las de árbitro) saldrían como mucho 1 de cada {{chance}}, una por equipo y mercado (la de la línea más exigente) y como mucho {{perEntity}} por equipo y día. Cuentan los partidos de la misma competición, de esta temporada y la anterior. Las de árbitro, solo con el árbitro ya designado.",
     "cards": "Tarjetas y puntos de tarjeta salen de nuestros datos: tarjetas = amarillas + rojas; puntos = amarilla 10, roja 25 (aproximado). Una estadística que una liga no tiene no sale, y un partido sin el dato no corta la racha."
   },
   "rarity": {
     "title": "¿Qué es la rareza?",
-    "what": "La rareza mide lo difícil que sería ver una racha así <bold>por pura casualidad</bold>, si el equipo fuera uno cualquiera de la liga. Se calcula con lo habitual en la liga para ese suceso, multiplicado por sí mismo tantas veces como partidos tiene la racha. Es la cifra «Por casualidad» de cada fila: «1 de cada 1500» quiere decir que, por pura suerte, solo 1 equipo de cada 1500 tendría una racha así.",
+    "what": "La rareza compara la racha con <bold>un equipo medio de la liga</bold>, no con el propio equipo (en las de árbitro, con un árbitro medio). Se calcula con lo habitual en la liga para ese suceso, multiplicado por sí mismo tantas veces como partidos tiene la racha. Es la cifra «Si fuese un equipo medio de la liga» de cada fila: «1 de cada 1500» quiere decir que solo 1 de cada 1500 equipos medios tendría una racha así por pura suerte. Por eso los equipos muy dominantes (o muy flojos) tienen rachas «raras» por su forma habitual de jugar, sin que sean una sorpresa.",
     "example1": "Ganar 8 seguidos cuando en la liga se gana el 40 % de los partidos: 0,40<sup>8</sup> ≈ 1 de cada 1500. Muy rara.",
     "example2": "9 seguidos de algo que pasa el 90 % de las veces: 0,90<sup>9</sup> ≈ 1 de cada 3. Es lo normal, así que no sale en la tabla.",
     "example3": "6 seguidos de algo que pasa la mitad de las veces: 0,50<sup>6</sup> ≈ 1 de cada 64. Es más corta que la anterior, pero mucho más rara: por eso va antes.",
@@ -77,12 +65,12 @@
       "away": "Lo normal en {{league}}: {{pct}} de los partidos fuera de casa"
     },
     "chanceTitle": "{{pct}} multiplicado por sí mismo {{n}} veces. Supone que cada partido es independiente del anterior.",
-    "chance": "Por casualidad: {{chance}}",
+    "chance": "Si fuese un equipo medio de la liga: {{chance}}",
+    "chanceReferee": "Si fuese un árbitro medio de la liga: {{chance}}",
     "since": "Desde el {{date}}",
     "skipped_one": "{{count}} partido sin dato no cuenta",
     "skipped_many": "{{count}} partidos sin dato no cuentan",
     "skipped_other": "{{count}} partidos sin dato no cuentan",
-    "odds": "La cuota {{odds}} pide acertar al menos el {{pct}} para no perder",
     "referee": "Árbitro: {{name}}",
     "home": "Local",
     "away": "Visitante"
@@ -99,7 +87,12 @@
     "bucket": "{{n}} partidos",
     "versus": "vs {{expected}}",
     "diff": "{{diff}} pp ({{low}} a {{high}})",
-    "diffUnclear": "{{diff}} pp ({{low}} a {{high}}) · sin diferencia clara"
+    "diffUnclear": "{{diff}} pp ({{low}} a {{high}}) · sin diferencia clara",
+    "ownNote": "Lo habitual del propio equipo (o árbitro): cuántas veces se dio ese suceso en sus partidos anteriores, en el mismo contexto que la racha e incluidos los de la racha; con menos de {{min}} partidos, no cuenta.",
+    "byMarket": "Por mercado",
+    "byLength": "Por longitud de la racha, frente a la liga",
+    "vsLeague": "Frente a lo habitual en la liga",
+    "vsOwn": "Frente a lo habitual del propio equipo"
   },
   "amount": {
     "goals": {
@@ -250,5 +243,61 @@
       }
     },
     "fallback": "{{name}} ha cumplido «{{market}}: {{option}}» en {{own}}"
+  },
+  "tabs": {
+    "label": "Vista",
+    "next": {
+      "label": "Próxima jornada",
+      "short": "Próxima"
+    },
+    "played": {
+      "label": "Jornadas jugadas",
+      "short": "Jugadas"
+    },
+    "summary": {
+      "label": "Resumen",
+      "short": "Resumen"
+    },
+    "teams": {
+      "label": "Tabla de aciertos",
+      "short": "Equipos"
+    }
+  },
+  "played": {
+    "tag": "Calculado con datos anteriores",
+    "note": "Las rachas de {{min}} partidos o más que habría mostrado la tabla antes de cada partido de esta temporada, calculadas solo con los partidos anteriores, y si siguieron en ese partido.",
+    "matchdayLabel": "Jornada",
+    "matchday": "Jornada {{n}}",
+    "summary": "Siguieron {{hits}} de {{count}} ({{pct}})",
+    "caption": "Rachas antes de los partidos de la jornada {{n}} y si siguieron",
+    "column": {
+      "match": "Partido",
+      "outcome": "¿Siguió?"
+    },
+    "continued": "✓ Siguió",
+    "broke": "✗ Se cortó",
+    "empty": "Todavía no hay rachas en partidos jugados de esta temporada."
+  },
+  "teams": {
+    "note": "Cada fila: las rachas del equipo que habría mostrado la tabla antes de cada partido y cuántas siguieron. «Pocos datos»: menos de {{n}} rachas.",
+    "caption": "Rachas de cada equipo y cuántas siguieron",
+    "column": {
+      "team": "Equipo",
+      "events": "Rachas",
+      "rate": "Siguieron",
+      "league": "Lo habitual en la liga",
+      "own": "Lo habitual del equipo"
+    },
+    "lowSample": "pocos datos",
+    "empty": "No hay rachas de equipos para medirlo."
+  },
+  "search": {
+    "label": "Buscar equipo o árbitro",
+    "placeholder": "Buscar equipo o árbitro…",
+    "teamLabel": "Buscar equipo",
+    "teamPlaceholder": "Buscar equipo…",
+    "empty": "Ninguna racha de «{{query}}» con estos filtros.",
+    "emptyPlayed": "Ninguna racha de «{{query}}» en los partidos jugados de esta temporada.",
+    "emptyTeams": "Ningún equipo encaja con «{{query}}»."
   }
 }

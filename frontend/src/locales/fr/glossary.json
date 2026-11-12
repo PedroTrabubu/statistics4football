@@ -61,7 +61,7 @@
     },
     "rarity": {
       "term": "Rareté",
-      "def": "La difficulté de voir cette série par pur hasard si l'équipe était une équipe quelconque du championnat : le taux habituel du championnat pour cet événement, élevé à la puissance du nombre de matchs de la série. Gagner 8 fois de suite là où 40 % des matchs sont gagnés : 0,40<sup>8</sup> ≈ 1 sur 1 500, très rare. Une série de 9 pour quelque chose qui arrive 90 % du temps : 0,90<sup>9</sup> ≈ 1 sur 3, pas rare du tout. Ce n'est pas la probabilité que la série continue : cela suppose des matchs indépendants et une équipe moyenne, et une équipe au style marqué (qui tire beaucoup, qui commet beaucoup de fautes) peut avoir des séries très rares sans que ce soit une surprise."
+      "def": "La difficulté de voir cette série si c'était une équipe moyenne du championnat (pour les séries d'arbitre, un arbitre moyen), et non l'équipe elle-même : le taux habituel du championnat pour cet événement, élevé à la puissance du nombre de matchs de la série. Gagner 8 fois de suite là où 40 % des matchs sont gagnés : 0,40<sup>8</sup> ≈ 1 sur 1 500, très rare. Une série de 9 pour quelque chose qui arrive 90 % du temps : 0,90<sup>9</sup> ≈ 1 sur 3, pas rare du tout. Ce n'est pas la probabilité que la série continue : cela suppose des matchs indépendants, et les équipes très dominantes (ou très faibles) auront des séries « rares » à cause de leur façon habituelle de jouer, sans que ce soit une surprise."
     }
   },
   "odds": {

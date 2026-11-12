@@ -60,7 +60,7 @@
     },
     "rarity": {
       "term": "Rarity",
-      "def": "How hard it would be to see that streak by pure chance if the team were just any side in the league: the league's usual rate for that event, raised to the power of the streak's length. Winning 8 in a row where 40% of matches are won: 0.40<sup>8</sup> ≈ 1 in 1,500, very rare. A streak of 9 of something that happens 90% of the time: 0.90<sup>9</sup> ≈ 1 in 3, not rare at all. It isn't the probability of the streak continuing: it assumes independent matches and an average team, and a team with a distinctive style (shooting a lot, committing lots of fouls) can have extremely rare streaks without them being a surprise."
+      "def": "How hard it would be to see that streak if it were an average team in the league (for referee streaks, an average referee), not the team itself: the league's usual rate for that event, raised to the power of the streak's length. Winning 8 in a row where 40% of matches are won: 0.40<sup>8</sup> ≈ 1 in 1,500, very rare. A streak of 9 of something that happens 90% of the time: 0.90<sup>9</sup> ≈ 1 in 3, not rare at all. It isn't the probability of the streak continuing: it assumes independent matches, and very dominant (or very weak) teams will have ‘rare’ streaks because of the way they usually play, without them being a surprise."
     }
   },
   "odds": {

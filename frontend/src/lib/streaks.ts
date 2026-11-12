@@ -3,7 +3,7 @@
  * Los tipos de racha salen del registro de markets.ts (un mercado nuevo entra
  * solo) y se cuentan con su `streak`. Funciones puras. */
 
-import type { MarketOdds, MatchResult, UpcomingMatch } from "../api/types";
+import type { MatchResult, UpcomingMatch } from "../api/types";
 import { currentLocale, t } from "../i18n";
 import { formatLocaleNumber, parseApiDate } from "./format";
 import { CHAMPIONS_LEAGUE_CODE } from "./leagues";
@@ -289,8 +289,6 @@ export interface StreakRow {
   /** Fecha del partido mas antiguo de la racha. */
   since: string;
   text: string;
-  /** Cuota media para que siga, solo si es exactamente ese mercado y linea. */
-  odds: MarketOdds | null;
 }
 
 const toTime = (iso: string) => parseApiDate(iso).getTime();
@@ -362,23 +360,6 @@ function streakSpan(views: TeamMatchView[], hit: MarketOption["hit"], n: number)
   return { skipped, oldest };
 }
 
-/** Cuota media para que la racha siga: solo Resultado (gana, empata, pierde) y
- * más/menos de 2,5 goles del partido, los mercados con "Market Average". */
-function oddsFor(match: UpcomingMatch, type: StreakType, side: "home" | "away"): MarketOdds | null {
-  const find = (market: string, selection: string) =>
-    match.odds.find((o) => o.market === market && o.selection === selection) ?? null;
-  const key = type.option.key;
-  if (type.market.slug === "resultado") {
-    if (key === "gana") return find("1x2", side);
-    if (key === "empata") return find("1x2", "draw");
-    if (key === "pierde") return find("1x2", side === "home" ? "away" : "home");
-  }
-  if (type.market.slug === "goles" && (key === "over-2.5" || key === "under-2.5")) {
-    return find("over_under_2.5", key === "over-2.5" ? "over" : "under");
-  }
-  return null;
-}
-
 /** Rachas activas de los equipos (y arbitros designados) de los proximos
  * partidos de una liga, con su partido siguiente. `played`: los partidos
  * jugados de la temporada y la anterior (la racha sigue hacia atras). Solo las
@@ -390,7 +371,7 @@ export function activeStreaks(leagueCode: string, played: MatchResult[], upcomin
   const seen = new Set<string>();
 
   const add = (
-    base: Omit<StreakRow, "id" | "type" | "context" | "length" | "baseRate" | "baseSample" | "chance" | "skipped" | "since" | "text" | "odds">,
+    base: Omit<StreakRow, "id" | "type" | "context" | "length" | "baseRate" | "baseSample" | "chance" | "skipped" | "since" | "text">,
     views: TeamMatchView[],
     type: StreakType,
     context: StreakContext,
@@ -418,7 +399,6 @@ export function activeStreaks(leagueCode: string, played: MatchResult[], upcomin
       get text() {
         return text(length);
       },
-      odds: base.side ? oddsFor(base.match, type, base.side) : null,
     });
   };
 
@@ -536,7 +516,38 @@ export interface StudyEvent {
   hit: boolean;
   /** Frecuencia de la liga antes de ese partido. */
   base: number;
+  /** Frecuencia propia del equipo (o del árbitro) antes de ese partido, en el
+   * contexto de la racha e incluidos sus partidos; null con menos de
+   * MIN_OWN_SAMPLE partidos. */
+  own: number | null;
   match: number;
+  /** Para listarla: el partido, de quién es, su suceso, contexto y rareza. */
+  result: MatchResult;
+  kind: "team" | "referee";
+  entity: string;
+  teamId: number | null;
+  type: StreakType;
+  context: StreakContext;
+  chance: number;
+}
+
+/** Menos partidos propios que esto: sin frecuencia propia. */
+export const MIN_OWN_SAMPLE = 10;
+
+/** Aciertos y casos propios de un equipo o árbitro, con el mismo índice que su racha. */
+interface Own {
+  hits: Float64Array;
+  decided: Float64Array;
+}
+
+const newOwn = (size: number): Own => ({ hits: new Float64Array(size), decided: new Float64Array(size) });
+const ownRate = (own: Own | undefined, i: number): number | null =>
+  own && own.decided[i] >= MIN_OWN_SAMPLE ? own.hits[i] / own.decided[i] : null;
+
+function count(own: Own, i: number, hit: boolean | null) {
+  if (hit === null) return;
+  own.decided[i] += 1;
+  if (hit) own.hits[i] += 1;
 }
 
 interface Run {
@@ -569,9 +580,12 @@ export function* studyEventsSteps(played: MatchResult[]): Generator<StudyEvent[]
   // Liga: aciertos y casos por tipo y campo (0 local, 1 visitante).
   const hits = new Float64Array(T * 2);
   const decided = new Float64Array(T * 2);
-  // Equipo: racha por tipo y contexto (0 todos, 1 en casa, 2 fuera).
+  // Equipo: racha por tipo y contexto (0 todos, 1 en casa, 2 fuera), y su
+  // frecuencia propia con el mismo índice.
   const teams = new Map<number, Run>();
   const referees = new Map<string, Run>();
+  const teamOwn = new Map<number, Own>();
+  const refereeOwn = new Map<string, Own>();
 
   const rate = (t: number, venue: Venue): number | null => {
     const h = venue === "away" ? hits[t * 2 + 1] : venue === "home" ? hits[t * 2] : hits[t * 2] + hits[t * 2 + 1];
@@ -580,9 +594,16 @@ export function* studyEventsSteps(played: MatchResult[]): Generator<StudyEvent[]
     return d >= MIN_BASE_SAMPLE ? h / d : null;
   };
 
-  type Best = { type: StreakType; len: number; p: number; chance: number };
+  type Best = { type: StreakType; len: number; p: number; chance: number; i: number; context: StreakContext };
   /** La mas rara por mercado de las que pasan los umbrales. */
-  const consider = (best: Map<string, Best>, type: StreakType, run: Run, i: number, venue: Venue) => {
+  const consider = (
+    best: Map<string, Best>,
+    type: StreakType,
+    run: Run,
+    i: number,
+    venue: Venue,
+    context: StreakContext,
+  ) => {
     const len = run.len[i];
     if (len < MIN_LENGTH || run.skip[i] > MAX_SKIPPED) return;
     const p = rate(type.index, venue);
@@ -590,7 +611,7 @@ export function* studyEventsSteps(played: MatchResult[]): Generator<StudyEvent[]
     const chance = p ** len;
     if (chance > MAX_CHANCE) return;
     const now = best.get(type.market.slug);
-    if (!now || chance < now.chance) best.set(type.market.slug, { type, len, p, chance });
+    if (!now || chance < now.chance) best.set(type.market.slug, { type, len, p, chance, i, context });
   };
 
   for (const match of matches) {
@@ -598,10 +619,21 @@ export function* studyEventsSteps(played: MatchResult[]): Generator<StudyEvent[]
     const away = viewFrom(match, "away");
     if (!home || !away) continue;
     const sides = [
-      { id: match.home_team_id, view: home, ctx: 1, venue: "home" as const },
-      { id: match.away_team_id, view: away, ctx: 2, venue: "away" as const },
+      { id: match.home_team_id, name: match.home_team, view: home, ctx: 1, venue: "home" as const },
+      { id: match.away_team_id, name: match.away_team, view: away, ctx: 2, venue: "away" as const },
     ];
     const events: StudyEvent[] = [];
+    const common = (b: Best, hit: boolean) => ({
+      category: b.type.category,
+      length: b.len,
+      hit,
+      base: b.p,
+      match: match.id,
+      result: match,
+      type: b.type,
+      context: b.context,
+      chance: b.chance,
+    });
 
     // 1) Rachas antes del partido y si siguieron.
     for (const side of sides) {
@@ -609,34 +641,53 @@ export function* studyEventsSteps(played: MatchResult[]): Generator<StudyEvent[]
       if (!run) continue;
       const best = new Map<string, Best>();
       for (const type of STREAK_TYPES) {
-        consider(best, type, run, type.index * 3, "all");
-        consider(best, type, run, type.index * 3 + side.ctx, side.venue);
+        consider(best, type, run, type.index * 3, "all", "all");
+        consider(best, type, run, type.index * 3 + side.ctx, side.venue, side.venue);
       }
       for (const b of best.values()) {
         const hit = b.type.option.hit(side.view);
-        if (hit !== null) events.push({ category: b.type.category, length: b.len, hit, base: b.p, match: match.id });
+        if (hit === null) continue;
+        events.push({
+          ...common(b, hit),
+          own: ownRate(teamOwn.get(side.id), b.i),
+          kind: "team",
+          entity: side.name,
+          teamId: side.id,
+        });
       }
     }
     const referee = match.referee;
     const refRun = referee ? referees.get(referee) : undefined;
-    if (refRun) {
+    if (referee && refRun) {
       const best = new Map<string, Best>();
-      for (const type of REFEREE_TYPES) consider(best, type, refRun, type.index, "home");
+      for (const type of REFEREE_TYPES) consider(best, type, refRun, type.index, "home", "all");
       for (const b of best.values()) {
         const hit = b.type.option.hit(home);
-        if (hit !== null) events.push({ category: REFEREE_CHIP, length: b.len, hit, base: b.p, match: match.id });
+        if (hit === null) continue;
+        events.push({
+          ...common(b, hit),
+          category: REFEREE_CHIP,
+          own: ownRate(refereeOwn.get(referee), b.i),
+          kind: "referee",
+          entity: referee,
+          teamId: null,
+        });
       }
     }
 
-    // 2) El partido entra en las rachas y en la frecuencia de la liga.
+    // 2) El partido entra en las rachas, en la frecuencia de la liga y en la propia.
     for (const side of sides) {
       let run = teams.get(side.id);
       if (!run) teams.set(side.id, (run = newRun(T * 3)));
+      let own = teamOwn.get(side.id);
+      if (!own) teamOwn.set(side.id, (own = newOwn(T * 3)));
       const v = side.venue === "home" ? 0 : 1;
       for (const type of STREAK_TYPES) {
         const hit = type.option.hit(side.view);
         advance(run, type.index * 3, hit);
         advance(run, type.index * 3 + side.ctx, hit);
+        count(own, type.index * 3, hit);
+        count(own, type.index * 3 + side.ctx, hit);
         if (hit !== null) {
           decided[type.index * 2 + v] += 1;
           if (hit) hits[type.index * 2 + v] += 1;
@@ -646,7 +697,13 @@ export function* studyEventsSteps(played: MatchResult[]): Generator<StudyEvent[]
     if (referee) {
       let run = referees.get(referee);
       if (!run) referees.set(referee, (run = newRun(T)));
-      for (const type of REFEREE_TYPES) advance(run, type.index, type.option.hit(home));
+      let own = refereeOwn.get(referee);
+      if (!own) refereeOwn.set(referee, (own = newOwn(T)));
+      for (const type of REFEREE_TYPES) {
+        const hit = type.option.hit(home);
+        advance(run, type.index, hit);
+        count(own, type.index, hit);
+      }
     }
     yield events;
   }
@@ -690,14 +747,19 @@ function seeded(seed: number): () => number {
   };
 }
 
-function cell(events: StudyEvent[], random: () => number): StudyCell | null {
+/** `baseOf`: con qué se compara cada racha (por defecto, lo habitual en la liga). */
+function cell(
+  events: StudyEvent[],
+  random: () => number,
+  baseOf: (e: StudyEvent) => number = (e) => e.base,
+): StudyCell | null {
   if (events.length < MIN_CELL_EVENTS) return null;
   // Remuestreo por partidos: las rachas de un mismo partido no son independientes.
   const byMatch = new Map<number, { hits: number; base: number; n: number }>();
   for (const e of events) {
     const g = byMatch.get(e.match) ?? { hits: 0, base: 0, n: 0 };
     g.hits += e.hit ? 1 : 0;
-    g.base += e.base;
+    g.base += baseOf(e);
     g.n += 1;
     byMatch.set(e.match, g);
   }
@@ -735,12 +797,18 @@ function cell(events: StudyEvent[], random: () => number): StudyCell | null {
 export interface StudyRow {
   category: string;
   cells: Record<LengthBucket, StudyCell | null>;
+  /** Todas las longitudes juntas, frente a lo habitual en la liga y frente a
+   * lo habitual del propio equipo (o árbitro). */
+  league: StudyCell | null;
+  own: StudyCell | null;
 }
 
 /** Por mercado y longitud: cuantas veces siguio la racha frente a lo habitual,
  * con su intervalo. La primera fila, todas juntas. Un paso por celda. */
 export function* summarizeStudySteps(events: StudyEvent[]): Generator<void, StudyRow[]> {
   const random = seeded(BOOTSTRAP_SEED);
+  // Otra semilla para lo de todas las longitudes: las celdas por longitud no cambian.
+  const overall = seeded(BOOTSTRAP_SEED + 1);
   const rows: StudyRow[] = [];
   for (const category of [ALL_CATEGORIES, ...CATEGORIES, REFEREE_CHIP]) {
     const own = category === ALL_CATEGORIES ? events : events.filter((e) => e.category === category);
@@ -752,9 +820,55 @@ export function* summarizeStudySteps(events: StudyEvent[]): Generator<void, Stud
       );
       yield;
     }
-    if (LENGTH_BUCKETS.some((b) => cells[b] !== null)) rows.push({ category, cells });
+    const league = cell(own, overall);
+    const vsOwn = cell(
+      own.filter((e) => e.own !== null),
+      overall,
+      (e) => e.own!,
+    );
+    yield;
+    if (LENGTH_BUCKETS.some((b) => cells[b] !== null) || league) rows.push({ category, cells, league, own: vsOwn });
   }
   return rows;
+}
+
+/** Continuación de las rachas de un equipo. */
+export interface StudyTeam {
+  teamId: number;
+  team: string;
+  league: string;
+  events: number;
+  hits: number;
+  rate: number;
+  /** Lo habitual en la liga y lo habitual del propio equipo para esas mismas rachas. */
+  expected: number;
+  own: number | null;
+}
+
+/** Por equipo (sin árbitros): cuántas de sus rachas siguieron, frente a lo
+ * habitual en la liga y en el propio equipo. */
+export function summarizeStudyTeams(events: StudyEvent[]): StudyTeam[] {
+  const byTeam = new Map<number, StudyEvent[]>();
+  for (const e of events) {
+    if (e.teamId === null) continue;
+    const list = byTeam.get(e.teamId) ?? [];
+    list.push(e);
+    byTeam.set(e.teamId, list);
+  }
+  return [...byTeam.entries()].map(([teamId, list]) => {
+    const hits = list.filter((e) => e.hit).length;
+    const owned = list.filter((e) => e.own !== null);
+    return {
+      teamId,
+      team: list[0].entity,
+      league: list[0].result.league_code,
+      events: list.length,
+      hits,
+      rate: hits / list.length,
+      expected: list.reduce((s, e) => s + e.base, 0) / list.length,
+      own: owned.length ? owned.reduce((s, e) => s + e.own!, 0) / owned.length : null,
+    };
+  });
 }
 
 export function summarizeStudy(events: StudyEvent[]): StudyRow[] {

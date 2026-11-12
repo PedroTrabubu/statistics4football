@@ -14,14 +14,13 @@ import { currentLocale, t } from "../i18n";
 import {
   formatKickoff,
   formatLocaleNumber,
-  formatOdds,
   formatSeason,
   formatShortDate,
   parseApiDate,
   withPercent,
 } from "../lib/format";
 import { leagueName, leagueParam, orderLeagues, parseLeagueParam, useSelectedLeagueCode } from "../lib/leagues";
-import { parseOddsInput } from "../lib/oddsMath";
+import { matchesSearch } from "../lib/teamSearch";
 import {
   ALL_CATEGORIES,
   BAD_RUN_CHIP,
@@ -34,6 +33,7 @@ import {
   MAX_PER_ENTITY,
   MIN_CELL_EVENTS,
   MIN_LENGTH,
+  MIN_OWN_SAMPLE,
   REFEREE_CHIP,
   activeStreaks,
   categoryLabel,
@@ -42,8 +42,10 @@ import {
   matchesChip,
   popularCategories,
   selectStreaks,
+  streakText,
   studyEventsSteps,
   summarizeStudySteps,
+  summarizeStudyTeams,
   upcomingDays,
   type StreakContext,
   type StreakRow,
@@ -51,6 +53,7 @@ import {
   type StudyCell,
   type StudyEvent,
   type StudyRow,
+  type StudyTeam,
 } from "../lib/streaks";
 import { useApi } from "../lib/useApi";
 
@@ -117,6 +120,13 @@ function useIsMobile(): boolean {
 /** Filas visibles de golpe; el resto, con "Ver más". */
 const PAGE_SIZE = 60;
 
+/** Pestañas, como en Picks probables: las de ahora y, con el estudio de
+ * "¿Se prolongan?", las jugadas, su resumen y por equipo. */
+type View = "next" | "played" | "summary" | "teams";
+const VIEWS: View[] = ["next", "played", "summary", "teams"];
+/** Por debajo de estas rachas, un equipo tiene pocos datos. */
+const LOW_TEAM_EVENTS = 20;
+
 const pct = (x: number) => withPercent(String(Math.round(x * 100)));
 
 /** Rareza en palabras: "1 de cada 1500" (redondeado a dos cifras). */
@@ -126,24 +136,11 @@ function chanceText(x: number): string {
   return t("streaks:chance.oneIn", { n: formatLocaleNumber(Number(n.toPrecision(2))) });
 }
 
-/** Dia en que se tomo la cuota: "17 oct". */
-function takenDate(iso: string): string {
-  return parseApiDate(iso).toLocaleDateString(currentLocale(), { day: "numeric", month: "short" });
-}
-
-function takenText(match: UpcomingMatch): string | null {
-  if (!match.odds_taken_at) return null;
-  return t("streaks:odds.taken", {
-    source: match.odds_source ?? t("streaks:odds.unknownSource"),
-    date: takenDate(match.odds_taken_at),
-  });
-}
-
 // --- Pagina ------------------------------------------------------------------
 
 /** Rachas: rachas activas de los equipos que juegan en los proximos dias. */
 export function StreaksPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [storedCode, setStoredCode] = useSelectedLeagueCode();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: leagues } = useApi(() => getLeagues(), []);
@@ -187,19 +184,25 @@ export function StreaksPage() {
     [selected?.map((l) => l.id).join()],
   );
 
+  const [tab, setTab] = useState<View>("next");
   const [day, setDay] = useState<string>("all");
   const [chip, setChip] = useState(ALL_CHIP);
   const [context, setContext] = useState<ContextFilter>("any");
   const [sort, setSort] = useState<StreakSort>("rarity");
   const [shown, setShown] = useState(PAGE_SIZE);
-  // "Tu cuota" de cada fila: no se guarda en ningun sitio.
-  const [myOdds, setMyOdds] = useState<Record<string, string>>({});
+  // Equipo o árbitro buscado; el mismo en todas las pestañas.
+  const [query, setQuery] = useState("");
 
   const mobile = useIsMobile();
   const days = useMemo(() => upcomingDays(), []);
   const pool = useMemo(
-    () => (data ?? []).flatMap((d) => d.rows).filter((r) => days.includes(r.day) && (context === "any" || r.context === context)),
-    [data, days, context],
+    () =>
+      (data ?? [])
+        .flatMap((d) => d.rows)
+        .filter(
+          (r) => days.includes(r.day) && (context === "any" || r.context === context) && matchesSearch(r.entity, query),
+        ),
+    [data, days, context, query],
   );
   const dayPool = useMemo(() => (day === "all" ? pool : pool.filter((r) => r.day === day)), [pool, day]);
   const popular = useMemo(() => popularCategories(dayPool), [dayPool]);
@@ -222,25 +225,9 @@ export function StreaksPage() {
     () => new Set((data ?? []).flatMap((d) => d.upcoming.map((m) => dayKey(parseApiDate(m.date))))),
     [data],
   );
-  useEffect(() => setShown(PAGE_SIZE), [day, chip, context, sort, leagueCode]);
-
-  const oddsNotes = useMemo(() => {
-    const notes = new Set<string>();
-    for (const d of data ?? []) {
-      for (const m of d.upcoming) {
-        if (!m.odds_taken_at) continue;
-        notes.add(
-          t("streaks:odds.note", { league: leagueName(d.league.code), source: m.odds_source, date: takenDate(m.odds_taken_at) }),
-        );
-      }
-    }
-    return [...notes];
-    // El idioma, para rehacer las notas al cambiarlo.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, i18n.language]);
+  useEffect(() => setShown(PAGE_SIZE), [day, chip, context, sort, leagueCode, query]);
 
   const rows = view.rows.slice(0, shown);
-  const odds = (row: StreakRow) => ({ raw: myOdds[row.id] ?? "", set: (v: string) => setMyOdds((p) => ({ ...p, [row.id]: v })) });
 
   return (
     <div>
@@ -248,138 +235,160 @@ export function StreaksPage() {
 
       <LeagueSwitch leagues={leagues} value={leagueCode} onChange={changeLeague} allowAll />
 
-      <DayTabs
-        days={days}
-        value={day === "all" ? null : day}
-        onChange={(d) => setDay(d ?? "all")}
-        allDate={t("streaks:page.allDays", { count: DAYS_AHEAD })}
-        enabled={data !== null ? (key) => matchDays.has(key) : null}
-        title={(key) => t("streaks:page.count", { count: dayCounts[key] ?? 0 })}
-      />
-
-      <div className="streak-chips" role="group" aria-label={t("streaks:page.marketLabel")}>
-        {CHIPS.map((c) => (
-          <button
-            key={c}
-            type="button"
-            className="group-chip"
-            aria-pressed={chip === c}
-            disabled={data !== null && c !== ALL_CHIP && !chipCounts[c]}
-            title={
-              c === POPULAR_CHIP && popular.length
-                ? t("streaks:page.popularTitle", { categories: popular.map(categoryLabel).join(", ") })
-                : undefined
-            }
-            onClick={() => setChip(c)}
-          >
-            {chipLabel(c)}
-            {data && <span className="chip-count">{chipCounts[c] ?? 0}</span>}
-          </button>
-        ))}
-      </div>
-
-      <div className="filters">
-        <select
-          aria-label={t("streaks:page.contextLabel")}
-          value={context}
-          onChange={(e) => setContext(e.target.value as ContextFilter)}
-        >
-          {CONTEXT_OPTIONS.map((value) => (
-            <option key={value} value={value}>
-              {t(`streaks:page.context.${value}`)}
-            </option>
-          ))}
-        </select>
-        <select aria-label={t("streaks:page.sortLabel")} value={sort} onChange={(e) => setSort(e.target.value as StreakSort)}>
-          <option value="rarity">{t("streaks:page.sort.rarity")}</option>
-          <option value="length">{t("streaks:page.sort.length")}</option>
-        </select>
-        {data && (
-          <span className="small muted">
-            {view.minLength < MIN_LENGTH
-              ? t("streaks:page.totalFallback", { count: view.rows.length, min: view.minLength, normal: MIN_LENGTH })
-              : t("streaks:page.count", { count: view.rows.length })}
-          </span>
-        )}
-      </div>
-
-      <RarityHelp />
-
-      {error && <ErrorView message={t("common:error.api", { error })} />}
-      {!error && (loading || !data) && <LoadingView label={t("streaks:page.loading")} />}
-      {!error && !loading && data && view.rows.length === 0 && <EmptyView message={t("streaks:page.empty")} />}
-
-      {!loading && data && view.rows.length > 0 && (
-        <>
-          {mobile ? (
-            <ul className="streak-cards">
-              {rows.map((row) => (
-                <li key={row.id} className="streak-card">
-                  <div className="streak-card-head">
-                    <LeagueCell code={row.leagueCode} />
-                    <span className="small muted">{formatKickoff(row.match.date)}</span>
-                  </div>
-                  <StreakText row={row} />
-                  <div className="streak-card-foot">
-                    <NextMatch row={row} />
-                    <div className="streak-odds">
-                      <OddsCell row={row} {...odds(row)} />
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="table-scroll">
-              <table className="predictions-table streaks-table">
-                <thead>
-                  <tr>
-                    <th>{t("streaks:page.column.league")}</th>
-                    <th>{t("streaks:page.column.streak")}</th>
-                    <th>{t("streaks:page.column.nextMatch")}</th>
-                    <th>{t("streaks:page.column.odds")}</th>
-                    <th>{t("streaks:page.column.date")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row) => (
-                    <tr key={row.id}>
-                      <td>
-                        <LeagueCell code={row.leagueCode} />
-                      </td>
-                      <td>
-                        <StreakText row={row} />
-                      </td>
-                      <td>
-                        <NextMatch row={row} />
-                      </td>
-                      <td className="streak-odds">
-                        <OddsCell row={row} {...odds(row)} />
-                      </td>
-                      <td className="streak-date">{formatKickoff(row.match.date)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {view.rows.length > shown && (
-            <button type="button" className="tab-button streak-more" onClick={() => setShown((n) => n + PAGE_SIZE)}>
-              {t("streaks:page.more", { n: view.rows.length - shown })}
+      <div className="picks-toolbar">
+        <div className="tab-group picks-tabs" role="tablist" aria-label={t("streaks:tabs.label")}>
+          {VIEWS.map((v) => (
+            <button
+              key={v}
+              type="button"
+              role="tab"
+              aria-selected={tab === v}
+              className={tab === v ? "tab-button tab-button-active" : "tab-button"}
+              onClick={() => setTab(v)}
+            >
+              <span className="label-long">{t(`streaks:tabs.${v}.label`)}</span>
+              <span className="label-short">{t(`streaks:tabs.${v}.short`)}</span>
             </button>
+          ))}
+        </div>
+      </div>
+
+      {tab !== "next" &&
+        (error ? (
+          <ErrorView message={t("common:error.api", { error })} />
+        ) : data ? (
+          <StudyViews view={tab} data={data} query={query} onQuery={setQuery} />
+        ) : (
+          <LoadingView label={t("streaks:page.loading")} />
+        ))}
+
+      {tab === "next" && (
+        <>
+          <DayTabs
+            days={days}
+            value={day === "all" ? null : day}
+            onChange={(d) => setDay(d ?? "all")}
+            allDate={t("streaks:page.allDays", { count: DAYS_AHEAD })}
+            enabled={data !== null ? (key) => matchDays.has(key) : null}
+            title={(key) => t("streaks:page.count", { count: dayCounts[key] ?? 0 })}
+          />
+
+          <div className="streak-chips" role="group" aria-label={t("streaks:page.marketLabel")}>
+            {CHIPS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className="group-chip"
+                aria-pressed={chip === c}
+                disabled={data !== null && c !== ALL_CHIP && !chipCounts[c]}
+                title={
+                  c === POPULAR_CHIP && popular.length
+                    ? t("streaks:page.popularTitle", { categories: popular.map(categoryLabel).join(", ") })
+                    : undefined
+                }
+                onClick={() => setChip(c)}
+              >
+                {chipLabel(c)}
+                {data && <span className="chip-count">{chipCounts[c] ?? 0}</span>}
+              </button>
+            ))}
+          </div>
+
+          <div className="filters">
+            <StreakSearch value={query} onChange={setQuery} />
+            <select
+              aria-label={t("streaks:page.contextLabel")}
+              value={context}
+              onChange={(e) => setContext(e.target.value as ContextFilter)}
+            >
+              {CONTEXT_OPTIONS.map((value) => (
+                <option key={value} value={value}>
+                  {t(`streaks:page.context.${value}`)}
+                </option>
+              ))}
+            </select>
+            <select aria-label={t("streaks:page.sortLabel")} value={sort} onChange={(e) => setSort(e.target.value as StreakSort)}>
+              <option value="rarity">{t("streaks:page.sort.rarity")}</option>
+              <option value="length">{t("streaks:page.sort.length")}</option>
+            </select>
+            {data && (
+              <span className="small muted">
+                {view.minLength < MIN_LENGTH
+                  ? t("streaks:page.totalFallback", { count: view.rows.length, min: view.minLength, normal: MIN_LENGTH })
+                  : t("streaks:page.count", { count: view.rows.length })}
+              </span>
+            )}
+          </div>
+
+          <RarityHelp />
+
+          {error && <ErrorView message={t("common:error.api", { error })} />}
+          {!error && (loading || !data) && <LoadingView label={t("streaks:page.loading")} />}
+          {!error && !loading && data && view.rows.length === 0 && (
+            <EmptyView
+              message={query.trim() ? t("streaks:search.empty", { query: query.trim() }) : t("streaks:page.empty")}
+            />
           )}
+
+          {!loading && data && view.rows.length > 0 && (
+            <>
+              {mobile ? (
+                <ul className="streak-cards">
+                  {rows.map((row) => (
+                    <li key={row.id} className="streak-card">
+                      <div className="streak-card-head">
+                        <LeagueCell code={row.leagueCode} />
+                        <span className="small muted">{formatKickoff(row.match.date)}</span>
+                      </div>
+                      <StreakText row={row} />
+                      <div className="streak-card-foot">
+                        <NextMatch row={row} />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="table-scroll">
+                  <table className="predictions-table streaks-table">
+                    <thead>
+                      <tr>
+                        <th>{t("streaks:page.column.league")}</th>
+                        <th>{t("streaks:page.column.streak")}</th>
+                        <th>{t("streaks:page.column.nextMatch")}</th>
+                        <th>{t("streaks:page.column.date")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((row) => (
+                        <tr key={row.id}>
+                          <td>
+                            <LeagueCell code={row.leagueCode} />
+                          </td>
+                          <td>
+                            <StreakText row={row} />
+                          </td>
+                          <td>
+                            <NextMatch row={row} />
+                          </td>
+                          <td className="streak-date">{formatKickoff(row.match.date)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {view.rows.length > shown && (
+                <button type="button" className="tab-button streak-more" onClick={() => setShown((n) => n + PAGE_SIZE)}>
+                  {t("streaks:page.more", { n: view.rows.length - shown })}
+                </button>
+              )}
         </>
       )}
 
       <div className="streak-notes small muted">
         <p>
           <Trans i18nKey="streaks:notes.describe" components={{ bold: <strong /> }} />
-        </p>
-        <p>
-          {oddsNotes.length > 0
-            ? t("streaks:notes.oddsWith", { notes: oddsNotes.join(" · ") })
-            : t("streaks:notes.oddsNone")}
         </p>
         <p>
           {t("streaks:notes.which", {
@@ -391,8 +400,8 @@ export function StreaksPage() {
         </p>
         <p>{t("streaks:notes.cards")}</p>
       </div>
-
-      {data && <StudyPanel data={data} />}
+        </>
+      )}
     </div>
   );
 }
@@ -425,6 +434,29 @@ function RarityHelp() {
   );
 }
 
+/** Buscador de equipo o árbitro (solo equipo en la tabla de equipos). */
+function StreakSearch({
+  value,
+  onChange,
+  teamsOnly = false,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  teamsOnly?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <input
+      type="search"
+      className="market-search"
+      aria-label={teamsOnly ? t("streaks:search.teamLabel") : t("streaks:search.label")}
+      placeholder={teamsOnly ? t("streaks:search.teamPlaceholder") : t("streaks:search.placeholder")}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  );
+}
+
 function LeagueCell({ code }: { code: string }) {
   return (
     <span className="streak-league">
@@ -449,12 +481,10 @@ function StreakText({ row }: { row: StreakRow }) {
             className="streak-chance"
             title={t("streaks:row.chanceTitle", { pct: pct(row.baseRate), n: row.length })}
           >
-            {t("streaks:row.chance", { chance: chanceText(row.chance) })}
+            {t(row.kind === "referee" ? "streaks:row.chanceReferee" : "streaks:row.chance", { chance: chanceText(row.chance) })}
           </span>{" "}
           · {t("streaks:row.since", { date: formatShortDate(row.since) })}
           {row.skipped > 0 && ` · ${t("streaks:row.skipped", { count: row.skipped })}`}
-          {row.odds &&
-            ` · ${t("streaks:row.odds", { odds: formatOdds(row.odds.odds), pct: pct(1 / row.odds.odds) })}`}
         </p>
       </div>
     </div>
@@ -484,48 +514,24 @@ function NextMatch({ row }: { row: StreakRow }) {
   );
 }
 
-function OddsCell({ row, raw, set }: { row: StreakRow; raw: string; set: (v: string) => void }) {
-  const { t } = useTranslation();
-  const mine = parseOddsInput(raw);
-  return (
-    <>
-      {row.odds ? (
-        <span className="streak-odds-value" title={takenText(row.match) ?? undefined}>
-          {formatOdds(row.odds.odds)}
-        </span>
-      ) : (
-        <span className="muted" title={t("streaks:odds.none")}>
-          —
-        </span>
-      )}
-      <input
-        type="text"
-        inputMode="decimal"
-        className="odds-input"
-        placeholder={t("streaks:odds.yours")}
-        value={raw}
-        onChange={(e) => set(e.target.value)}
-        aria-label={t("streaks:odds.yoursFor", { text: row.text })}
-      />
-      {mine !== null && <div className="small muted">{t("streaks:odds.requires", { pct: pct(1 / mine) })}</div>}
-    </>
-  );
-}
-
 // --- ¿Se prolongan? -------------------------------------------------------------
 
 /** Trozos de trabajo de este tiempo como mucho, para no congelar la pagina. */
 const SLICE_MS = 16;
-const studyCache = new Map<string, StudyRow[]>();
+interface StudyResult {
+  events: StudyEvent[];
+  rows: StudyRow[];
+  teams: StudyTeam[];
+}
 
-/** El estudio de las ligas cargadas, por trozos y guardado para la sesion. */
-function useStudy(data: LeagueStreaks[], enabled: boolean): { rows: StudyRow[] | null; progress: number } {
+const studyCache = new Map<string, StudyResult>();
+
+/** El estudio de las ligas cargadas, por trozos y guardado para la sesion:
+ * cada racha que habria salido antes de un partido jugado y si siguio, con su
+ * resumen y por equipo. */
+function useStudy(data: LeagueStreaks[], enabled: boolean): { result: StudyResult | null; progress: number } {
   const key = data.map((d) => `${d.league.id}:${d.played.length}`).join("|");
-  const [state, setState] = useState<{ key: string; rows: StudyRow[] | null; progress: number }>({
-    key: "",
-    rows: null,
-    progress: 0,
-  });
+  const [state, setState] = useState<{ key: string; progress: number }>({ key: "", progress: 0 });
 
   useEffect(() => {
     if (!enabled || studyCache.has(key)) return;
@@ -554,12 +560,12 @@ function useStudy(data: LeagueStreaks[], enabled: boolean): { rows: StudyRow[] |
         summary ??= summarizeStudySteps(events);
         const step = summary.next();
         if (step.done) {
-          studyCache.set(key, step.value);
-          setState({ key, rows: step.value, progress: 1 });
+          studyCache.set(key, { events, rows: step.value, teams: summarizeStudyTeams(events) });
+          setState({ key, progress: 1 });
           return;
         }
       }
-      setState({ key, rows: null, progress: league / total });
+      setState({ key, progress: league / total });
       timer = window.setTimeout(work, 0);
     };
     timer = window.setTimeout(work, 0);
@@ -570,36 +576,184 @@ function useStudy(data: LeagueStreaks[], enabled: boolean): { rows: StudyRow[] |
   }, [key, enabled, data]);
 
   const cached = studyCache.get(key);
-  if (cached) return { rows: cached, progress: 1 };
-  return { rows: null, progress: state.key === key ? state.progress : 0 };
+  if (cached) return { result: cached, progress: 1 };
+  return { result: null, progress: state.key === key ? state.progress : 0 };
 }
 
-function StudyPanel({ data }: { data: LeagueStreaks[] }) {
+/** Jornadas jugadas, resumen o por equipo: lo mismo que "¿Se prolongan?". */
+function StudyViews({
+  view,
+  data,
+  query,
+  onQuery,
+}: {
+  view: Exclude<View, "next">;
+  data: LeagueStreaks[];
+  query: string;
+  onQuery: (v: string) => void;
+}) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const { rows, progress } = useStudy(data, open);
+  const { result, progress } = useStudy(data, true);
+  if (!result) {
+    return <LoadingView label={t("streaks:study.loading", { pct: withPercent(String(Math.round(progress * 100))) })} />;
+  }
+  if (view === "played") return <PlayedView events={result.events} data={data} query={query} onQuery={onQuery} />;
+  if (view === "teams") return <TeamsView teams={result.teams} query={query} onQuery={onQuery} />;
+  return <StudySummary rows={result.rows} data={data} />;
+}
+
+/** "Calculado con datos anteriores", junto a lo que lo es. */
+function PriorDataTag() {
+  const { t } = useTranslation();
+  return <span className="match-meta-chip">{t("streaks:played.tag")}</span>;
+}
+
+/** Las rachas que habría mostrado la tabla antes de cada partido de esta
+ * temporada, por jornada, y si siguieron o se cortaron. */
+function PlayedView({
+  events,
+  data,
+  query,
+  onQuery,
+}: {
+  events: StudyEvent[];
+  data: LeagueStreaks[];
+  query: string;
+  onQuery: (v: string) => void;
+}) {
+  const { t } = useTranslation();
+  const current = useMemo(() => new Set(data.map((d) => d.seasons[0])), [data]);
+  const several = data.length > 1;
+  const byMatchday = useMemo(() => {
+    const groups = new Map<number, StudyEvent[]>();
+    for (const e of events) {
+      if (!current.has(e.result.season) || e.result.matchday == null || !matchesSearch(e.entity, query)) continue;
+      const list = groups.get(e.result.matchday) ?? [];
+      list.push(e);
+      groups.set(e.result.matchday, list);
+    }
+    return groups;
+  }, [events, current, query]);
+  const matchdays = [...byMatchday.keys()].sort((a, b) => b - a);
+  const [chosen, setChosen] = useState<number | null>(null);
+  const matchday = chosen !== null && byMatchday.has(chosen) ? chosen : (matchdays[0] ?? null);
+  const searching = query.trim() !== "";
+
+  if (matchday === null && !searching) return <EmptyView message={t("streaks:played.empty")} />;
+  const list =
+    matchday === null
+      ? []
+      : [...byMatchday.get(matchday)!].sort(
+          (a, b) => a.result.date.localeCompare(b.result.date) || a.result.id - b.result.id || a.chance - b.chance,
+        );
+  const hits = list.filter((e) => e.hit).length;
+
+  return (
+    <section className="streak-played">
+      <p className="small muted">
+        <PriorDataTag /> {t("streaks:played.note", { min: MIN_LENGTH })}
+      </p>
+      <div className="filters">
+        <StreakSearch value={query} onChange={onQuery} />
+        {matchday !== null && (
+          <>
+            <select
+              aria-label={t("streaks:played.matchdayLabel")}
+              value={matchday}
+              onChange={(e) => setChosen(Number(e.target.value))}
+            >
+              {matchdays.map((m) => (
+                <option key={m} value={m}>
+                  {t("streaks:played.matchday", { n: m })}
+                </option>
+              ))}
+            </select>
+            <span className="small muted">
+              {t("streaks:played.summary", { hits, count: list.length, pct: pct(hits / list.length) })}
+            </span>
+          </>
+        )}
+      </div>
+      {matchday === null ? (
+        <EmptyView message={t("streaks:search.emptyPlayed", { query: query.trim() })} />
+      ) : (
+        <div className="table-scroll">
+          <table className="predictions-table streaks-table">
+            <caption className="visually-hidden">{t("streaks:played.caption", { n: matchday })}</caption>
+            <thead>
+              <tr>
+                {several && <th scope="col">{t("streaks:page.column.league")}</th>}
+                <th scope="col">{t("streaks:page.column.streak")}</th>
+                <th scope="col">{t("streaks:played.column.match")}</th>
+                <th scope="col">{t("streaks:played.column.outcome")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.map((e, i) => (
+                <tr key={`${e.match}-${e.entity}-${e.type.market.slug}-${i}`}>
+                  {several && (
+                    <td>
+                      <LeagueCell code={e.result.league_code} />
+                    </td>
+                  )}
+                  <td>
+                    <div className="streak-entity">
+                      {e.kind === "team" && <TeamCrest team={e.entity} league={e.result.league_code} />}
+                      <p className="streak-text">
+                        {streakText({ kind: e.kind, name: e.entity }, e.type, e.length, e.context, e.result.league_code)}
+                      </p>
+                    </div>
+                  </td>
+                  <td>
+                    <Link to={matchPath(e.result.id)} className="streak-next">
+                      <MatchTeams
+                        home={e.result.home_team}
+                        away={e.result.away_team}
+                        league={e.result.league_code}
+                        middle={`${e.result.home_goals ?? ""}-${e.result.away_goals ?? ""}`}
+                      />
+                    </Link>
+                  </td>
+                  <td className={e.hit ? "edge-up" : "edge-down"}>
+                    {e.hit ? t("streaks:played.continued") : t("streaks:played.broke")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** ¿Se prolongan? Por mercado, frente a la liga y frente al propio equipo, y
+ * por longitud frente a la liga. */
+function StudySummary({ rows, data }: { rows: StudyRow[]; data: LeagueStreaks[] }) {
+  const { t } = useTranslation();
   const seasons = [...new Set(data.flatMap((d) => d.seasons))].sort().map(formatSeason).join(t("common:listAnd"));
   const leagues = data.map((d) => leagueName(d.league.code)).join(", ");
 
-  const cells = rows?.flatMap((r) => LENGTH_BUCKETS.map((b) => r.cells[b]).filter((c): c is StudyCell => c !== null)) ?? [];
+  const cells = rows.flatMap((r) => LENGTH_BUCKETS.map((b) => r.cells[b]).filter((c): c is StudyCell => c !== null));
   const above = cells.filter((c) => isClear(c) && c.diff > 0).length;
   const below = cells.filter((c) => isClear(c) && c.diff < 0).length;
+  const rowClass = (row: StudyRow) => (row.category === ALL_CATEGORIES ? "picks-summary-total" : undefined);
 
   return (
-    <details className="picks-method streak-study" onToggle={(e) => setOpen(e.currentTarget.open)}>
-      <summary>{t("streaks:study.title")}</summary>
+    <section className="streak-study">
+      <h2>{t("streaks:study.title")}</h2>
       <p className="small muted">
+        <PriorDataTag />{" "}
         {t("streaks:study.method", {
           seasons,
           leagues,
           min: MIN_LENGTH,
           samples: BOOTSTRAP_SAMPLES,
           minEvents: MIN_CELL_EVENTS,
-        })}
+        })}{" "}
+        {t("streaks:study.ownNote", { min: MIN_OWN_SAMPLE })}
       </p>
-      {rows === null ? (
-        <LoadingView label={t("streaks:study.loading", { pct: withPercent(String(Math.round(progress * 100))) })} />
-      ) : rows.length === 0 ? (
+      {rows.length === 0 ? (
         <EmptyView message={t("streaks:study.empty")} />
       ) : (
         <>
@@ -610,6 +764,32 @@ function StudyPanel({ data }: { data: LeagueStreaks[] }) {
                 ? t("streaks:study.verdictAboveBelow", { above, cells: cells.length, below })
                 : t("streaks:study.verdictAbove", { above, cells: cells.length })}
           </p>
+          <h3>{t("streaks:study.byMarket")}</h3>
+          <div className="table-scroll">
+            <table className="predictions-table streak-study-table">
+              <thead>
+                <tr>
+                  <th>{t("streaks:study.market")}</th>
+                  <th>{t("streaks:study.vsLeague")}</th>
+                  <th>{t("streaks:study.vsOwn")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.category} className={rowClass(row)}>
+                    <td>{categoryLabel(row.category)}</td>
+                    <td>
+                      <StudyCellView cell={row.league} />
+                    </td>
+                    <td>
+                      <StudyCellView cell={row.own} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <h3>{t("streaks:study.byLength")}</h3>
           <div className="table-scroll">
             <table className="predictions-table streak-study-table">
               <thead>
@@ -622,7 +802,7 @@ function StudyPanel({ data }: { data: LeagueStreaks[] }) {
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.category} className={row.category === ALL_CATEGORIES ? "picks-summary-total" : undefined}>
+                  <tr key={row.category} className={rowClass(row)}>
                     <td>{categoryLabel(row.category)}</td>
                     {LENGTH_BUCKETS.map((b) => (
                       <td key={b}>
@@ -636,7 +816,81 @@ function StudyPanel({ data }: { data: LeagueStreaks[] }) {
           </div>
         </>
       )}
-    </details>
+    </section>
+  );
+}
+
+type TeamSort = "team" | "events" | "rate" | "own";
+
+/** Por equipo: cuántas de sus rachas siguieron, frente a lo habitual en la
+ * liga y en el propio equipo. En orden alfabético; equipo, rachas, siguieron
+ * y lo habitual del equipo ordenan (otra vez, al revés). */
+function TeamsView({ teams, query, onQuery }: { teams: StudyTeam[]; query: string; onQuery: (v: string) => void }) {
+  const { t } = useTranslation();
+  const [sort, setSort] = useState<{ key: TeamSort; desc: boolean }>({ key: "team", desc: false });
+  const byName = (a: StudyTeam, b: StudyTeam) => a.team.localeCompare(b.team, currentLocale());
+  const value = (r: StudyTeam) => (sort.key === "events" ? r.events : sort.key === "rate" ? r.rate : (r.own ?? -1));
+  const rows = teams.filter((r) => matchesSearch(r.team, query)).sort((a, b) => {
+    const c = sort.key === "team" ? byName(a, b) : value(a) - value(b) || byName(a, b);
+    return sort.desc ? -c : c;
+  });
+  // Lo numérico, de mayor a menor al pulsarlo por primera vez.
+  const sortBy = (key: TeamSort) =>
+    setSort((s) => (s.key === key ? { key, desc: !s.desc } : { key, desc: key !== "team" }));
+  const header = (key: TeamSort, label: string) => (
+    <th scope="col" aria-sort={sort.key === key ? (sort.desc ? "descending" : "ascending") : "none"}>
+      <button type="button" className="hr-sort" onClick={() => sortBy(key)}>
+        {label}
+        {sort.key === key && <span aria-hidden="true">{sort.desc ? " ▼" : " ▲"}</span>}
+      </button>
+    </th>
+  );
+  if (teams.length === 0) return <EmptyView message={t("streaks:teams.empty")} />;
+  return (
+    <section className="streak-teams">
+      <p className="small muted">
+        <PriorDataTag /> {t("streaks:teams.note", { n: LOW_TEAM_EVENTS })}
+      </p>
+      <div className="filters">
+        <StreakSearch value={query} onChange={onQuery} teamsOnly />
+      </div>
+      {rows.length === 0 ? (
+        <EmptyView message={t("streaks:search.emptyTeams", { query: query.trim() })} />
+      ) : (
+        <div className="table-scroll">
+          <table className="predictions-table streak-study-table">
+            <caption className="visually-hidden">{t("streaks:teams.caption")}</caption>
+            <thead>
+              <tr>
+                {header("team", t("streaks:teams.column.team"))}
+                {header("events", t("streaks:teams.column.events"))}
+                {header("rate", t("streaks:teams.column.rate"))}
+                <th scope="col">{t("streaks:teams.column.league")}</th>
+                {header("own", t("streaks:teams.column.own"))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.teamId}>
+                  <th scope="row">
+                    <TeamName team={r.team} league={r.league} />
+                  </th>
+                  <td>
+                    {formatLocaleNumber(r.events)}
+                    {r.events < LOW_TEAM_EVENTS && <span className="small muted"> · {t("streaks:teams.lowSample")}</span>}
+                  </td>
+                  <td>
+                    {pct(r.rate)} <span className="small muted">({r.hits}/{r.events})</span>
+                  </td>
+                  <td>{pct(r.expected)}</td>
+                  <td>{r.own === null ? "—" : pct(r.own)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }
 

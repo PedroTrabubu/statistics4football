@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import type { MatchResult, TeamMatchStats, UpcomingMatch } from "../api/types";
-import { activeStreaks, dayLabel, matchesChip, selectStreaks, studyEvents, summarizeStudy, upcomingDays } from "./streaks";
+import {
+  ALL_CATEGORIES,
+  activeStreaks,
+  dayLabel,
+  matchesChip,
+  selectStreaks,
+  studyEvents,
+  summarizeStudy,
+  summarizeStudyTeams,
+  upcomingDays,
+} from "./streaks";
 
 // --- Liga de prueba ---------------------------------------------------------
 // Diez equipos de relleno con resultados y córners variados (la frecuencia de
@@ -102,11 +112,9 @@ describe("rachas activas", () => {
     expect(leader.every((r) => r.chance <= 0.05)).toBe(true);
   });
 
-  it("cuota media solo para el mercado exacto (gana en 1X2); el resto sin cuota", () => {
+  it("racha de victorias, con su texto", () => {
     const wins = leader.find((r) => r.type.market.slug === "resultado" && r.type.option.key === "gana" && r.context === "all");
     expect(wins?.text).toBe("Líder ha ganado sus últimos 8 partidos de liga");
-    expect(wins?.odds?.odds).toBe(1.5);
-    expect(leader.filter((r) => r.type.category === "corners").every((r) => r.odds === null)).toBe(true);
   });
 
   it("como mucho tres por equipo y día, las más raras primero", () => {
@@ -127,6 +135,31 @@ describe("¿se prolongan?", () => {
     const events = studyEvents(played);
     expect(events.length).toBeGreaterThan(0);
     expect(summarizeStudy(events)).toEqual(summarizeStudy(events));
+  });
+
+  it("cada racha con su partido, su equipo y lo habitual en él, solo con lo anterior", () => {
+    const events = studyEvents(played);
+    for (const e of events) {
+      expect(e.result.id).toBe(e.match);
+      if (e.kind === "team") expect([e.result.home_team_id, e.result.away_team_id]).toContain(e.teamId);
+      if (e.own !== null) {
+        expect(e.own).toBeGreaterThanOrEqual(0);
+        expect(e.own).toBeLessThanOrEqual(1);
+      }
+    }
+    // Una racha de N partidos ya está dentro de lo habitual del equipo: con
+    // al menos MIN_OWN_SAMPLE partidos, nunca es 0.
+    expect(events.filter((e) => e.own !== null).every((e) => e.own! > 0)).toBe(true);
+    const row = summarizeStudy(events).find((r) => r.category === ALL_CATEGORIES)!;
+    expect(row.league?.events).toBe(events.length);
+  });
+
+  it("por equipo: sus rachas, cuántas siguieron y solo equipos", () => {
+    const events = studyEvents(played);
+    const teams = summarizeStudyTeams(events);
+    const teamEvents = events.filter((e) => e.kind === "team");
+    expect(teams.reduce((s, t) => s + t.events, 0)).toBe(teamEvents.length);
+    for (const t of teams) expect(t.rate).toBeCloseTo(t.hits / t.events, 12);
   });
 });
 

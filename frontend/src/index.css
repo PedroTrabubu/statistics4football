@@ -4971,18 +4971,6 @@ section[id] {
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
 }
-.streak-odds {
-  white-space: nowrap;
-}
-.streak-odds-value {
-  font-weight: var(--fw-semibold);
-  cursor: help;
-}
-.streak-odds .odds-input {
-  display: block;
-  width: 5.5rem;
-  margin-top: var(--space-1-5);
-}
 .streak-cards {
   display: grid;
   gap: var(--space-3);

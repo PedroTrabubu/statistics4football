@@ -6,7 +6,7 @@
     "popular": "Populaires"
   },
   "page": {
-    "lead": "Séries en cours des équipes qui jouent dans les prochains jours : matchs consécutifs, en remontant depuis le plus récent, où un marché s'est vérifié. Triées par rareté : à quel point une telle série serait improbable par pur hasard.",
+    "lead": "Séries en cours des équipes qui jouent dans les prochains jours : matchs consécutifs, en remontant depuis le plus récent, où un marché s'est vérifié. Triées par rareté : à quel point une telle série serait improbable pour une équipe moyenne du championnat.",
     "allDays_one": "{{count}} jour",
     "allDays_many": "{{count}} jours",
     "allDays_other": "{{count}} jours",
@@ -36,7 +36,6 @@
       "league": "Championnat",
       "streak": "Série",
       "nextMatch": "Prochain match",
-      "odds": "Cote",
       "date": "Date"
     },
     "more": "Voir plus ({{n}})"
@@ -45,25 +44,14 @@
     "lessThan": "moins de 1 sur {{n}}",
     "oneIn": "1 sur {{n}}"
   },
-  "odds": {
-    "taken": "Cote moyenne de plusieurs bookmakers (« Market Average », {{source}}), relevée le {{date}}. Ce n'est pas la cote actuelle.",
-    "unknownSource": "source inconnue",
-    "note": "{{league}} : {{source}}, relevée le {{date}}",
-    "none": "Pas de cote moyenne du marché pour cet événement : elle n'est ni dérivée ni estimée.",
-    "yours": "Votre cote",
-    "yoursFor": "Votre cote pour : {{text}}",
-    "requires": "exige {{pct}}"
-  },
   "notes": {
     "describe": "<bold>Les séries décrivent ce qui s'est passé ; à elles seules, elles ne prédisent pas le prochain match.</bold> Il existe des centaines de combinaisons d'équipe, de marché et de ligne, donc certaines longues séries apparaissent par hasard.",
-    "oddsWith": "Cote : la moyenne de plusieurs bookmakers (« Market Average »), la même référence que dans le reste du site, uniquement pour Résultat (victoire, nul, défaite) et plus/moins de 2,5 buts dans le match. Pour les autres marchés, « — » : elle n'est ni dérivée ni estimée. C'est la cote du dernier relevé, pas la cote actuelle : {{notes}}.",
-    "oddsNone": "Cote : la moyenne de plusieurs bookmakers (« Market Average »), la même référence que dans le reste du site, uniquement pour Résultat (victoire, nul, défaite) et plus/moins de 2,5 buts dans le match. Pour les autres marchés, « — » : elle n'est ni dérivée ni estimée. C'est la cote du dernier relevé, pas la cote actuelle ; pour l'instant, il n'y en a aucune pour ces matchs.",
-    "which": "Seules apparaissent les séries de {{min}} matchs ou plus ({{fallback}} s'il y en a très peu) qui, par hasard, n'arriveraient qu'au plus 1 fois sur {{chance}}, une par équipe et par marché (celle de la ligne la plus exigeante) et au plus {{perEntity}} par équipe et par jour. On compte les matchs de la même compétition, de cette saison et de la précédente. Celles des arbitres, uniquement une fois l'arbitre désigné.",
+    "which": "Seules apparaissent les séries de {{min}} matchs ou plus ({{fallback}} s'il y en a très peu) qui, pour une équipe moyenne du championnat (un arbitre moyen, pour les séries d'arbitre), n'arriveraient qu'au plus 1 fois sur {{chance}}, une par équipe et par marché (celle de la ligne la plus exigeante) et au plus {{perEntity}} par équipe et par jour. On compte les matchs de la même compétition, de cette saison et de la précédente. Celles des arbitres, uniquement une fois l'arbitre désigné.",
     "cards": "Les cartons et les points de cartons viennent de nos données : cartons = jaunes + rouges ; points = jaune 10, rouge 25 (approximatif). Une statistique qu'un championnat n'a pas n'apparaît pas, et un match sans la donnée n'interrompt pas la série."
   },
   "rarity": {
     "title": "Qu'est-ce que la rareté ?",
-    "what": "La rareté mesure la difficulté de voir une telle série <bold>par pur hasard</bold>, si l'équipe était une équipe quelconque du championnat. On la calcule avec le taux habituel du championnat pour cet événement, multiplié par lui-même autant de fois que la série compte de matchs. C'est le chiffre « Par hasard » de chaque ligne : « 1 sur 1 500 » signifie que, par pure chance, seule 1 équipe sur 1 500 aurait une telle série.",
+    "what": "La rareté compare la série avec <bold>une équipe moyenne du championnat</bold>, pas avec l'équipe elle-même (pour les séries d'arbitre, avec un arbitre moyen). On la calcule avec le taux habituel du championnat pour cet événement, multiplié par lui-même autant de fois que la série compte de matchs. C'est le chiffre « Si c'était une équipe moyenne du championnat » de chaque ligne : « 1 sur 1 500 » signifie que seule 1 équipe moyenne sur 1 500 aurait une telle série par pure chance. C'est pourquoi les équipes très dominantes (ou très faibles) ont des séries « rares » à cause de leur façon habituelle de jouer, sans que ce soit une surprise.",
     "example1": "Gagner 8 fois de suite quand 40 % des matchs du championnat sont gagnés : 0,40<sup>8</sup> ≈ 1 sur 1 500. Très rare.",
     "example2": "9 fois de suite quelque chose qui arrive 90 % du temps : 0,90<sup>9</sup> ≈ 1 sur 3. C'est normal, donc elle n'apparaît pas dans le tableau.",
     "example3": "6 fois de suite quelque chose qui arrive une fois sur deux : 0,50<sup>6</sup> ≈ 1 sur 64. Elle est plus courte que la précédente, mais beaucoup plus rare : c'est pourquoi elle passe devant.",
@@ -77,12 +65,12 @@
       "away": "Habituel en {{league}} : {{pct}} des matchs à l'extérieur"
     },
     "chanceTitle": "{{pct}} multiplié par lui-même {{n}} fois. Suppose que chaque match est indépendant du précédent.",
-    "chance": "Par hasard : {{chance}}",
+    "chance": "Si c'était une équipe moyenne du championnat : {{chance}}",
+    "chanceReferee": "Si c'était un arbitre moyen du championnat : {{chance}}",
     "since": "Depuis le {{date}}",
     "skipped_one": "{{count}} match sans donnée ne compte pas",
     "skipped_many": "{{count}} matchs sans donnée ne comptent pas",
     "skipped_other": "{{count}} matchs sans donnée ne comptent pas",
-    "odds": "La cote {{odds}} exige une réussite d'au moins {{pct}} pour ne pas perdre",
     "referee": "Arbitre : {{name}}",
     "home": "Domicile",
     "away": "Extérieur"
@@ -99,7 +87,12 @@
     "bucket": "{{n}} matchs",
     "versus": "contre {{expected}}",
     "diff": "{{diff}} pts ({{low}} à {{high}})",
-    "diffUnclear": "{{diff}} pts ({{low}} à {{high}}) · pas d'écart net"
+    "diffUnclear": "{{diff}} pts ({{low}} à {{high}}) · pas d'écart net",
+    "ownNote": "Le taux habituel de l'équipe (ou de l'arbitre) : combien de fois cet événement s'est produit dans ses matchs antérieurs, dans le même contexte que la série et y compris ceux de la série ; avec moins de {{min}} matchs, il ne compte pas.",
+    "byMarket": "Par marché",
+    "byLength": "Par longueur de série, face au championnat",
+    "vsLeague": "Face au taux habituel du championnat",
+    "vsOwn": "Face au taux habituel de l'équipe"
   },
   "amount": {
     "goals": {
@@ -250,5 +243,61 @@
       }
     },
     "fallback": "{{name}} a rempli « {{market}} : {{option}} » lors de {{own}}"
+  },
+  "tabs": {
+    "label": "Vue",
+    "next": {
+      "label": "Prochaine journée",
+      "short": "Prochaine"
+    },
+    "played": {
+      "label": "Journées jouées",
+      "short": "Jouées"
+    },
+    "summary": {
+      "label": "Résumé",
+      "short": "Résumé"
+    },
+    "teams": {
+      "label": "Tableau de réussite",
+      "short": "Équipes"
+    }
+  },
+  "played": {
+    "tag": "Calculé avec les données antérieures",
+    "note": "Les séries de {{min}} matchs ou plus que le tableau aurait affichées avant chaque match de cette saison, calculées uniquement avec les matchs antérieurs, et si elles ont continué lors de ce match.",
+    "matchdayLabel": "Journée",
+    "matchday": "Journée {{n}}",
+    "summary": "{{hits}} sur {{count}} ont continué ({{pct}})",
+    "caption": "Séries avant les matchs de la journée {{n}} et si elles ont continué",
+    "column": {
+      "match": "Match",
+      "outcome": "Continuée ?"
+    },
+    "continued": "✓ Continuée",
+    "broke": "✗ Interrompue",
+    "empty": "Pas encore de séries dans les matchs joués cette saison."
+  },
+  "teams": {
+    "note": "Chaque ligne : les séries de l'équipe que le tableau aurait affichées avant chaque match et combien ont continué. « Peu de données » : moins de {{n}} séries.",
+    "caption": "Séries de chaque équipe et combien ont continué",
+    "column": {
+      "team": "Équipe",
+      "events": "Séries",
+      "rate": "Continuées",
+      "league": "Taux habituel du championnat",
+      "own": "Taux habituel de l'équipe"
+    },
+    "lowSample": "peu de données",
+    "empty": "Pas de séries d'équipes pour le mesurer."
+  },
+  "search": {
+    "label": "Rechercher une équipe ou un arbitre",
+    "placeholder": "Rechercher une équipe ou un arbitre…",
+    "teamLabel": "Rechercher une équipe",
+    "teamPlaceholder": "Rechercher une équipe…",
+    "empty": "Aucune série pour « {{query}} » avec ces filtres.",
+    "emptyPlayed": "Aucune série pour « {{query}} » dans les matchs joués cette saison.",
+    "emptyTeams": "Aucune équipe ne correspond à « {{query}} »."
   }
 }
