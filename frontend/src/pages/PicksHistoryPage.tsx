@@ -9,6 +9,7 @@ import {
   getLeagueSeasons,
   getLeagueUpcoming,
   getLeagues,
+  getMatchPickSummary,
   getMatches,
 } from "../api/client";
 import type { Match, MatchdayInfo, MatchResult } from "../api/types";
@@ -27,6 +28,7 @@ import {
   useSelectedLeagueCode,
 } from "../lib/leagues";
 import {
+  agreesWithDuel,
   MIN_TEAM_PICKS,
   rankTeams,
   strengthKey,
@@ -35,6 +37,8 @@ import {
   summarizeByTeam,
   summarizePicks,
   upcomingPicks,
+  wilsonLower,
+  wilsonUpper,
   type MatchPicksResult,
   type PickResult,
   type PicksSummary,
@@ -65,7 +69,7 @@ import {
 } from "../components/Predictability";
 import { MatchPickLine } from "../components/MatchPick";
 import { useMatchPicks } from "../lib/matchPick";
-import type { MatchPicksResponse } from "../api/types";
+import type { MatchPickSeason, MatchPicksResponse } from "../api/types";
 
 const STRENGTHS: Strength[] = ["alta", "media", "baja"];
 const pct = (x: number | null) =>
@@ -455,6 +459,7 @@ export function PicksHistoryPage() {
                       : t("picks:probablePage.seasonTitle", { season: formatSeason(season) })
                   }
                 />
+                {league && <MatchPickSeasons leagueId={league.id} season={allSeasons ? null : season} />}
                 <PredictabilityTable league={leagueCode} />
               </>
             )}
@@ -831,6 +836,120 @@ function SeasonSummary({
   );
 }
 
+/** Una temporada (o varias juntas) del pick del partido con las cifras del
+ * resumen de los picks: aciertos, intervalo y lo habitual en la liga. */
+function matchPickTotals(seasons: MatchPickSeason[]): PicksSummary {
+  const total = seasons.reduce((n, s) => n + s.decided, 0);
+  const hits = seasons.reduce((n, s) => n + s.hits, 0);
+  const base = seasons.reduce((sum, s) => sum + (s.base ?? 0) * s.decided, 0);
+  const withPick = seasons.reduce((n, s) => n + s.with_pick, 0);
+  return {
+    total,
+    hits,
+    undecided: withPick - total,
+    rate: total ? hits / total : null,
+    low: total ? wilsonLower(hits, total) : null,
+    high: total ? wilsonUpper(hits, total) : null,
+    expected: total ? base / total : null,
+  };
+}
+
+/** Acierto del pick del partido (uno por partido, del modelo, aparte de los
+ * picks de arriba) en la temporada elegida o, con todas, en cada una. */
+function MatchPickSeasons({ leagueId, season }: { leagueId: number; season: string | null }) {
+  const { t } = useTranslation();
+  const { data, loading, error } = useApi(() => getMatchPickSummary(leagueId), [leagueId]);
+  const seasons = data?.seasons.filter((s) => season === null || s.season === season) ?? [];
+  const all = matchPickTotals(seasons);
+  const rows: [string, PicksSummary, string][] = seasons.map((s) => [formatSeason(s.season), matchPickTotals([s]), s.season]);
+  if (rows.length > 1) rows.push([t("picks:probablePage.matchPickSummary.total"), all, "total"]);
+  const edge = all.rate !== null && all.expected !== null ? Math.round((all.rate - all.expected) * 100) : null;
+  const key = (k: string) => `picks:probablePage.matchPickSummary.${k}`;
+
+  return (
+    <section className="detail-section picks-summary match-pick-summary">
+      <h2>{t(key("title"))}</h2>
+      <p className="small muted">{t(key("intro"))}</p>
+      {loading && !data && <LoadingView label={t(key("loading"))} />}
+      {error && <ErrorView message={t(key("error"), { error })} />}
+      {data && !data.calibrated && <p className="small muted">{t(key("uncalibrated"))}</p>}
+      {data?.calibrated && all.total === 0 && (
+        <p className="small muted">
+          {season !== null && season < data.first_season
+            ? t(key("notYet"), { season: formatSeason(data.first_season) })
+            : t(key("none"))}
+        </p>
+      )}
+      {data?.calibrated && all.total > 0 && (
+        <>
+          <p>
+            <Trans
+              i18nKey={key("text")}
+              values={{ hits: all.hits, total: all.total, pct: pct(all.rate), expected: pct(all.expected) }}
+              components={{ bold: <strong /> }}
+            />
+            {edge !== null && (
+              <span className={edge > 0 ? "edge-up" : edge < 0 ? "edge-down" : undefined}>{edgeText(edge)}</span>
+            )}
+          </p>
+          <div className="table-scroll">
+            <table className="predictions-table picks-summary-table">
+              <thead>
+                <tr>
+                  <th>{t(key("season"))}</th>
+                  <th className="num">{t("picks:probablePage.column.picks")}</th>
+                  <th className="num">{t("picks:probablePage.column.hits")}</th>
+                  <th className="num">{t("picks:probablePage.column.misses")}</th>
+                  <th>{t("picks:probablePage.column.hitRate")}</th>
+                  <th className="num" title={t("picks:probablePage.column.leagueTitle")}>
+                    {t("picks:probablePage.column.league")}
+                  </th>
+                  <th className="num">{t("picks:probablePage.column.edge")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map(([label, s, id]) => (
+                  <tr key={id} className={id === "total" ? "picks-summary-total" : undefined}>
+                    <td>{label}</td>
+                    <td className="num">{s.total}</td>
+                    <td className="num summary-hits">{s.hits}</td>
+                    <td className="num summary-misses">{s.total - s.hits}</td>
+                    <td
+                      title={
+                        s.low !== null
+                          ? t("picks:probablePage.interval", { low: pct(s.low), high: pct(s.high) })
+                          : undefined
+                      }
+                    >
+                      <RateMeter rate={s.rate} expected={s.expected} />
+                    </td>
+                    <td className="num">{pct(s.expected)}</td>
+                    <td className="num">
+                      <EdgePill rate={s.rate} expected={s.expected} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {all.undecided > 0 && (
+            <p className="small muted">{t("picks:probablePage.undecided", { count: all.undecided })}</p>
+          )}
+        </>
+      )}
+      <details className="picks-method">
+        <summary>{t(key("method.title"))}</summary>
+        <ul>
+          <li>{t(key("method.options"))}</li>
+          <li>{t(key("method.model"))}</li>
+          <li>{t(key("method.filter"))}</li>
+          <li>{t(key("method.choice"))}</li>
+        </ul>
+      </details>
+    </section>
+  );
+}
+
 /** Sus textos, en picks:probablePage.rankColumn.<clave> (label y, en movil, short). */
 const RANK_COLUMNS: { key: TeamRankKey; text: string }[] = [
   { key: "alta", text: "high" },
@@ -1001,7 +1120,8 @@ function MatchdayResults({
   const filtered = all.map((r) => ({
     ...r,
     picks: r.picks.filter(keep),
-    duelPicks: r.duelPicks.filter(keep),
+    // Del duelo, solo los que su modelo no contradice: los mismos que en la tarjeta.
+    duelPicks: r.duelPicks.filter((d) => keep(d) && agreesWithDuel(d.pick, duels?.get(r.match.id))),
   }));
   const rows =
     strength === null ? filtered : filtered.filter((r) => r.picks.length > 0);
@@ -1250,7 +1370,8 @@ function MatchPicksCard({
   const keep = (r: CardPick) =>
     strength === null || r.pick.strength === strength;
   const shown = results.filter(keep);
-  const duelPicks = allDuelPicks.filter(keep);
+  // Del duelo, solo los que su modelo no contradice (agreesWithDuel).
+  const duelPicks = allDuelPicks.filter((r) => keep(r) && agreesWithDuel(r.pick, duel));
   const decided = shown.filter((r) => r.hit === true || r.hit === false);
   const hits = decided.filter((r) => r.hit).length;
   // Verde si acierta al menos lo que pasa en la liga con esos mismos sucesos.
@@ -1327,45 +1448,54 @@ function MatchPicksCard({
   );
 }
 
-/** Marca de cada resultado; su texto, en picks:probablePage.outcome.<clave>. */
-const OUTCOME = {
-  hit: { mark: "✓" },
-  miss: { mark: "✗" },
-  unknown: { mark: "–" },
-  pending: { mark: "•" },
-};
+/** Marca de cada resultado ya jugado; su texto, en picks:probablePage.outcome.<clave>.
+ * Por jugar no lleva marca. */
+const OUTCOME_MARK = { hit: "✓", miss: "✗", unknown: "–" } as const;
 
+/** Un pick en dos lineas, sea largo o corto: lo que se espera y, debajo, de
+ * quien sale, cuantas veces se ha cumplido y su fuerza. */
 function CheckedPick({ result, league }: { result: CardPick; league: string }) {
   const { t } = useTranslation();
   const { pick, hit } = result;
-  const outcome =
-    hit === undefined
-      ? "pending"
-      : hit === null
-        ? "unknown"
-        : hit
-          ? "hit"
-          : "miss";
+  const outcome = hit === undefined ? "pending" : hit === null ? "unknown" : hit ? "hit" : "miss";
   return (
     <li className={`checked-pick checked-${outcome}`}>
-      <span
-        className="checked-mark"
-        role="img"
-        aria-label={t(`picks:probablePage.outcome.${outcome}`)}
-        title={t(`picks:probablePage.outcome.${outcome}`)}
-      >
-        {OUTCOME[outcome].mark}
-      </span>
-      <TeamCrest team={pick.team} league={league} />
-      <span className="checked-text">
-        {pick.text}
-        <span className="small muted">
-          {" "}
-          {t("picks:probablePage.checkedEvidence", { team: pick.team, hits: pick.rate.hits, total: pick.rate.total })}
+      {outcome !== "pending" && (
+        <span
+          className="checked-mark"
+          role="img"
+          aria-label={t(`picks:probablePage.outcome.${outcome}`)}
+          title={t(`picks:probablePage.outcome.${outcome}`)}
+        >
+          {OUTCOME_MARK[outcome]}
         </span>
-      </span>
-      <span className={`pick-strength pick-strength-${pick.strength}`}>
-        {strengthLabel(pick.strength)}
+      )}
+      <TeamCrest team={pick.team} league={league} />
+      <span className="checked-body">
+        <span className="checked-text">{pick.text}</span>
+        <span className="checked-meta">
+          <span className="checked-evidence">
+            <Trans
+              i18nKey="picks:probablePage.checkedEvidence"
+              values={{
+                team: pick.team,
+                hits: pick.rate.hits,
+                total: pick.rate.total,
+                pct: withPercent(String(Math.round((pick.rate.hits / pick.rate.total) * 100))),
+              }}
+              components={{ team: <span className="checked-team" />, rate: <strong className="checked-rate" /> }}
+            />
+          </span>
+          {pick.leagueRate !== null && (
+            <span className="checked-league" title={t("picks:probablePage.column.leagueTitle")}>
+              <span className="checked-sep" aria-hidden="true">
+                {"· "}
+              </span>
+              {t("picks:probablePage.checkedLeague", { pct: pct(pick.leagueRate) })}
+            </span>
+          )}
+          <span className={`pick-strength pick-strength-${pick.strength}`}>{strengthLabel(pick.strength)}</span>
+        </span>
       </span>
     </li>
   );

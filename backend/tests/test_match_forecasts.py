@@ -230,6 +230,32 @@ def test_generation_is_incremental_and_frozen_rows_stay_after_kickoff(db):
     assert row.kind == mf.KIND_FROZEN and row.generated_at == second
 
 
+def test_xg_forecast_only_with_both_teams_up_to_date(db):
+    """Si al ultimo partido de un equipo le falta el xG, no se estima el xG de
+    su proximo partido (saldria de partidos mas antiguos); el resto, si."""
+    _, matches = _league(db, "ENG-Premier League")
+    now = DAY0 + timedelta(days=12, hours=-6)
+    target, other = matches[-6], matches[-5]  # la primera jornada programada
+    played = [m for m in matches if m.status == MatchStatus.HISTORICAL]
+    last = next(m for m in reversed(played) if target.home_team_id in (m.home_team_id, m.away_team_id))
+    stats = db.query(TeamMatchStats).filter_by(match_id=last.id, team_id=target.home_team_id).one()
+    xg, stats.xg = stats.xg, None
+    db.flush()
+
+    mf.generate_match_forecasts(db, now=now)
+    rows = _rows(db)
+    assert rows[(target.id, mf.STATS_PREDICTOR, "xg")].home is None
+    assert rows[(target.id, mf.STATS_PREDICTOR, "shots")].home is not None
+    assert rows[(other.id, mf.STATS_PREDICTOR, "xg")].home is not None
+    assert mf.match_forecasts(db, target)["stats"]["xg"] is None
+
+    # Cuando llega, la siguiente pasada antes del inicio ya lo estima.
+    stats.xg = xg
+    db.flush()
+    mf.generate_match_forecasts(db, now=now + timedelta(hours=1))
+    assert _rows(db)[(target.id, mf.STATS_PREDICTOR, "xg")].home is not None
+
+
 def test_champions_only_gets_the_duel_and_reading_says_what_there_is(db):
     _, matches = _league(db, CHAMPIONS_LEAGUE)
     target = matches[20]

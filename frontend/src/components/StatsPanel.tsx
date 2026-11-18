@@ -135,6 +135,9 @@ export function StatsPanel({
   } = features;
   const { t } = useTranslation();
   const disciplineMatches = home_discipline.matches_with_data || away_discipline.matches_with_data;
+  // Sin xG de ninguno de los dos (liga sin xG, o no está al día: el backend no
+  // da una media atrasada), sin sus filas.
+  const hasXg = home_xg_form.matches_with_data > 0 || away_xg_form.matches_with_data > 0;
   const fixed = (value: number | null | undefined, digits: number) => (value != null ? formatFixed(value, digits) : "—");
 
   return (
@@ -161,18 +164,22 @@ export function StatsPanel({
           homeSegs={goalsSegs(home_form)}
           awaySegs={goalsSegs(away_form)}
         />
-        <CompareRow
-          label={t("matches:statsPanel.xgFor")}
-          home={fixed(home_xg_form.avg_xg_for, 2)}
-          away={fixed(away_xg_form.avg_xg_for, 2)}
-          values={[home_xg_form.avg_xg_for, away_xg_form.avg_xg_for]}
-        />
-        <CompareRow
-          label={t("matches:statsPanel.xgAgainst")}
-          home={fixed(home_xg_form.avg_xg_against, 2)}
-          away={fixed(away_xg_form.avg_xg_against, 2)}
-          values={[home_xg_form.avg_xg_against, away_xg_form.avg_xg_against]}
-        />
+        {hasXg && (
+          <>
+            <CompareRow
+              label={t("matches:statsPanel.xgFor")}
+              home={fixed(home_xg_form.avg_xg_for, 2)}
+              away={fixed(away_xg_form.avg_xg_for, 2)}
+              values={[home_xg_form.avg_xg_for, away_xg_form.avg_xg_for]}
+            />
+            <CompareRow
+              label={t("matches:statsPanel.xgAgainst")}
+              home={fixed(home_xg_form.avg_xg_against, 2)}
+              away={fixed(away_xg_form.avg_xg_against, 2)}
+              values={[home_xg_form.avg_xg_against, away_xg_form.avg_xg_against]}
+            />
+          </>
+        )}
         <CompareRow
           label={t("matches:statsPanel.cornersFor")}
           home={fixed(home_discipline.avg_corners_for, 1)}

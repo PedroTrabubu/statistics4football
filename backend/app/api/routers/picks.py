@@ -1,11 +1,11 @@
 import json
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.config import PROJECT_ROOT
-from app.db.models import Match, MatchStatus, PickCombo, PickLeg, TeamMatchStats
+from app.db.models import League, Match, MatchStatus, PickCombo, PickLeg, TeamMatchStats
 from app.db.session import get_db
 from app.picks.combos import TIERS
 from app.picks.legs import LEG_DEF_BY_KEY
@@ -180,29 +180,16 @@ def get_predictability() -> dict:
     return {"available": True, **_predictability_cache["data"]}
 
 
-# Pick del partido: el historico lo precalcula backend/scripts/report_match_pick.py
-# (protocolo: docs/PICK_DEL_PARTIDO_PROTOCOLO.md); los partidos por jugar (o
-# jugados despues) se calculan aqui con el mismo codigo, solo con lo anterior.
-MATCH_PICK_PATH = PROJECT_ROOT / "data" / "model_cache" / "match_pick.json"
-MATCH_PICK_LEAGUES = {"ESP-La Liga", "ESP-La Liga 2", "ENG-Premier League", "FRA-Ligue 1", "GER-Bundesliga", "ITA-Serie A"}
-_match_pick_cache: dict = {"mtime": None, "data": None}
+# Pick del partido (protocolo: docs/PICK_DEL_PARTIDO_PROTOCOLO.md). Los jugados,
+# guardados (app/picks/match_pick_store.py); los por jugar se calculan aqui con
+# el mismo codigo, solo con lo anterior, y cambian con cada partido que se juega.
 # (partido, partidos jugados de su liga) -> pick calculado en vivo
 _live_picks: dict[tuple[int, int], dict | None] = {}
 
 
-def _stored_match_picks() -> dict:
-    if not MATCH_PICK_PATH.exists():
-        return {"matches": {}, "kinds": {}}
-    mtime = MATCH_PICK_PATH.stat().st_mtime
-    if _match_pick_cache["mtime"] != mtime:
-        _match_pick_cache["data"] = json.loads(MATCH_PICK_PATH.read_text(encoding="utf-8"))
-        _match_pick_cache["mtime"] = mtime
-    return _match_pick_cache["data"]
-
-
 def _live_match_picks(db: Session, matches: list[Match]) -> dict[int, dict | None]:
-    from app.picks.match_pick import outcome, pick_text
     from app.picks.match_pick_data import run
+    from app.picks.match_pick_store import pick_dict
 
     out: dict[int, dict | None] = {}
     for league_id in {m.league_id for m in matches}:
@@ -211,22 +198,7 @@ def _live_match_picks(db: Session, matches: list[Match]) -> dict[int, dict | Non
         pending = [m for m in league_matches if (m.id, version) not in _live_picks]
         if pending:
             for item in run(db, league_id, {m.id for m in pending}):
-                pick = item.pick
-                if pick is None:
-                    _live_picks[(item.match.match_id, version)] = None
-                    continue
-                c, hit = pick.candidate, outcome(pick.candidate, item.match)
-                _live_picks[(item.match.match_id, version)] = {
-                    "text": pick_text(c, item.match.home_team, item.match.away_team),
-                    "family": c.family,
-                    "side": c.side,
-                    "option": c.option,
-                    "kind": c.kind,
-                    "p": pick.p,
-                    "base": pick.base,
-                    "n": pick.n,
-                    "hit": hit,
-                }
+                _live_picks[(item.match.match_id, version)] = pick_dict(item)
         for m in league_matches:
             out[m.id] = _live_picks.get((m.id, version))
     return out
@@ -236,19 +208,45 @@ def _live_match_picks(db: Session, matches: list[Match]) -> dict[int, dict | Non
 def get_match_picks(match_ids: str = Query(..., max_length=2000), db: Session = Depends(get_db)) -> dict:
     """Pick del partido de cada partido pedido ("1,2,3"), con el acierto
     historico de cada tipo de pick. status: pick | none | uncalibrated."""
+    from app.picks.match_pick_store import LEAGUES, played_picks, protocol
+
     ids = [int(x) for x in match_ids.split(",") if x.strip().isdigit()][:60]
-    stored = _stored_match_picks()
-    matches = db.query(Match).filter(Match.id.in_(ids)).options(selectinload(Match.league)).all()
+    matches = (
+        db.query(Match)
+        .filter(Match.id.in_(ids))
+        .options(
+            selectinload(Match.league),
+            selectinload(Match.season),
+            selectinload(Match.home_team),
+            selectinload(Match.away_team),
+            selectinload(Match.team_stats),
+        )
+        .all()
+    )
     result: dict[str, dict] = {}
+    played: list[Match] = []
     live: list[Match] = []
     for m in matches:
-        if m.league.code not in MATCH_PICK_LEAGUES:
+        if m.league.code not in LEAGUES:
             result[str(m.id)] = {"status": "uncalibrated"}
-        elif m.status == MatchStatus.HISTORICAL and str(m.id) in stored["matches"]:
-            pick = stored["matches"][str(m.id)]
-            result[str(m.id)] = {"status": "pick" if pick else "none", "pick": pick, "before_match": True}
+        elif m.status == MatchStatus.HISTORICAL:
+            played.append(m)
         else:
             live.append(m)
-    for match_id, pick in _live_match_picks(db, live).items():
+    for match_id, pick in {**played_picks(db, played), **_live_match_picks(db, live)}.items():
         result[str(match_id)] = {"status": "pick" if pick else "none", "pick": pick, "before_match": True}
-    return {"matches": result, "kinds": stored.get("kinds", {})}
+    return {"matches": result, "kinds": protocol()["kinds"]}
+
+
+@router.get("/match-pick/summary")
+def get_match_pick_summary(league_id: int, db: Session = Depends(get_db)) -> dict:
+    """Acierto del pick del partido de cada temporada de la liga (la primera,
+    25/26), cada pick calculado solo con los partidos anteriores al suyo."""
+    from app.picks.match_pick_store import FIRST_SEASON, LEAGUES, season_summary
+
+    league = db.get(League, league_id)
+    if league is None:
+        raise HTTPException(status_code=404, detail="Liga no encontrada")
+    if league.code not in LEAGUES:
+        return {"calibrated": False, "first_season": FIRST_SEASON, "seasons": []}
+    return {"calibrated": True, "first_season": FIRST_SEASON, "seasons": season_summary(db, league)}

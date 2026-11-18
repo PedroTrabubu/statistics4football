@@ -193,6 +193,26 @@ export interface MatchPicksResponse {
   kinds: Record<string, MatchPickKind>;
 }
 
+/** Acierto del pick del partido en los jugados de una temporada. */
+export interface MatchPickSeason {
+  season: string;
+  matches: number;
+  with_pick: number;
+  /** Con dato para saber si se cumplió. */
+  decided: number;
+  hits: number;
+  /** Media, en los decididos, de la frecuencia en la liga y de la probabilidad del modelo. */
+  base: number | null;
+  p: number | null;
+}
+
+/** GET /picks/match-pick/summary?league_id=... (temporadas, de la más reciente). */
+export interface MatchPickSummary {
+  calibrated: boolean;
+  first_season: string;
+  seasons: MatchPickSeason[];
+}
+
 /** Partido jugado con las stats de cada equipo (GET /leagues/{id}/results). */
 export interface MatchResult extends Match {
   home_stats: TeamMatchStats | null;

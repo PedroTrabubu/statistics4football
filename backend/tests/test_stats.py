@@ -143,17 +143,65 @@ def test_h2h_counts_both_venues(db: Session, league_and_teams):
 def test_xg_form_only_uses_matches_with_data(db: Session, league_and_teams):
     league, season, team_a, team_b, _team_c = league_and_teams
 
-    m1 = _add_match(db, league.id, season.id, team_a, team_b, datetime(2024, 1, 1), 2, 1)
-    db.add(TeamMatchStats(match_id=m1.id, team_id=team_a.id, xg=1.8, xga=0.9))
-
     # Partido sin stats de xG (por ejemplo, Understat no lo cubrio).
-    _add_match(db, league.id, season.id, team_a, team_b, datetime(2024, 1, 8), 1, 1)
+    _add_match(db, league.id, season.id, team_a, team_b, datetime(2024, 1, 1), 1, 1)
+
+    m2 = _add_match(db, league.id, season.id, team_a, team_b, datetime(2024, 1, 8), 2, 1)
+    db.add(TeamMatchStats(match_id=m2.id, team_id=team_a.id, xg=1.8, xga=0.9))
 
     xg_form = compute_xg_form(db, team_a.id, datetime(2024, 2, 1), num_matches=5)
 
     assert xg_form.matches_with_data == 1
     assert xg_form.avg_xg_for == pytest.approx(1.8)
     assert xg_form.avg_xg_against == pytest.approx(0.9)
+
+
+def test_xg_form_hidden_when_latest_match_has_no_xg(db: Session, league_and_teams):
+    """Si al ultimo partido le falta el xG (la fuente no lo ha publicado o esta
+    caida), no se da una media de partidos mas antiguos."""
+    league, season, team_a, team_b, team_c = league_and_teams
+
+    m1 = _add_match(db, league.id, season.id, team_a, team_b, datetime(2024, 1, 1), 2, 1)
+    db.add(TeamMatchStats(match_id=m1.id, team_id=team_a.id, xg=1.8, xga=0.9))
+    db.add(TeamMatchStats(match_id=m1.id, team_id=team_b.id, xg=0.9, xga=1.8))
+    m2 = _add_match(db, league.id, season.id, team_c, team_a, datetime(2024, 1, 8), 0, 0)
+    db.add(TeamMatchStats(match_id=m2.id, team_id=team_a.id, corners_for=5))  # stats, pero sin xG
+
+    xg_form = compute_xg_form(db, team_a.id, datetime(2024, 2, 1), num_matches=5)
+    assert xg_form.matches_with_data == 0
+    assert xg_form.avg_xg_for is None and xg_form.avg_xg_against is None
+
+    # Antes de ese partido si estaba al dia; y el rival del primero, tambien.
+    assert compute_xg_form(db, team_a.id, datetime(2024, 1, 5)).avg_xg_for == pytest.approx(1.8)
+    assert compute_xg_form(db, team_b.id, datetime(2024, 2, 1)).avg_xg_for == pytest.approx(0.9)
+
+    # Cuando llega su xG, vuelve a darse.
+    db.add(TeamMatchStats(match_id=m2.id, team_id=team_c.id, xg=1.0, xga=0.6))
+    db.query(TeamMatchStats).filter_by(match_id=m2.id, team_id=team_a.id).one().xg = 0.6
+    assert compute_xg_form(db, team_a.id, datetime(2024, 2, 1)).avg_xg_for == pytest.approx(1.2)
+
+
+def test_xg_form_ignores_leagues_without_xg_and_excluded_ones(db: Session, league_and_teams):
+    league, season, team_a, team_b, _team_c = league_and_teams
+    m1 = _add_match(db, league.id, season.id, team_a, team_b, datetime(2024, 1, 1), 2, 1)
+    db.add(TeamMatchStats(match_id=m1.id, team_id=team_a.id, xg=1.8, xga=0.9))
+
+    # Despues, un partido en una competicion sin xG (como la Hypermotion o la Champions).
+    cup = League(code="TEST-Cup", name="Test Cup")
+    db.add(cup)
+    db.flush()
+    cup_season = Season(league_id=cup.id, name="2425")
+    db.add(cup_season)
+    db.flush()
+    _add_match(db, cup.id, cup_season.id, team_a, team_b, datetime(2024, 1, 8), 1, 0)
+    assert compute_xg_form(db, team_a.id, datetime(2024, 2, 1)).avg_xg_for == pytest.approx(1.8)
+
+    # Si esa competicion tiene xG, ese partido sin el lo deja atrasado...
+    m3 = _add_match(db, cup.id, cup_season.id, team_b, team_a, datetime(2023, 12, 1), 0, 0)
+    db.add(TeamMatchStats(match_id=m3.id, team_id=team_a.id, xg=0.5, xga=0.4))
+    assert compute_xg_form(db, team_a.id, datetime(2024, 2, 1)).avg_xg_for is None
+    # ...salvo que no cuente para este partido (la Champions en un partido de liga).
+    assert compute_xg_form(db, team_a.id, datetime(2024, 2, 1), exclude_league_ids=[cup.id]).avg_xg_for == pytest.approx(1.8)
 
 
 def test_elo_returns_latest_value_before_date(db: Session, league_and_teams):

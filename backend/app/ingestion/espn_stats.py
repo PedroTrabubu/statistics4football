@@ -19,7 +19,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.db.models import IngestionRun, IngestionStatus, League, Match, MatchStatus, Season, TeamMatchStats
-from app.ingestion.espn import CACHE_DIR, EspnClient, _JsonLinesCache, _resolve, espn_code
+from app.ingestion.espn import CACHE_DIR, EspnClient, _JsonLinesCache, espn_code, match_event_id
 from app.ingestion.historical_backfill import _upsert_team_match_stats
 from app.ingestion.team_names import TeamResolver
 
@@ -180,13 +180,8 @@ def correct_stats_from_espn(db: Session, leagues: list[str], seasons: list[str])
         with EspnClient() as client:
             for m, code, h, a in targets:
                 league = espn_code(code)
-                event = (m.source_ids or {}).get("espn_event_id")
-                if not event and league:
-                    for e in client.day_events(league, m.date.date(), cacheable=True):
-                        home, away = _resolve(resolver, e.home_names), _resolve(resolver, e.away_names)
-                        if home and away and (home.id, away.id) == (m.home_team_id, m.away_team_id):
-                            event = e.id
-                if not event or not league:
+                event = match_event_id(client, resolver, league, m) if league else None
+                if not event:
                     continue
                 key = f"{code}|{event}"
                 if key in cache:

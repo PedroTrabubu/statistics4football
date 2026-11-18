@@ -4,6 +4,7 @@ import type {
   Match,
   MatchFeatures,
   MatchHistory,
+  MatchPickSummary,
   MatchPicksResponse,
   MatchRecent,
   MatchRefereeStats,
@@ -244,6 +245,11 @@ export function getHitRateTeam(name: string): Promise<HitRateTeam> {
 /** Pick del partido de varios partidos (el de un jugado, el calculado antes de jugarse). */
 export function getMatchPicks(matchIds: number[]): Promise<MatchPicksResponse> {
   return request("/picks/match-pick", { match_ids: matchIds.join(",") });
+}
+
+/** Acierto del pick del partido de una liga, por temporada. */
+export function getMatchPickSummary(leagueId: number): Promise<MatchPickSummary> {
+  return request("/picks/match-pick/summary", { league_id: leagueId });
 }
 
 export { ApiError };

@@ -75,7 +75,7 @@
     "summary": "Ne perd pas le duel : {{home}} {{homePct}} · {{away}} {{awayPct}}. Corners attendus : {{homeExpected}} - {{awayExpected}}.",
     "resultWinner": "Corners du match : {{home}} {{homeCorners}} - {{awayCorners}} {{away}}, {{winner}} a remporté le duel.",
     "resultDraw": "Corners du match : {{home}} {{homeCorners}} - {{awayCorners}} {{away}}, égalité.",
-    "note": "Nouveau bloc, distinct des sélections ci-dessus et de leurs chiffres de réussite. Probabilités issues d'un modèle de corners fondé sur les matchs précédents : ce que chaque équipe obtient sur son terrain et ce que concède l'adversaire, avec plus de poids pour les matchs récents et un rapprochement vers la moyenne du championnat quand il y a peu de matchs. « Sélection très probable » uniquement quand la tendance atteint le seuil des autres sélections.",
+    "note": "Nouveau bloc, distinct des sélections ci-dessus et de leurs chiffres de réussite. Probabilités issues d'un modèle de corners fondé sur les matchs précédents : ce que chaque équipe obtient sur son terrain et ce que concède l'adversaire, avec plus de poids pour les matchs récents et un rapprochement vers la moyenne du championnat quand il y a peu de matchs. « Sélection très probable » uniquement quand la tendance atteint le seuil des autres sélections et que le modèle ci-dessus la juge au moins aussi probable que l'inverse.",
     "noteSample": "Échantillon : {{home}} matchs à domicile pour l'équipe qui reçoit et {{away}} à l'extérieur pour l'équipe visiteuse."
   },
   "kind": {
@@ -637,6 +637,25 @@
     "undecided_one": "{{count}} sélection sans donnée du match : elle ne compte pas.",
     "undecided_many": "{{count}} sélections sans donnée du match : elles ne comptent pas.",
     "undecided_other": "{{count}} sélections sans donnée du match : elles ne comptent pas.",
+    "matchPickSummary": {
+      "title": "Sélection du match",
+      "intro": "Une par match, à part des sélections ci-dessus : l'option que le modèle voit le plus au-dessus de l'habitude du championnat. Chacune calculée uniquement avec les matchs précédents.",
+      "text": "Validée dans <bold>{{hits}}</bold> matchs sur <bold>{{total}}</bold> ({{pct}}). Dans le championnat, ces mêmes événements se produisent dans {{expected}} des cas",
+      "season": "Saison",
+      "total": "Total",
+      "loading": "Calcul de la réussite de la sélection du match...",
+      "error": "Impossible de charger la réussite de la sélection du match : {{error}}",
+      "uncalibrated": "Pas de sélection du match dans ce championnat : le modèle n'est calibré que pour la LaLiga, la LaLiga Hypermotion, la Premier League, la Ligue 1, la Bundesliga et la Serie A.",
+      "notYet": "La sélection du match commence en {{season}}.",
+      "none": "Pas encore de match joué avec une sélection du match.",
+      "method": {
+        "title": "Comment elle est choisie",
+        "options": "Pour chaque match, le modèle calcule la probabilité de 338 options : résultat, buts, les deux équipes marquent, corners, cartons, fautes, tirs et tirs cadrés, de chaque équipe et du match, au-dessus et en dessous de chaque ligne.",
+        "model": "Les buts et le résultat viennent du modèle de scores (Dixon-Coles). Le reste vient de ce que chaque équipe obtient et de ce que l'adversaire concède, à domicile ou à l'extérieur, et de l'arbitre pour les cartons et les fautes. Avec peu de matchs, la probabilité se rapproche de l'habitude du championnat.",
+        "filter": "On écarte ce qui arrive déjà dans 80 % des matchs du championnat et ce qui n'atteint pas 65 %. Pour chaque marché, seule la ligne la plus exigeante est gardée.",
+        "choice": "L'option retenue est celle qui s'écarte le plus de l'habitude du championnat, pas la plus probable : 68 % là où la normale est de 45 % compte plus que 85 % là où la normale est de 75 %."
+      }
+    },
     "rankColumn": {
       "high": {
         "label": "Force élevée",
@@ -678,10 +697,10 @@
     "outcome": {
       "hit": "Validé",
       "miss": "Non validé",
-      "unknown": "Pas de donnée",
-      "pending": "En attente"
+      "unknown": "Pas de donnée"
     },
-    "checkedEvidence": "· {{team}}, {{hits}} sur {{total}}",
+    "checkedEvidence": "<team>{{team}}</team> · <rate>{{hits}} sur {{total}} ({{pct}})</rate>",
+    "checkedLeague": "championnat {{pct}}",
     "picksWord_one": "sélection",
     "picksWord_many": "sélections",
     "picksWord_other": "sélections"

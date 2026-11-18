@@ -10,6 +10,7 @@ import type { MatchForecasts } from "../lib/forecasts";
 import { PredictabilityChip } from "./Predictability";
 import { MatchPickBlock } from "./MatchPick";
 import {
+  agreesWithDuel,
   cornerDuelPicks,
   evidenceText,
   isModelMarket,
@@ -63,15 +64,19 @@ export function ProbablePicks({
   const { t } = useTranslation();
   const picks = useMemo(() => (history ? probablePicks(match, history.matches, undefined, history.context ?? []) : []), [match, history]);
   const played = history?.played ?? null;
+  // Solo los que el modelo del duelo no contradice (agreesWithDuel).
+  const duel = forecasts?.duel ?? null;
   const duelPicks = useMemo(
     () =>
       history
-        ? cornerDuelPicks(match, history.matches, history.context ?? []).map((pick) => ({
-            pick,
-            hit: played ? pickOutcome(pick, played) : undefined,
-          }))
+        ? cornerDuelPicks(match, history.matches, history.context ?? [])
+            .filter((pick) => agreesWithDuel(pick, duel))
+            .map((pick) => ({
+              pick,
+              hit: played ? pickOutcome(pick, played) : undefined,
+            }))
         : [],
-    [match, history, played],
+    [match, history, played, duel],
   );
 
   // Lo que llevan acertado los picks de esta temporada: los partidos ya jugados
