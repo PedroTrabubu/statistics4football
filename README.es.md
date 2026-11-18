@@ -35,7 +35,7 @@ Es una herramienta de análisis, no un sistema de apuestas. El backtest fuera de
 | Datos | Fuente |
 |---|---|
 | Resultados históricos y de la temporada en curso, marcador al descanso, árbitro (Premier League), córners, tarjetas, tiros, faltas y cuotas de cierre | [Football-Data.co.uk](https://www.football-data.co.uk/) mediante [soccerdata](https://github.com/probberechts/soccerdata) |
-| xG por partido | [Understat](https://understat.com/) mediante soccerdata |
+| xG por partido | [Understat](https://understat.com/) mediante soccerdata; si falta, el de ESPN, ajustado a la escala de Understat (desde la 2026-27) |
 | Rating Elo | [ClubElo](http://clubelo.com/) mediante soccerdata |
 | Resultados y calendario de la temporada en curso | [football-data.org](https://www.football-data.org/) (plan gratuito) |
 | Árbitros de LaLiga, LaLiga Hypermotion y Ligue 1, y calendario de LaLiga Hypermotion | [ESPN](https://www.espn.com/soccer/) (API pública, sin clave) |

@@ -10,6 +10,8 @@ historico. Los modelos: corner_duel.py y stats_predictor.py.
 - `refresh_match_forecasts`: lo mismo, con registro en `ingestion_runs`.
 - `match_forecasts` y `league_season_duels`: solo leen (la API).
 
+El xG del predictor, solo con el de los dos equipos al dia (_XgFreshness).
+
 Solo en las ligas de la web (settings.leagues): las de contexto solo estan
 para el historial de los equipos de Champions. El duelo, en todas ellas; el
 predictor, en todas menos la Champions (no se evaluo alli y la ficha no lo
@@ -19,6 +21,8 @@ ensena).
 from __future__ import annotations
 
 import math
+from bisect import bisect_left
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -122,6 +126,31 @@ def _histories(played: list[_Row], stats: dict[tuple[int, int], tuple]) -> dict[
     }
 
 
+class _XgFreshness:
+    """Si el ultimo partido jugado de cada equipo antes de una fecha tiene su
+    xG. Si no (la fuente aun no lo ha publicado, o esta caida), la estimacion
+    de xG saldria de partidos mas antiguos como si fuera la actual, y no se da
+    (lo mismo que las medias de la ficha, app/stats/xg.py)."""
+
+    def __init__(self, played: list[_Row], stats: dict[tuple[int, int], tuple]):
+        xg = STAT_KEYS.index("xg")
+        by_team: dict[int, list[tuple[float, bool]]] = defaultdict(list)
+        for m in played:
+            for team in (m.home_id, m.away_id):
+                values = stats.get((m.id, team))
+                by_team[team].append((_days(m.date), values is not None and values[xg] is not None))
+        self._days: dict[int, list[float]] = {}
+        self._has_xg: dict[int, list[bool]] = {}
+        for team, rows in by_team.items():
+            rows.sort()
+            self._days[team] = [d for d, _ in rows]
+            self._has_xg[team] = [has for _, has in rows]
+
+    def up_to_date(self, team: int, at: float) -> bool:
+        i = bisect_left(self._days.get(team, []), at) - 1
+        return i < 0 or self._has_xg[team][i]
+
+
 def generate_match_forecasts(db: Session, now: datetime | None = None, leagues: list[str] | None = None) -> GenerationSummary:
     now = now or datetime.utcnow()
     existing: dict[tuple[int, str, str], tuple[int, datetime]] = {
@@ -174,6 +203,7 @@ def generate_match_forecasts(db: Session, now: datetime | None = None, leagues: 
             played = [m for m in matches if m.season_id in window and m.status == MatchStatus.HISTORICAL]
             # Los corners, con el mismo recorte que el duelo: su historial sirve a los dos.
             histories = _histories(played, stats)
+            xg_freshness = _XgFreshness(played, stats)
 
             for m, kinds in todo:
                 at = _days(m.date)
@@ -182,6 +212,8 @@ def generate_match_forecasts(db: Session, now: datetime | None = None, leagues: 
                     write(m, CORNER_DUEL, "corners", CORNER_DUEL_VERSION, kinds[CORNER_DUEL]["corners"], _duel_values(duel))
                 if kinds.get(STATS_PREDICTOR):
                     forecasts = predict_stats(histories, at, m.home_id, m.away_id, m.referee)
+                    if not (xg_freshness.up_to_date(m.home_id, at) and xg_freshness.up_to_date(m.away_id, at)):
+                        forecasts["xg"] = None
                     for stat, kind in kinds[STATS_PREDICTOR].items():
                         write(m, STATS_PREDICTOR, stat, STATS_VERSION, kind, _stat_values(forecasts[stat]))
                 if m.status == MatchStatus.HISTORICAL:

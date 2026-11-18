@@ -6,7 +6,8 @@ scripts/ingest_fixtures.py (a mano) y el programador (scripts/scheduler.py).
    tarjetas, faltas y tiros de los ya jugados. Football-Data lo actualiza un
    par de veces por semana: hasta entonces un partido jugado tiene marcador
    pero no esas estadísticas.
-3. xG de Understat.
+3. xG de Understat y, para los partidos que no tenga, el de ESPN
+   (app/ingestion/espn_xg.py).
 4. fixtures.csv de Football-Data.co.uk: la próxima jornada con sus cuotas.
 5. ESPN: árbitros de partidos jugados, calendario de LaLiga Hypermotion y
    marcador provisional de sus recién jugados (football-data.org no la tiene),
@@ -33,6 +34,7 @@ from app.ingestion.champions import LEAGUE_CODE as CHAMPIONS, sync_champions
 from app.ingestion.designations import sync_designations
 from app.ingestion.espn import sync_espn
 from app.ingestion.espn_stats import correct_stats_from_espn, fill_stats_from_espn
+from app.ingestion.espn_xg import fill_xg_from_espn
 from app.ingestion.fixtures_backfill import sync_current_season_matches
 from app.ingestion.fixtures_csv import sync_fixtures_csv
 from app.ingestion.historical_backfill import backfill_match_history, season_name_for
@@ -70,9 +72,15 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
         run = backfill_match_history(db, leagues=leagues, seasons=[season])
         return f"status={run.status.value} partidos_procesados={run.rows_ingested}"
 
+    xg_leagues = leagues_with_source(settings.leagues, "Understat")
+
     def understat() -> str:
-        run = backfill_understat_xg(db, leagues=leagues_with_source(settings.leagues, "Understat"), seasons=[season])
+        run = backfill_understat_xg(db, leagues=xg_leagues, seasons=[season])
         return f"status={run.status.value} partidos_actualizados={run.rows_ingested}"
+
+    def espn_xg() -> str:
+        run = fill_xg_from_espn(db, xg_leagues, season)
+        return f"status={run.status.value} {run.notes}"
 
     def fixtures() -> str:
         odds_api_leagues = (
@@ -131,6 +139,8 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
     step("football-data.org", football_data_org)
     step(f"Football-Data.co.uk {season}", match_history)
     step(f"Understat xG {season}", understat)
+    # Después de Understat: solo los partidos que siguen sin xG.
+    step("xG de respaldo (ESPN)", espn_xg)
     step("fixtures.csv", fixtures)
     step("ESPN", espn)
     step("Estadísticas provisionales (ESPN)", espn_stats)

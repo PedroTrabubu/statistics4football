@@ -35,7 +35,7 @@ This is an analysis tool, not a betting system. The out-of-sample backtest cover
 | Data | Source |
 |---|---|
 | Historical and current season results, half-time score, referee (Premier League), corners, cards, shots, fouls and closing odds | [Football-Data.co.uk](https://www.football-data.co.uk/) via [soccerdata](https://github.com/probberechts/soccerdata) |
-| xG per match | [Understat](https://understat.com/) via soccerdata |
+| xG per match | [Understat](https://understat.com/) via soccerdata; when missing, ESPN's, rescaled to Understat's scale (from 2026-27) |
 | Elo ratings | [ClubElo](http://clubelo.com/) via soccerdata |
 | Current season results and fixtures | [football-data.org](https://www.football-data.org/) (free tier) |
 | Referees for LaLiga, LaLiga Hypermotion and Ligue 1, and LaLiga Hypermotion fixtures | [ESPN](https://www.espn.com/soccer/) (public API, no key) |

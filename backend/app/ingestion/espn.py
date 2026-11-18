@@ -51,6 +51,8 @@ from app.ingestion.team_names import TeamResolver, normalize
 logger = logging.getLogger(__name__)
 
 ESPN_API = "https://site.api.espn.com/apis/site/v2/sports/soccer"
+# El core API: las estadísticas completas de cada equipo en un partido (entre ellas, el xG).
+ESPN_CORE_API = "https://sports.core.api.espn.com/v2/sports/soccer/leagues"
 CACHE_DIR = PROJECT_ROOT / "data" / "espn_cache"
 MADRID = ZoneInfo("Europe/Madrid")
 
@@ -176,6 +178,10 @@ class _JsonLinesCache:
             f.write(json.dumps({"key": key, "value": value}, ensure_ascii=False) + "\n")
 
 
+class EspnNotFound(ConnectionError):
+    """ESPN respondió 404: no tiene ese recurso (por ejemplo, las estadísticas de un partido)."""
+
+
 class EspnClient:
     def __init__(self, cache_dir: Path = CACHE_DIR):
         self._http = httpx.Client(timeout=30, follow_redirects=True)
@@ -195,7 +201,7 @@ class EspnClient:
             self._caches[name] = _JsonLinesCache(self._cache_dir / f"{name}.jsonl")
         return self._caches[name]
 
-    def _get(self, path: str, params: dict[str, str]) -> dict:
+    def _get(self, path: str, params: dict[str, str], base: str = ESPN_API) -> dict:
         error: Exception | None = None
         for wait in (*_RETRY_WAITS, None):
             pause = _PAUSE_SECONDS - (time.monotonic() - self._last_request)
@@ -204,13 +210,16 @@ class EspnClient:
             self._last_request = time.monotonic()
             self.requests += 1
             try:
-                response = self._http.get(f"{ESPN_API}/{path}", params=params)
+                response = self._http.get(f"{base}/{path}", params=params)
             except httpx.TransportError as exc:
                 error = exc
             else:
                 if response.status_code == 200:
                     return response.json()
-                error = ConnectionError(f"ESPN respondió {response.status_code} a {response.url}")
+                not_found = response.status_code == 404
+                error = (EspnNotFound if not_found else ConnectionError)(
+                    f"ESPN respondió {response.status_code} a {response.url}"
+                )
                 if response.status_code != 429 and response.status_code < 500:
                     raise error
             if wait is None:
@@ -257,6 +266,30 @@ class EspnClient:
         if name or cacheable:
             cache.put(event_id, name)
         return name
+
+    def team_statistics(self, league: str, event_id: str) -> dict[str, dict[str, float | None]]:
+        """{"home": {"expectedGoals": 1.25, ...}, "away": {...}}: las
+        estadísticas de cada equipo en el partido, del core API (unas 170 por
+        equipo, entre ellas el xG). Vacío si ESPN aún no las tiene."""
+        summary = self._get(f"{league}/summary", {"event": event_id})
+        competition = ((summary.get("header") or {}).get("competitions") or [{}])[0]
+        out: dict[str, dict[str, float | None]] = {}
+        for competitor in competition.get("competitors") or []:
+            side = competitor.get("homeAway")
+            if side not in ("home", "away"):
+                continue
+            path = f"{league}/events/{event_id}/competitions/{competition.get('id', event_id)}/competitors/{competitor['id']}/statistics"
+            try:
+                data = self._get(path, {}, base=ESPN_CORE_API)
+            except EspnNotFound:
+                return {}
+            out[side] = {
+                stat["name"]: stat.get("value")
+                for category in (data.get("splits") or {}).get("categories") or []
+                for stat in category.get("stats") or []
+                if stat.get("name")
+            }
+        return out
 
 
 _PARTICLES = {"de", "del", "la", "las", "los", "y", "i"}
@@ -305,6 +338,19 @@ def _resolve(resolver: TeamResolver, names: tuple[str, ...]):
         team = resolver.resolve(name)
         if team is not None:
             return team
+    return None
+
+
+def match_event_id(client: EspnClient, resolver: TeamResolver, league: str, match: Match) -> str | None:
+    """El id de ESPN de un partido jugado: el guardado o, si no lo hay, el del
+    partido de ese día con los mismos equipos."""
+    event = (match.source_ids or {}).get("espn_event_id")
+    if event:
+        return event
+    for e in client.day_events(league, match.date.date(), cacheable=True):
+        home, away = _resolve(resolver, e.home_names), _resolve(resolver, e.away_names)
+        if home and away and (home.id, away.id) == (match.home_team_id, match.away_team_id):
+            return e.id
     return None
 
 
