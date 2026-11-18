@@ -4240,14 +4240,48 @@ a.hero-card:hover {
   padding: 0;
   list-style: none;
 }
+/* Cada pick en dos lineas, sea largo o corto: arriba lo que se espera, en
+   negrita; debajo de quien sale, cuantas veces se ha cumplido y su fuerza.
+   Por jugar no lleva marca: escudo y texto. */
 .checked-pick {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  grid-template-columns: auto auto minmax(0, 1fr);
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1-5) var(--space-2);
+  gap: var(--space-2-5);
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-sm);
-  font-size: var(--fs-md);
+}
+.checked-pending {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+.checked-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  min-width: 0;
+}
+/* Segunda linea: equipo, veces que se cumplio, lo habitual en la liga y la
+   fuerza a la derecha. En movil, la liga y la fuerza bajan juntas a una
+   tercera linea (abajo), igual en todas las filas. */
+.checked-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+.checked-league {
+  white-space: nowrap;
+}
+.checked-meta .pick-strength {
+  margin-inline-start: auto;
+}
+.checked-rate {
+  color: var(--ink-2);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .checked-hit {
   background: var(--green-bg);
@@ -4270,18 +4304,31 @@ a.hero-card:hover {
   color: var(--red);
 }
 .checked-text {
-  min-width: 0;
+  color: var(--ink);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
 }
+/* Mismo ancho para "Fuerza alta" y "Fuerza media": las filas no bailan. */
 .checked-pick .pick-strength {
+  min-width: 7.5em;
+  padding-block: var(--space-0-5);
+  text-align: center;
   cursor: default;
 }
+/* Verde sobre la fila verde de un acierto: se perdia. */
+.checked-hit .pick-strength-alta {
+  background: var(--surface);
+}
 @media (max-width: 520px) {
-  .checked-pick {
-    grid-template-columns: auto auto minmax(0, 1fr);
-  }
   .checked-pick .pick-strength {
-    grid-column: 3;
-    justify-self: start;
+    min-width: 0;
+  }
+  .checked-evidence {
+    flex-basis: 100%;
+  }
+  .checked-sep {
+    display: none;
   }
 }
 
@@ -4367,9 +4414,6 @@ a.hero-card:hover {
 }
 .checked-pending {
   background: var(--surface-alt);
-}
-.checked-pending .checked-mark {
-  color: var(--faint);
 }
 .picks-played-title {
   margin-top: var(--space-10);

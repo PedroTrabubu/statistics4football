@@ -1327,45 +1327,54 @@ function MatchPicksCard({
   );
 }
 
-/** Marca de cada resultado; su texto, en picks:probablePage.outcome.<clave>. */
-const OUTCOME = {
-  hit: { mark: "✓" },
-  miss: { mark: "✗" },
-  unknown: { mark: "–" },
-  pending: { mark: "•" },
-};
+/** Marca de cada resultado ya jugado; su texto, en picks:probablePage.outcome.<clave>.
+ * Por jugar no lleva marca. */
+const OUTCOME_MARK = { hit: "✓", miss: "✗", unknown: "–" } as const;
 
+/** Un pick en dos lineas, sea largo o corto: lo que se espera y, debajo, de
+ * quien sale, cuantas veces se ha cumplido y su fuerza. */
 function CheckedPick({ result, league }: { result: CardPick; league: string }) {
   const { t } = useTranslation();
   const { pick, hit } = result;
-  const outcome =
-    hit === undefined
-      ? "pending"
-      : hit === null
-        ? "unknown"
-        : hit
-          ? "hit"
-          : "miss";
+  const outcome = hit === undefined ? "pending" : hit === null ? "unknown" : hit ? "hit" : "miss";
   return (
     <li className={`checked-pick checked-${outcome}`}>
-      <span
-        className="checked-mark"
-        role="img"
-        aria-label={t(`picks:probablePage.outcome.${outcome}`)}
-        title={t(`picks:probablePage.outcome.${outcome}`)}
-      >
-        {OUTCOME[outcome].mark}
-      </span>
-      <TeamCrest team={pick.team} league={league} />
-      <span className="checked-text">
-        {pick.text}
-        <span className="small muted">
-          {" "}
-          {t("picks:probablePage.checkedEvidence", { team: pick.team, hits: pick.rate.hits, total: pick.rate.total })}
+      {outcome !== "pending" && (
+        <span
+          className="checked-mark"
+          role="img"
+          aria-label={t(`picks:probablePage.outcome.${outcome}`)}
+          title={t(`picks:probablePage.outcome.${outcome}`)}
+        >
+          {OUTCOME_MARK[outcome]}
         </span>
-      </span>
-      <span className={`pick-strength pick-strength-${pick.strength}`}>
-        {strengthLabel(pick.strength)}
+      )}
+      <TeamCrest team={pick.team} league={league} />
+      <span className="checked-body">
+        <span className="checked-text">{pick.text}</span>
+        <span className="checked-meta">
+          <span className="checked-evidence">
+            <Trans
+              i18nKey="picks:probablePage.checkedEvidence"
+              values={{
+                team: pick.team,
+                hits: pick.rate.hits,
+                total: pick.rate.total,
+                pct: withPercent(String(Math.round((pick.rate.hits / pick.rate.total) * 100))),
+              }}
+              components={{ team: <span className="checked-team" />, rate: <strong className="checked-rate" /> }}
+            />
+          </span>
+          {pick.leagueRate !== null && (
+            <span className="checked-league" title={t("picks:probablePage.column.leagueTitle")}>
+              <span className="checked-sep" aria-hidden="true">
+                {"· "}
+              </span>
+              {t("picks:probablePage.checkedLeague", { pct: pct(pick.leagueRate) })}
+            </span>
+          )}
+          <span className={`pick-strength pick-strength-${pick.strength}`}>{strengthLabel(pick.strength)}</span>
+        </span>
       </span>
     </li>
   );

@@ -678,10 +678,10 @@
     "outcome": {
       "hit": "Se cumplió",
       "miss": "No se cumplió",
-      "unknown": "Sin dato",
-      "pending": "Pendiente"
+      "unknown": "Sin dato"
     },
-    "checkedEvidence": "· {{team}}, {{hits}} de {{total}}",
+    "checkedEvidence": "<team>{{team}}</team> · <rate>{{hits}} de {{total}} ({{pct}})</rate>",
+    "checkedLeague": "liga {{pct}}",
     "picksWord_one": "pick",
     "picksWord_many": "picks",
     "picksWord_other": "picks"

@@ -637,10 +637,10 @@
     "outcome": {
       "hit": "Hit",
       "miss": "Missed",
-      "unknown": "No data",
-      "pending": "Pending"
+      "unknown": "No data"
     },
-    "checkedEvidence": "· {{team}}, {{hits}} of {{total}}",
+    "checkedEvidence": "<team>{{team}}</team> · <rate>{{hits}} of {{total}} ({{pct}})</rate>",
+    "checkedLeague": "league {{pct}}",
     "picksWord_one": "pick",
     "picksWord_other": "picks"
   }

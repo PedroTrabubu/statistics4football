@@ -678,10 +678,10 @@
     "outcome": {
       "hit": "Validé",
       "miss": "Non validé",
-      "unknown": "Pas de donnée",
-      "pending": "En attente"
+      "unknown": "Pas de donnée"
     },
-    "checkedEvidence": "· {{team}}, {{hits}} sur {{total}}",
+    "checkedEvidence": "<team>{{team}}</team> · <rate>{{hits}} sur {{total}} ({{pct}})</rate>",
+    "checkedLeague": "championnat {{pct}}",
     "picksWord_one": "sélection",
     "picksWord_many": "sélections",
     "picksWord_other": "sélections"
