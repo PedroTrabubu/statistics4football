@@ -45,6 +45,7 @@ from app.ingestion.xg_backfill import backfill_understat_xg
 from app.picks.match_pick_store import refresh_played_picks
 from app.probability.dc_monthly import refresh_dc_monthly
 from app.probability.match_forecasts import refresh_match_forecasts
+from app.probability.pattern_refresh import refresh_predictions
 from app.probability.result_predictions import LEAGUES as RESULT_LEAGUES
 from app.probability.result_predictions import refresh_result_predictions
 from app.stats.own_elo import refresh_own_elo
@@ -129,6 +130,10 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
         run = refresh_result_predictions(db)
         return f"status={run.status.value} {run.notes}"
 
+    def high_probability() -> str:
+        summary = refresh_predictions(db, settings)
+        return f"{summary.matches} partidos por empezar, {summary.with_odds} con cuotas ({'; '.join(summary.lines)})"
+
     def match_forecasts() -> str:
         run = refresh_match_forecasts(db)
         return f"status={run.status.value} {run.notes}"
@@ -161,6 +166,10 @@ def run_update(db: Session, settings: Settings, log: Callable[[str], None] = pri
     # Si Dixon-Coles falla en una liga, el paso sale con aviso y esa liga usa solo Elo.
     step("Dixon-Coles mensual", dc_monthly)
     step("Porcentajes de resultado", result_probabilities)
+    # Con Dixon-Coles y las cuotas ya al dia: las selecciones de alta
+    # probabilidad de los partidos que aun no han empezado (los empezados no se
+    # tocan: queda la ultima prediccion anterior al inicio).
+    step("Alta probabilidad", high_probability)
     # Con las estadisticas y los arbitros ya al dia: el duelo de corners y el
     # predictor de los programados hasta su inicio y los jugados que falten.
     step("Duelo y predictor", match_forecasts)
