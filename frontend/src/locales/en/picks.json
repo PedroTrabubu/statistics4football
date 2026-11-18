@@ -599,6 +599,25 @@
     "interval": "95% interval: {{low}}–{{high}}",
     "undecided_one": "{{count}} pick without match data: it doesn't count.",
     "undecided_other": "{{count}} picks without match data: they don't count.",
+    "matchPickSummary": {
+      "title": "Pick of the match",
+      "intro": "One per match, separate from the picks above: the option the model sees furthest above what's usual in the league. Each one worked out using only earlier matches.",
+      "text": "It hit in <bold>{{hits}}</bold> of <bold>{{total}}</bold> matches ({{pct}}). Across the league, those same events happen {{expected}} of the time",
+      "season": "Season",
+      "total": "Total",
+      "loading": "Working out the pick of the match hit rate...",
+      "error": "Couldn't load the pick of the match hit rate: {{error}}",
+      "uncalibrated": "There's no pick of the match in this league: the model is only calibrated for LaLiga, LaLiga Hypermotion, Premier League, Ligue 1, Bundesliga and Serie A.",
+      "notYet": "The pick of the match starts in {{season}}.",
+      "none": "No played matches with a pick of the match yet.",
+      "method": {
+        "title": "How it's chosen",
+        "options": "For each match, the model works out the probability of 338 options: result, goals, both teams to score, corners, cards, fouls, shots and shots on target, for each team and for the match, over and under each line.",
+        "model": "Goals and result come from the scoreline model (Dixon-Coles). The rest comes from what each team gets and what the opponent concedes, at home or away, plus the referee for cards and fouls. With few matches, the probability moves towards what's usual in the league.",
+        "filter": "Anything that already happens in 80% of the league's matches is dropped, as is anything below 65%. For each market, only the most demanding line is kept.",
+        "choice": "The winner is the option furthest above what's usual in the league, not the most likely one: 68% where 45% is normal counts for more than 85% where 75% is normal."
+      }
+    },
     "rankColumn": {
       "high": {
         "label": "High strength",

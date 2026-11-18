@@ -637,6 +637,25 @@
     "undecided_one": "{{count}} pick sin dato en el partido: no cuenta.",
     "undecided_many": "{{count}} picks sin dato en el partido: no cuentan.",
     "undecided_other": "{{count}} picks sin dato en el partido: no cuentan.",
+    "matchPickSummary": {
+      "title": "Pick del partido",
+      "intro": "Uno por partido, aparte de los picks de arriba: la opción que el modelo ve más por encima de lo habitual en la liga. Cada uno, calculado solo con los partidos anteriores.",
+      "text": "Se cumplió en <bold>{{hits}}</bold> de <bold>{{total}}</bold> partidos ({{pct}}). En la liga, esos mismos sucesos pasan el {{expected}}",
+      "season": "Temporada",
+      "total": "Total",
+      "loading": "Calculando el acierto del pick del partido...",
+      "error": "No se pudo cargar el acierto del pick del partido: {{error}}",
+      "uncalibrated": "En esta liga no hay pick del partido: el modelo solo está calibrado en LaLiga, LaLiga Hypermotion, Premier League, Ligue 1, Bundesliga y Serie A.",
+      "notYet": "El pick del partido empieza en {{season}}.",
+      "none": "Todavía no hay partidos jugados con pick del partido.",
+      "method": {
+        "title": "Cómo se elige",
+        "options": "Para cada partido se calcula la probabilidad de 338 opciones: resultado, goles, ambos marcan, córners, tarjetas, faltas, tiros y tiros a puerta, de cada equipo y del partido, a más y a menos de cada línea.",
+        "model": "Goles y resultado salen del modelo de marcadores (Dixon-Coles). El resto, de lo que saca cada equipo y concede el rival, en casa o fuera, y del árbitro en tarjetas y faltas. Con pocos partidos, la probabilidad se acerca a lo habitual en la liga.",
+        "filter": "Se descarta lo que ya pasa en el 80 % de los partidos de la liga y lo que no llega al 65 %. De cada mercado queda la línea más exigente.",
+        "choice": "Gana la opción que más se separa de lo habitual en la liga, no la más probable: un 68 % donde lo normal es un 45 % pesa más que un 85 % donde lo normal es un 75 %."
+      }
+    },
     "rankColumn": {
       "high": {
         "label": "Fuerza alta",
