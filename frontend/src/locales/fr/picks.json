@@ -75,7 +75,7 @@
     "summary": "Ne perd pas le duel : {{home}} {{homePct}} · {{away}} {{awayPct}}. Corners attendus : {{homeExpected}} - {{awayExpected}}.",
     "resultWinner": "Corners du match : {{home}} {{homeCorners}} - {{awayCorners}} {{away}}, {{winner}} a remporté le duel.",
     "resultDraw": "Corners du match : {{home}} {{homeCorners}} - {{awayCorners}} {{away}}, égalité.",
-    "note": "Nouveau bloc, distinct des sélections ci-dessus et de leurs chiffres de réussite. Probabilités issues d'un modèle de corners fondé sur les matchs précédents : ce que chaque équipe obtient sur son terrain et ce que concède l'adversaire, avec plus de poids pour les matchs récents et un rapprochement vers la moyenne du championnat quand il y a peu de matchs. « Sélection très probable » uniquement quand la tendance atteint le seuil des autres sélections.",
+    "note": "Nouveau bloc, distinct des sélections ci-dessus et de leurs chiffres de réussite. Probabilités issues d'un modèle de corners fondé sur les matchs précédents : ce que chaque équipe obtient sur son terrain et ce que concède l'adversaire, avec plus de poids pour les matchs récents et un rapprochement vers la moyenne du championnat quand il y a peu de matchs. « Sélection très probable » uniquement quand la tendance atteint le seuil des autres sélections et que le modèle ci-dessus la juge au moins aussi probable que l'inverse.",
     "noteSample": "Échantillon : {{home}} matchs à domicile pour l'équipe qui reçoit et {{away}} à l'extérieur pour l'équipe visiteuse."
   },
   "kind": {

@@ -5,6 +5,7 @@
 
 import type { Match, MatchResult } from "../api/types";
 import { t } from "../i18n";
+import type { DuelForecast } from "./cornerDuel";
 import { formatLine, formatSeason } from "./format";
 import {
   average,
@@ -642,10 +643,34 @@ function teamPicks(
 }
 
 /** Picks del duelo de córners (nuevos, aparte de los demás): los que ya
- * cumplen el umbral del motor, con su fuerza y el cruce con el rival. */
+ * cumplen el umbral del motor, con su fuerza y el cruce con el rival. Antes de
+ * mostrarlos, `agreesWithDuel` con el pronóstico del duelo. */
 export function cornerDuelPicks(match: Match, history: MatchResult[], context: MatchResult[] = []): ProbablePick[] {
   const prior = priorMatches(match, history);
   return teamPicks(match, prior, leagueRates(prior), DUEL_FAMILIES, teamPrior(match, prior, context));
+}
+
+/** Lo minimo que el modelo del duelo (el bloque donde sale el pick) tiene que
+ * dar al suceso de un pick del duelo para mostrarlo. Cada equipo se mira por
+ * separado, y sin esto salian picks opuestos en un mismo partido ("Barcelona
+ * no pierde el duelo" y "Villarreal gana el duelo"). Con un 50 % ninguno
+ * contradice al modelo ni a otro pick: dos sucesos incompatibles no pueden
+ * pasar los dos del 50 %. Medido en las seis ligas desde 21/22 (4967 picks):
+ * con el modelo en 50 % o mas, 68,7 % de acierto (+12,2 puntos sobre la liga);
+ * por debajo, 43,4 % (-8,7). */
+export const MIN_DUEL_MODEL = 0.5;
+
+/** Probabilidad que da el modelo del duelo al suceso de un pick del duelo. */
+export function duelModelProbability(pick: Pick<TeamPattern, "side" | "option">, duel: DuelForecast): number {
+  const own = pick.side === "home" ? duel.home : duel.away;
+  if (pick.option.key === "gana") return own;
+  if (pick.option.key === "empata") return duel.draw;
+  return own + duel.draw; // no pierde
+}
+
+/** Si un pick del duelo se muestra: sin pronostico del duelo, no. */
+export function agreesWithDuel(pick: Pick<TeamPattern, "side" | "option">, duel: DuelForecast | null | undefined): boolean {
+  return duel != null && duelModelProbability(pick, duel) >= MIN_DUEL_MODEL;
 }
 
 /** Picks de un partido a partir de sus partidos anteriores (ya filtrados, los

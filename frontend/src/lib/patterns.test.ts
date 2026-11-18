@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import type { Match, MatchResult, TeamMatchStats } from "../api/types";
 import { findMarket, hitRate } from "./markets";
 import {
+  agreesWithDuel,
   checkPlayedPicks,
   checkRival,
   cornerDuelPicks,
+  duelModelProbability,
   evidenceText,
   findTeamPatterns,
   isModelMarket,
@@ -555,5 +557,22 @@ describe("duelo de córners (nuevo, aparte de los demás picks)", () => {
     expect(pickOutcome(pick, played(3, 6))).toBe(true);
     expect(pickOutcome(pick, played(6, 6))).toBe(false);
     expect(pickOutcome(pick, played(null, 6))).toBeNull();
+  });
+
+  it("solo se muestra si el modelo del duelo no lo contradice", () => {
+    const [pick] = visitorDuels([...cornerLeague(), ...visitorCorners(WINS)]); // el visitante gana el duelo
+    const duel = (home: number, draw: number, away: number) => ({
+      home, draw, away, homeNotLose: home + draw, awayNotLose: away + draw,
+      homeExpected: 5, awayExpected: 4, homeMatches: 10, awayMatches: 10,
+    }); // prettier-ignore
+    // Como en el Barcelona-Villarreal (72 / 8 / 20): "el visitante gana el duelo" no sale.
+    expect(duelModelProbability(pick, duel(0.72, 0.08, 0.2))).toBeCloseTo(0.2);
+    expect(agreesWithDuel(pick, duel(0.72, 0.08, 0.2))).toBe(false);
+    expect(agreesWithDuel(pick, duel(0.3, 0.1, 0.6))).toBe(true);
+    expect(agreesWithDuel(pick, null)).toBe(false);
+    // "No pierde" del local: local + los mismos.
+    const homeNotLose = { ...pick, side: "home" as const, option: { ...pick.option, key: "no-pierde" } };
+    expect(duelModelProbability(homeNotLose, duel(0.72, 0.08, 0.2))).toBeCloseTo(0.8);
+    expect(agreesWithDuel(homeNotLose, duel(0.72, 0.08, 0.2))).toBe(true);
   });
 });

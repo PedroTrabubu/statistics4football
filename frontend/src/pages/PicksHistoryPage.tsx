@@ -28,6 +28,7 @@ import {
   useSelectedLeagueCode,
 } from "../lib/leagues";
 import {
+  agreesWithDuel,
   MIN_TEAM_PICKS,
   rankTeams,
   strengthKey,
@@ -1119,7 +1120,8 @@ function MatchdayResults({
   const filtered = all.map((r) => ({
     ...r,
     picks: r.picks.filter(keep),
-    duelPicks: r.duelPicks.filter(keep),
+    // Del duelo, solo los que su modelo no contradice: los mismos que en la tarjeta.
+    duelPicks: r.duelPicks.filter((d) => keep(d) && agreesWithDuel(d.pick, duels?.get(r.match.id))),
   }));
   const rows =
     strength === null ? filtered : filtered.filter((r) => r.picks.length > 0);
@@ -1368,7 +1370,8 @@ function MatchPicksCard({
   const keep = (r: CardPick) =>
     strength === null || r.pick.strength === strength;
   const shown = results.filter(keep);
-  const duelPicks = allDuelPicks.filter(keep);
+  // Del duelo, solo los que su modelo no contradice (agreesWithDuel).
+  const duelPicks = allDuelPicks.filter((r) => keep(r) && agreesWithDuel(r.pick, duel));
   const decided = shown.filter((r) => r.hit === true || r.hit === false);
   const hits = decided.filter((r) => r.hit).length;
   // Verde si acierta al menos lo que pasa en la liga con esos mismos sucesos.

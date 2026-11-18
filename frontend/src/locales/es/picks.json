@@ -75,7 +75,7 @@
     "summary": "No pierde el duelo: {{home}} {{homePct}} · {{away}} {{awayPct}}. Córners esperados: {{homeExpected}} - {{awayExpected}}.",
     "resultWinner": "Córners del partido: {{home}} {{homeCorners}} - {{awayCorners}} {{away}}, ganó el duelo {{winner}}.",
     "resultDraw": "Córners del partido: {{home}} {{homeCorners}} - {{awayCorners}} {{away}}, empate.",
-    "note": "Bloque nuevo, aparte de los picks de arriba y de sus cifras de acierto. Probabilidades de un modelo de córners con los partidos anteriores: lo que saca cada equipo en su campo y lo que concede el rival, con más peso a lo reciente y acercado a la media de la liga cuando hay pocos partidos. \"Pick muy probable\" solo cuando el patrón cumple el umbral del resto de picks.",
+    "note": "Bloque nuevo, aparte de los picks de arriba y de sus cifras de acierto. Probabilidades de un modelo de córners con los partidos anteriores: lo que saca cada equipo en su campo y lo que concede el rival, con más peso a lo reciente y acercado a la media de la liga cuando hay pocos partidos. \"Pick muy probable\" solo cuando el patrón cumple el umbral del resto de picks y el modelo de arriba lo ve al menos tan probable como lo contrario.",
     "noteSample": "Muestra: {{home}} partidos del local en casa y {{away}} del visitante fuera."
   },
   "kind": {

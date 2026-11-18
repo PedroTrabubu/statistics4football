@@ -74,7 +74,7 @@
     "summary": "Not losing the count: {{home}} {{homePct}} · {{away}} {{awayPct}}. Expected corners: {{homeExpected}} - {{awayExpected}}.",
     "resultWinner": "Match corners: {{home}} {{homeCorners}} - {{awayCorners}} {{away}}, {{winner}} won the count.",
     "resultDraw": "Match corners: {{home}} {{homeCorners}} - {{awayCorners}} {{away}}, level.",
-    "note": "A new block, separate from the picks above and their hit-rate figures. Probabilities from a corner model built on previous matches: what each team takes at their venue and what the opponent concedes, with more weight on recent matches and pulled towards the league average when there are few matches. ‘Very likely pick’ only when the pattern meets the same threshold as the other picks.",
+    "note": "A new block, separate from the picks above and their hit-rate figures. Probabilities from a corner model built on previous matches: what each team takes at their venue and what the opponent concedes, with more weight on recent matches and pulled towards the league average when there are few matches. ‘Very likely pick’ only when the pattern meets the same threshold as the other picks and the model above rates it at least as likely as not.",
     "noteSample": "Sample: {{home}} home matches for the home side and {{away}} away matches for the away side."
   },
   "kind": {
